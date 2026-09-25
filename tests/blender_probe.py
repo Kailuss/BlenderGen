@@ -181,10 +181,16 @@ def run():
          'door_width':32, 'door_height':34, 'windows_enabled':True, 'collapse':.12, 'hole_count':0, 'cracks':.2}, 'WORK'),
         ('room_beams_draft', {'layout_mode':'ROOM', 'height_type':'TWO', 'door_enabled':True,
          'windows_enabled':True, 'windows_per_wall':2, 'collapse':.18, 'hole_count':0}, 'DRAFT'),
+        # Detalle es la calidad de exportación por defecto: se genera en modo exportación y se funde.
+        ('window_detail', {'layout_mode':'NONE', 'height_type':'ONE', 'length':80, 'windows_enabled':True,
+         'hole_count':1, 'collapse':.2, 'cracks':.6}, 'DETAIL'),
     ]
+    exported={'window_detail'}
     reports=[]
     for name, changes, quality in cases:
         if args.case and name!=args.case:continue
+        if name in exported and args.legacy:continue
+        setattr(state, preview, name not in exported)
         clear_cache()
         bpy.ops.wm.read_factory_settings(use_empty=True)
         p=bpy.context.scene.ruin_settings
@@ -212,6 +218,19 @@ def run():
         reports.append({'case':name,'digest':first,'blender':bpy.app.version_string,'closure':sealed,
                         'metrics':metrics,'windows':len(windows),'beams':len(beams),
                         'shapes':shapes,'metadata':{k:bpy.context.scene[k] for k in config.CACHE_METADATA if k in bpy.context.scene}})
+        if name in exported:
+            failed=[o.name for o in coll.objects if o.get('hueco_revertido') or o.get('ramas_revertidas')]
+            assert not failed, ('booleanos_revertidos',name,failed[:5])
+            solid=g.make_solid(bpy.context)
+            bm=bmesh.new()
+            bm.from_mesh(solid.data)
+            closed=all(e.is_manifold for e in bm.edges)
+            from ruinas_panel.services import export
+            pieces=len(export.shells(bm))
+            bm.free()
+            assert closed and pieces==1, ('solido_invalido',name,closed,pieces)
+            reports[-1]['solid_faces']=len(solid.data.polygons)
+        setattr(state, preview, True)
         print('CASE_PASS',name,metrics['faces'],flush=True)
     if not args.legacy:
         session_checks(g,state,config,cases[0])

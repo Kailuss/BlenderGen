@@ -149,7 +149,7 @@ def main():
     locate=sub.add_parser('find');locate.add_argument('query')
     plate=sub.add_parser('calibrate');plate.add_argument('--blender');plate.add_argument('--output',default=str(ROOT/'dist'/'placa_prueba_resina.stl'))
     test=sub.add_parser('test');test.add_argument('--blender');test.add_argument('--baseline',type=Path)
-    test.add_argument('--case',choices=['basic_draft','door_windows_work','room_beams_draft'])
+    test.add_argument('--case',choices=['basic_draft','door_windows_work','room_beams_draft','window_detail'])
     test.add_argument('--update-expected',action='store_true',help='acepta la geometría actual como referencia')
     args=parser.parse_args()
     if args.command=='check':check()

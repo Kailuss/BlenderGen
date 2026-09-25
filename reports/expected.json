@@ -18,6 +18,13 @@
       "digest": "01ff4ed4192b66411e6348b4538a821fd0cc9983c9bfb507d19eaf10f22bb171",
       "faces": 58243,
       "degenerate_faces": []
+    },
+    "window_detail": {
+      "digest": "efca2446e7071ac4f5846b06fc30f1efae0bcab5a126d5974a8a6e16cd0fcee6",
+      "faces": 507344,
+      "degenerate_faces": [
+        "Piedra entera · hilada 01.02"
+      ]
     }
   }
 }
