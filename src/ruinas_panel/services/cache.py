@@ -6,9 +6,14 @@ from ..structure import layout
 import bpy
 
 
-def clear_cache(quality=None):
-    'IA: Elimina plantillas y sus mallas; no borres objetos de la fuente activa.'
-    keys=[quality] if quality else list(runtime.cache)
+def cache_key():
+    'IA: Ranura de caché por calidad y modo: la vista previa omite biseles que la exportación sí aplica.'
+    return (runtime.quality,runtime.preview)
+
+
+def clear_cache(key=None):
+    'IA: Elimina plantillas y sus mallas de una ranura o de todas; no borres objetos de la fuente activa.'
+    keys=[key] if key else list(runtime.cache)
     for key in keys:
         entry=runtime.cache.pop(key,None)
         if not entry:
@@ -57,7 +62,7 @@ def cache_signature(context,p):
 
 def save_cache(context,coll,signature):
     'IA: Guarda copia anterior a grietas y metadatos; no acumules desgaste sobre el resultado visible.'
-    clear_cache(runtime.quality)
+    clear_cache(cache_key())
     templates=[]
     for ob in coll.objects:
         copy=ob.copy()
@@ -65,7 +70,7 @@ def save_cache(context,coll,signature):
         copy.name=config.CACHE_PREFIX+ob.name
         copy['_source_name']=ob.name
         templates.append(copy)
-    runtime.cache[runtime.quality]={'signature':signature,'objects':templates,'metadata':{k:context.scene[k] for k in config.CACHE_METADATA if k in context.scene}}
+    runtime.cache[cache_key()]={'signature':signature,'objects':templates,'metadata':{k:context.scene[k] for k in config.CACHE_METADATA if k in context.scene}}
 
 
 def restore_cache(context):
@@ -73,13 +78,13 @@ def restore_cache(context):
     clear_source()
     coll=bpy.data.collections.new(config.COLLECTION)
     context.scene.collection.children.link(coll)
-    for template in runtime.cache[runtime.quality]['objects']:
+    for template in runtime.cache[cache_key()]['objects']:
         ob=template.copy()
         ob.data=template.data.copy()
         ob.name=template['_source_name']
         ob.hide_render=False
         coll.objects.link(ob)
         ob.hide_set(False)
-    for key,value in runtime.cache[runtime.quality]['metadata'].items():
+    for key,value in runtime.cache[cache_key()]['metadata'].items():
         context.scene[key]=value
     return coll

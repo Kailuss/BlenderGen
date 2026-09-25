@@ -70,6 +70,23 @@ def session_checks(g, state, config, case):
     assert not state.cache
     orphans = [o.name for o in bpy.data.objects if o.name.startswith(config.CACHE_PREFIX)]
     assert not orphans, ('plantillas_huerfanas', orphans[:3])
+    # C3: con la misma calidad, exportar no reutiliza la plantilla de vista previa (sin biseles de mortero).
+    def mortar_faces():
+        """IA: caras de mortero de la fuente actual; la exportación bisela el mortero y la vista previa no."""
+        return sum(len(o.data.polygons) for o in bpy.data.collections[config.COLLECTION].objects if o.name.startswith('Mortero'))
+    g.generate(bpy.context, p, quality)
+    preview_faces = mortar_faces()
+    state.preview = False
+    try:
+        g.generate(bpy.context, p, quality)
+        assert not json.loads(bpy.context.scene['ruinas_metricas'])['cached'], 'exportación reutilizó la vista previa'
+        assert mortar_faces() > preview_faces, (mortar_faces(), preview_faces)
+        g.generate(bpy.context, p, quality)
+        assert json.loads(bpy.context.scene['ruinas_metricas'])['cached'], 'la exportación repetida debería usar su caché'
+    finally:
+        state.preview = True
+    g.generate(bpy.context, p, quality)
+    assert json.loads(bpy.context.scene['ruinas_metricas'])['cached'], 'la exportación expulsó la caché de vista previa'
     # Operador: un error de validación llega como informe, no como traza, y no toca la escena.
     before = set(bpy.data.objects.keys())
     for key, value in {'build_type': 'FORTRESS', 'layout_mode': 'TWO', 'length': 60, 'door_enabled': True}.items():

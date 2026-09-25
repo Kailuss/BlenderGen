@@ -28,7 +28,8 @@ def generate(context,p,quality=None):
     layout.apply_profiles(p)
     layout.plan_door(p)  # Validar espacio antes de reemplazar la geometría existente.
     signature=cache.cache_signature(context,p)
-    cached=runtime.quality in runtime.cache and runtime.cache[runtime.quality]['signature']==signature
+    entry=runtime.cache.get(cache.cache_key())
+    cached=entry is not None and entry['signature']==signature
     if cached:
         coll=cache.restore_cache(context)
     else:

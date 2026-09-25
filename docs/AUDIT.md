@@ -45,7 +45,7 @@ Severidad: **Alta** significa resultado incorrecto, riesgo de cierre de Blender 
 | C10 | Alta | Grietas | ✅ Resuelto: una grieta podía dejar la piedra reducida a una esquirla | Blender |
 | C1 | Alta | Grietas | En paredes de retorno, las grietas se tallan en la cara de junta | Blender |
 | C2 | Alta | Estado | ✅ Resuelto: referencias a ID en `runtime`, sin handlers de deshacer ni de carga | Blender (carga) + doc. Blender (deshacer) |
-| C3 | Media | Caché | La exportación reutiliza geometría de vista previa | Blender |
+| C3 | Media | Caché | ✅ Resuelto: la exportación reutilizaba geometría de vista previa | Blender |
 | C4 | Media | UI | ✅ Resuelto: operadores sin `poll` ni gestión de errores | Código |
 | C5 | Media | Deshacer | La geometría queda desfasada tras Ctrl+Z | Hipótesis |
 | C6 | Baja | Semillas | Clasificación y semillas dependen del nombre de objeto | Código |
@@ -192,7 +192,7 @@ Criterio de salida: los casos actuales conservan su digest. Los casos nuevos que
 | 1.1 | ✅ Handlers `@persistent` en `load_pre`, `undo_pre` y `redo_pre` que vacíen `runtime.cache`, `pending` y `settings` sin tocar IDs. En `load_post` y `undo_post`, borrar los huérfanos `__RUIN_CACHE__*` buscándolos por nombre. A medio plazo: caché de datos puros (vértices, caras, materiales, propiedades) sin objetos Blender | C2 | S (+M) | Igual |
 | 1.2 | ✅ Operadores: `poll` (Modo Objeto y `ruin_settings` disponible), `try/except` que llame a `self.report({'ERROR'}, …)`, eliminación del sólido parcial y restauración de la visibilidad | C4 | S | Igual |
 | 1.3 | Clave estable `ob['ruin_key']`, asignada al crear con el mismo texto que el nombre actual, como semilla CRC; rol `ob['ruin_role']` para clasificar | C6 | M | Igual (mismos textos) |
-| 1.4 | Para C3, medir dos opciones: (a) incluir `runtime.preview` en la firma; (b) biselar siempre el mortero. Elegir por tiempo y resultado | C3 | S | (a) igual; (b) cambia |
+| 1.4 | ✅ Para C3, medir dos opciones: (a) incluir `runtime.preview` en la firma; (b) biselar siempre el mortero. Elegir por tiempo y resultado | C3 | S | (a) igual; (b) cambia |
 | 1.4b | ✅ C10: revertir la rama si el booleano quita más del 25 % del volumen, y prueba que lo detecta | C10 | S | Cambió `door_windows_work` |
 | 1.5 | Grietas en el marco local del tramo (usando `wall_id` y el eje de `paredes_generadas`), decidiendo qué cara es la visible en cada pared | C1 | M | Cambia en L/U/habitación |
 | 1.6 | En `undo_post`, si `parametros_muro` no coincide con los ajustes actuales, programar una vista previa | C5 | S | Igual |
@@ -270,6 +270,17 @@ Criterio: digests idénticos y tiempos medidos en los mismos casos. Si 2.2 no co
   - La recarga en caliente deja una sola copia de cada handler.
   - Queda pendiente probar Ctrl+Z real con interfaz. La caché sigue guardando objetos Blender entre deshaceres; la caché de datos puros es la mejora a medio plazo de 1.1.
 - **C3 confirmado.** En `basic_draft`, la «exportación» tras una vista previa sale de la caché: el mortero tiene 509 caras y el digest difiere. Sin vista previa previa, el mortero tiene 1 781 caras.
+- **C3 resuelto con la opción (a) y la caché separada por modo.** Medidas en la misma sesión, calidad Trabajo:
+
+| | basic | door_windows |
+|---|---|---|
+| Vista previa actual | 20,2 s | 17,1 s |
+| (b) vista previa biselando el mortero | 20,9 s (+4 %) | 18,7 s (+9 %) |
+| Exportar desde la caché de vista previa (antes) | 19,7 s | 15,8 s |
+| (a) exportar reconstruyendo | 27,5 s (+40 %) | 28,3 s (+78 %) |
+| Diferencia entre sólidos, media / p99 / máx. | 0,02 / 0,33 / 1,15 mm | 0,02 / 0,34 / 1,16 mm |
+
+  Motivos de la elección: la vista previa, que es la acción frecuente, no se toca; los digests de referencia no cambian; y la exportación recibe la geometría biselada prevista. `cache.cache_key()` usa `(calidad, modo)`: exportar no expulsa la caché de vista previa, y repetir la exportación sin cambios usa su propia caché. `blender_probe` lo comprueba, y falla con la clave anterior (solo calidad).
 - **C10 descubierto** durante la verificación de C1 (ver hallazgo).
 - **C9 y T4:** ninguna arista abierta en los tres casos (1 460 piezas). Solo hay una cara de área casi nula, en `Piedra caída · fractura 3551.1`. El recorte de X no produce los problemas previstos.
 - **R1 confirmado.** Coste medio de `bevel` en `room_beams_draft` según el número de objetos en `bpy.data`:
