@@ -30,7 +30,7 @@ Detalle y plan en `docs/AUDIT.md` (auditoría del 2026-09-25, verificada en Blen
 - Los booleanos EXACT pueden fallar casi por completo sin dejar la malla vacía. `crack_stone` revierte cada rama que quite más de `config.CRACK_MAX_VOLUME_LOSS` del volumen; aplica la misma protección en booleanos nuevos.
 
 - El nombre de objeto alimenta la semilla CRC de las grietas (`fracture.apply_damage`), y los prefijos de nombre deciden biseles, grietas, huecos y apoyos. Si el nombre ya existe en el archivo, Blender añade `.001`.
-- `runtime.cache`, `runtime.pending` y `runtime.settings` guardan referencias a datos de Blender, y no hay handlers de deshacer ni de carga. No añadas más referencias a ID en estado de módulo.
+- `runtime.cache` (plantillas) y `runtime.settings` guardan referencias a datos de Blender; los handlers de `registration.py` las sueltan antes de deshacer, rehacer o cargar un archivo. No añadas más referencias a ID en estado de módulo; guarda nombres, como hace `runtime.pending`.
 - La firma de caché no incluye `runtime.preview`, pero `primitives.bevel` sí depende de él (C3).
 - `crack_stone` supone un muro que corre en X con el frente en −Y. En las paredes de retorno talla la cara de junta (C1).
 - El coste lo dominan `bpy.ops.object.modifier_apply` por pieza y los booleanos EXACT, y crece de forma aproximadamente cuadrática con el número de objetos. No añadas operadores por pieza sin medir.

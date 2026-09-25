@@ -11,13 +11,13 @@
       "quality": "DRAFT",
       "faces": 17175,
       "vertices": 18522,
-      "seconds": 3.6314037000001917,
+      "seconds": 3.464950999999928,
       "stages": {
-        "biseles": 1.0378589000029024,
-        "desgaste": 2.2130298999945808,
-        "aberturas_y_vigas": 0.0002959000003102119,
-        "preparacion": 3.6313975000002756,
-        "total": 3.6314037000001917
+        "biseles": 0.9846672000021499,
+        "desgaste": 2.1104578000013134,
+        "aberturas_y_vigas": 0.00030979999974078964,
+        "preparacion": 3.4649463999994623,
+        "total": 3.464950999999928
       },
       "cached": false,
       "solid": false
@@ -3399,14 +3399,14 @@
       "quality": "WORK",
       "faces": 142069,
       "vertices": 144657,
-      "seconds": 17.54450159999942,
+      "seconds": 17.053456100000403,
       "stages": {
-        "biseles": 1.59940479999932,
-        "desgaste": 4.642042499995114,
-        "aberturas_y_vigas": 2.064239400000588,
-        "preparacion": 10.989862899999935,
-        "grietas": 6.551367099999879,
-        "total": 17.54450159999942
+        "biseles": 1.5155253000084485,
+        "desgaste": 4.4695558000039455,
+        "aberturas_y_vigas": 1.9217822999999044,
+        "preparacion": 10.50874660000045,
+        "grietas": 6.5414638000002014,
+        "total": 17.053456100000403
       },
       "cached": false,
       "solid": false
@@ -7874,13 +7874,13 @@
       "quality": "DRAFT",
       "faces": 58243,
       "vertices": 62848,
-      "seconds": 83.49995769999987,
+      "seconds": 73.00202530000024,
       "stages": {
-        "biseles": 22.125076700004684,
-        "desgaste": 39.824232400002984,
-        "aberturas_y_vigas": 20.472843300000022,
-        "preparacion": 83.49995349999972,
-        "total": 83.49995769999987
+        "biseles": 19.895737899996675,
+        "desgaste": 35.832361999977365,
+        "aberturas_y_vigas": 16.405899999999747,
+        "preparacion": 73.00202220000028,
+        "total": 73.00202530000024
       },
       "cached": false,
       "solid": false

@@ -6,6 +6,7 @@
 preview = False
 
 
+# Nombre de la escena pendiente; nunca guardes aquí referencias a datos Blender (undo las invalida).
 pending = None
 
 

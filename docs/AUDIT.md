@@ -44,9 +44,9 @@ Severidad: **Alta** significa resultado incorrecto, riesgo de cierre de Blender 
 |---|---|---|---|---|
 | C10 | Alta | Grietas | ✅ Resuelto: una grieta podía dejar la piedra reducida a una esquirla | Blender |
 | C1 | Alta | Grietas | En paredes de retorno, las grietas se tallan en la cara de junta | Blender |
-| C2 | Alta | Estado | Referencias a ID en `runtime`, sin handlers de deshacer ni de carga | Blender (carga) + doc. Blender (deshacer) |
+| C2 | Alta | Estado | ✅ Resuelto: referencias a ID en `runtime`, sin handlers de deshacer ni de carga | Blender (carga) + doc. Blender (deshacer) |
 | C3 | Media | Caché | La exportación reutiliza geometría de vista previa | Blender |
-| C4 | Media | UI | Operadores sin `poll` ni gestión de errores | Código |
+| C4 | Media | UI | ✅ Resuelto: operadores sin `poll` ni gestión de errores | Código |
 | C5 | Media | Deshacer | La geometría queda desfasada tras Ctrl+Z | Hipótesis |
 | C6 | Baja | Semillas | Clasificación y semillas dependen del nombre de objeto | Código |
 | C7 | Baja | Exportación | «Reducir caras coplanares» es un Decimate COLLAPSE | Código |
@@ -189,8 +189,8 @@ Criterio de salida: los casos actuales conservan su digest. Los casos nuevos que
 
 | # | Propuesta | Resuelve | Esf. | Geometría |
 |---|---|---|---|---|
-| 1.1 | Handlers `@persistent` en `load_pre`, `undo_pre` y `redo_pre` que vacíen `runtime.cache`, `pending` y `settings` sin tocar IDs. En `load_post` y `undo_post`, borrar los huérfanos `__RUIN_CACHE__*` buscándolos por nombre. A medio plazo: caché de datos puros (vértices, caras, materiales, propiedades) sin objetos Blender | C2 | S (+M) | Igual |
-| 1.2 | Operadores: `poll` (Modo Objeto y `ruin_settings` disponible), `try/except` que llame a `self.report({'ERROR'}, …)`, eliminación del sólido parcial y restauración de la visibilidad | C4 | S | Igual |
+| 1.1 | ✅ Handlers `@persistent` en `load_pre`, `undo_pre` y `redo_pre` que vacíen `runtime.cache`, `pending` y `settings` sin tocar IDs. En `load_post` y `undo_post`, borrar los huérfanos `__RUIN_CACHE__*` buscándolos por nombre. A medio plazo: caché de datos puros (vértices, caras, materiales, propiedades) sin objetos Blender | C2 | S (+M) | Igual |
+| 1.2 | ✅ Operadores: `poll` (Modo Objeto y `ruin_settings` disponible), `try/except` que llame a `self.report({'ERROR'}, …)`, eliminación del sólido parcial y restauración de la visibilidad | C4 | S | Igual |
 | 1.3 | Clave estable `ob['ruin_key']`, asignada al crear con el mismo texto que el nombre actual, como semilla CRC; rol `ob['ruin_role']` para clasificar | C6 | M | Igual (mismos textos) |
 | 1.4 | Para C3, medir dos opciones: (a) incluir `runtime.preview` en la firma; (b) biselar siempre el mortero. Elegir por tiempo y resultado | C3 | S | (a) igual; (b) cambia |
 | 1.4b | ✅ C10: revertir la rama si el booleano quita más del 25 % del volumen, y prueba que lo detecta | C10 | S | Cambió `door_windows_work` |
@@ -235,7 +235,7 @@ Criterio: digests idénticos y tiempos medidos en los mismos casos. Si 2.2 no co
 |---|---|---|---|
 | 5.1 | Barra de progreso (`window_manager.progress_*`) y pausa automática de la vista previa cuando la última generación supere un umbral (por ejemplo, 3 s), con aviso en el panel | R5 | S |
 | 5.2 | Subpaneles plegables (`layout.panel` o `bl_parent_id`), conservando los identificadores RNA | UX | S |
-| 5.3 | Mensajes de error de exportación que digan qué cambiar | C4 | S |
+| 5.3 | ✅ Mensajes de error de exportación que digan qué cambiar | C4 | S |
 | 5.4 | `blender_manifest.toml` junto a `bl_info`, con una única fuente de versión y el autor correcto | M8, T6 | S |
 | 5.5 | `USERGUIDE.md` real (parámetros, flujo, exportación STL, límites) y README sin rutas de otro equipo | M6 | S |
 | 5.6 | Fijar las unidades solo al crear la colección la primera vez, o mediante una opción, y documentarlo | C8 | S |
@@ -261,6 +261,14 @@ Criterio: digests idénticos y tiempos medidos en los mismos casos. Si 2.2 no co
 - **`blender_lifecycle.py`:** pasa con un .blend de prueba creado en v0.21 (58 641 caras en el sólido). No prueba la compatibilidad con archivos de v20.
 - **C1 confirmado.** En `door_windows_work`, los vértices nuevos de las seis piedras `right.*` agrietadas están todos a menos de 1,6 mm de su cara −Y. En esas piezas, −Y es la cara de junta, porque el tramo corre en Y (12 mm), y ninguna grieta llega a las caras exteriores. En la fachada, −Y es el frente, que es lo correcto.
 - **C2 confirmado para la carga de archivo.** Tras generar y cargar otro archivo sin limpiar la caché, la siguiente generación falla con `ReferenceError: StructRNA of type Object has been removed`; la posterior funciona. Blender no se cerró. Deshacer no se puede probar en modo `-b`.
+- **C2 y C4 resueltos (propuestas 1.1, 1.2 y 5.3).**
+  - `registration` instala handlers `load_pre`, `undo_pre` y `redo_pre` que sueltan las referencias de `runtime`, y handlers `*_post` que borran por nombre las plantillas huérfanas.
+  - `runtime.pending` guarda el nombre de la escena, no la escena.
+  - Los operadores tienen `poll` con mensaje, y sus errores llegan como informe de Blender, no como traza.
+  - Si `make_solid` falla, borra las copias y el sólido parcial.
+  - `blender_probe` lo comprueba: carga con caché llena, handlers de deshacer simulados, puerta que no cabe y fragmento suelto en la fusión.
+  - La recarga en caliente deja una sola copia de cada handler.
+  - Queda pendiente probar Ctrl+Z real con interfaz. La caché sigue guardando objetos Blender entre deshaceres; la caché de datos puros es la mejora a medio plazo de 1.1.
 - **C3 confirmado.** En `basic_draft`, la «exportación» tras una vista previa sale de la caché: el mortero tiene 509 caras y el digest difiere. Sin vista previa previa, el mortero tiene 1 781 caras.
 - **C10 descubierto** durante la verificación de C1 (ver hallazgo).
 - **C9 y T4:** ninguna arista abierta en los tres casos (1 460 piezas). Solo hay una cara de área casi nula, en `Piedra caída · fractura 3551.1`. El recorte de X no produce los problemas previstos.

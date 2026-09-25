@@ -23,7 +23,7 @@ La versión 0.21 reorganiza v0.20. La geometría conserva sus algoritmos; el cam
 | Temporizadores de edición | `ui/preview.py` | Debounce, modo rápido y protección busy |
 | Acciones | `ui/operators.py` | Operadores delegan en servicios |
 | Menú | `ui/panel.py` | Dibuja sin generar geometría |
-| Ciclo de vida | `registration.py` | Limpia versión anterior y registra clases |
+| Ciclo de vida | `registration.py` | Limpia versión anterior, registra clases y handlers de carga/deshacer |
 
 ## Flujo
 

@@ -6,6 +6,12 @@
 COLLECTION = 'MURO · fuente procedural'
 
 
+SOLID_NAME = 'MURO · sólido exportable'
+
+
+CACHE_PREFIX = '__RUIN_CACHE__'
+
+
 QUALITY = {'DRAFT':(1,.45,1),'WORK':(2,.32,2),'DETAIL':(3,.18,2)}
 
 

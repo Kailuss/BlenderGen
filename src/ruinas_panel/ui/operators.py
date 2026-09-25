@@ -7,14 +7,37 @@ from bpy.props import IntProperty
 import bpy
 
 
+def ready(cls,context):
+    'IA: Poll común: exige ajustes registrados y Modo Objeto; explica en la interfaz por qué el botón está inactivo.'
+    if getattr(context.scene,'ruin_settings',None) is None:
+        cls.poll_message_set('Activa el complemento Ruinas en esta escena.')
+        return False
+    if context.mode!='OBJECT':
+        cls.poll_message_set('Cambia a Modo Objeto para generar.')
+        return False
+    return True
+
+
+def fail(operator,context,exc):
+    'IA: Convierte una excepción en informe de Blender y estado del panel; devuelve CANCELLED sin traza al usuario.'
+    message=str(exc) or type(exc).__name__
+    context.scene.ruin_settings.status='Error: '+message[:100]
+    operator.report({'ERROR'},message)
+    return {'CANCELLED'}
+
+
 class RUIN_OT_generate(bpy.types.Operator):
     bl_idname='ruin.generate'
     bl_label='Generar / actualizar muro'
     bl_options={'REGISTER','UNDO'}
+    poll=classmethod(ready)
     def execute(self,context):
-        'IA: Operador Blender: respeta UNDO, usa servicios y devuelve un estado válido.'
+        'IA: Regenera la vista en la calidad de edición; cancela la vista diferida pendiente y avisa si falla.'
         preview.cancel_pending()
-        preview.update_preview(context)
+        try:
+            preview.update_preview(context)
+        except Exception as exc:
+            return fail(self,context,exc)
         return {'FINISHED'}
 
 
@@ -22,9 +45,13 @@ class RUIN_OT_solid(bpy.types.Operator):
     bl_idname='ruin.solid'
     bl_label='Preparar sólido para exportar'
     bl_options={'REGISTER','UNDO'}
+    poll=classmethod(ready)
     def execute(self,context):
-        'IA: Operador Blender: respeta UNDO, usa servicios y devuelve un estado válido.'
-        preview.prepare_detail(context)
+        'IA: Genera en calidad de exportación y fusiona; si falla, informa y deja la fuente visible y editable.'
+        try:
+            preview.prepare_detail(context)
+        except Exception as exc:
+            return fail(self,context,exc)
         self.report({'INFO'},'Sólido seleccionado. Exporta STL: solo selección, escala 1, sin Scene Unit.')
         return {'FINISHED'}
 
@@ -33,12 +60,16 @@ class RUIN_OT_seed(bpy.types.Operator):
     bl_idname='ruin.next_seed'
     bl_label='Otra variante'
     bl_options={'REGISTER','UNDO'}
+    poll=classmethod(ready)
     def execute(self,context):
-        'IA: Operador Blender: respeta UNDO, usa servicios y devuelve un estado válido.'
+        'IA: Avanza la semilla; con vista automática el callback regenera, sin ella regenera aquí.'
         p=context.scene.ruin_settings
         p.seed=(p.seed+1)%1000000
         if not p.live_preview:
-            preview.update_preview(context)
+            try:
+                preview.update_preview(context)
+            except Exception as exc:
+                return fail(self,context,exc)
         return {'FINISHED'}
 
 
@@ -47,8 +78,14 @@ class RUIN_OT_reset(bpy.types.Operator):
     bl_label='Restablecer sección'
     bl_options={'REGISTER','UNDO'}
     section: IntProperty()
+    @classmethod
+    def poll(cls,context):
+        'IA: Solo necesita ajustes registrados; restablecer valores no crea geometría por sí mismo.'
+        return getattr(context.scene,'ruin_settings',None) is not None
     def execute(self,context):
-        'IA: Operador Blender: respeta UNDO, usa servicios y devuelve un estado válido.'
+        'IA: Restablece los valores por defecto de una sección bajo busy y programa una única vista previa.'
+        if not 0<=self.section<len(config.SECTIONS):
+            return {'CANCELLED'}
         p=context.scene.ruin_settings
         runtime.busy=True
         try:

@@ -20,6 +20,22 @@ def clear_cache(quality=None):
                 bpy.data.meshes.remove(mesh)
 
 
+def forget_cache():
+    'IA: Suelta las referencias a plantillas sin tocar datos Blender; úsalo cuando undo o una carga de archivo las invalidan.'
+    runtime.cache.clear()
+
+
+def purge_orphan_templates():
+    'IA: Borra plantillas huérfanas buscándolas por prefijo en bpy.data; no actúa si la caché sigue en uso.'
+    if runtime.cache:
+        return
+    for ob in [o for o in bpy.data.objects if o.name.startswith(config.CACHE_PREFIX) and o.users==0]:
+        mesh=ob.data
+        bpy.data.objects.remove(ob,do_unlink=True)
+        if mesh and mesh.users==0:
+            bpy.data.meshes.remove(mesh)
+
+
 def clear_source():
     'IA: Elimina solo la colección procedural conocida y mallas sin usuarios.'
     coll=bpy.data.collections.get(config.COLLECTION)
@@ -46,7 +62,7 @@ def save_cache(context,coll,signature):
     for ob in coll.objects:
         copy=ob.copy()
         copy.data=ob.data.copy()
-        copy.name='__RUIN_CACHE__'+ob.name
+        copy.name=config.CACHE_PREFIX+ob.name
         copy['_source_name']=ob.name
         templates.append(copy)
     runtime.cache[runtime.quality]={'signature':signature,'objects':templates,'metadata':{k:context.scene[k] for k in config.CACHE_METADATA if k in context.scene}}

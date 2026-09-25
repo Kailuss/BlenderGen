@@ -1,5 +1,6 @@
 """ui /preview — ver docs/ARCHITECTURE.md para contratos y dependencias."""
 
+from .. import config
 from .. import runtime
 from ..services import export
 from ..services import generation
@@ -29,7 +30,7 @@ def settings_changed(self, context):
     self.status = 'Cambios pendientes'
     if not self.live_preview:
         return
-    runtime.pending = self.id_data
+    runtime.pending = self.id_data.name
     runtime.deadline = time.monotonic()+.25
     if not bpy.app.timers.is_registered(refresh_timer):
         bpy.app.timers.register(refresh_timer, first_interval=.25)
@@ -41,7 +42,10 @@ def refresh_timer():
         return None
     if time.monotonic()<runtime.deadline:
         return max(.02,runtime.deadline-time.monotonic())
-    scene=runtime.pending
+    scene=bpy.data.scenes.get(runtime.pending)
+    if scene is None:
+        runtime.pending=None
+        return None
     if scene!=bpy.context.scene or bpy.context.mode!='OBJECT':
         return .2
     p=scene.ruin_settings
@@ -68,7 +72,7 @@ def update_preview(context, quality=None):
     runtime.busy=True
     runtime.preview=True
     try:
-        old=bpy.data.objects.get('MURO · sólido exportable')
+        old=bpy.data.objects.get(config.SOLID_NAME)
         if old:
             old.hide_set(True)
             old.hide_render=True

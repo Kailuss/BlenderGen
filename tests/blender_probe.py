@@ -53,6 +53,48 @@ def shrunk_by_cracks(coll, ratio=.5):
     return shrunk
 
 
+def session_checks(g, state, config, case):
+    """IA: comprueba carga de archivo con caché llena, handlers de undo y fallo controlado del operador de sólido."""
+    from ruinas_panel import registration
+    _, changes, quality = case
+    assert state.cache, 'la caché debería contener plantillas antes de cargar otro archivo'
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    assert not state.cache, ('cache_tras_carga', list(state.cache))
+    p = bpy.context.scene.ruin_settings
+    for key, value in changes.items():
+        setattr(p, key, value)
+    g.generate(bpy.context, p, quality)  # En v0.21 original: ReferenceError por plantillas liberadas.
+    assert state.cache
+    registration.before_data_reload()  # Simula undo: Blender invalida las referencias.
+    registration.after_data_reload()
+    assert not state.cache
+    orphans = [o.name for o in bpy.data.objects if o.name.startswith(config.CACHE_PREFIX)]
+    assert not orphans, ('plantillas_huerfanas', orphans[:3])
+    # Operador: un error de validación llega como informe, no como traza, y no toca la escena.
+    before = set(bpy.data.objects.keys())
+    for key, value in {'build_type': 'FORTRESS', 'layout_mode': 'TWO', 'length': 60, 'door_enabled': True}.items():
+        setattr(p, key, value)
+    try:
+        bpy.ops.ruin.solid()
+        raise AssertionError('ruin.solid debería fallar: la puerta no cabe')
+    except RuntimeError as exc:
+        assert 'No cabe la puerta' in str(exc), exc
+    assert set(bpy.data.objects.keys()) == before, 'la validación fallida cambió la escena'
+    # Fusión: un fragmento suelto aborta y se borran copias y sólido parcial.
+    from ruinas_panel.geometry import primitives
+    from ruinas_panel.services import export
+    coll = bpy.data.collections[config.COLLECTION]
+    primitives.block('Prueba · pieza suelta', 200, 206, 0, 6, 0, 6, coll, primitives.material('Temporal', (.5, .5, .5)))
+    before = set(bpy.data.objects.keys())
+    try:
+        export.make_solid(bpy.context, .45)
+        raise AssertionError('make_solid debería rechazar la pieza suelta')
+    except ValueError as exc:
+        assert 'Fragmento suelto' in str(exc), exc
+    assert set(bpy.data.objects.keys()) == before, ('fusion_fallida_deja_objetos', set(bpy.data.objects.keys()) ^ before)
+    print('SESSION_PASS', flush=True)
+
+
 def run():
     """IA: usa procesos separados para baseline/modular; el fallo debe producir exit code distinto de cero."""
     parser = argparse.ArgumentParser()
@@ -115,6 +157,8 @@ def run():
                         'metrics':metrics,'windows':len(windows),'beams':len(beams),
                         'shapes':shapes,'metadata':{k:bpy.context.scene[k] for k in config.CACHE_METADATA if k in bpy.context.scene}})
         print('CASE_PASS',name,metrics['faces'],flush=True)
+    if not args.legacy:
+        session_checks(g,state,config,cases[0])
     clear_cache()
     g.unregister();g.register()
     assert hasattr(bpy.types.Scene,'ruin_settings')
