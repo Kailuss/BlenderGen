@@ -48,6 +48,14 @@ CRACK_FIELDS=('cracks_per_stone','cracks','crack_length_var','crack_width_var','
 CRACK_MAX_VOLUME_LOSS=.25
 
 
+# Mínimos de impresión en resina (Anycubic Photon P1 Max, píxel XY de 24,8 µm; escala 28–35 mm).
+# Las grietas más estrechas se cierran al curar o bajo la imprimación. Hasta el tramo final (tail),
+# cada grieta conserva min_surface_width (mm) de ancho en una superficie hundida erosion mm por el
+# desgaste, y min_depth mm de profundidad; en el tramo final se afina hasta la punta.
+# Valores provisionales hasta calibrarlos con una impresión de prueba.
+CRACK_PRINT={'min_surface_width':.15,'min_depth':.5,'erosion':.25,'tail':.15}
+
+
 # Solver de los booleanos de grieta. MANIFOLD (Blender 4.5+) exige piezas cerradas, como las nuestras.
 CRACK_SOLVER='MANIFOLD'
 

@@ -31,6 +31,21 @@ def crack_frame(ob,walls,center):
     return along,normal
 
 
+def printable(widths,depths,fractions,tail):
+    'IA: Aplica config.CRACK_PRINT: ancho en superficie y profundidad mínimos hasta el tramo final, que se afina de forma continua hasta la punta.'
+    rule=config.CRACK_PRINT
+    out_w=[]
+    out_d=[]
+    for w,d,s in zip(widths,depths,fractions):
+        fade=1.0 if s<=1-tail else max(0.0,(1-s)/tail)
+        d=max(d,rule['min_depth']*fade)
+        # En la V, el ancho en la superficie hundida es 2w·(d−erosión)/(d+0,2).
+        need=rule['min_surface_width']/2*(d+.2)/max(.05,d-rule['erosion'])
+        out_w.append(max(w,need*fade))
+        out_d.append(d)
+    return out_w,out_d
+
+
 def crack_paths(rr,p,amount,u0,u1,z0,z1,split=False):
     'IA: Trazos quebrados en la cara (u,z) que se afinan, una rama como mucho; split añade primero una grieta que parte la pieza de borde a borde.'
     span_u=u1-u0
@@ -76,6 +91,7 @@ def crack_paths(rr,p,amount,u0,u1,z0,z1,split=False):
         else:
             widths=[width*(1-s)**.7+.04 for s in f]
             depths=[depth*(.35+.65*(1-s)) for s in f]
+        widths,depths=printable(widths,depths,f,1e-6 if through else config.CRACK_PRINT['tail'])
         return points,widths,depths
     if split:
         # Partida de borde a borde por el lado corto de la cara: la pieza queda agrietada por la mitad.
