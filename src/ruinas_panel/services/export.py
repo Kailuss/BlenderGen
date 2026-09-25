@@ -20,10 +20,115 @@ def discard_objects(names):
             bpy.data.meshes.remove(mesh)
 
 
+def shells(bm):
+    'IA: Cáscaras conexas de un bmesh como (vértices, volumen con signo); volumen negativo indica un hueco interior.'
+    remaining=set(bm.verts)
+    parts=[]
+    while remaining:
+        group={remaining.pop()}
+        stack=list(group)
+        while stack:
+            v=stack.pop()
+            for e in v.link_edges:
+                w=e.other_vert(v)
+                if w in remaining:
+                    remaining.remove(w)
+                    group.add(w)
+                    stack.append(w)
+        faces={f for v in group for f in v.link_faces}
+        volume=sum(f.calc_area()*f.normal.dot(f.calc_center_median()) for f in faces)/3
+        parts.append((group,volume))
+    return parts
+
+
+def fuse_voxel(obj,voxel):
+    'IA: Remallado vóxel + suavizado + colapso al 28 %; borra polvo y agujas y rechaza fragmentos apreciables.'
+    import bmesh
+    obj['voxel_mm']=voxel
+    mod=obj.modifiers.new('Unión volumétrica maciza', 'REMESH')
+    mod.mode='VOXEL'
+    mod.voxel_size=voxel
+    mod.use_smooth_shade=False
+    bpy.ops.object.modifier_apply(modifier=mod.name)
+    mod=obj.modifiers.new('Suavizado mínimo de voxel','SMOOTH')
+    mod.factor=.28
+    mod.iterations=2
+    bpy.ops.object.modifier_apply(modifier=mod.name)
+    # Colapso uniforme al 28 %: desviación máx. ~0,04 mm. La disolución planar deja menos caras pero tarda ~25 veces más.
+    mod=obj.modifiers.new('Reducir densidad (colapso 28 %)','DECIMATE')
+    mod.decimate_type='COLLAPSE'
+    mod.ratio=.28
+    bpy.ops.object.modifier_apply(modifier=mod.name)
+    # Limpiar residuos del remallado; conservar cualquier fragmento de volumen apreciable.
+    bm=bmesh.new()
+    bm.from_mesh(obj.data)
+    parts=sorted((group for group,_ in shells(bm)),key=len,reverse=True)
+    removed=0
+    for group in parts[1:]:
+        span=[max(v.co[i] for v in group)-min(v.co[i] for v in group) for i in range(3)]
+        dust=max(span)<=2.5 and math.prod(span)<=1.0
+        needle=max(span)<=4 and min(span)<voxel*.5 and math.prod(span)<.2
+        if not (dust or needle):
+            position=[round(min(v.co[i] for v in group),1) for i in range(3)]
+            bm.free()
+            raise ValueError('Fragmento suelto de %s mm en %s: prueba otra semilla o menos derrumbe/daño.'
+                             %('×'.join('%.1f'%s for s in span),position))
+        removed+=1
+        bmesh.ops.delete(bm,geom=list(group),context='VERTS')
+    bm.to_mesh(obj.data)
+    bm.free()
+    obj['particulas_submilimetricas_eliminadas']=removed
+    for face in obj.data.polygons:
+        face.use_smooth=True
+
+
+def fuse_manifold(context,obj,names):
+    'IA: Une obj con el resto de copias mediante booleano Manifold exacto; limpia residuos y huecos interiores por volumen.'
+    import bmesh
+    union=bpy.data.collections.new('MURO · unión temporal')
+    context.scene.collection.children.link(union)
+    try:
+        for name in names[1:]:
+            ob=bpy.data.objects[name]
+            context.scene.collection.objects.unlink(ob)
+            union.objects.link(ob)
+        mod=obj.modifiers.new('Unión exacta de piezas','BOOLEAN')
+        mod.operation='UNION'
+        mod.operand_type='COLLECTION'
+        mod.collection=union
+        mod.solver='MANIFOLD'
+        context.view_layer.objects.active=obj
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+    finally:
+        discard_objects(names[1:])
+        bpy.data.collections.remove(union)
+    bm=bmesh.new()
+    bm.from_mesh(obj.data)
+    parts=sorted(shells(bm),key=lambda part:part[1],reverse=True)
+    debris=cavities=0
+    for group,volume in parts[1:]:
+        if volume<0:
+            cavities+=1
+        elif volume<config.EXPORT_DEBRIS_MM3:
+            debris+=1
+        else:
+            span=[max(v.co[i] for v in group)-min(v.co[i] for v in group) for i in range(3)]
+            position=[round(min(v.co[i] for v in group),1) for i in range(3)]
+            bm.free()
+            raise ValueError('Fragmento suelto de %s mm (%.1f mm³) en %s: prueba otra semilla o menos derrumbe/daño.'
+                             %('×'.join('%.1f'%s for s in span),volume,position))
+        bmesh.ops.delete(bm,geom=list(group),context='VERTS')
+    bm.to_mesh(obj.data)
+    bm.free()
+    obj['residuos_eliminados']=debris
+    obj['huecos_interiores_eliminados']=cavities
+
+
 @profiling.timed("fusion")
-def make_solid(context, voxel=None):
-    'IA: Fusiona copias y valida componentes; si falla, borra copias y sólido parcial y deja la fuente intacta.'
+def make_solid(context, voxel=None, method=None):
+    'IA: Fusiona copias (Manifold exacto o vóxel según config.EXPORT_METHOD) y valida cáscaras; si falla, borra copias y sólido parcial y deja la fuente intacta.'
     start=time.perf_counter()
+    method=method or config.EXPORT_METHOD
     if voxel is None:
         voxel=config.QUALITY[context.scene.ruin_settings.export_quality][1]
     src=bpy.data.collections.get(config.COLLECTION)
@@ -42,67 +147,26 @@ def make_solid(context, voxel=None):
             ob.hide_set(False)
             ob.select_set(True)
             copies.append(ob.name)
-        context.view_layer.objects.active=bpy.data.objects[copies[0]]
-        bpy.ops.object.join()
-        obj=context.object
+        first=bpy.data.objects[copies[0]]
+        context.view_layer.objects.active=first
+        if method=='MANIFOLD':
+            fuse_manifold(context,first,copies)
+            obj=first
+        else:
+            bpy.ops.object.join()
+            obj=context.object
         obj.name=config.SOLID_NAME
         copies.append(obj.name)
-        obj['voxel_mm']=voxel
-        mod=obj.modifiers.new('Unión volumétrica maciza', 'REMESH')
-        mod.mode='VOXEL'
-        mod.voxel_size=voxel
-        mod.use_smooth_shade=False
-        bpy.ops.object.modifier_apply(modifier=mod.name)
-        mod=obj.modifiers.new('Suavizado mínimo de voxel','SMOOTH')
-        mod.factor=.28
-        mod.iterations=2
-        bpy.ops.object.modifier_apply(modifier=mod.name)
-        # Colapso uniforme al 28 %: desviación máx. ~0,04 mm. La disolución planar deja menos caras pero tarda ~25 veces más.
-        mod=obj.modifiers.new('Reducir densidad (colapso 28 %)','DECIMATE')
-        mod.decimate_type='COLLAPSE'
-        mod.ratio=.28
-        bpy.ops.object.modifier_apply(modifier=mod.name)
-        # Limpiar residuos del remallado; conservar cualquier fragmento de volumen apreciable.
-        import bmesh
-        bm=bmesh.new()
-        bm.from_mesh(obj.data)
-        remaining=set(bm.verts)
-        parts=[]
-        while remaining:
-            group={remaining.pop()}
-            stack=list(group)
-            while stack:
-                v=stack.pop()
-                for e in v.link_edges:
-                    w=e.other_vert(v)
-                    if w in remaining:
-                        remaining.remove(w)
-                        group.add(w)
-                        stack.append(w)
-            parts.append(group)
-        parts.sort(key=len,reverse=True)
-        removed=0
-        for group in parts[1:]:
-            span=[max(v.co[i] for v in group)-min(v.co[i] for v in group) for i in range(3)]
-            dust=max(span)<=2.5 and math.prod(span)<=1.0
-            needle=max(span)<=4 and min(span)<voxel*.5 and math.prod(span)<.2
-            if not (dust or needle):
-                position=[round(min(v.co[i] for v in group),1) for i in range(3)]
-                bm.free()
-                raise ValueError('Fragmento suelto de %s mm en %s: prueba otra semilla o menos derrumbe/daño.'
-                                 %('×'.join('%.1f'%s for s in span),position))
-            removed+=1
-            bmesh.ops.delete(bm,geom=list(group),context='VERTS')
-        bm.to_mesh(obj.data)
-        bm.free()
+        obj['metodo_fusion']=method
+        if method!='MANIFOLD':
+            fuse_voxel(obj,voxel)
     except Exception:
         discard_objects(copies)
         raise
-    obj['particulas_submilimetricas_eliminadas']=removed
-    for face in obj.data.polygons:
-        face.use_smooth=True
     for ob in src.objects:
         ob.hide_set(True)
         ob.hide_render=True
+    obj.select_set(True)
+    context.view_layer.objects.active=obj
     generation.metrics(context,src,{'fusion':time.perf_counter()-start,'total':time.perf_counter()-start},False,solid=obj)
     return obj

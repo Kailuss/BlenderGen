@@ -300,6 +300,16 @@ El coste por llamada crece de forma lineal, así que el total es cuadrático. La
 | Vista previa real con interfaz (habitación, Borrador) | 72,9 s | 6,9 s | ×10,6 |
 
   La prueba con interfaz recorrió el camino real: callback, temporizador y generación. Hubo que arrancar Blender con `--gpu-backend vulkan`, porque desde la consola de desarrollo el driver OpenGL de NVIDIA se cierra al abrir la ventana, incluso sin el complemento. `blender_probe` comprueba que la escena de taller no queda tras generar ni tras un fallo.
+- **Exportación sin pérdida de detalle (objetivo de resina).** El remallado vóxel de `make_solid` (0,32 mm en Trabajo) borraba grietas, vetas y biseles, y dejaba goterones en las juntas. Ahora `config.EXPORT_METHOD='MANIFOLD'` une las copias con un booleano Manifold exacto; el vóxel sigue disponible como alternativa. Con volumen con signo, las cáscaras sueltas de menos de `EXPORT_DEBRIS_MM3` (2 mm³) se eliminan como residuos, los huecos interiores también, y un fragmento mayor rechaza la exportación.
+
+| Caso | Calidad | Fusión | Caras | Residuos | Huecos |
+|---|---|---|---|---|---|
+| basic_draft | Borrador | 0,7 s | 13 015 | 2 | 1 |
+| door_windows_work | Trabajo | 4,1 s (vóxel: 9,3 s) | 108 410 (vóxel: 170 684) | 5 | 48 |
+| room_beams_draft | Borrador | 6,3 s | 60 278 | 4 | 15 |
+| 3 agujeros | Detalle | 8,0 s | 308 217 | 11 | 31 |
+
+  Todos quedan en una sola pieza cerrada. `blender_probe` comprueba que el sólido es cerrado, de una pieza y con la misma caja envolvente que la fuente.
 
 Pendiente:
 

@@ -131,6 +131,23 @@ def session_checks(g, state, config, case):
     except ValueError as exc:
         assert 'Fragmento suelto' in str(exc), exc
     assert set(bpy.data.objects.keys()) == before, ('fusion_fallida_deja_objetos', set(bpy.data.objects.keys()) ^ before)
+    # Exportación Manifold: una sola pieza cerrada con la misma caja que la fuente (sin pérdida de detalle).
+    loose = bpy.data.objects['Prueba · pieza suelta']
+    mesh = loose.data
+    bpy.data.objects.remove(loose, do_unlink=True)
+    bpy.data.meshes.remove(mesh)
+    points = [v.co for o in coll.objects for v in o.data.vertices]
+    box = [min(q[i] for q in points) for i in range(3)] + [max(q[i] for q in points) for i in range(3)]
+    solid = export.make_solid(bpy.context)
+    assert solid['metodo_fusion'] == 'MANIFOLD', solid['metodo_fusion']
+    bm = bmesh.new()
+    bm.from_mesh(solid.data)
+    assert all(e.is_manifold for e in bm.edges), 'sólido con aristas abiertas'
+    assert len(export.shells(bm)) == 1, 'el sólido debe ser una sola pieza'
+    bm.free()
+    points = [v.co for v in solid.data.vertices]
+    solid_box = [min(q[i] for q in points) for i in range(3)] + [max(q[i] for q in points) for i in range(3)]
+    assert max(abs(a - b) for a, b in zip(box, solid_box)) < 1e-3, ('caja_distinta', box, solid_box)
     print('SESSION_PASS', flush=True)
 
 

@@ -18,6 +18,14 @@ STAGE_SCENE = 'RUINAS · taller'
 CACHE_PREFIX = '__RUIN_CACHE__'
 
 
+# Fusión del sólido exportable. MANIFOLD une las piezas con un booleano exacto y conserva todo el
+# detalle (grietas, vetas, biseles); VOXEL remalla a QUALITY[calidad][1] mm y lo suaviza.
+EXPORT_METHOD = 'MANIFOLD'
+# Con MANIFOLD: cáscaras sueltas por debajo de este volumen (mm³) son residuos y se eliminan;
+# por encima, la exportación se rechaza. Los huecos cerrados interiores se eliminan siempre.
+EXPORT_DEBRIS_MM3 = 2.0
+
+
 QUALITY = {'DRAFT':(1,.45,1),'WORK':(2,.32,2),'DETAIL':(3,.18,2)}
 
 
