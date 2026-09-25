@@ -27,7 +27,7 @@ Las reglas del proyecto están en `AGENTS.md`, importado arriba; no las repitas 
 
 Detalle y plan en `docs/AUDIT.md` (auditoría del 2026-09-25, verificada en Blender 5.2.2).
 
-- `crack_stone` puede dejar una piedra reducida a una esquirla (C10).
+- Los booleanos EXACT pueden fallar casi por completo sin dejar la malla vacía. `crack_stone` revierte cada rama que quite más de `config.CRACK_MAX_VOLUME_LOSS` del volumen; aplica la misma protección en booleanos nuevos.
 
 - El nombre de objeto alimenta la semilla CRC de las grietas (`fracture.apply_damage`), y los prefijos de nombre deciden biseles, grietas, huecos y apoyos. Si el nombre ya existe en el archivo, Blender añade `.001`.
 - `runtime.cache`, `runtime.pending` y `runtime.settings` guardan referencias a datos de Blender, y no hay handlers de deshacer ni de carga. No añadas más referencias a ID en estado de módulo.

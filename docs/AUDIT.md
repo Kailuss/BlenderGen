@@ -42,7 +42,7 @@ Severidad: **Alta** significa resultado incorrecto, riesgo de cierre de Blender 
 
 | ID | Sev. | Área | Hallazgo | Evidencia |
 |---|---|---|---|---|
-| C10 | Alta | Grietas | Una grieta puede dejar la piedra reducida a una esquirla | Blender |
+| C10 | Alta | Grietas | ✅ Resuelto: una grieta podía dejar la piedra reducida a una esquirla | Blender |
 | C1 | Alta | Grietas | En paredes de retorno, las grietas se tallan en la cara de junta | Blender |
 | C2 | Alta | Estado | Referencias a ID en `runtime`, sin handlers de deshacer ni de carga | Blender (carga) + doc. Blender (deshacer) |
 | C3 | Media | Caché | La exportación reutiliza geometría de vista previa | Blender |
@@ -67,7 +67,9 @@ Severidad: **Alta** significa resultado incorrecto, riesgo de cierre de Blender 
 
 ### Corrección
 
-**C10: una grieta puede dejar la piedra reducida a una esquirla.** En el caso de referencia `door_windows_work`, `Piedra entera · hilada 06.05` mide 10,7 × 13,4 × 5,7 mm antes de las grietas y 2,6 × 0,7 × 0,8 mm después: el muro pierde la piedra y en su lugar queda un fragmento. La limpieza de islas de `crack_stone` ([fracture.py:123-143](../src/ruinas_panel/geometry/fracture.py#L123-L143)) conserva el componente con más vértices, no el de más volumen, y el caso de «booleano vacío» solo se detecta cuando no queda ningún vértice ([fracture.py:111](../src/ruinas_panel/geometry/fracture.py#L111)). Falta confirmar cuál de los dos mecanismos lo provoca. Las pruebas de paridad no lo detectan, porque v20 produce el mismo resultado.
+**C10: una grieta puede dejar la piedra reducida a una esquirla.** En el caso de referencia `door_windows_work`, `Piedra entera · hilada 06.05` mide 10,7 × 13,4 × 5,7 mm antes de las grietas y 2,6 × 0,7 × 0,8 mm después: el muro pierde la piedra y en su lugar queda un fragmento. La limpieza de islas de `crack_stone` ([fracture.py:123-143](../src/ruinas_panel/geometry/fracture.py#L123-L143)) conserva el componente con más vértices, no el de más volumen, y el caso de «booleano vacío» solo se detecta cuando no queda ningún vértice ([fracture.py:111](../src/ruinas_panel/geometry/fracture.py#L111)). Las pruebas de paridad no lo detectaban, porque v20 produce el mismo resultado.
+**Causa (diagnóstico en Blender):** no es la limpieza de islas. El quinto booleano EXACT (raíz 2 de la grieta) devolvió un fragmento de 16 vértices y 0,38 mm³ en lugar de la piedra de 755 mm³. La protección solo actuaba si la malla quedaba vacía.
+**Resuelto:** `crack_stone` mide el volumen tras cada rama y restaura la copia de respaldo si se pierde más de `config.CRACK_MAX_VOLUME_LOSS` (25 %). Una rama sana retira menos del 5 %. Las ramas descartadas se cuentan en `ob['ramas_revertidas']`. `blender_probe` falla si una pieza agrietada queda por debajo del 50 % de su caja previa. Solo cambió `door_windows_work` (141 116 → 142 069 caras); `basic_draft` y `room_beams_draft` conservan su digest. Render revisado: la piedra vuelve a su sitio con sus grietas.
 
 **C1: grietas de paredes de retorno en la cara de junta.** [fracture.py:23-31](../src/ruinas_panel/geometry/fracture.py#L23-L31) toma X como anchura de la piedra y Z como altura, y talla desde `lo[1]`, el mínimo de Y ([fracture.py:89](../src/ruinas_panel/geometry/fracture.py#L89)). Eso es correcto en la fachada, que corre en X con el frente en −Y. Las paredes `left`/`right` ([walls.py:84](../src/ruinas_panel/structure/walls.py#L84)) corren en Y, así que el mínimo de Y de cada piedra es la cara que queda a 0,36 mm de la piedra contigua.
 Evidencia: en `door_windows_work`, `Piedra · right.0.0` mide 13,39 × 12,03 × 5,67 mm (X es el grosor, Y la longitud). Aplicando la regla de `apply_damage` con semilla 17 salen exactamente las seis piedras de retorno que tienen caras extra (924–1 015, frente a 864). Se pagan booleanos sin efecto visible y las paredes de retorno no muestran grietas. En la pared `back`, las grietas caen en la cara interior. El fallo viene de v20 (los digests son idénticos).
@@ -191,7 +193,7 @@ Criterio de salida: los casos actuales conservan su digest. Los casos nuevos que
 | 1.2 | Operadores: `poll` (Modo Objeto y `ruin_settings` disponible), `try/except` que llame a `self.report({'ERROR'}, …)`, eliminación del sólido parcial y restauración de la visibilidad | C4 | S | Igual |
 | 1.3 | Clave estable `ob['ruin_key']`, asignada al crear con el mismo texto que el nombre actual, como semilla CRC; rol `ob['ruin_role']` para clasificar | C6 | M | Igual (mismos textos) |
 | 1.4 | Para C3, medir dos opciones: (a) incluir `runtime.preview` en la firma; (b) biselar siempre el mortero. Elegir por tiempo y resultado | C3 | S | (a) igual; (b) cambia |
-| 1.4b | C10: conservar la isla de mayor volumen (o la que contiene el centro original) y restaurar la copia de respaldo si la pieza pierde más de un porcentaje fijado de su caja envolvente; añadir una prueba que lo detecte | C10 | S | Cambia en `door_windows_work` |
+| 1.4b | ✅ C10: revertir la rama si el booleano quita más del 25 % del volumen, y prueba que lo detecta | C10 | S | Cambió `door_windows_work` |
 | 1.5 | Grietas en el marco local del tramo (usando `wall_id` y el eje de `paredes_generadas`), decidiendo qué cara es la visible en cada pared | C1 | M | Cambia en L/U/habitación |
 | 1.6 | En `undo_post`, si `parametros_muro` no coincide con los ajustes actuales, programar una vista previa | C5 | S | Igual |
 | 1.7 | Renombrar el Decimate o corregirlo según la intención (COLLAPSE o DISSOLVE), midiendo caras y aspecto del STL | C7 | S | Solo el STL, si se corrige |

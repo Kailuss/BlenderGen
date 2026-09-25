@@ -40,6 +40,19 @@ def closure(coll):
     return {'open_edges': open_edges, 'degenerate_faces': degenerate}
 
 
+def shrunk_by_cracks(coll, ratio=.5):
+    """IA: detecta piezas agrietadas cuya caja cae por debajo de ratio de la caja previa guardada en parametros_grieta."""
+    shrunk = {}
+    for ob in coll.objects:
+        if 'parametros_grieta' not in ob or not ob.data.vertices:
+            continue
+        lo, hi = json.loads(ob['parametros_grieta'])['bounds']
+        span = [max(v.co[i] for v in ob.data.vertices) - min(v.co[i] for v in ob.data.vertices) for i in range(3)]
+        if any(s < ratio * (b - a) for s, a, b in zip(span, lo, hi)):
+            shrunk[ob.name] = [round(s, 2) for s in span]
+    return shrunk
+
+
 def run():
     """IA: usa procesos separados para baseline/modular; el fallo debe producir exit code distinto de cero."""
     parser = argparse.ArgumentParser()
@@ -85,6 +98,8 @@ def run():
         assert len(coll.objects)>0
         sealed=closure(coll)
         assert not sealed['open_edges'], ('malla_abierta',name,sealed['open_edges'])
+        shrunk=shrunk_by_cracks(coll)
+        assert not shrunk, ('grieta_destruye_pieza',name,shrunk)
         windows=json.loads(bpy.context.scene.get('ventanas_generadas','[]'))
         if changes.get('windows_enabled'):assert windows
         beams=json.loads(bpy.context.scene.get('vigas_generadas','[]'))

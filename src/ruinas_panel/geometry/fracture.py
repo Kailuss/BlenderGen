@@ -1,5 +1,6 @@
 """geometry /fracture — ver docs/ARCHITECTURE.md para contratos y dependencias."""
 
+from .. import config
 from .. import runtime
 from ..geometry import primitives
 from ..geometry import weather
@@ -15,7 +16,7 @@ import zlib
 
 @profiling.timed("grietas")
 def crack_stone(ob, amount, seed, coll, mat):
-    'IA: Grietas ramificadas desde aristas; conserva la copia si el booleano elimina toda la piedra.'
+    'IA: Grietas ramificadas desde aristas; revierte cada rama cuyo booleano quite más de CRACK_MAX_VOLUME_LOSS del volumen.'
     if amount<=0:
         return
     import bmesh
@@ -78,6 +79,8 @@ def crack_stone(ob, amount, seed, coll, mat):
             branches.append({'root':root_index,'start':list(start),'tip':list(tip)})
     ob['parametros_grieta']=json.dumps({'count':count,'width':width,'roots':roots,'branches':branches,'bounds':[lo,hi]})
     changed=False
+    reverted=0
+    volume=primitives.mesh_volume(ob.data)
     for path,scale in paths:
         verts=[]
         faces=[]
@@ -108,12 +111,16 @@ def crack_stone(ob, amount, seed, coll, mat):
         mod.solver='EXACT'
         mod.object=cut
         bpy.ops.object.modifier_apply(modifier=mod.name)
-        if not ob.data.vertices:
-            empty=ob.data
+        after=primitives.mesh_volume(ob.data) if ob.data.vertices else 0
+        # El booleano EXACT puede devolver solo un fragmento: se descarta esa rama.
+        if after<volume*(1-config.CRACK_MAX_VOLUME_LOSS):
+            failed=ob.data
             ob.data=backup.copy()
-            bpy.data.meshes.remove(empty)
+            bpy.data.meshes.remove(failed)
+            reverted+=1
         else:
             changed=True
+            volume=after
         bpy.data.meshes.remove(backup)
         mesh=cut.data
         bpy.data.objects.remove(cut,do_unlink=True)
@@ -142,6 +149,7 @@ def crack_stone(ob, amount, seed, coll, mat):
     bm.to_mesh(ob.data)
     bm.free()
     ob['grieta_fisica']=changed
+    ob['ramas_revertidas']=reverted
 
 
 def hole_fragment(coll,mat,mortar,a,b,z0,z1,thickness,projection,damage,seed,wear):

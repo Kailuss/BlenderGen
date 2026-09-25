@@ -36,7 +36,7 @@ $ruinasPython = 'C:\Users\yhora\.cache\codex-runtimes\codex-primary-runtime\depe
 
 `check` valida sintaxis, contratos y tres grupos de pruebas de cálculo puro, sin Blender. `find` consulta el AST sin cargar todas las fuentes en el chat. `test --case` limita el trabajo a un escenario; sin ese argumento ejecuta tres. `--blender <ruta>` permite elegir otra instalación. Los logs y resultados JSON se guardan en `reports/`.
 
-`test` exige que cada pieza generada cierre (sin aristas abiertas) y compara digests y caras degeneradas con `reports/expected.json`. Si la versión de Blender es otra, avisa y omite la comparación. `test --update-expected` acepta la geometría actual como nueva referencia: úsalo solo tras revisar render y cierre de un cambio de geometría intencionado.
+`test` exige que cada pieza generada cierre (sin aristas abiertas) y que ninguna grieta reduzca una pieza por debajo de la mitad de su tamaño, y compara digests y caras degeneradas con `reports/expected.json`. Si la versión de Blender es otra, avisa y omite la comparación. `test --update-expected` acepta la geometría actual como nueva referencia: úsalo solo tras revisar render y cierre de un cambio de geometría intencionado.
 
 `test --baseline` compara vértices redondeados a 6 decimales, caras y nombres contra el monolito, con semilla de ruido de Blender controlada para la prueba. No compara renders píxel a píxel ni demuestra equivalencia de todas las combinaciones posibles. Cada escenario también se regenera desde caché y debe coincidir exactamente.
 

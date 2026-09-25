@@ -11,13 +11,13 @@
       "quality": "DRAFT",
       "faces": 17175,
       "vertices": 18522,
-      "seconds": 3.4318138999997245,
+      "seconds": 3.6314037000001917,
       "stages": {
-        "biseles": 0.975840900006915,
-        "desgaste": 2.0907027999965067,
-        "aberturas_y_vigas": 0.0004112999995413702,
-        "preparacion": 3.431808799999999,
-        "total": 3.4318138999997245
+        "biseles": 1.0378589000029024,
+        "desgaste": 2.2130298999945808,
+        "aberturas_y_vigas": 0.0002959000003102119,
+        "preparacion": 3.6313975000002756,
+        "total": 3.6314037000001917
       },
       "cached": false,
       "solid": false
@@ -3387,7 +3387,7 @@
   },
   {
     "case": "door_windows_work",
-    "digest": "c0ac7fb2cc3f1916ad90158dec9f42c4353a2c6fcac89d38ca93c00365dc6f94",
+    "digest": "24060f1bd009a112d6460da6ad6acd4e83f40ebac0e15d9a39a3c729b66c1900",
     "blender": "5.2.2 LTS",
     "closure": {
       "open_edges": {},
@@ -3397,16 +3397,16 @@
     },
     "metrics": {
       "quality": "WORK",
-      "faces": 141116,
-      "vertices": 143634,
-      "seconds": 16.736058299999968,
+      "faces": 142069,
+      "vertices": 144657,
+      "seconds": 17.54450159999942,
       "stages": {
-        "biseles": 1.4928643000021111,
-        "desgaste": 4.41773270000067,
-        "aberturas_y_vigas": 1.9029215000000477,
-        "preparacion": 10.405389800000194,
-        "grietas": 6.327362699999867,
-        "total": 16.736058299999968
+        "biseles": 1.59940479999932,
+        "desgaste": 4.642042499995114,
+        "aberturas_y_vigas": 2.064239400000588,
+        "preparacion": 10.989862899999935,
+        "grietas": 6.551367099999879,
+        "total": 17.54450159999942
       },
       "cached": false,
       "solid": false
@@ -5111,18 +5111,18 @@
         ]
       },
       "Piedra entera \u00b7 hilada 06.05": {
-        "faces": 18,
-        "vertices": 26,
+        "faces": 971,
+        "vertices": 1049,
         "bounds": [
           [
-            30.91542,
-            -6.81362,
-            42.74299
+            27.40312,
+            -6.82658,
+            39.75595
           ],
           [
-            33.51491,
-            -6.11658,
-            43.54904
+            38.15307,
+            6.61581,
+            45.4692
           ]
         ]
       },
@@ -7874,13 +7874,13 @@
       "quality": "DRAFT",
       "faces": 58243,
       "vertices": 62848,
-      "seconds": 76.05037309999989,
+      "seconds": 83.49995769999987,
       "stages": {
-        "biseles": 20.476810099997238,
-        "desgaste": 36.79060390000632,
-        "aberturas_y_vigas": 17.894222400000217,
-        "preparacion": 76.05036979999932,
-        "total": 76.05037309999989
+        "biseles": 22.125076700004684,
+        "desgaste": 39.824232400002984,
+        "aberturas_y_vigas": 20.472843300000022,
+        "preparacion": 83.49995349999972,
+        "total": 83.49995769999987
       },
       "cached": false,
       "solid": false

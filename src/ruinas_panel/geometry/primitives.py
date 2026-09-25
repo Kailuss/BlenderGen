@@ -70,6 +70,16 @@ def relief(obj, strength, seed):
     obj.data.update()
 
 
+def mesh_volume(mesh):
+    'IA: Volumen en mm³ de una malla cerrada; solo mide, no modifica la malla.'
+    import bmesh
+    bm=bmesh.new()
+    bm.from_mesh(mesh)
+    volume=bm.calc_volume()
+    bm.free()
+    return volume
+
+
 def clip_closed(ob,point,normal):
     'IA: Recorta con bmesh y tapa la sección; la salida debe seguir siendo cerrada.'
     import bmesh
