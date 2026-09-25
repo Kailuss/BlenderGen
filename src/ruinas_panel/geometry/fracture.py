@@ -31,8 +31,8 @@ def crack_frame(ob,walls,center):
     return along,normal
 
 
-def crack_paths(rr,p,amount,u0,u1,z0,z1):
-    'IA: Trazos quebrados en el plano de la cara (u,z) con ancho y profundidad decrecientes; como mucho una rama por grieta.'
+def crack_paths(rr,p,amount,u0,u1,z0,z1,split=False):
+    'IA: Trazos quebrados en la cara (u,z) que se afinan, una rama como mucho; split añade primero una grieta que parte la pieza de borde a borde.'
     span_u=u1-u0
     span_z=z1-z0
     mouth=(.22+.28*amount)*(1+rr.uniform(-.35,.35)*p.crack_width_var)
@@ -40,25 +40,55 @@ def crack_paths(rr,p,amount,u0,u1,z0,z1):
     count=rr.randint(1,p.cracks_per_stone) if min(span_u,span_z)>3.5 else 1
     paths=[]
     roots=[]
-    def clamp(q):
-        'IA: Mantiene un punto del trazo dentro de la cara, a 0,3 mm de sus bordes.'
-        return Vector((max(u0+.3,min(u1-.3,q.x)),max(z0+.3,min(z1-.3,q.y))))
-    def trace(start,heading,length,width,depth,wobble):
-        'IA: Polilínea en zigzag desde start; devuelve puntos, semianchos y profundidades que se afinan hasta la punta.'
+    def clamp(q,through=None):
+        'IA: Mantiene un punto dentro de la cara a 0,3 mm de sus bordes; through=u o z deja libre el otro eje para cruzar la pieza.'
+        u=max(u0+.3,min(u1-.3,q.x)) if through!='z' else q.x
+        z=max(z0+.3,min(z1-.3,q.y)) if through!='u' else q.y
+        return Vector((u,z))
+    def trace(start,heading,length,width,depth,wobble,through=None):
+        'IA: Polilínea en zigzag desde start que termina al tocar un borde; se afina hasta la punta, o con through sale por el borde opuesto; None si queda corta.'
         steps=max(3,round(length/.8))
         across=Vector((-heading.y,heading.x))
         phase=rr.uniform(0,math.tau)
         points=[start]
+        ts=[0.0]
         sign=rr.choice((-1,1))
         for k in range(1,steps+1):
             t=min(1,(k+(rr.uniform(-.3,.3) if k<steps else 0))/steps)
             sign=-sign if rr.random()<.7 else sign
             zig=sign*rr.uniform(.08,.3)*wobble*(1-.5*t)
             drift=.25*wobble*math.sin(t*math.pi+phase)
-            points.append(clamp(start+heading*length*t+across*(zig+drift)))
-        widths=[width*(1-k/steps)**.7+.04 for k in range(steps+1)]
-        depths=[depth*(.35+.65*(1-k/steps)) for k in range(steps+1)]
+            wanted=start+heading*length*t+across*(zig+drift)
+            q=clamp(wanted,through)
+            # Recortar contra el borde deja puntos repetidos o pliegues: el cortador se autointerseca y EXACT falla.
+            clipped=(q-wanted).length>1e-6
+            if (q-points[-1]).length>=.2:
+                points.append(q)
+                ts.append(t)
+            if clipped:
+                break
+        if len(points)<2:
+            return None
+        f=[t/ts[-1] for t in ts]
+        if through:
+            widths=[width*(1-.45*s)+.04 for s in f]
+            depths=[depth*(.7+.3*(1-s)) for s in f]
+        else:
+            widths=[width*(1-s)**.7+.04 for s in f]
+            depths=[depth*(.35+.65*(1-s)) for s in f]
         return points,widths,depths
+    if split:
+        # Partida de borde a borde por el lado corto de la cara: la pieza queda agrietada por la mitad.
+        tilt=rr.uniform(-.25,.25)*p.crack_angle_var
+        if span_u>=span_z:
+            root,heading,length,through=Vector((u0+span_u*rr.uniform(.3,.7),z1+.35)),Vector((math.sin(tilt),-math.cos(tilt))),span_z+.7,'u'
+        else:
+            root,heading,length,through=Vector((u0-.35,z0+span_z*rr.uniform(.3,.7))),Vector((math.cos(tilt),math.sin(tilt))),span_u+.7,'z'
+        cut=trace(root,heading,length/max(.5,abs(heading.y if through=='u' else heading.x)),mouth*1.15,deep,p.crack_path_var,through)
+        if cut:
+            paths.append(cut)
+        roots.append({'edge':'partida','point':list(root),'length':length,'angle':tilt})
+        count-=1
     for root_index in range(count):
         edge=rr.randrange(4)
         s=(root_index+rr.uniform(.3,.7))/count
@@ -74,13 +104,17 @@ def crack_paths(rr,p,amount,u0,u1,z0,z1):
         heading=Vector((heading.x*math.cos(angle)-heading.y*math.sin(angle),heading.x*math.sin(angle)+heading.y*math.cos(angle)))
         length=span*rr.uniform(.55,.85)*(1+rr.uniform(-.35,.2)*p.crack_length_var)
         main=trace(root,heading,length,mouth,deep,p.crack_path_var)
+        if not main:
+            continue
         paths.append(main)
         roots.append({'edge':edge,'point':list(root),'length':length,'angle':angle})
         if len(main[0])>=5 and rr.random()<.3+.4*amount:
             k=rr.randint(len(main[0])//3,2*len(main[0])//3)
             turn=rr.choice((-1,1))*rr.uniform(.45,.85)
             branch=Vector((heading.x*math.cos(turn)-heading.y*math.sin(turn),heading.x*math.sin(turn)+heading.y*math.cos(turn)))
-            paths.append(trace(main[0][k],branch,length*rr.uniform(.25,.45),main[1][k]*.75,main[2][k]*.8,p.crack_path_var*.7))
+            twig=trace(main[0][k],branch,length*rr.uniform(.25,.45),main[1][k]*.75,main[2][k]*.8,p.crack_path_var*.7)
+            if twig:
+                paths.append(twig)
     return paths,roots,mouth
 
 
@@ -115,8 +149,8 @@ def crack_cutter(path,along,normal,top):
 
 
 @profiling.timed("grietas")
-def crack_stone(ob, amount, seed, coll, mat, frame=None):
-    'IA: Grietas quebradas que se afinan, talladas en la cara exterior del frame; revierte ramas que quiten más de CRACK_MAX_VOLUME_LOSS.'
+def crack_stone(ob, amount, seed, coll, mat, frame=None, split=False):
+    'IA: Grietas quebradas que se afinan en la cara exterior del frame; split parte la pieza de borde a borde; revierte ramas que quiten más de CRACK_MAX_VOLUME_LOSS.'
     if amount<=0:
         return
     import bmesh
@@ -129,9 +163,9 @@ def crack_stone(ob, amount, seed, coll, mat, frame=None):
     u0,u1,z0,z1=min(us),max(us),lo[2],hi[2]
     if u1-u0<1.8 or z1-z0<1.3:
         return
-    paths,roots,mouth=crack_paths(rr,runtime.settings,amount,u0,u1,z0,z1)
+    paths,roots,mouth=crack_paths(rr,runtime.settings,amount,u0,u1,z0,z1,split)
     top=max(ns)+.2
-    ob['parametros_grieta']=json.dumps({'count':len(roots),'width':mouth,'roots':roots,'paths':len(paths),
+    ob['parametros_grieta']=json.dumps({'count':len(roots),'width':mouth,'roots':roots,'paths':len(paths),'partida':split,
                                         'frame':[list(along),list(normal)],'bounds':[lo,hi]})
     changed=False
     reverted=0
@@ -149,7 +183,7 @@ def crack_stone(ob, amount, seed, coll, mat, frame=None):
         backup=ob.data.copy()
         mod=ob.modifiers.new('Rama de grieta','BOOLEAN')
         mod.operation='DIFFERENCE'
-        mod.solver='EXACT'
+        mod.solver=config.CRACK_SOLVER
         mod.object=cut
         bpy.ops.object.modifier_apply(modifier=mod.name)
         after=primitives.mesh_volume(ob.data) if ob.data.vertices else 0
@@ -404,13 +438,40 @@ def opening_damage(ob,core,holes,x0,x1,z0,z1,amount,seed):
             primitives.mesh_obj('Mortero · resto adherido',verts,faces,coll,mat)
 
 
+def crack_stress(ob,walls,openings):
+    'IA: Tensión 0–1 por cercanía del centro de la pieza a huecos de su tramo y a los extremos del tramo, en coordenadas locales.'
+    wall=walls.get(ob.get('wall_id','front')) or walls.get('front')
+    if not wall:
+        return 0.0
+    xs=[v.co.x for v in ob.data.vertices]
+    ys=[v.co.y for v in ob.data.vertices]
+    zs=[v.co.z for v in ob.data.vertices]
+    o,a=wall['origin'],wall['axis']
+    u=((min(xs)+max(xs))/2-o[0])*a[0]+((min(ys)+max(ys))/2-o[1])*a[1]
+    z=(min(zs)+max(zs))/2
+    gap=min(abs(u-wall['start']),abs(u-wall['end']))
+    for wid,x0,x1,z0,z1 in openings:
+        if wid==wall['id']:
+            gap=min(gap,math.hypot(max(x0-u,0,u-x1),max(z0-z,0,z-z1)))
+    stress=max(0.0,1-gap/config.CRACK_STRESS['reach'])
+    if '· sillar' in ob.name:
+        stress=max(stress,config.CRACK_STRESS['pillar'])
+    return stress
+
+
 def apply_damage(coll,p):
-    'IA: Aplica grietas después de caché en la cara exterior de cada tramo; omite Borrador y conserva selección determinista por nombre.'
+    'IA: Aplica grietas tras la caché, más y partidas cerca de huecos y extremos; omite Borrador y conserva la selección determinista por nombre.'
     if runtime.quality=='DRAFT' or p.cracks<=0:
         return
     stone=primitives.material('Piedra · neutro',(.52,.52,.52))
     walls={w['id']:w for w in json.loads(bpy.context.scene.get('paredes_generadas','[]'))}
     center=Vector((0,p.building_depth/2,0))
+    scene=bpy.context.scene
+    door=json.loads(scene.get('puerta_generada','null'))
+    openings=[('front',door['left'],door['right'],0,door['top'])] if door else []
+    openings+=[(w['wall'],w['x0'],w['x1'],w['z0'],w['z1']) for w in json.loads(scene.get('ventanas_generadas','[]'))]
+    openings+=[('front',h['x0'],h['x1'],h['z0'],h['z1']) for h in json.loads(scene.get('huecos_generados','[]'))]
+    tuning=config.CRACK_STRESS
     for ob in list(coll.objects):
         if not ob.name.startswith(('Piedra','Pilar')) or ob.get('connection_face'):
             continue
@@ -419,5 +480,8 @@ def apply_damage(coll,p):
         key=zlib.crc32(ob.name.encode('utf8'))
         if ob.get('escombro') and random.Random(p.seed+key+34).random()>.2:
             continue
-        if ob.name.startswith('Piedra parcial') or random.Random(p.seed+key).random()<p.cracks*.8:
-            crack_stone(ob,p.cracks,(p.seed+key)%1000000,coll,stone,crack_frame(ob,walls,center))
+        stress=0.0 if ob.get('escombro') else crack_stress(ob,walls,openings)
+        chance=min(.95,p.cracks*(tuning['base']+tuning['gain']*stress))
+        if ob.name.startswith('Piedra parcial') or random.Random(p.seed+key).random()<chance:
+            split=not ob.get('escombro') and random.Random(p.seed+key+71).random()<p.cracks*(tuning['split']+tuning['split_gain']*stress)
+            crack_stone(ob,p.cracks,(p.seed+key)%1000000,coll,stone,crack_frame(ob,walls,center),split)

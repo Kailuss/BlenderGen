@@ -53,7 +53,7 @@ Severidad: **Alta** significa resultado incorrecto, riesgo de cierre de Blender 
 | C8 | Baja | Efectos | Unidades, materiales y RNA se reescriben en cada generación | Código |
 | C9 | Baja | Geometría | Recorte de X de todos los vértices a ±L/2 | No confirmado en Blender |
 | R1 | Alta | Rendimiento | Escalado cuadrático por `bpy.ops` en bucle | Blender |
-| R2 | Media | Rendimiento | Hasta ~9 booleanos EXACT por piedra en grietas | Código + datos |
+| R2 | Media | Rendimiento | Mejorado: hasta ~9 booleanos EXACT por piedra en grietas; ahora Manifold y como mucho una rama por grieta | Código + datos |
 | R3 | Media | Densidad | ~1 000 caras por piedra en Trabajo; densidad fija por calidad | Datos |
 | R4 | Baja | Rendimiento | Bucles Python por vértice | Código |
 | R5 | Media | UX | Vista previa bloqueante, sin progreso ni pausa automática | Datos |
@@ -214,7 +214,7 @@ Criterio: digests idénticos y tiempos medidos en los mismos casos. Si 2.2 no co
 
 | # | Propuesta | Resuelve | Esf. |
 |---|---|---|---|
-| 3.1 | Un solo booleano por piedra, con todas las ramas en un cortador (o un operando de colección) y sin copia de respaldo por rama | R2 | M |
+| 3.1 | (Parcial: Manifold ya hace barato cada booleano) Un solo booleano por piedra, con todas las ramas en un cortador (o un operando de colección) y sin copia de respaldo por rama | R2 | M |
 | 3.2 | Subdivisión adaptativa según la longitud de arista en mm, sin subir la densidad por defecto; comparar caras, tiempo y render | R3 | M |
 | 3.3 | `bmesh.ops.bevel` en lugar del modificador; comprobar si el resultado coincide | R1 | M |
 | 3.4 | Recortar las ventanas en el plan de hiladas, como la puerta, en lugar de usar booleanos | R1 | L |
@@ -300,6 +300,13 @@ Pendiente:
   - Renders revisados: en la pared lateral las grietas ya están en la cara visible.
   - En `door_windows_work`, el paso de grietas baja de 6,6 s a 4,2 s (dos muestras alternas en la misma sesión) y las caras pasan de 142 069 a 142 206.
   - Nueva cara degenerada en `Piedra · right.2.2`; la malla sigue cerrada y queda anotada en la referencia.
+- **Solver Manifold para grietas (hallazgo nuevo).** Con EXACT fallaban en silencio unas 25 de cada ~90 ramas de grieta en `door_windows_work` al 0,6: el cortador estaba bien (cerrado, volumen positivo, sin autointersecciones), pero EXACT devolvía una malla de volumen cero y la protección de C10 lo deshacía. `config.CRACK_SOLVER='MANIFOLD'` (Blender 4.5+): 0 reversiones y el paso de grietas baja de 4,5 s a 2,0 s. Candidato para `carve_rectangle` (ventanas y vigas) en la fase de rendimiento.
+- **Piezas partidas y tensión cerca de huecos (petición de uso).**
+  - `crack_stress` da una tensión de 0 a 1 según la cercanía (16 mm) a puerta, ventanas, agujeros y extremos del tramo. Los sillares de pilar tienen un mínimo de 0,4; los pilares de conexión siguen sin grietas.
+  - Con esa tensión suben la probabilidad de grieta y la de «partida», una grieta de borde a borde por el lado corto que parte la pieza por la mitad. Todas las cifras están en `config.CRACK_STRESS`.
+  - Las piedras sin partida conservan exactamente la forma que tenían.
+  - Los trazos terminan al tocar el borde de la cara, sin deslizarse sobre él.
+  - Renders revisados y aceptados. `door_windows_work`: 142 206 → 142 044 caras.
 - [ ] C2 y C5 con deshacer: requieren Blender con interfaz (generar, pulsar Ctrl+Z, mover un deslizador).
 
 Cuando un hallazgo quede demostrado en Blender, anótalo en `docs/STATUS.md` como límite conocido o márcalo aquí como resuelto.

@@ -27,13 +27,13 @@ Las reglas del proyecto están en `AGENTS.md`, importado arriba; no las repitas 
 
 Detalle y plan en `docs/AUDIT.md` (auditoría del 2026-09-25, verificada en Blender 5.2.2).
 
-- Los booleanos EXACT pueden fallar casi por completo sin dejar la malla vacía. `crack_stone` revierte cada rama que quite más de `config.CRACK_MAX_VOLUME_LOSS` del volumen; aplica la misma protección en booleanos nuevos.
+- Los booleanos EXACT fallan en silencio con piedras desgastadas: devuelven una malla de volumen casi cero. Las grietas usan `config.CRACK_SOLVER='MANIFOLD'` (Blender 4.5+; exige piezas cerradas) y revierten cualquier rama que quite más de `config.CRACK_MAX_VOLUME_LOSS`. En booleanos nuevos, usa Manifold y la misma protección de volumen.
 
 - El nombre de objeto alimenta la semilla CRC de las grietas (`fracture.apply_damage`), y los prefijos de nombre deciden biseles, grietas, huecos y apoyos. Si el nombre ya existe en el archivo, Blender añade `.001`.
 - `runtime.cache` (plantillas) y `runtime.settings` guardan referencias a datos de Blender; los handlers de `registration.py` las sueltan antes de deshacer, rehacer o cargar un archivo. No añadas más referencias a ID en estado de módulo; guarda nombres, como hace `runtime.pending`.
 - Hay una ranura de caché por `(calidad, modo)` (`cache.cache_key()`), porque `primitives.bevel` omite piezas en vista previa. Si otra función se comporta distinto según `runtime.preview`, no hace falta tocar la clave: la separación ya la cubre.
 - `crack_stone` trabaja en el marco de cara que calcula `crack_frame` (eje del tramo y normal exterior). Usa ese marco para cualquier detalle superficial nuevo; no supongas un muro en X con el frente en −Y.
-- El coste lo dominan `bpy.ops.object.modifier_apply` por pieza y los booleanos EXACT, y crece de forma aproximadamente cuadrática con el número de objetos. No añadas operadores por pieza sin medir.
+- El coste lo dominan `bpy.ops.object.modifier_apply` por pieza y los booleanos EXACT de ventanas y vigas, y crece de forma aproximadamente cuadrática con el número de objetos. No añadas operadores por pieza sin medir.
 - `_build_wall` cambia las unidades de la escena en cada generación. `primitives.relief` y `fracture.small_rubble` no se usan.
 - `config.QUALITY[q]` es `(niveles de subdivisión, vóxel en mm, segmentos de bisel)`. Otros presets por calidad siguen repartidos en `terrain.py` y `timber.py`.
 

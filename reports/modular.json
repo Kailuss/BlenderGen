@@ -1,27 +1,26 @@
 [
   {
     "case": "door_windows_work",
-    "digest": "d80efab365ce3e8a06fd8f9eeb4b6f6e05ddb20ca4fe5fcbf0c4fcfd1af53284",
+    "digest": "00e914a4dadd7f29aa44bb7bce9b391666bff9f8e4ae2948ec434fed05a77bd5",
     "blender": "5.2.2 LTS",
     "closure": {
       "open_edges": {},
       "degenerate_faces": {
-        "Piedra ca\u00edda \u00b7 fractura 3551.1": 1,
-        "Piedra \u00b7 right.2.2": 3
+        "Piedra ca\u00edda \u00b7 fractura 3551.1": 1
       }
     },
     "metrics": {
       "quality": "WORK",
-      "faces": 142206,
-      "vertices": 144623,
-      "seconds": 33.237736799999766,
+      "faces": 142044,
+      "vertices": 144802,
+      "seconds": 12.871034800000416,
       "stages": {
-        "biseles": 3.249553699992248,
-        "desgaste": 10.794078900005843,
-        "aberturas_y_vigas": 4.222285400001056,
-        "preparacion": 24.242060099999435,
-        "grietas": 8.953973399997267,
-        "total": 33.237736799999766
+        "biseles": 1.5384397999951034,
+        "desgaste": 4.528015700001561,
+        "aberturas_y_vigas": 1.9115237000005436,
+        "preparacion": 10.594998500000656,
+        "grietas": 2.067262499997014,
+        "total": 12.871034800000416
       },
       "cached": false,
       "solid": false
@@ -190,8 +189,8 @@
         ]
       },
       "Piedra entera \u00b7 hilada 00.00": {
-        "faces": 864,
-        "vertices": 866,
+        "faces": 961,
+        "vertices": 1049,
         "bounds": [
           [
             -59.95294,
@@ -254,8 +253,8 @@
         ]
       },
       "Piedra entera \u00b7 hilada 00.02": {
-        "faces": 973,
-        "vertices": 1053,
+        "faces": 930,
+        "vertices": 993,
         "bounds": [
           [
             -37.74163,
@@ -574,12 +573,12 @@
         ]
       },
       "Piedra entera \u00b7 hilada 01.05": {
-        "faces": 911,
-        "vertices": 949,
+        "faces": 903,
+        "vertices": 953,
         "bounds": [
           [
             16.3075,
-            -6.73611,
+            -6.73608,
             8.56337
           ],
           [
@@ -670,8 +669,8 @@
         ]
       },
       "Piedra entera \u00b7 hilada 02.00": {
-        "faces": 630,
-        "vertices": 681,
+        "faces": 708,
+        "vertices": 825,
         "bounds": [
           [
             -59.92522,
@@ -679,7 +678,7 @@
             14.77068
           ],
           [
-            -49.28559,
+            -49.28862,
             6.67902,
             20.43457
           ]
@@ -814,12 +813,12 @@
         ]
       },
       "Piedra entera \u00b7 hilada 02.05": {
-        "faces": 950,
-        "vertices": 992,
+        "faces": 864,
+        "vertices": 866,
         "bounds": [
           [
             27.5386,
-            -6.6042,
+            -6.60737,
             14.76463
           ],
           [
@@ -1038,8 +1037,8 @@
         ]
       },
       "Piedra entera \u00b7 hilada 03.06": {
-        "faces": 945,
-        "vertices": 1009,
+        "faces": 890,
+        "vertices": 924,
         "bounds": [
           [
             21.88024,
@@ -1182,8 +1181,8 @@
         ]
       },
       "Piedra entera \u00b7 hilada 04.03": {
-        "faces": 912,
-        "vertices": 950,
+        "faces": 906,
+        "vertices": 953,
         "bounds": [
           [
             -26.78311,
@@ -1214,8 +1213,8 @@
         ]
       },
       "Piedra entera \u00b7 hilada 04.04": {
-        "faces": 938,
-        "vertices": 963,
+        "faces": 918,
+        "vertices": 969,
         "bounds": [
           [
             16.88102,
@@ -1310,8 +1309,8 @@
         ]
       },
       "Piedra entera \u00b7 hilada 05.00": {
-        "faces": 864,
-        "vertices": 866,
+        "faces": 935,
+        "vertices": 1017,
         "bounds": [
           [
             -59.90797,
@@ -1726,8 +1725,8 @@
         ]
       },
       "Piedra entera \u00b7 hilada 06.05": {
-        "faces": 1000,
-        "vertices": 1107,
+        "faces": 926,
+        "vertices": 998,
         "bounds": [
           [
             27.40312,
@@ -1950,8 +1949,8 @@
         ]
       },
       "Piedra entera \u00b7 hilada 07.05": {
-        "faces": 990,
-        "vertices": 1069,
+        "faces": 987,
+        "vertices": 1103,
         "bounds": [
           [
             -10.82894,
@@ -2542,8 +2541,8 @@
         ]
       },
       "Piedra ca\u00edda \u00b7 fractura 3437.0": {
-        "faces": 1872,
-        "vertices": 1874,
+        "faces": 1883,
+        "vertices": 1920,
         "bounds": [
           [
             31.02375,
@@ -3406,8 +3405,8 @@
         ]
       },
       "Piedra \u00b7 right.1.0": {
-        "faces": 864,
-        "vertices": 866,
+        "faces": 887,
+        "vertices": 923,
         "bounds": [
           [
             46.22041,
@@ -3438,8 +3437,8 @@
         ]
       },
       "Piedra \u00b7 right.1.1": {
-        "faces": 864,
-        "vertices": 866,
+        "faces": 886,
+        "vertices": 908,
         "bounds": [
           [
             46.15922,
@@ -3566,8 +3565,8 @@
         ]
       },
       "Piedra \u00b7 right.2.0": {
-        "faces": 638,
-        "vertices": 686,
+        "faces": 701,
+        "vertices": 807,
         "bounds": [
           [
             46.16129,
@@ -3576,7 +3575,7 @@
           ],
           [
             59.51724,
-            21.6722,
+            21.66618,
             20.41886
           ]
         ]
@@ -3614,8 +3613,8 @@
         ]
       },
       "Piedra \u00b7 right.2.2": {
-        "faces": 958,
-        "vertices": 1034,
+        "faces": 903,
+        "vertices": 943,
         "bounds": [
           [
             46.14965,
@@ -3726,8 +3725,8 @@
         ]
       },
       "Piedra \u00b7 right.3.3": {
-        "faces": 969,
-        "vertices": 1037,
+        "faces": 981,
+        "vertices": 1101,
         "bounds": [
           [
             46.16074,
@@ -3966,8 +3965,8 @@
         ]
       },
       "Piedra \u00b7 right.5.2": {
-        "faces": 964,
-        "vertices": 1010,
+        "faces": 908,
+        "vertices": 951,
         "bounds": [
           [
             46.15046,
@@ -4062,8 +4061,8 @@
         ]
       },
       "Piedra \u00b7 right.6.0": {
-        "faces": 983,
-        "vertices": 1048,
+        "faces": 970,
+        "vertices": 1049,
         "bounds": [
           [
             46.15075,
@@ -4094,8 +4093,8 @@
         ]
       },
       "Piedra \u00b7 right.6.1": {
-        "faces": 967,
-        "vertices": 1045,
+        "faces": 897,
+        "vertices": 933,
         "bounds": [
           [
             46.15626,
@@ -4222,8 +4221,8 @@
         ]
       },
       "Piedra \u00b7 right.7.1": {
-        "faces": 941,
-        "vertices": 954,
+        "faces": 891,
+        "vertices": 919,
         "bounds": [
           [
             46.15676,

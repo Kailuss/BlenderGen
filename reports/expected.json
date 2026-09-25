@@ -7,11 +7,10 @@
       "degenerate_faces": []
     },
     "door_windows_work": {
-      "digest": "d80efab365ce3e8a06fd8f9eeb4b6f6e05ddb20ca4fe5fcbf0c4fcfd1af53284",
-      "faces": 142206,
+      "digest": "00e914a4dadd7f29aa44bb7bce9b391666bff9f8e4ae2948ec434fed05a77bd5",
+      "faces": 142044,
       "degenerate_faces": [
-        "Piedra caída · fractura 3551.1",
-        "Piedra · right.2.2"
+        "Piedra caída · fractura 3551.1"
       ]
     },
     "room_beams_draft": {
