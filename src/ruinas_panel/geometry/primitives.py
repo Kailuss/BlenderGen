@@ -16,14 +16,21 @@ def material(name, color):
 
 
 def mesh_obj(name, verts, faces, coll, mat):
-    'IA: Crea y enlaza una malla; vértices en mm y caras con orientación exterior.'
+    'IA: Crea y enlaza una malla; vértices en mm, caras con orientación exterior y ruin_key con el nombre pedido.'
     mesh = bpy.data.meshes.new(name)
     mesh.from_pydata(verts, [], faces)
     mesh.update()
     obj = bpy.data.objects.new(name, mesh)
+    # Blender añade .001 si el nombre ya existe en el archivo; la clave conserva el nombre pedido.
+    obj['ruin_key'] = name
     coll.objects.link(obj)
     obj.data.materials.append(mat)
     return obj
+
+
+def piece_key(obj):
+    'IA: Clave estable de una pieza para semillas; no cambia aunque Blender añada sufijos .001 al nombre.'
+    return obj.get('ruin_key', obj.name)
 
 
 @profiling.timed("biseles")

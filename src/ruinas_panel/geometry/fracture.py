@@ -460,7 +460,7 @@ def crack_stress(ob,walls,openings):
 
 
 def apply_damage(coll,p):
-    'IA: Aplica grietas tras la caché, más y partidas cerca de huecos y extremos; omite Borrador y conserva la selección determinista por nombre.'
+    'IA: Aplica grietas tras la caché, más y partidas cerca de huecos y extremos; omite Borrador; la selección depende de piece_key, no del nombre visible.'
     if runtime.quality=='DRAFT' or p.cracks<=0:
         return
     stone=primitives.material('Piedra · neutro',(.52,.52,.52))
@@ -477,7 +477,7 @@ def apply_damage(coll,p):
             continue
         if 'núcleo' in ob.name or 'pie' in ob.name:
             continue
-        key=zlib.crc32(ob.name.encode('utf8'))
+        key=zlib.crc32(primitives.piece_key(ob).encode('utf8'))
         if ob.get('escombro') and random.Random(p.seed+key+34).random()>.2:
             continue
         stress=0.0 if ob.get('escombro') else crack_stress(ob,walls,openings)

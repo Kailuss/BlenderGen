@@ -29,7 +29,7 @@ Detalle y plan en `docs/AUDIT.md` (auditoría del 2026-09-25, verificada en Blen
 
 - Los booleanos EXACT fallan en silencio con piedras desgastadas: devuelven una malla de volumen casi cero. Las grietas usan `config.CRACK_SOLVER='MANIFOLD'` (Blender 4.5+; exige piezas cerradas) y revierten cualquier rama que quite más de `config.CRACK_MAX_VOLUME_LOSS`. En booleanos nuevos, usa Manifold y la misma protección de volumen.
 
-- El nombre de objeto alimenta la semilla CRC de las grietas (`fracture.apply_damage`), y los prefijos de nombre deciden biseles, grietas, huecos y apoyos. Si el nombre ya existe en el archivo, Blender añade `.001`.
+- La semilla CRC de las grietas sale de `primitives.piece_key(ob)` (`ob['ruin_key']`, el nombre pedido al crear), no de `ob.name`. Los prefijos de nombre siguen decidiendo biseles, grietas, huecos y apoyos. Crea las piezas siempre con `primitives.mesh_obj`.
 - `runtime.cache` (plantillas) y `runtime.settings` guardan referencias a datos de Blender; los handlers de `registration.py` las sueltan antes de deshacer, rehacer o cargar un archivo. No añadas más referencias a ID en estado de módulo; guarda nombres, como hace `runtime.pending`.
 - Hay una ranura de caché por `(calidad, modo)` (`cache.cache_key()`), porque `primitives.bevel` omite piezas en vista previa. Si otra función se comporta distinto según `runtime.preview`, no hace falta tocar la clave: la separación ya la cubre.
 - `crack_stone` trabaja en el marco de cara que calcula `crack_frame` (eje del tramo y normal exterior). Usa ese marco para cualquier detalle superficial nuevo; no supongas un muro en X con el frente en −Y.

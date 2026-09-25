@@ -34,8 +34,20 @@ def after_data_reload(*args):
     cache.purge_orphan_templates()
 
 
+@persistent
+def after_undo(*args):
+    'IA: Tras undo o redo purga plantillas huérfanas y reprograma la vista previa si la geometría quedó desfasada de los ajustes.'
+    after_data_reload()
+    scene=bpy.context.scene
+    p=getattr(scene,'ruin_settings',None)
+    if p is not None and p.live_preview and preview.stale_preview(scene):
+        runtime.phase='FAST'
+        p.status='Deshacer: actualizando vista'
+        preview.schedule_refresh(scene)
+
+
 HANDLERS=(('load_pre',before_data_reload),('undo_pre',before_data_reload),('redo_pre',before_data_reload),
-          ('load_post',after_data_reload),('undo_post',after_data_reload),('redo_post',after_data_reload))
+          ('load_post',after_data_reload),('undo_post',after_undo),('redo_post',after_undo))
 
 
 def install_handlers():
@@ -46,12 +58,13 @@ def install_handlers():
 
 
 def remove_handlers(everywhere=False):
-    'IA: Retira los handlers de esta versión; con everywhere también los de otras cargas del mismo paquete.'
-    for name,function in HANDLERS:
+    'IA: Retira los handlers de esta versión; con everywhere también cualquiera de este módulo de otras cargas, aunque cambie su nombre.'
+    for name in {name for name,_ in HANDLERS}:
         handlers=getattr(bpy.app.handlers,name)
+        mine={function for key,function in HANDLERS if key==name}
         for existing in list(handlers):
-            same_package=getattr(existing,'__module__','')==__name__ and getattr(existing,'__name__','')==function.__name__
-            if existing is function or (everywhere and same_package):
+            same_module=getattr(existing,'__module__','')==__name__
+            if existing in mine or (everywhere and same_module):
                 handlers.remove(existing)
 
 

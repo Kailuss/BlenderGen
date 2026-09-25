@@ -47,9 +47,9 @@ Severidad: **Alta** significa resultado incorrecto, riesgo de cierre de Blender 
 | C2 | Alta | Estado | ✅ Resuelto: referencias a ID en `runtime`, sin handlers de deshacer ni de carga | Blender (carga) + doc. Blender (deshacer) |
 | C3 | Media | Caché | ✅ Resuelto: la exportación reutilizaba geometría de vista previa | Blender |
 | C4 | Media | UI | ✅ Resuelto: operadores sin `poll` ni gestión de errores | Código |
-| C5 | Media | Deshacer | La geometría queda desfasada tras Ctrl+Z | Hipótesis |
-| C6 | Baja | Semillas | Clasificación y semillas dependen del nombre de objeto | Código |
-| C7 | Baja | Exportación | «Reducir caras coplanares» es un Decimate COLLAPSE | Código |
+| C5 | Media | Deshacer | ✅ Mitigado: la geometría queda desfasada tras Ctrl+Z | Hipótesis |
+| C6 | Baja | Semillas | ✅ Semillas resueltas: clasificación y semillas dependen del nombre de objeto | Código |
+| C7 | Baja | Exportación | ✅ Resuelto: «Reducir caras coplanares» es un Decimate COLLAPSE | Código |
 | C8 | Baja | Efectos | Unidades, materiales y RNA se reescriben en cada generación | Código |
 | C9 | Baja | Geometría | Recorte de X de todos los vértices a ±L/2 | No confirmado en Blender |
 | R1 | Alta | Rendimiento | Escalado cuadrático por `bpy.ops` en bucle | Blender |
@@ -191,12 +191,12 @@ Criterio de salida: los casos actuales conservan su digest. Los casos nuevos que
 |---|---|---|---|---|
 | 1.1 | ✅ Handlers `@persistent` en `load_pre`, `undo_pre` y `redo_pre` que vacíen `runtime.cache`, `pending` y `settings` sin tocar IDs. En `load_post` y `undo_post`, borrar los huérfanos `__RUIN_CACHE__*` buscándolos por nombre. A medio plazo: caché de datos puros (vértices, caras, materiales, propiedades) sin objetos Blender | C2 | S (+M) | Igual |
 | 1.2 | ✅ Operadores: `poll` (Modo Objeto y `ruin_settings` disponible), `try/except` que llame a `self.report({'ERROR'}, …)`, eliminación del sólido parcial y restauración de la visibilidad | C4 | S | Igual |
-| 1.3 | Clave estable `ob['ruin_key']`, asignada al crear con el mismo texto que el nombre actual, como semilla CRC; rol `ob['ruin_role']` para clasificar | C6 | M | Igual (mismos textos) |
+| 1.3 | ✅ Clave estable `ob['ruin_key']`, asignada al crear con el mismo texto que el nombre actual, como semilla CRC; rol `ob['ruin_role']` para clasificar | C6 | M | Igual (mismos textos) |
 | 1.4 | ✅ Para C3, medir dos opciones: (a) incluir `runtime.preview` en la firma; (b) biselar siempre el mortero. Elegir por tiempo y resultado | C3 | S | (a) igual; (b) cambia |
 | 1.4b | ✅ C10: revertir la rama si el booleano quita más del 25 % del volumen, y prueba que lo detecta | C10 | S | Cambió `door_windows_work` |
 | 1.5 | ✅ Grietas en el marco local del tramo (usando `wall_id` y el eje de `paredes_generadas`), decidiendo qué cara es la visible en cada pared | C1 | M | Cambia en L/U/habitación |
-| 1.6 | En `undo_post`, si `parametros_muro` no coincide con los ajustes actuales, programar una vista previa | C5 | S | Igual |
-| 1.7 | Renombrar el Decimate o corregirlo según la intención (COLLAPSE o DISSOLVE), midiendo caras y aspecto del STL | C7 | S | Solo el STL, si se corrige |
+| 1.6 | ✅ En `undo_post`, si `parametros_muro` no coincide con los ajustes actuales, programar una vista previa | C5 | S | Igual |
+| 1.7 | ✅ Renombrar el Decimate o corregirlo según la intención (COLLAPSE o DISSOLVE), midiendo caras y aspecto del STL | C7 | S | Solo el STL, si se corrige |
 
 ### Fase 2: rendimiento con paridad exacta
 
@@ -307,6 +307,11 @@ Pendiente:
   - Las piedras sin partida conservan exactamente la forma que tenían.
   - Los trazos terminan al tocar el borde de la cara, sin deslizarse sobre él.
   - Renders revisados y aceptados. `door_windows_work`: 142 206 → 142 044 caras.
+- **Fase 1 cerrada (1.3, 1.6 y 1.7), sin cambios de geometría.**
+  - **1.3:** `mesh_obj` guarda `ruin_key` con el nombre pedido, y `piece_key()` alimenta la semilla CRC de las grietas. Duplicar la colección ya no cambia las grietas de una nueva generación. La clasificación sigue por prefijo de nombre: los sufijos `.001` no la alteran, así que no hacen falta roles.
+  - **1.6:** `after_undo` (handlers `undo_post` y `redo_post`) compara `parametros_muro` con los ajustes actuales y, si difieren, reprograma la vista previa. Probado simulando el estado que deja un deshacer; el Ctrl+Z real con interfaz sigue pendiente.
+  - **1.7:** se mantiene COLLAPSE al 28 % y se corrige el nombre. Medido sobre el mismo remallado: COLLAPSE da 122 575 caras en 5,4 s con 0,037 mm de desviación máxima; DISSOLVE a 5° da 58 394 caras pero tarda 133 s.
+  - Además, la limpieza de handlers en recarga retira cualquier handler del módulo, aunque cambie su nombre.
 - [ ] C2 y C5 con deshacer: requieren Blender con interfaz (generar, pulsar Ctrl+Z, mover un deslizador).
 
 Cuando un hallazgo quede demostrado en Blender, anótalo en `docs/STATUS.md` como límite conocido o márcalo aquí como resuelto.

@@ -5,6 +5,7 @@ from .. import runtime
 from ..services import export
 from ..services import generation
 import bpy
+import json
 import time
 
 
@@ -30,10 +31,27 @@ def settings_changed(self, context):
     self.status = 'Cambios pendientes'
     if not self.live_preview:
         return
-    runtime.pending = self.id_data.name
+    schedule_refresh(self.id_data)
+
+
+def schedule_refresh(scene):
+    'IA: Programa una vista previa diferida de la escena, guardada por nombre; no genera geometría aquí.'
+    runtime.pending = scene.name
     runtime.deadline = time.monotonic()+.25
     if not bpy.app.timers.is_registered(refresh_timer):
         bpy.app.timers.register(refresh_timer, first_interval=.25)
+
+
+def stale_preview(scene):
+    'IA: True si la fuente generada no corresponde a los ajustes actuales, p. ej. tras Ctrl+Z; compara con parametros_muro.'
+    p=getattr(scene,'ruin_settings',None)
+    stored=scene.get('parametros_muro')
+    if p is None or not stored or not bpy.data.collections.get(config.COLLECTION):
+        return False
+    ignored={'export_quality','quick_edit'}
+    current=json.loads(json.dumps({k:getattr(p,k) for k in config.FIELDS if k not in ignored},ensure_ascii=False))
+    saved={k:v for k,v in json.loads(stored).items() if k not in ignored}
+    return saved!=current
 
 
 def refresh_timer():

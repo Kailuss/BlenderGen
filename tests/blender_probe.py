@@ -87,6 +87,26 @@ def session_checks(g, state, config, case):
         state.preview = True
     g.generate(bpy.context, p, quality)
     assert json.loads(bpy.context.scene['ruinas_metricas'])['cached'], 'la exportación expulsó la caché de vista previa'
+    # 1.3: la semilla usa ruin_key aunque Blender renombre la pieza por un nombre repetido.
+    from ruinas_panel.geometry import primitives
+    from ruinas_panel.ui import preview
+    coll = bpy.data.collections[config.COLLECTION]
+    mat = primitives.material('Temporal', (.5, .5, .5))
+    twins = [primitives.mesh_obj('Prueba · clave', [(0, 0, 0), (1, 0, 0), (0, 1, 0)], [(0, 1, 2)], coll, mat) for _ in range(2)]
+    assert twins[1].name != 'Prueba · clave' and primitives.piece_key(twins[1]) == 'Prueba · clave', twins[1].name
+    for ob in twins:
+        mesh = ob.data
+        bpy.data.objects.remove(ob, do_unlink=True)
+        bpy.data.meshes.remove(mesh)
+    # 1.6: si Ctrl+Z deja la geometría desfasada de los ajustes, el handler reprograma la vista previa.
+    g.generate(bpy.context, p, quality)
+    assert not preview.stale_preview(bpy.context.scene), 'recién generada no debería estar desfasada'
+    p.seed += 1  # Con busy no salta el callback, como tras deshacer.
+    assert preview.stale_preview(bpy.context.scene)
+    registration.after_undo()
+    assert state.pending == bpy.context.scene.name and bpy.app.timers.is_registered(preview.refresh_timer)
+    preview.cancel_pending()
+    p.seed -= 1
     # Operador: un error de validación llega como informe, no como traza, y no toca la escena.
     before = set(bpy.data.objects.keys())
     for key, value in {'build_type': 'FORTRESS', 'layout_mode': 'TWO', 'length': 60, 'door_enabled': True}.items():
