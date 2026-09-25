@@ -1,0 +1,60 @@
+# Ruinas v0.21 — proyecto modular para Blender
+
+El código activo está en `src/ruinas_panel/`. Los módulos separan geometría, estructura, generación/caché e interfaz. Cada función contiene un contrato breve `IA:`. Las versiones anteriores permanecen en `../outputs/`.
+
+## Usarlo en Blender
+
+**Uso normal:** instala `dist/ruinas_panel_v021.zip` desde Preferencias → Complementos → Instalar desde disco, actívalo y abre Vista 3D → N → Ruinas. Puedes abrir un .blend de v0.20: conserva los campos guardados. No ejecutes su antiguo `generador_muro.py`, porque volvería a registrar la versión anterior.
+
+**Desarrollo:** abre `tools/load_in_blender.py` como archivo en el editor de texto de Blender y pulsa Ejecutar script. Repite tras editar un módulo: limpia callbacks y caché, recarga el paquete y mantiene los parámetros guardados. No es necesario volver a empaquetar ni reiniciar Blender. Usa solo una copia del addon activa.
+
+El lanzador necesita la carpeta completa `ruinas`; los .py ya no funcionan aislados. No se concatenan módulos con `exec` ni se mantienen copias separadas de la lógica.
+
+## Comandos de desarrollo
+
+Desde esta carpeta, con Python 3.11 o posterior:
+
+```powershell
+python dev.py check
+python dev.py find grieta
+python dev.py find carve_rectangle
+python dev.py test --case basic_draft
+python dev.py test --case door_windows_work
+python dev.py test
+python dev.py test --update-expected
+python dev.py test --baseline ../outputs/muro_20/generador_muro.py
+python dev.py pack
+python dev.py pack --project
+```
+
+En este equipo Python no figura en PATH. Puedes usar:
+
+```powershell
+$ruinasPython = 'C:\Users\yhora\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
+& $ruinasPython dev.py check
+```
+
+`check` valida sintaxis, contratos y tres grupos de pruebas de cálculo puro, sin Blender. `find` consulta el AST sin cargar todas las fuentes en el chat. `test --case` limita el trabajo a un escenario; sin ese argumento ejecuta tres. `--blender <ruta>` permite elegir otra instalación. Los logs y resultados JSON se guardan en `reports/`.
+
+`test` exige que cada pieza generada cierre (sin aristas abiertas) y compara digests y caras degeneradas con `reports/expected.json`. Si la versión de Blender es otra, avisa y omite la comparación. `test --update-expected` acepta la geometría actual como nueva referencia: úsalo solo tras revisar render y cierre de un cambio de geometría intencionado.
+
+`test --baseline` compara vértices redondeados a 6 decimales, caras y nombres contra el monolito, con semilla de ruido de Blender controlada para la prueba. No compara renders píxel a píxel ni demuestra equivalencia de todas las combinaciones posibles. Cada escenario también se regenera desde caché y debe coincidir exactamente.
+
+`pack` crea solo el addon, con rutas portables y sin renders ni cachés. No ejecuta Blender: ejecuta la prueba relevante antes de distribuirlo.
+`pack --project` añade un segundo ZIP con el proyecto, documentación, habilidad y pruebas.
+
+## Agente especializado en este mismo chat
+
+Se entrega como habilidad **ruinas-dev**, con instrucciones de proyecto y herramientas deterministas. No es un modelo nuevo ni un proceso autónomo que trabaje sin instrucciones.
+
+Puedes escribir ahora:
+
+> Usa la habilidad `ruinas/agent/ruinas-dev/SKILL.md` y continúa con las grietas, manteniendo la densidad actual.
+
+Si está descubierta en el selector, basta con `$ruinas-dev` y la petición. La copia preparada está en `agent/ruinas-dev/`; para descubrimiento local se coloca esa carpeta bajo `.agents/skills/` del directorio de trabajo. No hace falta una API key ni otro chat. La guía raíz `AGENTS.md` dirige a los módulos aunque no se use el selector.
+
+La instalación de habilidades y la carga gradual de instrucciones están descritas en la [documentación oficial de habilidades](https://learn.chatgpt.com/docs/build-skills); la guía persistente usa [AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md).
+
+## Coste y límites
+
+Esta reorganización reduce búsquedas, contexto repetido y pasos manuales de edición. No garantiza un porcentaje de ahorro de tokens ni acelera por sí sola los operadores de Blender. `docs/ARCHITECTURE.md` permite localizar el cambio y `docs/STATUS.md` recoge limitaciones actuales. El aumento de resolución sigue siendo una decisión explícita; la prioridad es lowpoly.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Desarrollador de Ruinas"
+  short_description: "Edición modular y pruebas del generador Blender"
+  default_prompt: "Usa $ruinas-dev para continuar el generador de muros, consultando solo los módulos necesarios y comprobando el resultado."

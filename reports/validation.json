@@ -1,0 +1,50 @@
+{
+  "version": "0.21.0",
+  "baseline": "v0.20",
+  "blender": "5.2.2",
+  "geometry_parity_cases": [
+    "basic_draft",
+    "door_windows_work",
+    "room_beams_draft"
+  ],
+  "comparison": "vertices rounded to 6 decimals, face indices and object names; controlled mathutils noise seed 17",
+  "cache_repeat_exact": true,
+  "pure_test_groups": 3,
+  "documented_runtime_functions": 78,
+  "lifecycle": {
+    "hot_reload": true,
+    "timer_cancelled": true,
+    "blend_v20_properties_preserved": true,
+    "zip_registration": true,
+    "fused_solid_manifold": true,
+    "faces": 58792
+  },
+  "skill_validation": "Frontmatter fields, names and unfinished placeholders checked. Official validator unavailable because bundled Python lacks PyYAML.",
+  "source_sha256": {
+    "src\\ruinas_panel\\config.py": "21f6064106fd8d16452858c5f30450de8cdab1ffd5986ffad42d087c7523d94f",
+    "src\\ruinas_panel\\registration.py": "65a1787000c7eba67e06d9cd85881390a4b06f412cbc00aa357b9974a23ab777",
+    "src\\ruinas_panel\\runtime.py": "847d2e4e93bdf2b7e61feda0441a8e28af665dfeaf78047c760050a0d44abba2",
+    "src\\ruinas_panel\\__init__.py": "81fa2cc846457aea638b12ac9c2607634329dedb2223aef21730776e2efffa72",
+    "src\\ruinas_panel\\geometry\\fracture.py": "63dcb5ae9bd9028e63363d721445fad0ba890e89fcea5acd5cef498a4cb60ba6",
+    "src\\ruinas_panel\\geometry\\primitives.py": "49c5420dbbb4cf5d0deb62e63ec73199c3d241cce04f7f0540e03547ea822ab4",
+    "src\\ruinas_panel\\geometry\\rubble.py": "b9cbc9f7ef6dcaa6f127dfaa22062329b4112f7be028f2a150be3874378d2b37",
+    "src\\ruinas_panel\\geometry\\terrain.py": "719537e25378456cb1d397a8998d90ee4086406619049c8d105ee09bc1c1f16e",
+    "src\\ruinas_panel\\geometry\\timber.py": "a455c553adeeb0b6fec64a72cec939e56467eb2b27adbf6fd7876399657e6b0d",
+    "src\\ruinas_panel\\geometry\\weather.py": "c0f42f8980f7a30ee57beed7eb23eaf33cba3ba04afc00e0e9f100d52baa485e",
+    "src\\ruinas_panel\\geometry\\__init__.py": "5d6bbb439a20cad71e5d410cfc4d30708c7b153cd5485f870835e467c91f4443",
+    "src\\ruinas_panel\\services\\cache.py": "f7b12026d7b50ff37a2f1c44d0cbcba35e1a0b11c3583ef59e281bb20468395b",
+    "src\\ruinas_panel\\services\\export.py": "6fb51425353a4def2dc3aa9eb5c47beec7cd1aebadc0a1c90cbb65362c1bec2b",
+    "src\\ruinas_panel\\services\\generation.py": "d9033245dcc325be322640da4eafc29d9a78216b8dee53f7fd0ccf8f5425e0c9",
+    "src\\ruinas_panel\\services\\profiling.py": "448317d19b45f288b79aca5ef5fcae1981910f9afc9cc6cbd18d82c282476101",
+    "src\\ruinas_panel\\services\\__init__.py": "f62c14880958c6f72c3ab6dc4962b5912d1373e381ae040aa859081f9104d290",
+    "src\\ruinas_panel\\structure\\layout.py": "4a3a9871b5ea53d732975cb916eafe868df3a1d95446a72c0d69f7a2d6f062ff",
+    "src\\ruinas_panel\\structure\\openings.py": "82bbb30c2d8e8fbf05a7361ad95229d2ed0ced158a2ab6cff68e47b75a990312",
+    "src\\ruinas_panel\\structure\\walls.py": "4c99c48b1b20bfafc5b682e9ea6f490075cbe27662f6899d6f3aa79545d67fd4",
+    "src\\ruinas_panel\\structure\\__init__.py": "988b1701a548738bab0d8f8da3853a83531109e05126e49b08805640b16b8af3",
+    "src\\ruinas_panel\\ui\\operators.py": "7f3f349e402076fd4c74c04dc054f90573e36e17308ebdb65ff6454c2c9156cc",
+    "src\\ruinas_panel\\ui\\panel.py": "be88eb190dd1a83be6f6dfefbb8ad244c4d3e983880961710a49acc107fe2d63",
+    "src\\ruinas_panel\\ui\\preview.py": "614cd9090f5b2937cf1651021ed29508cc6c71859b00c80654e71bc0f4a3deb7",
+    "src\\ruinas_panel\\ui\\settings.py": "8f464913a125a2772522b40ad2261e31944d9209625e4fd3a0896f7e8f5d5bf0",
+    "src\\ruinas_panel\\ui\\__init__.py": "a251518d4e5d8c009947d4c4adeaba74a7b36c330c2686ffc49f30a2260556e4"
+  }
+}

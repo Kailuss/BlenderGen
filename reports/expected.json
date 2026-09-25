@@ -1,0 +1,22 @@
+{
+  "blender": "5.2.2 LTS",
+  "cases": {
+    "basic_draft": {
+      "digest": "6aa6247de31e1d701a909d95a42eb6129435d97190ab596a9efed94b6bcc8b3f",
+      "faces": 17175,
+      "degenerate_faces": []
+    },
+    "door_windows_work": {
+      "digest": "c0ac7fb2cc3f1916ad90158dec9f42c4353a2c6fcac89d38ca93c00365dc6f94",
+      "faces": 141116,
+      "degenerate_faces": [
+        "Piedra caída · fractura 3551.1"
+      ]
+    },
+    "room_beams_draft": {
+      "digest": "4c151ca7df4d7e20dc2b0882de46cb6e7d58deccc714bd7c54eb1da8ff3ebd25",
+      "faces": 58243,
+      "degenerate_faces": []
+    }
+  }
+}

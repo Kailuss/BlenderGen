@@ -1,0 +1,9 @@
+# Texto en LF dentro del repositorio; en checkout se usa el final de línea nativo.
+* text=auto
+*.py text
+*.md text
+*.json text
+*.yaml text
+*.zip binary
+*.blend binary
+*.png binary
