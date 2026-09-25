@@ -179,13 +179,12 @@ def crack_stone(ob, amount, seed, coll, mat, frame=None, split=False):
         bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces))
         bm.to_mesh(cut.data)
         bm.free()
-        bpy.context.view_layer.objects.active=ob
         backup=ob.data.copy()
         mod=ob.modifiers.new('Rama de grieta','BOOLEAN')
         mod.operation='DIFFERENCE'
         mod.solver=config.CRACK_SOLVER
         mod.object=cut
-        bpy.ops.object.modifier_apply(modifier=mod.name)
+        primitives.apply_modifier(ob,mod,cut)
         after=primitives.mesh_volume(ob.data) if ob.data.vertices else 0
         # El booleano EXACT puede devolver solo un fragmento: se descarta esa rama.
         if after<volume*(1-config.CRACK_MAX_VOLUME_LOSS):

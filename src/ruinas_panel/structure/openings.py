@@ -61,12 +61,11 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
         bm.to_mesh(ob.data)
         bm.free()
         ob.data.update()
-        bpy.context.view_layer.objects.active=ob
         mod=ob.modifiers.new('Hueco arquitectónico','BOOLEAN')
         mod.operation='DIFFERENCE'
         mod.solver='EXACT'
         mod.object=cutter
-        bpy.ops.object.modifier_apply(modifier=mod.name)
+        primitives.apply_modifier(ob,mod,cutter)
         if not ob.data.vertices:
             mesh=ob.data
             bpy.data.objects.remove(ob,do_unlink=True)

@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Base: v0.20, convertida a paquete modular v0.21. El usuario prioriza modelos lowpoly, mampostería coherente y edición fácil.
+Base: v0.20, convertida a paquete modular v0.21. El usuario prioriza modelos lowpoly, mampostería coherente y edición fácil. Actualización (2026-09-25): el destino es la impresión en resina, así que se prioriza el detalle imprimible y se aceptan cambios de geometría revisados.
 
 Ya existe: perfiles Tabique/Pared/Muralla; ruina baja/una/dos plantas; Ninguna/L/U/Habitación; ventanas por pared con apoyo; puerta de madera con picaporte; vigas alojadas; derrumbes escalonados; daño de agujeros, grietas ramificadas; tierra/grava y escombros asentados.
 
@@ -14,6 +14,6 @@ Límites demostrados en Blender 5.2.2 (2026-09-25; detalle en `docs/AUDIT.md`), 
 - Una grieta puede dejar una piedra reducida a una esquirla (`door_windows_work`, `hilada 06.05`). Resuelto después: se revierte la rama si el booleano quita más del 25 % del volumen.
 - «Preparar sólido» reutiliza la geometría de vista previa si ambas calidades coinciden. Resuelto después: la caché se separa por modo; la primera exportación tras una vista previa reconstruye (+40–80 % de tiempo).
 - La primera generación tras cargar otro archivo falla con `ReferenceError`. Resuelto después: handlers de carga y deshacer sueltan las referencias.
-- El coste de cada bisel crece de forma lineal con el número de objetos (2 ms → 47 ms), así que el total es cuadrático.
+- El coste de cada bisel crece de forma lineal con el número de objetos (2 ms → 47 ms), así que el total es cuadrático. Resuelto después: los modificadores se aplican en una escena de taller (habitación en Borrador: 74 s → 7 s, misma geometría).
 
 Las pruebas de migración están en `reports/`; los resultados históricos de cierre de malla v20 están en `../outputs/muro_20`. Para cambios posteriores de geometría debe renovarse la validación correspondiente.

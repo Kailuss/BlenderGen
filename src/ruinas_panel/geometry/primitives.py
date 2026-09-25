@@ -33,18 +33,49 @@ def piece_key(obj):
     return obj.get('ruin_key', obj.name)
 
 
+def stage_scene():
+    'IA: Escena de taller para aplicar modificadores pieza a pieza; se busca por nombre y se crea si falta.'
+    stage = bpy.data.scenes.get(config.STAGE_SCENE)
+    if stage is None:
+        stage = bpy.data.scenes.new(config.STAGE_SCENE)
+    return stage
+
+
+def drop_stage():
+    'IA: Borra la escena de taller al terminar una generación; sus piezas solo estaban enlazadas de paso.'
+    stage = bpy.data.scenes.get(config.STAGE_SCENE)
+    if stage is not None:
+        bpy.data.scenes.remove(stage)
+
+
+def apply_modifier(obj, mod, *operands):
+    'IA: Aplica mod con solo obj y sus operandos en la escena de taller: coste por llamada constante; mismo resultado que en la escena principal.'
+    if not config.ISOLATE_MODIFIERS:
+        bpy.context.view_layer.objects.active = obj
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+        return
+    stage = stage_scene()
+    pieces = [obj, *operands]
+    for piece in pieces:
+        stage.collection.objects.link(piece)
+    try:
+        with bpy.context.temp_override(scene=stage, view_layer=stage.view_layers[0], object=obj,
+                                       active_object=obj, selected_objects=[obj]):
+            bpy.ops.object.modifier_apply(modifier=mod.name)
+    finally:
+        for piece in pieces:
+            stage.collection.objects.unlink(piece)
+
+
 @profiling.timed("biseles")
 def bevel(obj, width):
     'IA: Aplica bisel según calidad; respeta la exclusión de mortero en previsualización.'
     if runtime.preview and not (obj.name.startswith(('Piedra','Esquirla')) or '· sillar' in obj.name):
         return
-    bpy.context.view_layer.objects.active = obj
-    obj.select_set(True)
     mod = obj.modifiers.new('Aristas modeladas', 'BEVEL')
     mod.width = width
     mod.segments = config.QUALITY[runtime.quality][2]
-    bpy.ops.object.modifier_apply(modifier=mod.name)
-    obj.select_set(False)
+    apply_modifier(obj, mod)
 
 
 def block(name, x0, x1, y0, y1, z0, z1, coll, mat, rng=None, wear=0):
@@ -64,11 +95,10 @@ def relief(obj, strength, seed):
     'IA: Relieve auxiliar solo fuera de preview; cualquier aumento de subdivisión debe medirse.'
     if runtime.preview:
         return
-    bpy.context.view_layer.objects.active=obj
     mod=obj.modifiers.new('Relieve físico', 'SUBSURF')
     mod.subdivision_type='SIMPLE'
     mod.levels=2
-    bpy.ops.object.modifier_apply(modifier=mod.name)
+    apply_modifier(obj, mod)
     obj.data.update()
     for v in obj.data.vertices:
         q=v.co

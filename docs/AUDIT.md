@@ -52,7 +52,7 @@ Severidad: **Alta** significa resultado incorrecto, riesgo de cierre de Blender 
 | C7 | Baja | Exportación | ✅ Resuelto: «Reducir caras coplanares» es un Decimate COLLAPSE | Código |
 | C8 | Baja | Efectos | Unidades, materiales y RNA se reescriben en cada generación | Código |
 | C9 | Baja | Geometría | Recorte de X de todos los vértices a ±L/2 | No confirmado en Blender |
-| R1 | Alta | Rendimiento | Escalado cuadrático por `bpy.ops` en bucle | Blender |
+| R1 | Alta | Rendimiento | ✅ Resuelto: escalado cuadrático por `bpy.ops` en bucle | Blender |
 | R2 | Media | Rendimiento | Mejorado: hasta ~9 booleanos EXACT por piedra en grietas; ahora Manifold y como mucho una rama por grieta | Código + datos |
 | R3 | Media | Densidad | ~1 000 caras por piedra en Trabajo; densidad fija por calidad | Datos |
 | R4 | Baja | Rendimiento | Bucles Python por vértice | Código |
@@ -202,8 +202,8 @@ Criterio de salida: los casos actuales conservan su digest. Los casos nuevos que
 
 | # | Propuesta | Resuelve | Esf. |
 |---|---|---|---|
-| 2.1 | Contar llamadas a `bpy.ops` y medir ms por llamada según el número de objetos (ampliando `profiling.timed`) | R1 | S |
-| 2.2 | Experimento de «escena de trabajo»: aplicar bisel, subdivisión, suavizado y booleanos de cada pieza en una escena temporal que solo contiene esa pieza y su cortador, y enlazarla después a la colección. Con los mismos modificadores, los digests deberían ser idénticos. Objetivo: coste por llamada constante | R1, R2 | M |
+| 2.1 | ✅ Contar llamadas a `bpy.ops` y medir ms por llamada según el número de objetos (ampliando `profiling.timed`) | R1 | S |
+| 2.2 | ✅ Experimento de «escena de trabajo»: aplicar bisel, subdivisión, suavizado y booleanos de cada pieza en una escena temporal que solo contiene esa pieza y su cortador, y enlazarla después a la colección. Con los mismos modificadores, los digests deberían ser idénticos. Objetivo: coste por llamada constante | R1, R2 | M |
 | 2.3 | `carve_rectangle`: caja envolvente con `foreach_get` y numpy, con la misma lógica de inclusión | R4 | S |
 | 2.4 | Vectorizar las transformaciones de 90° y el recorte de X; usar `shade_smooth()` | R4 | S |
 | 2.5 | Componentes conexos de `make_solid` y `crack_stone` con numpy (union-find) | R4 | S |
@@ -289,7 +289,17 @@ Criterio: digests idénticos y tiempos medidos en los mismos casos. Si 2.2 no co
 |---|---|---|---|---|---|---|
 | ms por llamada | 2,2 | 9,8 | 17,7 | 28,1 | 41,9 | 46,7 |
 
-El coste por llamada crece de forma lineal, así que el total es cuadrático. Queda pendiente confirmar que la causa es la reconstrucción del depsgraph; la propuesta 2.2 lo comprueba.
+El coste por llamada crece de forma lineal, así que el total es cuadrático. La causa queda confirmada con la propuesta 2.2: cada operador trabajaba sobre toda la escena principal.
+- **R1 resuelto (2.2, escena de taller).** `primitives.apply_modifier` aplica cada modificador de pieza (bisel, subdivisión, suavizado y booleanos de grietas y huecos) en la escena `RUINAS · taller`, que solo contiene la pieza y su cortador. La escena se busca por nombre y `generation.generate` la borra al terminar, aunque falle. Los digests son idénticos en los tres casos y la geometría no cambia. Se desactiva con `config.ISOLATE_MODIFIERS`.
+
+| Caso | Sin taller | Con taller | Mejora |
+|---|---|---|---|
+| basic_draft | 3,4 s | 1,4 s | ×2,4 |
+| door_windows_work (dos muestras alternas) | 13,0 s | 7,3 s | ×1,8 |
+| room_beams_draft | 74,3 s | 6,8 s | ×11 |
+| Vista previa real con interfaz (habitación, Borrador) | 72,9 s | 6,9 s | ×10,6 |
+
+  La prueba con interfaz recorrió el camino real: callback, temporizador y generación. Hubo que arrancar Blender con `--gpu-backend vulkan`, porque desde la consola de desarrollo el driver OpenGL de NVIDIA se cierra al abrir la ventana, incluso sin el complemento. `blender_probe` comprueba que la escena de taller no queda tras generar ni tras un fallo.
 
 Pendiente:
 

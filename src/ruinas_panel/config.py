@@ -9,6 +9,12 @@ COLLECTION = 'MURO · fuente procedural'
 SOLID_NAME = 'MURO · sólido exportable'
 
 
+# Aplicar modificadores en una escena de taller que solo contiene la pieza: el coste de cada
+# operador deja de crecer con el número de objetos de la escena principal.
+ISOLATE_MODIFIERS = True
+STAGE_SCENE = 'RUINAS · taller'
+
+
 CACHE_PREFIX = '__RUIN_CACHE__'
 
 

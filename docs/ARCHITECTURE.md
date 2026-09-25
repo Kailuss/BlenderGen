@@ -9,7 +9,7 @@ La versión 0.21 reorganiza v0.20. La geometría conserva sus algoritmos; el cam
 | Aparejo, alturas, planificación de puerta | `structure/layout.py` | Cálculo de intervalos y cotas sin crear mallas |
 | Fachada, pilares, paredes contiguas | `structure/walls.py` | Orquesta piezas; asigna wall_id |
 | Ventanas, alojamientos y vigas | `structure/openings.py` | Recorta antes de añadir carpintería; exige apoyos |
-| Cajas, bisel, material, recorte plano | `geometry/primitives.py` | Mallas cerradas y coordenadas en mm |
+| Cajas, bisel, material, recorte plano, aplicación de modificadores | `geometry/primitives.py` | Mallas cerradas en mm; modificadores de pieza solo con `apply_modifier` (escena de taller) |
 | Desgaste | `geometry/weather.py` | Erosión hacia dentro y densidad por calidad |
 | Grietas y roturas | `geometry/fracture.py` | Semillas locales, grietas desde aristas, sin islas grandes |
 | Tierra, peana, grava, asentamiento | `geometry/terrain.py` | Superficie física compartida con los escombros |

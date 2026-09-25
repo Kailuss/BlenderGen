@@ -2,6 +2,7 @@
 
 from .. import config
 from .. import runtime
+from ..geometry import primitives
 from ..services import profiling
 from mathutils import Vector
 from mathutils import noise
@@ -15,14 +16,13 @@ def weather_stone(obj, amount, seed):
     'IA: Aplica desgaste hacia dentro sin cambiar las hiladas; usa la calidad activa y la semilla local.'
     if amount<=0:
         return
-    bpy.context.view_layer.objects.active=obj
     # Misma geometría de desgaste al editar y al preparar el sólido.
     # La densidad depende de milímetros, no de un número fijo por ladrillo.
     # Malla ligera desde el principio, sin crear alta resolución para reducirla después.
     mod=obj.modifiers.new('Superficie de trabajo lowpoly','SUBSURF')
     mod.subdivision_type='SIMPLE'
     mod.levels=1 if obj.name.startswith('Esquirla') else config.QUALITY[runtime.quality][0]
-    bpy.ops.object.modifier_apply(modifier=mod.name)
+    primitives.apply_modifier(obj,mod)
     obj['vertices_desgaste_actuales']=len(obj.data.vertices)
     obj.data.update()
     coords=[v.co.copy() for v in obj.data.vertices]
@@ -54,7 +54,7 @@ def weather_stone(obj, amount, seed):
     mod.factor=.35
     mod.iterations=1
     mod.vertex_group=smooth_group.name
-    bpy.ops.object.modifier_apply(modifier=mod.name)
+    primitives.apply_modifier(obj,mod)
     for face in obj.data.polygons:
         face.use_smooth=True
     obj.data.update()

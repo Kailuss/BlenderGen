@@ -57,6 +57,7 @@ def session_checks(g, state, config, case):
     """IA: comprueba carga de archivo con caché llena, handlers de undo y fallo controlado del operador de sólido."""
     from ruinas_panel import registration
     _, changes, quality = case
+    assert config.STAGE_SCENE not in bpy.data.scenes, 'la escena de taller debe borrarse tras generar'
     assert state.cache, 'la caché debería contener plantillas antes de cargar otro archivo'
     bpy.ops.wm.read_factory_settings(use_empty=True)
     assert not state.cache, ('cache_tras_carga', list(state.cache))
@@ -117,6 +118,7 @@ def session_checks(g, state, config, case):
     except RuntimeError as exc:
         assert 'No cabe la puerta' in str(exc), exc
     assert set(bpy.data.objects.keys()) == before, 'la validación fallida cambió la escena'
+    assert config.STAGE_SCENE not in bpy.data.scenes, 'la escena de taller debe borrarse aunque la generación falle'
     # Fusión: un fragmento suelto aborta y se borran copias y sólido parcial.
     from ruinas_panel.geometry import primitives
     from ruinas_panel.services import export

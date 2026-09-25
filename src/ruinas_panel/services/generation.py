@@ -3,6 +3,7 @@
 from .. import config
 from .. import runtime
 from ..geometry import fracture
+from ..geometry import primitives
 from ..services import cache
 from ..structure import layout
 from ..structure import walls
@@ -21,6 +22,14 @@ def metrics(context,coll,timings,cached,solid=None):
 
 def generate(context,p,quality=None):
     'IA: Entrada principal; valida, prepara o restaura caché, aplica daño y actualiza métricas.'
+    try:
+        return build(context,p,quality)
+    finally:
+        primitives.drop_stage()
+
+
+def build(context,p,quality):
+    'IA: Cuerpo de generate; la escena de taller que usa apply_modifier se borra en generate aunque esto falle.'
     runtime.quality=quality or (p.preview_quality if runtime.preview else p.export_quality)
     runtime.settings=p
     runtime.timings={}
