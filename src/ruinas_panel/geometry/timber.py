@@ -1,10 +1,10 @@
 """geometry /timber — ver docs/ARCHITECTURE.md para contratos y dependencias."""
 
+from .. import meta
 from .. import runtime
 from ..geometry import primitives
 from mathutils import Vector
 import bpy
-import json
 import math
 import random
 
@@ -140,7 +140,7 @@ def wooden_door(coll,p,door):
     bm.free()
     door['leaf']=True
     door['planks']=count
-    bpy.context.scene['puerta_generada']=json.dumps(door)
+    meta.put(bpy.context.scene,'puerta_generada',door)
 
 
 def wooden_frame(coll,p,door):
@@ -158,4 +158,4 @@ def wooden_frame(coll,p,door):
     door['clear_left']=door['left']+w-.4
     door['clear_right']=door['right']-w+.4
     door['clear_top']=door['top']-2.7
-    bpy.context.scene['puerta_generada']=json.dumps(door)
+    meta.put(bpy.context.scene,'puerta_generada',door)

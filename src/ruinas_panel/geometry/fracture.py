@@ -1,5 +1,6 @@
 """geometry /fracture — ver docs/ARCHITECTURE.md para contratos y dependencias."""
 
+from .. import meta
 from .. import config
 from .. import runtime
 from ..geometry import primitives
@@ -478,13 +479,13 @@ def apply_damage(coll,p):
     if runtime.quality=='DRAFT' or p.cracks<=0:
         return
     stone=primitives.material('Piedra · neutro',(.52,.52,.52))
-    walls={w['id']:w for w in json.loads(bpy.context.scene.get('paredes_generadas','[]'))}
+    walls={w['id']:w for w in meta.get(bpy.context.scene,'paredes_generadas',[])}
     center=Vector((0,p.building_depth/2,0))
     scene=bpy.context.scene
-    door=json.loads(scene.get('puerta_generada','null'))
+    door=meta.get(scene,'puerta_generada')
     openings=[('front',door['left'],door['right'],0,door['top'])] if door else []
-    openings+=[(w['wall'],w['x0'],w['x1'],w['z0'],w['z1']) for w in json.loads(scene.get('ventanas_generadas','[]'))]
-    openings+=[('front',h['x0'],h['x1'],h['z0'],h['z1']) for h in json.loads(scene.get('huecos_generados','[]'))]
+    openings+=[(w['wall'],w['x0'],w['x1'],w['z0'],w['z1']) for w in meta.get(scene,'ventanas_generadas',[])]
+    openings+=[('front',h['x0'],h['x1'],h['z0'],h['z1']) for h in meta.get(scene,'huecos_generados',[])]
     tuning=config.CRACK_STRESS
     for ob in list(coll.objects):
         if not ob.name.startswith(('Piedra','Pilar')) or ob.get('connection_face'):

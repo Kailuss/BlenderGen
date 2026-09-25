@@ -1,5 +1,6 @@
 """structure /walls — ver docs/ARCHITECTURE.md para contratos y dependencias."""
 
+from .. import meta
 from .. import config
 from ..geometry import fracture
 from ..geometry import primitives
@@ -10,7 +11,6 @@ from ..geometry import weather
 from ..structure import layout
 from ..structure import openings
 import bpy
-import json
 import math
 import random
 
@@ -90,8 +90,8 @@ def build_returns(coll,p,centers,edges):
         left,right=sorted(corners)
         gap=layout.corner_width(p)/2+.25
         walls.append(segment_wall(coll,p,'back',left+gap,right-gap,(0,depth),(1,0),p.height,edges))
-    bpy.context.scene['giros_generados']=json.dumps(walls[1:])
-    bpy.context.scene['paredes_generadas']=json.dumps(walls)
+    meta.put(bpy.context.scene,'giros_generados',walls[1:])
+    meta.put(bpy.context.scene,'paredes_generadas',walls)
     return walls
 
 
@@ -105,9 +105,6 @@ def _build_wall(context, p):
         bpy.data.collections.remove(old)
     coll = bpy.data.collections.new(config.COLLECTION)
     context.scene.collection.children.link(coll)
-    context.scene.unit_settings.system = 'METRIC'
-    context.scene.unit_settings.scale_length = .001
-    context.scene.unit_settings.length_unit = 'MILLIMETERS'
     stone = primitives.material('Piedra · neutro', (.52,.52,.52))
     mortar = primitives.material('Núcleo · neutro', (.44,.44,.44))
     L,H,T = p.length,p.height,p.thickness
@@ -117,7 +114,7 @@ def _build_wall(context, p):
     detail = random.Random(p.seed+91073)
     z_edges,rh=layout.course_layout(p)
     rows=len(z_edges)-1
-    context.scene["hiladas_generadas"]=json.dumps(z_edges)
+    meta.put(context.scene,'hiladas_generadas',z_edges)
     # Referencias físicas de los extremos. El límite general y las hiladas mandan.
     left=min(H,p.left_height)
     right=min(H,p.right_height)
@@ -211,7 +208,7 @@ def _build_wall(context, p):
     if door:
         courses=layout.trim_door_courses(courses,door,z_edges)
     courses=[layout.merge_thin_stones(line,max(3.2,(z_edges[r+1]-z_edges[r])*.65)) for r,line in enumerate(courses)]
-    context.scene['puerta_generada']=json.dumps(door)
+    meta.put(context.scene,'puerta_generada',door)
     # Huecos pasantes definidos por piedras omitidas: sin cavidades de resina ni tapones de mortero.
     cells=[(r,k,a,b) for r,line in enumerate(courses) for k,(a,b) in enumerate(line)]
     candidates=[((a+b)/2,(z_edges[r]+z_edges[r+1])/2) for r,k,a,b in cells if r>=1]
@@ -264,8 +261,8 @@ def _build_wall(context, p):
             r,k=min(h['removed_cells'])
             a,b=courses[r][k]
             fracture.hole_fragment(coll,stone,mortar,a,b,z_edges[r]+.2,z_edges[r+1]-.25,T,p.projection,p.hole_damage,p.seed+8521+hindex,p.wear)
-    context.scene['huecos_generados']=json.dumps(holes)
-    context.scene['huecos_solicitados']=p.hole_count
+    meta.put(context.scene,'huecos_generados',holes)
+    meta.put(context.scene,'huecos_solicitados',p.hole_count)
     build_base_and_lintel(coll,stone,p,door,rh)
     audit=[]
     mortar_audit=[]
@@ -318,8 +315,8 @@ def _build_wall(context, p):
                 weather.weather_stone(ob,p.wear,p.seed+row*701+index)
             fracture.opening_damage(ob,core,holes,bx0,bx1,z0,z1,p.hole_damage,p.seed+row*811+index)
             audit.append({'row':row,'x0':x,'x1':end,'z0':z0,'z1':z1,'fractured':fractured})
-    context.scene['aparejo_escalonado']=json.dumps(audit)
-    context.scene['mortero_retranqueado']=json.dumps(mortar_audit)
+    meta.put(context.scene,'aparejo_escalonado',audit)
+    meta.put(context.scene,'mortero_retranqueado',mortar_audit)
     # Pilares trabados: posiciones estratificadas con variación recuperable por semilla.
     for i,pier in enumerate(centers):
         cx= pier['x_mm']
@@ -342,7 +339,7 @@ def _build_wall(context, p):
                 weather.weather_stone(ob,p.wear,p.seed+i*19+j)
             else:
                 ob['connection_face']=True
-    context.scene['pilares_generados']=json.dumps(centers)
+    meta.put(context.scene,'pilares_generados',centers)
     rubble.build_rubble(coll,stone,mortar,p,door,rh)
     timber.wooden_frame(coll,p,door)
     timber.wooden_door(coll,p,door)
@@ -353,7 +350,6 @@ def _build_wall(context, p):
     terrain.pier_ground(coll,p,centers)
     walls=build_returns(coll,p,centers,z_edges)
     openings.architectural_openings(coll,p,walls,door,z_edges)
-    context.scene['parametros_muro'] = json.dumps({k:getattr(p,k) for k in config.FIELDS},ensure_ascii=False)
     return coll
 
 

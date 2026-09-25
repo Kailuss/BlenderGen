@@ -84,15 +84,22 @@ FIELDS=('build_type','height_type','layout_mode','building_depth','extra_side','
 TURN_ITEMS=[('NONE','Recto','Sin tramo perpendicular'),('LEFT','Giro izq.','Giro de 90 grados a la izquierda mirando hacia ese extremo'),('RIGHT','Giro der.','Giro de 90 grados a la derecha mirando hacia ese extremo')]
 
 
+# Subpaneles de la barra lateral, en orden. toggle: casilla en la cabecera que activa el bloque;
+# closed: empieza plegado. El botón de restablecer vuelve a los valores por defecto de fields (no del toggle).
 SECTIONS=(
- ('Construcción',('build_type','height_type','length')),
- ('Distribución',('layout_mode','building_depth','extra_side')),
- ('Aberturas',('door_enabled','door_leaf','windows_enabled','windows_per_wall')),
- ('Plantas',('floor_beams',)),
- ('Acabado',('collapse','wear','cracks','rubble_amount','ground_roughness')),
- ('Calidad',('preview_quality','export_quality','quick_edit')),
- ('Aparejo avanzado',('stone_variation','bond_subdivisions','alternate_height','randomness')),
- ('Grietas avanzadas',('cracks_per_stone','crack_length_var','crack_width_var','crack_angle_var','crack_path_var')),
- ('Derrumbe avanzado',('break_position','hole_count','hole_size','hole_damage')),
- ('Pilares avanzados',('pillar_count','connection_enabled','connection_side')),
- ('Puerta avanzada',('door_position','door_width','door_height','wood_frame','wood_grain')))
+ {'id':'build','title':'Construcción','fields':('build_type','height_type','length','floor_beams'),'closed':False},
+ {'id':'layout','title':'Distribución','fields':('layout_mode','building_depth','extra_side'),'closed':False},
+ {'id':'finish','title':'Acabado','fields':('collapse','wear','cracks','rubble_amount','ground_roughness'),'closed':False},
+ {'id':'door','title':'Puerta','toggle':'door_enabled','fields':('door_leaf','door_position','door_width','door_height','wood_frame','wood_grain'),'closed':True},
+ {'id':'windows','title':'Ventanas','toggle':'windows_enabled','fields':('windows_per_wall',),'closed':True},
+ {'id':'quality','title':'Calidad','fields':('preview_quality','export_quality','quick_edit'),'closed':True},
+ {'id':'bond','title':'Aparejo','fields':('stone_variation','bond_subdivisions','alternate_height','randomness'),'closed':True},
+ {'id':'cracks','title':'Grietas','fields':('cracks_per_stone','crack_length_var','crack_width_var','crack_angle_var','crack_path_var'),'closed':True},
+ {'id':'collapse','title':'Derrumbe y agujeros','fields':('break_position','hole_count','hole_size','hole_damage'),'closed':True},
+ {'id':'pillars','title':'Pilares','fields':('pillar_count','connection_enabled','connection_side'),'closed':True})
+
+
+# Enums de 2-3 opciones que definen un modo: botones en fila. FULL_WIDTH: sin etiqueta y a todo lo
+# ancho, porque cada botón se explica solo y con etiqueta no caben en la barra lateral.
+EXPANDED_ENUMS=('extra_side',)
+FULL_WIDTH_ENUMS=('build_type','height_type')

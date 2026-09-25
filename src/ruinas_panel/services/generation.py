@@ -1,5 +1,6 @@
 """services /generation — ver docs/ARCHITECTURE.md para contratos y dependencias."""
 
+from .. import meta
 from .. import config
 from .. import runtime
 from ..geometry import fracture
@@ -7,7 +8,6 @@ from ..geometry import primitives
 from ..services import cache
 from ..structure import layout
 from ..structure import walls
-import json
 import time
 
 
@@ -17,15 +17,25 @@ def metrics(context,coll,timings,cached,solid=None):
     data={'quality':runtime.quality,'faces':sum(len(o.data.polygons) for o in objects),
           'vertices':sum(len(o.data.vertices) for o in objects),
           'seconds':timings.get('total',0),'stages':dict(timings),'cached':cached,'solid':solid is not None}
-    context.scene['ruinas_metricas']=json.dumps(data)
+    meta.put(context.scene,'ruinas_metricas',data)
 
 
-def generate(context,p,quality=None):
+def generate(context,p,quality=None,units=True):
     'IA: Entrada principal; valida, prepara o restaura caché, aplica daño y actualiza métricas.'
     try:
+        meta.drop_legacy(context.scene)
+        if units:
+            set_units(context.scene)
         return build(context,p,quality)
     finally:
         primitives.drop_stage()
+
+
+def set_units(scene):
+    'IA: Escena en milímetros (escala 0,001) para leer las medidas en mm; solo cambia la presentación, no la geometría.'
+    scene.unit_settings.system='METRIC'
+    scene.unit_settings.scale_length=.001
+    scene.unit_settings.length_unit='MILLIMETERS'
 
 
 def build(context,p,quality):
@@ -48,5 +58,5 @@ def build(context,p,quality):
     fracture.apply_damage(coll,p)
     runtime.timings['total']=time.perf_counter()-start
     metrics(context,coll,runtime.timings,cached)
-    context.scene['parametros_muro']=json.dumps({k:getattr(p,k) for k in config.FIELDS},ensure_ascii=False)
+    meta.put(context.scene,'parametros_muro',{k:getattr(p,k) for k in config.FIELDS})
     return coll

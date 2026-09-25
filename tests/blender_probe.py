@@ -24,6 +24,21 @@ def digest(coll):
     return hashlib.sha256(json.dumps(result, separators=(',', ':')).encode()).hexdigest()
 
 
+def stored(name, default=None):
+    """IA: dato de auditoría de la escena: grupo 'ruinas' (v0.21) o propiedad suelta (monolito v20)."""
+    scene = bpy.context.scene
+    group = scene.get('ruinas')
+    text = group.get(name) if group is not None else scene.get(name)
+    return default if text is None else json.loads(text)
+
+
+def stored_raw(name):
+    """IA: texto guardado del dato de auditoría, sin decodificar, en cualquiera de los dos formatos."""
+    scene = bpy.context.scene
+    group = scene.get('ruinas')
+    return group.get(name) if group is not None else scene.get(name)
+
+
 def closure(coll):
     """IA: cuenta por pieza aristas no manifold y caras de área casi nula; no corrige la malla."""
     open_edges, degenerate = {}, {}
@@ -80,14 +95,14 @@ def session_checks(g, state, config, case):
     state.preview = False
     try:
         g.generate(bpy.context, p, quality)
-        assert not json.loads(bpy.context.scene['ruinas_metricas'])['cached'], 'exportación reutilizó la vista previa'
+        assert not stored('ruinas_metricas')['cached'], 'exportación reutilizó la vista previa'
         assert mortar_faces() > preview_faces, (mortar_faces(), preview_faces)
         g.generate(bpy.context, p, quality)
-        assert json.loads(bpy.context.scene['ruinas_metricas'])['cached'], 'la exportación repetida debería usar su caché'
+        assert stored('ruinas_metricas')['cached'], 'la exportación repetida debería usar su caché'
     finally:
         state.preview = True
     g.generate(bpy.context, p, quality)
-    assert json.loads(bpy.context.scene['ruinas_metricas'])['cached'], 'la exportación expulsó la caché de vista previa'
+    assert stored('ruinas_metricas')['cached'], 'la exportación expulsó la caché de vista previa'
     # 1.3: la semilla usa ruin_key aunque Blender renombre la pieza por un nombre repetido.
     from ruinas_panel.geometry import primitives
     from ruinas_panel.ui import preview
@@ -99,8 +114,13 @@ def session_checks(g, state, config, case):
         mesh = ob.data
         bpy.data.objects.remove(ob, do_unlink=True)
         bpy.data.meshes.remove(mesh)
-    # 1.6: si Ctrl+Z deja la geometría desfasada de los ajustes, el handler reprograma la vista previa.
+    from ruinas_panel.ui import panel
+    assert panel.menu_add in bpy.types.VIEW3D_MT_mesh_add.draw._draw_funcs, 'falta «Ruina» en Añadir > Malla'
+    # Metadatos: las propiedades sueltas de versiones anteriores se borran y todo queda en el grupo 'ruinas'.
+    bpy.context.scene['ventanas_generadas'] = '[]'
     g.generate(bpy.context, p, quality)
+    assert 'ventanas_generadas' not in bpy.context.scene and 'ruinas_metricas' in bpy.context.scene['ruinas']
+    # 1.6: si Ctrl+Z deja la geometría desfasada de los ajustes, el handler reprograma la vista previa.
     assert not preview.stale_preview(bpy.context.scene), 'recién generada no debería estar desfasada'
     p.seed += 1  # Con busy no salta el callback, como tras deshacer.
     assert preview.stale_preview(bpy.context.scene)
@@ -208,26 +228,26 @@ def run():
         noise.seed_set(17)
         coll=g.generate(bpy.context,p,quality)
         first=digest(coll)
-        metrics=json.loads(bpy.context.scene['ruinas_metricas'])
+        metrics=stored('ruinas_metricas')
         assert len(coll.objects)>0
         sealed=closure(coll)
         assert not sealed['open_edges'], ('malla_abierta',name,sealed['open_edges'])
         shrunk=shrunk_by_cracks(coll)
         assert not shrunk, ('grieta_destruye_pieza',name,shrunk)
-        windows=json.loads(bpy.context.scene.get('ventanas_generadas','[]'))
+        windows=stored('ventanas_generadas',[])
         if changes.get('windows_enabled'):assert windows
-        beams=json.loads(bpy.context.scene.get('vigas_generadas','[]'))
+        beams=stored('vigas_generadas',[])
         if changes['height_type']=='TWO':assert beams
         # La plantilla anterior a grietas debe producir exactamente el mismo resultado.
         coll=g.generate(bpy.context,p,quality)
-        assert json.loads(bpy.context.scene['ruinas_metricas'])['cached']
+        assert stored('ruinas_metricas')['cached']
         assert digest(coll)==first, ('cache_changed_geometry',name)
         shapes={ob.name:{'faces':len(ob.data.polygons),'vertices':len(ob.data.vertices),
                 'bounds':[[round(float(fn(v.co[i] for v in ob.data.vertices)),5) for i in range(3)] for fn in (min,max)]}
                 for ob in coll.objects if ob.data.vertices}
         reports.append({'case':name,'digest':first,'blender':bpy.app.version_string,'closure':sealed,
                         'metrics':metrics,'windows':len(windows),'beams':len(beams),
-                        'shapes':shapes,'metadata':{k:bpy.context.scene[k] for k in config.CACHE_METADATA if k in bpy.context.scene}})
+                        'shapes':shapes,'metadata':{k:stored_raw(k) for k in config.CACHE_METADATA if stored_raw(k) is not None}})
         if name in exported:
             failed=[o.name for o in coll.objects if o.get('hueco_revertido') or o.get('ramas_revertidas')]
             assert not failed, ('booleanos_revertidos',name,failed[:5])

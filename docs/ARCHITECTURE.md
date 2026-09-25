@@ -6,6 +6,7 @@ La versión 0.21 reorganiza v0.20. La geometría conserva sus algoritmos; el cam
 |---|---|---|
 | Perfiles, campos, secciones, calidad | `config.py` | Constantes sin dependencia de Blender |
 | Estado temporal | `runtime.py` | Única instancia por sesión; no persiste en .blend |
+| Datos de auditoría en la escena | `meta.py` | Un solo grupo `scene['ruinas']` con JSON por clave; borra las claves sueltas antiguas |
 | Aparejo, alturas, planificación de puerta | `structure/layout.py` | Cálculo de intervalos y cotas sin crear mallas |
 | Fachada, pilares, paredes contiguas | `structure/walls.py` | Orquesta piezas; asigna wall_id |
 | Ventanas, alojamientos y vigas | `structure/openings.py` | Recorta antes de añadir carpintería; exige apoyos |
@@ -19,10 +20,11 @@ La versión 0.21 reorganiza v0.20. La geometría conserva sus algoritmos; el cam
 | Caché | `services/cache.py` | Plantillas anteriores a grietas, copiadas antes de editar |
 | Fusión/exportación | `services/export.py` | Fuente intacta; valida componentes del sólido |
 | Medición | `services/profiling.py` | Decorador acumulativo por etapa |
-| Propiedades guardadas | `ui/settings.py` | Mantener identificadores RNA compatibles |
+| Propiedades guardadas | `ui/settings.py` | Mantener identificadores RNA compatibles; los nombres visibles son cortos y el detalle va en `description` |
+| Preferencias del complemento | `ui/preferences.py` | Umbrales de pausa, unidades y fusión; `preferences.value()` con respaldo en `config` si no está activado |
 | Temporizadores de edición | `ui/preview.py` | Debounce, modo rápido y protección busy |
 | Acciones | `ui/operators.py` | Operadores delegan en servicios |
-| Menú | `ui/panel.py` | Dibuja sin generar geometría |
+| Panel, subpaneles y menú Añadir | `ui/panel.py` | Subpaneles generados desde `config.SECTIONS`; `draw()` solo lee (JSON memorizado) |
 | Ciclo de vida | `registration.py` | Limpia versión anterior, registra clases y handlers de carga/deshacer |
 
 ## Flujo
@@ -40,7 +42,7 @@ La API de `__init__.py` carga servicios de Blender al llamarlos. Por eso `config
 
 1. Declara la propiedad RNA en `ui/settings.py`.
 2. Añádela a `config.FIELDS` si afecta generación; esto también instala el callback e incluye la propiedad en la firma de caché.
-3. Inclúyela en `config.SECTIONS` para mostrarla. Las secciones desde índice 6 son avanzadas.
+3. Inclúyela en `config.SECTIONS` para mostrarla: cada entrada es un subpanel (`toggle` = casilla en su cabecera, `closed` = plegado). Si es un enum de 2-3 opciones, añádela a `EXPANDED_ENUMS` o `FULL_WIDTH_ENUMS`. Nombre visible corto; el detalle, en `description`.
 4. Modifica solo el módulo que consume el parámetro. Si es daño reaplicable, revisa conscientemente `CRACK_FIELDS`; excluir un campo incorrecto puede mostrar geometría antigua.
 5. Comprueba dos valores y una regeneración con caché; conserva el valor anterior si estás migrando datos guardados.
 

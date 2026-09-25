@@ -1,60 +1,135 @@
 """ui /panel — ver docs/ARCHITECTURE.md para contratos y dependencias."""
 
+from .. import meta
 from .. import config
 import bpy
 import json
 
 
+CATEGORY = 'Ruinas'
+_parsed = {}
+
+
+def parsed(text, default):
+    'IA: Decodifica JSON de la escena una sola vez por valor distinto; draw() solo lee, nunca recalcula.'
+    if text not in _parsed:
+        if len(_parsed) > 16:
+            _parsed.clear()
+        try:
+            _parsed[text] = json.loads(text)
+        except ValueError:
+            _parsed[text] = default
+    return _parsed[text]
+
+
+def status_icon(status):
+    'IA: Icono nativo coherente con el estado: pausa, error o información.'
+    if status.startswith('Pausa'):
+        return 'PAUSE'
+    if status.startswith('Error'):
+        return 'ERROR'
+    return 'INFO'
+
+
 class RUIN_PT_panel(bpy.types.Panel):
-    bl_label='Muro de fantasía · v0.21'
-    bl_idname='RUIN_PT_panel'
-    bl_space_type='VIEW_3D'
-    bl_region_type='UI'
-    bl_category='Ruinas'
-    def draw(self,context):
-        'IA: Dibuja controles y métricas; no generes ni modifiques geometría desde el panel.'
-        layout=self.layout
-        p=context.scene.ruin_settings
-        layout.prop(p,'live_preview')
-        layout.label(text=p.status)
-        m=json.loads(context.scene.get('ruinas_metricas','{}'))
-        layout.label(text='%s caras · %.2f s'%(format(m.get('faces',0),','),m.get('seconds',0)))
-        if m.get('cached'):
-            layout.label(text='Geometría previa reutilizada',icon='CHECKMARK')
-        layout.prop(p,'lock_distribution')
-        if p.lock_distribution:
-            layout.label(text='Distribución fijada: %s'%p.distribution_seed)
-        row=layout.row(align=True)
-        row.prop(p,'seed')
-        row.operator('ruin.next_seed',text='',icon='FILE_REFRESH')
-        layout.prop(p,'show_advanced')
-        for index,(title,fields) in enumerate(config.SECTIONS):
-            if index>=6 and not p.show_advanced:
+    bl_label = 'Muro de fantasía · v0.21'
+    bl_idname = 'RUIN_PT_panel'
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = CATEGORY
+
+    @classmethod
+    def poll(cls, context):
+        'IA: Solo con los ajustes registrados en la escena.'
+        return getattr(context.scene, 'ruin_settings', None) is not None
+
+    def draw(self, context):
+        'IA: Acciones, estado y semilla arriba; no generes ni modifiques geometría desde el panel.'
+        layout = self.layout
+        p = context.scene.ruin_settings
+        row = layout.row(align=True)
+        row.scale_y = 1.3
+        row.operator('ruin.generate', text='Actualizar', icon='FILE_REFRESH')
+        row.operator('ruin.solid', text='Preparar sólido', icon='EXPORT')
+        layout.prop(p, 'live_preview')
+        box = layout.box()
+        col = box.column(align=True)
+        col.label(text=p.status, icon=status_icon(p.status))
+        m = parsed(meta.raw(context.scene, 'ruinas_metricas') or '{}', {})
+        col.label(text='%s caras%s' % (format(m.get('faces', 0), ','), ' · geometría en caché' if m.get('cached') else ''))
+        row = layout.row(align=True)
+        row.prop(p, 'seed')
+        row.operator('ruin.next_seed', text='', icon='RNDCURVE')
+        row.prop(p, 'lock_distribution', text='', icon='LOCKED' if p.lock_distribution else 'UNLOCKED')
+
+
+def enabled(p, field):
+    'IA: Controles que no aplican se atenúan en lugar de ocultarse.'
+    if field == 'building_depth':
+        return p.layout_mode != 'NONE'
+    if field == 'extra_side':
+        return p.layout_mode == 'ONE'
+    if field == 'floor_beams':
+        return p.height_type == 'TWO'
+    if field == 'connection_side':
+        return p.connection_enabled
+    return True
+
+
+def section_panel(index, section):
+    'IA: Crea un subpanel para una entrada de config.SECTIONS: casilla en cabecera si hay toggle, restablecer a la derecha.'
+
+    def draw_header(self, context):
+        'IA: Casilla que activa el bloque, dibujada en la cabecera del subpanel.'
+        self.layout.prop(context.scene.ruin_settings, section['toggle'], text='')
+
+    def draw_header_preset(self, context):
+        'IA: Botón de restablecer los valores por defecto de la sección, alineado a la derecha.'
+        self.layout.operator('ruin.reset_section', text='', icon='LOOP_BACK', emboss=False).section = index
+
+    def draw(self, context):
+        'IA: Propiedades de la sección con separación de etiquetas; atenúa lo que no aplica.'
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+        p = context.scene.ruin_settings
+        col = layout.column()
+        if 'toggle' in section:
+            col.enabled = getattr(p, section['toggle'])
+        for field in section['fields']:
+            if field in config.FULL_WIDTH_ENUMS:
+                row = col.row(align=True)
+                row.use_property_split = False
+                row.prop(p, field, expand=True)
                 continue
-            box=layout.box()
-            row=box.row()
-            row.label(text=title)
-            row.operator('ruin.reset_section',text='',icon='LOOP_BACK').section=index
-            for field in fields:
-                row=box.row()
-                if field=='building_depth':
-                    row.enabled=p.layout_mode!='NONE'
-                if field=='extra_side':
-                    if p.layout_mode!='ONE':
-                        continue
-                if field=='windows_per_wall':
-                    row.enabled=p.windows_enabled
-                if field=='door_leaf' or title=='Puerta avanzada':
-                    row.enabled=p.door_enabled
-                if field=='floor_beams':
-                    row.enabled=p.height_type=='TWO'
-                row.prop(p,field,slider=True)
-            if title=='Construcción':
-                box.label(text='Grosor %.0f mm · altura %.0f mm'%(config.BUILD_TYPES[p.build_type][0],config.HEIGHT_TYPES[p.height_type]))
-            if title=='Aberturas' and p.windows_enabled:
-                actual=json.loads(context.scene.get('ventanas_generadas','[]'))
-                box.label(text='Ventanas generadas: %s'%len(actual))
-                box.label(text='Limitadas por apoyos y espacio disponible')
-        layout.operator('ruin.generate',text='Actualizar calidad elegida')
-        layout.operator('ruin.solid',text='Preparar sólido para exportar',icon='MESH_DATA')
-        layout.label(text='Borrador omite las grietas finas')
+            row = col.row()
+            row.enabled = enabled(p, field)
+            row.prop(p, field, expand=field in config.EXPANDED_ENUMS, slider=True)
+        if section['id'] == 'build':
+            col.label(text='Grosor %.0f mm · altura %.0f mm' % (config.BUILD_TYPES[p.build_type][0], config.HEIGHT_TYPES[p.height_type]))
+        if section['id'] == 'windows' and p.windows_enabled:
+            windows = parsed(meta.raw(context.scene, 'ventanas_generadas') or '[]', [])
+            col.label(text='Generadas: %s · limitadas por apoyos y espacio' % len(windows))
+
+    attrs = {
+        'bl_label': section['title'],
+        'bl_idname': 'RUIN_PT_' + section['id'],
+        'bl_space_type': 'VIEW_3D',
+        'bl_region_type': 'UI',
+        'bl_category': CATEGORY,
+        'bl_parent_id': RUIN_PT_panel.bl_idname,
+        'bl_options': {'DEFAULT_CLOSED'} if section['closed'] else set(),
+        'draw': draw,
+        'draw_header_preset': draw_header_preset,
+    }
+    if 'toggle' in section:
+        attrs['draw_header'] = draw_header
+    return type('RUIN_PT_' + section['id'], (bpy.types.Panel,), attrs)
+
+
+SUBPANELS = tuple(section_panel(index, section) for index, section in enumerate(config.SECTIONS))
+
+
+def menu_add(self, context):
+    'IA: Entrada «Ruina» en Añadir > Malla; genera con los ajustes actuales de la escena.'
+    self.layout.operator('ruin.generate', text='Ruina', icon='MOD_BUILD')

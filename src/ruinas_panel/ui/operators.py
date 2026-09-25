@@ -29,6 +29,7 @@ def fail(operator,context,exc):
 class RUIN_OT_generate(bpy.types.Operator):
     bl_idname='ruin.generate'
     bl_label='Generar / actualizar muro'
+    bl_description='Genera o regenera la ruina con los ajustes de la escena, en la calidad de edición'
     bl_options={'REGISTER','UNDO'}
     poll=classmethod(ready)
     def execute(self,context):
@@ -44,6 +45,7 @@ class RUIN_OT_generate(bpy.types.Operator):
 class RUIN_OT_solid(bpy.types.Operator):
     bl_idname='ruin.solid'
     bl_label='Preparar sólido para exportar'
+    bl_description='Genera en la calidad de exportación y une todas las piezas en un sólido cerrado listo para STL'
     bl_options={'REGISTER','UNDO'}
     poll=classmethod(ready)
     def execute(self,context):
@@ -59,6 +61,7 @@ class RUIN_OT_solid(bpy.types.Operator):
 class RUIN_OT_seed(bpy.types.Operator):
     bl_idname='ruin.next_seed'
     bl_label='Otra variante'
+    bl_description='Avanza la semilla para obtener otra variante con los mismos ajustes'
     bl_options={'REGISTER','UNDO'}
     poll=classmethod(ready)
     def execute(self,context):
@@ -76,6 +79,7 @@ class RUIN_OT_seed(bpy.types.Operator):
 class RUIN_OT_reset(bpy.types.Operator):
     bl_idname='ruin.reset_section'
     bl_label='Restablecer sección'
+    bl_description='Devuelve los ajustes de esta sección a sus valores por defecto'
     bl_options={'REGISTER','UNDO'}
     section: IntProperty()
     @classmethod
@@ -89,7 +93,7 @@ class RUIN_OT_reset(bpy.types.Operator):
         p=context.scene.ruin_settings
         runtime.busy=True
         try:
-            for field in config.SECTIONS[self.section][1]:
+            for field in config.SECTIONS[self.section]['fields']:
                 setattr(p,field,p.bl_rna.properties[field].default)
         finally:
             runtime.busy=False

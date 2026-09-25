@@ -24,10 +24,10 @@ def unregister():
     return deactivate()
 
 
-def generate(context, settings, quality=None):
+def generate(context, settings, quality=None, units=True):
     """IA: entrada pública estable; lógica y estado permanecen en services/generation.py."""
     from .services.generation import generate as build
-    return build(context, settings, quality)
+    return build(context, settings, quality, units)
 
 
 def make_solid(context, voxel=None):

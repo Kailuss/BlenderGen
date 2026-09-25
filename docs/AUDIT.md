@@ -50,7 +50,7 @@ Severidad: **Alta** significa resultado incorrecto, riesgo de cierre de Blender 
 | C5 | Media | Deshacer | ✅ Mitigado: la geometría queda desfasada tras Ctrl+Z | Hipótesis |
 | C6 | Baja | Semillas | ✅ Semillas resueltas: clasificación y semillas dependen del nombre de objeto | Código |
 | C7 | Baja | Exportación | ✅ Resuelto: «Reducir caras coplanares» es un Decimate COLLAPSE | Código |
-| C8 | Baja | Efectos | Unidades, materiales y RNA se reescriben en cada generación | Código |
+| C8 | Baja | Efectos | Parcial: unidades según preferencia y metadatos en un grupo; materiales y perfiles se siguen reescribiendo | Código |
 | C9 | Baja | Geometría | Recorte de X de todos los vértices a ±L/2 | No confirmado en Blender |
 | R1 | Alta | Rendimiento | ✅ Resuelto: escalado cuadrático por `bpy.ops` en bucle | Blender |
 | R2 | Media | Rendimiento | ✅ Mejorado: hasta ~9 booleanos EXACT por piedra en grietas; ahora Manifold y como mucho una rama por grieta | Código + datos |
@@ -234,12 +234,12 @@ Criterio: digests idénticos y tiempos medidos en los mismos casos. Si 2.2 no co
 | # | Propuesta | Resuelve | Esf. |
 |---|---|---|---|
 | 5.1 | ✅ Barra de progreso (`window_manager.progress_*`) y pausa automática de la vista previa cuando la última generación supere un umbral (por ejemplo, 3 s), con aviso en el panel | R5 | S |
-| 5.2 | Subpaneles plegables (`layout.panel` o `bl_parent_id`), conservando los identificadores RNA | UX | S |
+| 5.2 | ✅ Subpaneles plegables (`layout.panel` o `bl_parent_id`), conservando los identificadores RNA | UX | S |
 | 5.3 | ✅ Mensajes de error de exportación que digan qué cambiar | C4 | S |
-| 5.4 | `blender_manifest.toml` junto a `bl_info`, con una única fuente de versión y el autor correcto | M8, T6 | S |
+| 5.4 | ⏸ Descartado por ahora (decisión del usuario) `blender_manifest.toml` junto a `bl_info`, con una única fuente de versión y el autor correcto | M8, T6 | S |
 | 5.5 | `USERGUIDE.md` real (parámetros, flujo, exportación STL, límites) y README sin rutas de otro equipo | M6 | S |
-| 5.6 | Fijar las unidades solo al crear la colección la primera vez, o mediante una opción, y documentarlo | C8 | S |
-| 5.7 | Guardar los metadatos JSON en la colección o bajo una sola clave | C8 | S |
+| 5.6 | ✅ (preferencia «Escena en milímetros») Fijar las unidades solo al crear la colección la primera vez, o mediante una opción, y documentarlo | C8 | S |
+| 5.7 | ✅ (grupo `scene['ruinas']`, `meta.py`) Guardar los metadatos JSON en la colección o bajo una sola clave | C8 | S |
 
 ### Orden recomendado
 
@@ -340,6 +340,16 @@ El coste por llamada crece de forma lineal, así que el total es cuadrático. La
   - Probado con interfaz (Vulkan) en una habitación: Borrador sigue siendo automático y Trabajo (31 s) queda en pausa.
   - `primitives.remove_objects` borra con `bpy.data.batch_remove`. Borrar pieza a pieza recorría el archivo en cada llamada: tras una habitación en Trabajo, regenerar Borrador pasa de 12,1 a 6,5 s.
   - Pendiente: la habitación en Trabajo con grietas al 0,6 tarda 31 s.
+- **Interfaz según las guías de Blender (5.2, 5.6, 5.7).**
+  - Panel principal: acciones arriba («Actualizar», «Preparar sólido»), estado con icono (pausa, error o información), semilla con variante y candado compacto.
+  - Subpaneles generados desde `config.SECTIONS`, con `bl_parent_id`: Construcción, Distribución y Acabado abiertos; Puerta y Ventanas con la casilla en la cabecera; Calidad y los avanzados plegados. El botón de restablecer va en `draw_header_preset`.
+  - `use_property_split`; lo que no aplica se atenúa en vez de ocultarse; tipo y altura en filas completas.
+  - Nombres visibles cortos, con el detalle en `description`; las claves RNA no cambian.
+  - `draw()` memoriza el JSON en lugar de decodificarlo en cada redibujado.
+  - Entrada «Ruina» en Añadir > Malla y `bl_description` en los operadores.
+  - `AddonPreferences`: umbrales de pausa, escena en mm y fusión (Manifold por defecto).
+  - Los metadatos pasan de 14 propiedades sueltas a un grupo `scene['ruinas']`.
+  - Revisado con capturas reales de Blender (Vulkan).
 
 Pendiente:
 

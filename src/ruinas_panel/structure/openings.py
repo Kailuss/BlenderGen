@@ -1,12 +1,12 @@
 """structure /openings — ver docs/ARCHITECTURE.md para contratos y dependencias."""
 
+from .. import meta
 from .. import config
 from ..geometry import primitives
 from ..geometry import timber
 from ..services import profiling
 from mathutils import Vector
 import bpy
-import json
 import numpy
 
 
@@ -147,7 +147,7 @@ def architectural_openings(coll,p,walls,door,edges):
         wh=16
         usable=(w['start']+4,w['end']-4)
         # Reservar columnas y puerta en la fachada.
-        centers=json.loads(bpy.context.scene['pilares_generados']) if w['id']=='front' else []
+        centers=meta.get(bpy.context.scene,'pilares_generados',[]) if w['id']=='front' else []
         floors=2 if p.height_type=='TWO' else 1
         made=0
         tree=wall_tree(coll,w)
@@ -221,5 +221,5 @@ def architectural_openings(coll,p,walls,door,edges):
                 # Clavos en una abrazadera de frente; unidos al extremo de la viga.
                 if w['id']=='front':
                     timber.metal_pin(coll,iron,'Hierro · clavo de viga',x,-length-.1,z,.4,.5)
-    bpy.context.scene['ventanas_generadas']=json.dumps(windows)
-    bpy.context.scene['vigas_generadas']=json.dumps(beams)
+    meta.put(bpy.context.scene,'ventanas_generadas',windows)
+    meta.put(bpy.context.scene,'vigas_generadas',beams)

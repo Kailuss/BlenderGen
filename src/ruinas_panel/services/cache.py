@@ -1,5 +1,6 @@
 """services /cache — ver docs/ARCHITECTURE.md para contratos y dependencias."""
 
+from .. import meta
 from .. import config
 from .. import runtime
 from ..geometry import primitives
@@ -59,7 +60,7 @@ def save_cache(context,coll,signature):
         copy.name=config.CACHE_PREFIX+ob.name
         copy['_source_name']=ob.name
         templates.append(copy)
-    runtime.cache[cache_key()]={'signature':signature,'objects':templates,'metadata':{k:context.scene[k] for k in config.CACHE_METADATA if k in context.scene}}
+    runtime.cache[cache_key()]={'signature':signature,'objects':templates,'metadata':{k:meta.raw(context.scene,k) for k in config.CACHE_METADATA if meta.raw(context.scene,k) is not None}}
 
 
 def restore_cache(context):
@@ -75,5 +76,5 @@ def restore_cache(context):
         coll.objects.link(ob)
         ob.hide_set(False)
     for key,value in runtime.cache[cache_key()]['metadata'].items():
-        context.scene[key]=value
+        meta.put_raw(context.scene,key,value)
     return coll

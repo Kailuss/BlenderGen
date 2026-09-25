@@ -1,7 +1,9 @@
 """ui /preview — ver docs/ARCHITECTURE.md para contratos y dependencias."""
 
+from .. import meta
 from .. import config
 from .. import runtime
+from ..ui import preferences
 from ..services import export
 from ..services import generation
 import bpy
@@ -39,8 +41,9 @@ def settings_changed(self, context):
 
 
 def slow(quality,stage):
-    'IA: True si la última vista previa en esa calidad superó el umbral de config.PREVIEW_PAUSE_SECONDS para stage (fast o refine).'
-    return runtime.durations.get(quality,0)>config.PREVIEW_PAUSE_SECONDS[stage]
+    'IA: True si la última vista previa en esa calidad superó el umbral de pausa de stage (fast o refine): preferencias o config.'
+    limit=preferences.value('pause_'+stage,config.PREVIEW_PAUSE_SECONDS[stage])
+    return runtime.durations.get(quality,0)>limit
 
 
 def paused_status(quality):
@@ -86,7 +89,7 @@ def schedule_refresh(scene):
 def stale_preview(scene):
     'IA: True si la fuente generada no corresponde a los ajustes actuales, p. ej. tras Ctrl+Z; compara con parametros_muro.'
     p=getattr(scene,'ruin_settings',None)
-    stored=scene.get('parametros_muro')
+    stored=meta.raw(scene,'parametros_muro')
     if p is None or not stored or not bpy.data.collections.get(config.COLLECTION):
         return False
     ignored={'export_quality','quick_edit'}
@@ -143,7 +146,7 @@ def update_preview(context, quality=None):
         bpy.ops.object.select_all(action='DESELECT')
         target=quality or context.scene.ruin_settings.preview_quality
         with ProgressCursor(context,target):
-            generation.generate(context,context.scene.ruin_settings,quality)
+            generation.generate(context,context.scene.ruin_settings,quality,preferences.value('scene_units',True))
         elapsed=time.perf_counter()-start
         runtime.durations[runtime.quality]=elapsed
         context.scene.ruin_settings.status='Vista '+(runtime.quality.lower())+' · %.2f s'%elapsed
@@ -164,8 +167,8 @@ def prepare_detail(context):
     try:
         bpy.ops.object.select_all(action='DESELECT')
         with ProgressCursor(context,context.scene.ruin_settings.export_quality):
-            generation.generate(context,context.scene.ruin_settings)
-        result=export.make_solid(context)
+            generation.generate(context,context.scene.ruin_settings,None,preferences.value('scene_units',True))
+        result=export.make_solid(context,method=preferences.value('export_method',config.EXPORT_METHOD))
         result.hide_set(False)
         result.hide_render=False
         context.scene.ruin_settings.status='Sólido detallado actualizado'

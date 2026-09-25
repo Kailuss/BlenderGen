@@ -5,6 +5,7 @@ from . import runtime
 from .services import cache
 from .ui import operators
 from .ui import panel
+from .ui import preferences
 from .ui import preview
 from .ui import settings
 from bpy.app.handlers import persistent
@@ -17,7 +18,8 @@ for _field in config.FIELDS:
         settings.RuinSettings.__annotations__[_field].keywords['update']=preview.settings_changed
 
 
-CLASSES=(settings.RuinSettings,operators.RUIN_OT_generate,operators.RUIN_OT_solid,operators.RUIN_OT_seed,operators.RUIN_OT_reset,panel.RUIN_PT_panel)
+CLASSES=(preferences.RuinPreferences,settings.RuinSettings,operators.RUIN_OT_generate,operators.RUIN_OT_solid,operators.RUIN_OT_seed,
+         operators.RUIN_OT_reset,panel.RUIN_PT_panel)+panel.SUBPANELS
 
 
 @persistent
@@ -84,6 +86,7 @@ def register():
     for cls in CLASSES:
         bpy.utils.register_class(cls)
     bpy.types.Scene.ruin_settings=PointerProperty(type=settings.RuinSettings)
+    bpy.types.VIEW3D_MT_mesh_add.append(panel.menu_add)
     install_handlers()
     bpy.app.driver_namespace['ruinas_cleanup']=unregister
 
@@ -91,6 +94,7 @@ def register():
 def unregister():
     'IA: Retira handlers, cancela timers y limpia caché antes de retirar clases; permite registro repetido.'
     remove_handlers()
+    bpy.types.VIEW3D_MT_mesh_add.remove(panel.menu_add)
     preview.cancel_pending()
     cache.clear_cache()
     if hasattr(bpy.types.Scene,'ruin_settings'):

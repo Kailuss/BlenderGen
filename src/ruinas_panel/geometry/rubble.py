@@ -1,5 +1,6 @@
 """geometry /rubble — ver docs/ARCHITECTURE.md para contratos y dependencias."""
 
+from .. import meta
 from ..geometry import fracture
 from ..geometry import primitives
 from ..geometry import terrain
@@ -8,7 +9,6 @@ from ..structure import layout
 from mathutils import Euler
 from mathutils import Vector
 import bpy
-import json
 import math
 import numpy
 import random
@@ -64,4 +64,4 @@ def build_rubble(coll,stone,mortar,p,door,rh):
                 terrain.settle_rubble(ob,surface)
                 ob['escombro']=True
         terrain.gravel_batch(coll,stone,'Grava · cúmulo %s'%i,x,y,rx,ry,surface,round(12+amount*45+p.ground_roughness*12),dseed+9400+i)
-    bpy.context.scene['escombros_generados']=json.dumps(audit)
+    meta.put(bpy.context.scene,'escombros_generados',audit)
