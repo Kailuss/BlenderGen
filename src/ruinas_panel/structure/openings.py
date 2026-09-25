@@ -7,6 +7,7 @@ from ..services import profiling
 from mathutils import Vector
 import bpy
 import json
+import numpy
 
 
 def wall_point(w,x,y,z):
@@ -40,16 +41,21 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
             continue
         if not ob.name.startswith(('Piedra','Mortero','Núcleo')):
             continue
-        coords=[wall_local(w,v.co) for v in ob.data.vertices]
-        if not coords:
+        world=primitives.coords(ob)
+        if not len(world):
             continue
-        if max(q[0] for q in coords)<=x0 or min(q[0] for q in coords)>=x1 or max(q[2] for q in coords)<=z0 or min(q[2] for q in coords)>=z1:
+        a,o=w['axis'],w['origin']
+        dx=world[:,0]-o[0]
+        dy=world[:,1]-o[1]
+        # Misma transformación que wall_local, para todos los vértices a la vez.
+        local=numpy.stack((dx*a[0]+dy*a[1],-dx*a[1]+dy*a[0],world[:,2]),axis=1)
+        if local[:,0].max()<=x0 or local[:,0].min()>=x1 or local[:,2].max()<=z0 or local[:,2].min()>=z1:
             continue
-        if max(q[1] for q in coords)<-T or min(q[1] for q in coords)>T:
+        if local[:,1].max()<-T or local[:,1].min()>T:
             continue
         # Las piezas totalmente dentro del hueco se eliminan directamente.
         # Evita booleanos degenerados y reduce el trabajo de ventanas grandes.
-        if all(x0<=q[0]<=x1 and z0<=q[2]<=z1 and -T<=q[1]<=T for q in coords):
+        if ((x0<=local[:,0])&(local[:,0]<=x1)&(z0<=local[:,2])&(local[:,2]<=z1)&(-T<=local[:,1])&(local[:,1]<=T)).all():
             mesh=ob.data
             bpy.data.objects.remove(ob,do_unlink=True)
             if mesh.users==0:
@@ -63,7 +69,7 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
         bm.free()
         ob.data.update()
         # El recorte no puede quitar más que el cruce de la caja de la pieza con el cortador.
-        reach=[max(0,min(max(q[i] for q in coords),hi)-max(min(q[i] for q in coords),lo)) for i,(lo,hi) in enumerate(((x0,x1),(-T,T),(z0,z1)))]
+        reach=[max(0,min(local[:,i].max(),hi)-max(local[:,i].min(),lo)) for i,(lo,hi) in enumerate(((x0,x1),(-T,T),(z0,z1)))]
         limit=reach[0]*reach[1]*reach[2]*1.05+.5
         before=primitives.mesh_volume(ob.data)
         backup=ob.data.copy()
@@ -96,13 +102,20 @@ def wall_tree(coll,w):
     'IA: BVH de mampostería del tramo para apoyos; excluye escombros y otros muros.'
     from mathutils.bvhtree import BVHTree
     verts=[]
-    faces=[]
+    tris=[]
+    offset=0
     for ob in coll.objects:
         if ob.get('wall_id','front')==w['id'] and not ob.get('escombro') and ob.name.startswith(('Piedra','Mortero')):
-            off=len(verts)
-            verts.extend(tuple(v.co) for v in ob.data.vertices)
-            faces.extend(tuple(off+i for i in f.vertices) for f in ob.data.polygons)
-    return BVHTree.FromPolygons(verts,faces)
+            me=ob.data
+            me.calc_loop_triangles()
+            ids=numpy.empty(len(me.loop_triangles)*3,dtype=numpy.int32)
+            me.loop_triangles.foreach_get('vertices',ids)
+            verts.append(primitives.coords(ob))
+            tris.append(ids.reshape(-1,3)+offset)
+            offset+=len(me.vertices)
+    if not verts:
+        return BVHTree.FromPolygons([],[])
+    return BVHTree.FromPolygons(numpy.concatenate(verts).tolist(),numpy.concatenate(tris).tolist())
 
 
 def wall_hit(tree,w,p,x,z):

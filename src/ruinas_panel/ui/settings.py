@@ -33,7 +33,7 @@ class RuinSettings(bpy.types.PropertyGroup):
     wood_grain: FloatProperty(name='Relieve de vetas',default=.7,min=0,max=1)
 
     preview_quality: EnumProperty(name='Calidad de edición',items=config.QUALITY_ITEMS,default='WORK')
-    export_quality: EnumProperty(name='Calidad de exportación',items=config.QUALITY_ITEMS,default='WORK')
+    export_quality: EnumProperty(name='Calidad de exportación',items=config.QUALITY_ITEMS,default='DETAIL')
     quick_edit: BoolProperty(name='Borrador mientras ajustas',default=True)
     lock_distribution: BoolProperty(name='Bloquear distribución',default=True,update=preview.distribution_changed)
     distribution_seed: IntProperty(default=17)

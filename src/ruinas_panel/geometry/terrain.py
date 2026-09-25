@@ -10,7 +10,19 @@ import random
 
 
 def height_sampler(verts,topfaces):
-    'IA: Devuelve altura de triángulos superiores; conserva coordenadas XY del terreno.'
+    'IA: Altura de los triángulos superiores por rayo vertical sobre un BVH (C); fuera del montículo devuelve la cota base.'
+    from mathutils.bvhtree import BVHTree
+    tree=BVHTree.FromPolygons(verts,topfaces)
+    down=Vector((0,0,-1))
+    def surface(x,y):
+        'IA: Primera cara superior bajo (x,y); 0,25 si el punto queda fuera del terreno.'
+        hit=tree.ray_cast(Vector((x,y,1000.0)),down)[0]
+        return hit.z if hit is not None else .25
+    return surface
+
+
+def height_sampler_scan(verts,topfaces):
+    'IA: Versión anterior por recorrido lineal de triángulos; se conserva solo como referencia de comparación.'
     triangles=[]
     for ids in topfaces:
         a,b,c=[verts[i] for i in ids]

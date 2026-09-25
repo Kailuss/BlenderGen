@@ -2,12 +2,12 @@
   "blender": "5.2.2 LTS",
   "cases": {
     "basic_draft": {
-      "digest": "6aa6247de31e1d701a909d95a42eb6129435d97190ab596a9efed94b6bcc8b3f",
+      "digest": "8864f018b697feeead2ed8200acc44a8cc112abd33c3b0bd31e2f9ee23295b9c",
       "faces": 17175,
       "degenerate_faces": []
     },
     "door_windows_work": {
-      "digest": "0ab7c233bc9c5fb57918558929d7db3544b54e6efa641e32a67421fbe71d04d2",
+      "digest": "6628aa83ed837e164e88745842d3eda27b51d4fb5d39719f9c9ac85111f904ed",
       "faces": 144991,
       "degenerate_faces": [
         "Piedra caída · fractura 3551.1",
@@ -15,7 +15,7 @@
       ]
     },
     "room_beams_draft": {
-      "digest": "f5653a58e70c2984d033ea7cc628db9ff9e28cf30f6197ac871793015355ccd2",
+      "digest": "01ff4ed4192b66411e6348b4538a821fd0cc9983c9bfb507d19eaf10f22bb171",
       "faces": 58243,
       "degenerate_faces": []
     }

@@ -10,6 +10,7 @@ from mathutils import Vector
 import bpy
 import json
 import math
+import numpy
 import random
 
 
@@ -52,8 +53,10 @@ def build_rubble(coll,stone,mortar,p,door,rh):
                 ob=primitives.block('Piedra caída · entera %s.%s'%(i,j),-w/2,w/2,-d/2,d/2,0,h,coll,stone)
                 weather.weather_stone(ob,p.wear*.7,dseed+i*91+j)
                 rot=Euler((rr.uniform(-.22,.22),rr.uniform(-.22,.22),ang)).to_matrix()
-                for v in ob.data.vertices:
-                    v.co=rot@v.co+Vector((cx,cy,0))
+                co=primitives.coords(ob)@numpy.array(rot).T
+                co[:,0]+=cx
+                co[:,1]+=cy
+                primitives.set_coords(ob,co)
             else:
                 fracture.broken_stone(coll,stone,cx,cy,ang,rh*1.6*scale,rh*.78*scale,rh*.62*scale,dseed+3300+i*117+j,p.wear)
             for ob in set(coll.objects)-before:

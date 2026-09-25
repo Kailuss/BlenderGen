@@ -10,6 +10,7 @@ from mathutils import Vector
 import bpy
 import json
 import math
+import numpy
 import random
 import zlib
 
@@ -23,9 +24,9 @@ def crack_frame(ob,walls,center):
     along=Vector((axis[0],axis[1],0))
     normal=Vector((axis[1],-axis[0],0))
     if len(walls)>1:
-        xs=[v.co.x for v in ob.data.vertices]
-        ys=[v.co.y for v in ob.data.vertices]
-        middle=Vector(((min(xs)+max(xs))/2-center.x,(min(ys)+max(ys))/2-center.y,0))
+        co=primitives.coords(ob)
+        mid=(co.min(axis=0)+co.max(axis=0))/2
+        middle=Vector((mid[0]-center.x,mid[1]-center.y,0))
         if middle.dot(normal)<0:
             normal=-normal
     return along,normal
@@ -172,15 +173,16 @@ def crack_stone(ob, amount, seed, coll, mat, frame=None, split=False):
     import bmesh
     rr=random.Random(seed)
     along,normal=frame or (Vector((1,0,0)),Vector((0,-1,0)))
-    lo=[min(v.co[i] for v in ob.data.vertices) for i in range(3)]
-    hi=[max(v.co[i] for v in ob.data.vertices) for i in range(3)]
-    us=[v.co.dot(along) for v in ob.data.vertices]
-    ns=[v.co.dot(normal) for v in ob.data.vertices]
-    u0,u1,z0,z1=min(us),max(us),lo[2],hi[2]
+    co=primitives.coords(ob)
+    lo=co.min(axis=0).tolist()
+    hi=co.max(axis=0).tolist()
+    us=co@(along.x,along.y,along.z)
+    ns=co@(normal.x,normal.y,normal.z)
+    u0,u1,z0,z1=float(us.min()),float(us.max()),lo[2],hi[2]
     if u1-u0<1.8 or z1-z0<1.3:
         return
     paths,roots,mouth=crack_paths(rr,runtime.settings,amount,u0,u1,z0,z1,split)
-    top=max(ns)+.2
+    top=float(ns.max())+.2
     ob['parametros_grieta']=json.dumps({'count':len(roots),'width':mouth,'roots':roots,'paths':len(paths),'partida':split,
                                         'frame':[list(along),list(normal)],'bounds':[lo,hi]})
     changed=False
@@ -317,21 +319,18 @@ def broken_stone(coll, mat, cx, cy, angle, width, depth, height, seed, wear):
         bm.free()
         primitives.bevel(ob,.13)
         weather.weather_stone(ob,wear*.7,seed+part*91)
-        pivot=sum((v.co for v in ob.data.vertices),Vector())/len(ob.data.vertices)
+        co=primitives.coords(ob)
+        pivot=Vector(co.mean(axis=0).tolist())
         rotations=[(.18,rr.uniform(-.28,.28),angle+rr.uniform(-.25,.25)),
                    (rr.uniform(.18,.4),rr.uniform(-.22,.22),angle+rr.uniform(-.7,.7)),
                    (rr.uniform(-.35,-.12),rr.uniform(.1,.3),angle+rr.uniform(.4,1.0))]
         rotation=Euler(rotations[part]).to_matrix()
         displacement=Vector((cx+pivot.x+(part-1)*.45,cy+pivot.y+(part-1)*.3,0))
-        for v in ob.data.vertices:
-            v.co=rotation@(v.co-pivot)+displacement
-        bottom=min(v.co.z for v in ob.data.vertices)
-        for v in ob.data.vertices:
-            v.co.z+=.62-bottom
+        co=(co-numpy.array(pivot))@numpy.array(rotation).T+numpy.array(displacement)
+        co[:,2]+=.62-co[:,2].min()
         # Apoyo asentado: una pequeña parte del fragmento queda enterrada en el suelo.
-        for v in ob.data.vertices:
-            if v.co.z<.95:
-                v.co.z=.68
+        co[co[:,2]<.95,2]=.68
+        primitives.set_coords(ob,co)
 
 
 def fractured_block(name,x0,x1,y0,y1,z0,z1,coll,mat,seed):
@@ -417,7 +416,8 @@ def opening_damage(ob,core,holes,x0,x1,z0,z1,amount,seed):
     if abs(direction.z)>.8:
         direction.x=rr.choice((-1,1))*.48
     direction.normalize()
-    corner=max((v.co for v in ob.data.vertices),key=lambda q:q.dot(direction)).copy()
+    co=primitives.coords(ob)
+    corner=Vector(co[int((co@numpy.array(direction)).argmax())].tolist())
     loss=min(x1-x0,z1-z0)*(.16+.23*amount)*rr.uniform(.65,1.0)
     point=corner-direction*loss
     if rr.random()<.35+.6*amount:
@@ -458,12 +458,11 @@ def crack_stress(ob,walls,openings):
     wall=walls.get(ob.get('wall_id','front')) or walls.get('front')
     if not wall:
         return 0.0
-    xs=[v.co.x for v in ob.data.vertices]
-    ys=[v.co.y for v in ob.data.vertices]
-    zs=[v.co.z for v in ob.data.vertices]
+    co=primitives.coords(ob)
+    mid=(co.min(axis=0)+co.max(axis=0))/2
     o,a=wall['origin'],wall['axis']
-    u=((min(xs)+max(xs))/2-o[0])*a[0]+((min(ys)+max(ys))/2-o[1])*a[1]
-    z=(min(zs)+max(zs))/2
+    u=float((mid[0]-o[0])*a[0]+(mid[1]-o[1])*a[1])
+    z=float(mid[2])
     gap=min(abs(u-wall['start']),abs(u-wall['end']))
     for wid,x0,x1,z0,z1 in openings:
         if wid==wall['id']:

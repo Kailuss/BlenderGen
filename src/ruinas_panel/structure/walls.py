@@ -60,9 +60,11 @@ def segment_wall(coll,p,wall_id,start,end,origin,axis,height,edges):
             ob=primitives.block('Piedra · %s.%s.%s'%(wall_id,row,j),a+.18,b-.18,-p.thickness/2-p.projection*.75,p.thickness/2+p.projection*.75,z0,z1,coll,stone)
             weather.weather_stone(ob,p.wear,p.seed+191+row*31+j+len(wall_id))
     for ob in set(coll.objects)-before:
-        for v in ob.data.vertices:
-            x,y,z=v.co
-            v.co=(origin[0]+axis[0]*x-axis[1]*y,origin[1]+axis[1]*x+axis[0]*y,z)
+        co=primitives.coords(ob)
+        x,y=co[:,0].copy(),co[:,1].copy()
+        co[:,0]=origin[0]+axis[0]*x-axis[1]*y
+        co[:,1]=origin[1]+axis[1]*x+axis[0]*y
+        primitives.set_coords(ob,co)
         ob['wall_id']=wall_id
     return {'id':wall_id,'start':start,'end':end,'origin':origin,'axis':axis,'height':height}
 
@@ -349,8 +351,9 @@ def _build_wall(context, p):
     timber.wooden_frame(coll,p,door)
     timber.wooden_door(coll,p,door)
     for ob in coll.objects:
-        for v in ob.data.vertices:
-            v.co.x=max(-L/2,min(L/2,v.co.x))
+        co=primitives.coords(ob)
+        co[:,0]=co[:,0].clip(-L/2,L/2)
+        primitives.set_coords(ob,co)
     terrain.pier_ground(coll,p,centers)
     walls=build_returns(coll,p,centers,z_edges)
     openings.architectural_openings(coll,p,walls,door,z_edges)

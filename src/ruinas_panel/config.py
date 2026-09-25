@@ -26,7 +26,7 @@ EXPORT_METHOD = 'MANIFOLD'
 EXPORT_DEBRIS_MM3 = 2.0
 
 
-QUALITY = {'DRAFT':(1,.45,1),'WORK':(2,.32,2),'DETAIL':(3,.18,2)}
+QUALITY = {'DRAFT':(1,.45,1),'WORK':(2,.32,2),'DETAIL':(2,.18,2)}
 
 
 # Detalle fino para resina por calidad: las caras visibles (frente, dorso y techo) se subdividen
@@ -35,7 +35,7 @@ QUALITY = {'DRAFT':(1,.45,1),'WORK':(2,.32,2),'DETAIL':(3,.18,2)}
 FINE_DETAIL={'DETAIL':{'edge':.22,'pits':.12,'pit_scale':.45,'grain':.04,'grain_scale':.15}}
 
 
-QUALITY_ITEMS=[('DRAFT','Borrador','Estructura rápida, sin grietas finas'),('WORK','Trabajo','Detalle ligero'),('DETAIL','Detalle','Más geometría para revisar y exportar')]
+QUALITY_ITEMS=[('DRAFT','Borrador','Estructura rápida, sin grietas finas'),('WORK','Trabajo','Detalle ligero'),('DETAIL','Detalle','Detalle fino para resina: poros y grano; exportación lenta')]
 
 
 BUILD_TYPES={'PARTITION':(8.0,4.5,.6,10.0),'WALL':(12.0,6.25,1.0,12.0),'FORTRESS':(18.0,8.0,1.3,15.0)}

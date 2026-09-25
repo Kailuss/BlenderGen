@@ -324,6 +324,15 @@ El coste por llamada crece de forma lineal, así que el total es cuadrático. La
   - `weather.fine_relief` añade picado Voronoi (poros de ~0,45 mm, hasta 0,12 mm de hondo) y grano de nubes (0,04 mm) con modificadores Displace en coordenadas globales, siempre hacia dentro.
   - Coste en la puerta con grietas al 0,6 en Detalle: generar 87 s y fundir 74 s; 1,42 millones de caras fuente y 1,09 millones en el STL. Sin detalle fino: 34 s + 18 s y 391 000 caras.
   - En los bordes superiores queda una arista unos 0,03 mm más saliente, porque el relieve se aplica en diagonal en el bisel; está por debajo del píxel de la impresora.
+- **Rendimiento de Detalle y Detalle por defecto (2026-09-25).** La calidad de exportación por defecto pasa a Detalle; los .blend guardados conservan su valor.
+  - El perfil (cProfile) señaló cuatro causas:
+    - `foreach_get` con matrices float64 copiaba valor a valor; ahora lee en float32, el tipo nativo.
+    - `refine_visible` recorría las aristas en Python; ahora usa numpy.
+    - `terrain.surface` recorría los triángulos uno a uno; ahora lanza un rayo sobre un BVH.
+    - Había bucles por vértice en `wall_tree`, `carve_rectangle`, las transformaciones de tramo, los escombros, las cajas de grieta y el recorte de X; ahora usan numpy.
+  - Además, Detalle parte de subdivisión nivel 2 en vez de 3, y `refine_visible` pone la densidad solo en caras visibles. Así desaparece también el reborde de los bordes superiores.
+  - Puerta con grietas al 0,6 en Detalle: generar 87 → 34 s, fundir 74 → 34 s, STL de 1 091 000 → 607 000 caras. Trabajo y Borrador también mejoran (puerta 6,7 → 4,3 s).
+  - Las referencias cambian como mucho 0,0002 mm en tierra y escombros, por el BVH en float32.
 
 Pendiente:
 

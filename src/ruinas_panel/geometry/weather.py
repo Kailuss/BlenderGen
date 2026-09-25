@@ -13,26 +13,40 @@ import random
 def refine_visible(obj, target):
     'IA: Subdivide aristas de caras visibles (frente, dorso y techo) hasta ~target mm, por pasadas del grupo más largo; juntas y base no se densifican.'
     import bmesh
-    import math
-    bm=bmesh.new()
-    bm.from_mesh(obj.data)
+    import numpy
+    me=obj.data
     for _ in range(8):
-        groups={}
-        for e in bm.edges:
-            # Incluir biseles (normal a ~45°): si solo se densifica la cara plana queda un labio en el borde.
-            if not any(abs(f.normal.y)>.3 or f.normal.z>.3 for f in e.link_faces):
-                continue
-            cuts=math.ceil(e.calc_length()/target)-1
-            if cuts>=1:
-                groups.setdefault(min(cuts,24),[]).append(e)
-        if not groups:
+        co=primitives.coords(obj)
+        ends=numpy.empty(len(me.edges)*2,dtype=numpy.int32)
+        me.edges.foreach_get('vertices',ends)
+        ends=ends.reshape(-1,2)
+        normals=numpy.empty(len(me.polygons)*3,dtype=numpy.float32)
+        me.polygons.foreach_get('normal',normals)
+        normals=normals.reshape(-1,3)
+        starts=numpy.empty(len(me.polygons),dtype=numpy.int32)
+        totals=numpy.empty(len(me.polygons),dtype=numpy.int32)
+        me.polygons.foreach_get('loop_start',starts)
+        me.polygons.foreach_get('loop_total',totals)
+        loop_edges=numpy.empty(len(me.loops),dtype=numpy.int32)
+        me.loops.foreach_get('edge_index',loop_edges)
+        # Incluir biseles (normal a ~45°): si solo se densifica la cara plana queda un labio en el borde.
+        visible=(numpy.abs(normals[:,1])>.3)|(normals[:,2]>.3)
+        owner=numpy.repeat(numpy.arange(len(starts)),totals)
+        loops=numpy.repeat(starts,totals)+numpy.arange(len(owner))-numpy.repeat(numpy.cumsum(totals)-totals,totals)
+        edges=numpy.unique(loop_edges[loops[visible[owner]]])
+        lengths=numpy.linalg.norm(co[ends[edges,0]]-co[ends[edges,1]],axis=1)
+        cuts=numpy.minimum(numpy.ceil(lengths/target).astype(int)-1,24)
+        if not len(cuts) or cuts.max()<1:
             break
+        top=int(cuts.max())
         # Una sola longitud por pasada: las aristas opuestas reciben los mismos cortes y el relleno forma rejilla.
-        bmesh.ops.subdivide_edges(bm,edges=groups[max(groups)],cuts=max(groups),use_grid_fill=True)
-        bm.normal_update()
-    bm.to_mesh(obj.data)
-    bm.free()
-    obj.data.update()
+        bm=bmesh.new()
+        bm.from_mesh(me)
+        bm.edges.ensure_lookup_table()
+        bmesh.ops.subdivide_edges(bm,edges=[bm.edges[i] for i in edges[cuts==top]],cuts=top,use_grid_fill=True)
+        bm.to_mesh(me)
+        bm.free()
+        me.update()
 
 
 def fine_relief(obj, spec, amount):

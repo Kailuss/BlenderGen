@@ -28,6 +28,21 @@ def mesh_obj(name, verts, faces, coll, mat):
     return obj
 
 
+def coords(obj):
+    'IA: Coordenadas de los vértices como matriz numpy (n, 3) en float64; lee en float32, el tipo nativo, para copiar en bloque.'
+    import numpy
+    data = numpy.empty(len(obj.data.vertices) * 3, dtype=numpy.float32)
+    obj.data.vertices.foreach_get('co', data)
+    return data.reshape(-1, 3).astype(numpy.float64)
+
+
+def set_coords(obj, data):
+    'IA: Escribe una matriz (n, 3) de coordenadas en la malla y la actualiza.'
+    import numpy
+    obj.data.vertices.foreach_set('co', numpy.ascontiguousarray(data, dtype=numpy.float32).reshape(-1))
+    obj.data.update()
+
+
 def piece_key(obj):
     'IA: Clave estable de una pieza para semillas; no cambia aunque Blender añada sufijos .001 al nombre.'
     return obj.get('ruin_key', obj.name)
