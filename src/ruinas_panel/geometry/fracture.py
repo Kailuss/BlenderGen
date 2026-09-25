@@ -198,7 +198,7 @@ def crack_stone(ob, amount, seed, coll, mat, frame=None, split=False):
         backup=ob.data.copy()
         mod=ob.modifiers.new('Rama de grieta','BOOLEAN')
         mod.operation='DIFFERENCE'
-        mod.solver=config.CRACK_SOLVER
+        mod.solver=config.BOOLEAN_SOLVER
         mod.object=cut
         primitives.apply_modifier(ob,mod,cut)
         after=primitives.mesh_volume(ob.data) if ob.data.vertices else 0

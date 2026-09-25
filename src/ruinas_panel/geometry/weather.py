@@ -10,10 +10,52 @@ import bpy
 import random
 
 
+def refine_visible(obj, target):
+    'IA: Subdivide aristas de caras visibles (frente, dorso y techo) hasta ~target mm, por pasadas del grupo más largo; juntas y base no se densifican.'
+    import bmesh
+    import math
+    bm=bmesh.new()
+    bm.from_mesh(obj.data)
+    for _ in range(8):
+        groups={}
+        for e in bm.edges:
+            # Incluir biseles (normal a ~45°): si solo se densifica la cara plana queda un labio en el borde.
+            if not any(abs(f.normal.y)>.3 or f.normal.z>.3 for f in e.link_faces):
+                continue
+            cuts=math.ceil(e.calc_length()/target)-1
+            if cuts>=1:
+                groups.setdefault(min(cuts,24),[]).append(e)
+        if not groups:
+            break
+        # Una sola longitud por pasada: las aristas opuestas reciben los mismos cortes y el relleno forma rejilla.
+        bmesh.ops.subdivide_edges(bm,edges=groups[max(groups)],cuts=max(groups),use_grid_fill=True)
+        bm.normal_update()
+    bm.to_mesh(obj.data)
+    bm.free()
+    obj.data.update()
+
+
+def fine_relief(obj, spec, amount):
+    'IA: Picado Voronoi y grano de nubes hacia dentro con Displace en coordenadas globales: rápido, determinista y sin hinchar la pieza.'
+    layers=(('Ruinas · picado','VORONOI',spec['pit_scale'],spec['pits']),('Ruinas · grano','CLOUDS',spec['grain_scale'],spec['grain']))
+    for name,kind,size,depth in layers:
+        texture=bpy.data.textures.get(name) or bpy.data.textures.new(name,kind)
+        texture.noise_scale=size
+        texture.use_clamp=True
+        mod=obj.modifiers.new(name,'DISPLACE')
+        mod.texture=texture
+        mod.texture_coords='GLOBAL'
+        mod.direction='NORMAL'
+        # Con mid_level 1, un valor de textura en [0,1] solo desplaza hacia dentro, hasta depth·amount.
+        mod.mid_level=1.0
+        mod.strength=depth*min(1.0,amount*1.4)
+        primitives.apply_modifier(obj,mod)
+
+
 @profiling.timed("desgaste")
 def weather_stone(obj, amount, seed):
     # Erosión hacia dentro; no desplaza las hiladas ni hincha los ladrillos.
-    'IA: Aplica desgaste hacia dentro sin cambiar las hiladas; usa la calidad activa y la semilla local.'
+    'IA: Desgaste hacia dentro sin cambiar hiladas; en calidades de config.FINE_DETAIL añade densidad visible y picado imprimible.'
     if amount<=0:
         return
     # Misma geometría de desgaste al editar y al preparar el sólido.
@@ -55,6 +97,10 @@ def weather_stone(obj, amount, seed):
     mod.iterations=1
     mod.vertex_group=smooth_group.name
     primitives.apply_modifier(obj,mod)
+    spec=config.FINE_DETAIL.get(runtime.quality)
+    if spec and not obj.name.startswith('Esquirla'):
+        refine_visible(obj,spec['edge'])
+        fine_relief(obj,spec,amount)
     for face in obj.data.polygons:
         face.use_smooth=True
     obj.data.update()

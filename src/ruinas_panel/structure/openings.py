@@ -1,5 +1,6 @@
 """structure /openings — ver docs/ARCHITECTURE.md para contratos y dependencias."""
 
+from .. import config
 from ..geometry import primitives
 from ..geometry import timber
 from ..services import profiling
@@ -25,7 +26,7 @@ def wall_local(w,q):
 
 
 def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
-    'Booleanos locales solo sobre piezas que intersectan el hueco.\n\nIA: Recorta solo piezas solapadas; actualiza cutter/normales y elimina piezas contenidas antes del booleano.'
+    'Booleanos locales solo sobre piezas que intersectan el hueco.\n\nIA: Recorta solo piezas solapadas con BOOLEAN_SOLVER; elimina piezas contenidas; restaura la pieza si el booleano quita más que el cruce con el hueco.'
     verts=[(x0,-T,z0),(x1,-T,z0),(x1,T,z0),(x0,T,z0),(x0,-T,z1),(x1,-T,z1),(x1,T,z1),(x0,T,z1)]
     cutter=primitives.mesh_obj('Cortador · '+name,verts,[(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)],coll,primitives.material('Temporal',(.5,.5,.5)))
     # Box sin modificadores pendientes; transformación rígida al plano de la pared.
@@ -61,11 +62,23 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
         bm.to_mesh(ob.data)
         bm.free()
         ob.data.update()
+        # El recorte no puede quitar más que el cruce de la caja de la pieza con el cortador.
+        reach=[max(0,min(max(q[i] for q in coords),hi)-max(min(q[i] for q in coords),lo)) for i,(lo,hi) in enumerate(((x0,x1),(-T,T),(z0,z1)))]
+        limit=reach[0]*reach[1]*reach[2]*1.05+.5
+        before=primitives.mesh_volume(ob.data)
+        backup=ob.data.copy()
         mod=ob.modifiers.new('Hueco arquitectónico','BOOLEAN')
         mod.operation='DIFFERENCE'
-        mod.solver='EXACT'
+        mod.solver=config.BOOLEAN_SOLVER
         mod.object=cutter
         primitives.apply_modifier(ob,mod,cutter)
+        if ob.data.vertices and before-primitives.mesh_volume(ob.data)>limit:
+            # Booleano fallido: devolvió menos pieza de la que el hueco puede quitar. Se conserva sin recortar.
+            failed=ob.data
+            ob.data=backup.copy()
+            bpy.data.meshes.remove(failed)
+            ob['hueco_revertido']=True
+        bpy.data.meshes.remove(backup)
         if not ob.data.vertices:
             mesh=ob.data
             bpy.data.objects.remove(ob,do_unlink=True)

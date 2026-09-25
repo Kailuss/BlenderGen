@@ -315,6 +315,15 @@ El coste por llamada crece de forma lineal, así que el total es cuadrático. La
   - `fracture.printable` aplica `config.CRACK_PRINT`: 0,15 mm de ancho en superficie, suponiendo 0,25 mm de erosión, y 0,5 mm de profundidad hasta el 85 % del largo; después se afina de forma continua hasta la punta. Las partidas aplican los mínimos en todo su largo.
   - Resultado: entre el 85 % y el 95 % del largo supera 0,15 mm, también al 0,2. El aspecto al 0,6 apenas cambia (renders revisados).
   - Los valores son provisionales hasta calibrarlos con una impresión de prueba. `python dev.py calibrate` (`tools/print_test.py`) genera una placa de 72 × 44 mm, cerrada y de una sola pieza, con leyenda: filas de ancho, de profundidad y de pivotes, y dos piedras reales en Detalle. El usuario decidió no imprimirla (2026-09-25): los valores se quedan como están, elegidos a partir de la ficha de la impresora; la placa queda disponible como herramienta opcional.
+- **Huecos de ventanas y vigas con Manifold (fallo heredado de v20).** `carve_rectangle` usaba EXACT, que fallaba en silencio igual que en las grietas: devolvía una malla casi vacía y la pieza se borraba.
+  - En el caso de referencia `door_windows_work` (Trabajo) desaparecían 5 piedras junto a las ventanas (`hilada 02.01`, `hilada 04.01`, `right.2.1`, `right.3.0` y `right.4.1`), y en su lugar solo se veía mortero.
+  - En Detalle desaparecían más, el marco de la ventana quedaba flotando y la exportación Manifold lo rechazaba.
+  - Ahora se usa `config.BOOLEAN_SOLVER='MANIFOLD'` (antes `CRACK_SOLVER`) con una protección: si el booleano quita más volumen que el cruce de la pieza con el hueco, se restaura la pieza y se marca `hueco_revertido`. Renders revisados y referencias actualizadas.
+- **Detalle fino para resina (solo en calidad Detalle, `config.FINE_DETAIL`).**
+  - `weather.refine_visible` subdivide hasta ~0,22 mm las caras visibles y los biseles (frente, dorso y techo); las juntas y la base no.
+  - `weather.fine_relief` añade picado Voronoi (poros de ~0,45 mm, hasta 0,12 mm de hondo) y grano de nubes (0,04 mm) con modificadores Displace en coordenadas globales, siempre hacia dentro.
+  - Coste en la puerta con grietas al 0,6 en Detalle: generar 87 s y fundir 74 s; 1,42 millones de caras fuente y 1,09 millones en el STL. Sin detalle fino: 34 s + 18 s y 391 000 caras.
+  - En los bordes superiores queda una arista unos 0,03 mm más saliente, porque el relieve se aplica en diagonal en el bisel; está por debajo del píxel de la impresora.
 
 Pendiente:
 

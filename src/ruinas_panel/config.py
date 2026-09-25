@@ -29,6 +29,12 @@ EXPORT_DEBRIS_MM3 = 2.0
 QUALITY = {'DRAFT':(1,.45,1),'WORK':(2,.32,2),'DETAIL':(3,.18,2)}
 
 
+# Detalle fino para resina por calidad: las caras visibles (frente, dorso y techo) se subdividen
+# hasta 'edge' mm y reciben picado Voronoi (poros de ~pit_scale mm, hasta 'pits' mm de hondo) y
+# grano de nubes ('grain' mm). Todo hacia dentro: no cambia hiladas ni juntas.
+FINE_DETAIL={'DETAIL':{'edge':.22,'pits':.12,'pit_scale':.45,'grain':.04,'grain_scale':.15}}
+
+
 QUALITY_ITEMS=[('DRAFT','Borrador','Estructura rápida, sin grietas finas'),('WORK','Trabajo','Detalle ligero'),('DETAIL','Detalle','Más geometría para revisar y exportar')]
 
 
@@ -56,8 +62,9 @@ CRACK_MAX_VOLUME_LOSS=.25
 CRACK_PRINT={'min_surface_width':.15,'min_depth':.5,'erosion':.25,'tail':.15}
 
 
-# Solver de los booleanos de grieta. MANIFOLD (Blender 4.5+) exige piezas cerradas, como las nuestras.
-CRACK_SOLVER='MANIFOLD'
+# Solver de los booleanos de pieza (grietas, ventanas y alojamientos de viga). MANIFOLD (Blender 4.5+)
+# exige piezas cerradas, como las nuestras; EXACT fallaba en silencio con piedras desgastadas o densas.
+BOOLEAN_SOLVER='MANIFOLD'
 
 
 # Tensión 0–1 por cercanía (mm) a huecos y extremos del tramo. Probabilidades por pieza:
