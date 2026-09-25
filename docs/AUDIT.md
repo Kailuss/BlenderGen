@@ -43,7 +43,7 @@ Severidad: **Alta** significa resultado incorrecto, riesgo de cierre de Blender 
 | ID | Sev. | Área | Hallazgo | Evidencia |
 |---|---|---|---|---|
 | C10 | Alta | Grietas | ✅ Resuelto: una grieta podía dejar la piedra reducida a una esquirla | Blender |
-| C1 | Alta | Grietas | En paredes de retorno, las grietas se tallan en la cara de junta | Blender |
+| C1 | Alta | Grietas | ✅ Resuelto: en paredes de retorno, las grietas se tallaban en la cara de junta | Blender |
 | C2 | Alta | Estado | ✅ Resuelto: referencias a ID en `runtime`, sin handlers de deshacer ni de carga | Blender (carga) + doc. Blender (deshacer) |
 | C3 | Media | Caché | ✅ Resuelto: la exportación reutilizaba geometría de vista previa | Blender |
 | C4 | Media | UI | ✅ Resuelto: operadores sin `poll` ni gestión de errores | Código |
@@ -194,7 +194,7 @@ Criterio de salida: los casos actuales conservan su digest. Los casos nuevos que
 | 1.3 | Clave estable `ob['ruin_key']`, asignada al crear con el mismo texto que el nombre actual, como semilla CRC; rol `ob['ruin_role']` para clasificar | C6 | M | Igual (mismos textos) |
 | 1.4 | ✅ Para C3, medir dos opciones: (a) incluir `runtime.preview` en la firma; (b) biselar siempre el mortero. Elegir por tiempo y resultado | C3 | S | (a) igual; (b) cambia |
 | 1.4b | ✅ C10: revertir la rama si el booleano quita más del 25 % del volumen, y prueba que lo detecta | C10 | S | Cambió `door_windows_work` |
-| 1.5 | Grietas en el marco local del tramo (usando `wall_id` y el eje de `paredes_generadas`), decidiendo qué cara es la visible en cada pared | C1 | M | Cambia en L/U/habitación |
+| 1.5 | ✅ Grietas en el marco local del tramo (usando `wall_id` y el eje de `paredes_generadas`), decidiendo qué cara es la visible en cada pared | C1 | M | Cambia en L/U/habitación |
 | 1.6 | En `undo_post`, si `parametros_muro` no coincide con los ajustes actuales, programar una vista previa | C5 | S | Igual |
 | 1.7 | Renombrar el Decimate o corregirlo según la intención (COLLAPSE o DISSOLVE), midiendo caras y aspecto del STL | C7 | S | Solo el STL, si se corrige |
 
@@ -293,7 +293,13 @@ El coste por llamada crece de forma lineal, así que el total es cuadrático. Qu
 
 Pendiente:
 
-- [ ] C1: render de un muro en L para confirmarlo visualmente.
+- [x] C1: render de un muro en L para confirmarlo visualmente.
+- **C1 resuelto, junto con un rediseño del aspecto de las grietas.**
+  - `crack_frame` elige la cara exterior de cada tramo usando el eje de `paredes_generadas`, y en habitación y U el lado opuesto al centro del edificio.
+  - Las grietas son ahora trazos quebrados (tramos de ~0,8 mm de longitud irregular) con sección en V que se afina hasta una punta cerrada, y como mucho una rama más fina.
+  - Renders revisados: en la pared lateral las grietas ya están en la cara visible.
+  - En `door_windows_work`, el paso de grietas baja de 6,6 s a 4,2 s (dos muestras alternas en la misma sesión) y las caras pasan de 142 069 a 142 206.
+  - Nueva cara degenerada en `Piedra · right.2.2`; la malla sigue cerrada y queda anotada en la referencia.
 - [ ] C2 y C5 con deshacer: requieren Blender con interfaz (generar, pulsar Ctrl+Z, mover un deslizador).
 
 Cuando un hallazgo quede demostrado en Blender, anótalo en `docs/STATUS.md` como límite conocido o márcalo aquí como resuelto.

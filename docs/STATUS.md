@@ -10,7 +10,7 @@ Las alturas 27/52/102 mm son presets de diseño, no garantías sobre reglas ofic
 
 Límites demostrados en Blender 5.2.2 (2026-09-25; detalle en `docs/AUDIT.md`), heredados de v20:
 
-- En L/U/habitación, las grietas de las paredes de retorno se tallan en la cara de junta.
+- En L/U/habitación, las grietas de las paredes de retorno se tallan en la cara de junta. Resuelto después: se tallan en la cara exterior de cada tramo, con trazo quebrado que se afina.
 - Una grieta puede dejar una piedra reducida a una esquirla (`door_windows_work`, `hilada 06.05`). Resuelto después: se revierte la rama si el booleano quita más del 25 % del volumen.
 - «Preparar sólido» reutiliza la geometría de vista previa si ambas calidades coinciden. Resuelto después: la caché se separa por modo; la primera exportación tras una vista previa reconstruye (+40–80 % de tiempo).
 - La primera generación tras cargar otro archivo falla con `ReferenceError`. Resuelto después: handlers de carga y deshacer sueltan las referencias.
