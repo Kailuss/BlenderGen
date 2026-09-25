@@ -105,6 +105,19 @@ def expected(actual,update=False):
     print('EXPECTED_PASSED',', '.join(current))
 
 
+def calibrate(blender, output):
+    """IA: genera en Blender la placa de prueba para resina (STL + leyenda .md); exige marcador además de exit code."""
+    output=Path(output).resolve()
+    cmd=[blender,'-b','--factory-startup','--python-exit-code','1','--python',str(ROOT/'tools/print_test.py'),'--','--output',str(output)]
+    log=output.with_suffix('.log')
+    output.parent.mkdir(parents=True,exist_ok=True)
+    with log.open('w',encoding='utf-8') as stream:
+        result=subprocess.run(cmd,stdout=stream,stderr=subprocess.STDOUT)
+    if result.returncode or 'PLATE_READY' not in log.read_text(encoding='utf-8'):raise RuntimeError('Placa fallida: '+str(log))
+    print('PLATE_READY',output)
+    print('LEYENDA',output.with_suffix('.md'))
+
+
 def pack(project=False):
     """IA: empaqueta únicamente fuentes del addon; excluye cachés, renders y pruebas del ZIP instalable."""
     check()
@@ -134,12 +147,14 @@ def main():
     sub.add_parser('check')
     package=sub.add_parser('pack');package.add_argument('--project',action='store_true')
     locate=sub.add_parser('find');locate.add_argument('query')
+    plate=sub.add_parser('calibrate');plate.add_argument('--blender');plate.add_argument('--output',default=str(ROOT/'dist'/'placa_prueba_resina.stl'))
     test=sub.add_parser('test');test.add_argument('--blender');test.add_argument('--baseline',type=Path)
     test.add_argument('--case',choices=['basic_draft','door_windows_work','room_beams_draft'])
     test.add_argument('--update-expected',action='store_true',help='acepta la geometría actual como referencia')
     args=parser.parse_args()
     if args.command=='check':check()
     elif args.command=='pack':pack(args.project)
+    elif args.command=='calibrate':calibrate(blender_path(args.blender),args.output)
     elif args.command=='find':
         for line in (ROOT/'docs/ARCHITECTURE.md').read_text(encoding='utf-8').splitlines():
             columns=line.split('|')

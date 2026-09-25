@@ -314,7 +314,7 @@ El coste por llamada crece de forma lineal, así que el total es cuadrático. La
   - Con la sección en V, el ancho en la superficie hundida por el desgaste es 2w·(d−e)/(d+0,2). Al 0,2 solo entre el 33 % y el 77 % del largo de cada grieta superaba 0,15 mm, y cerca de la punta la grieta no llegaba a atravesar la superficie erosionada.
   - `fracture.printable` aplica `config.CRACK_PRINT`: 0,15 mm de ancho en superficie, suponiendo 0,25 mm de erosión, y 0,5 mm de profundidad hasta el 85 % del largo; después se afina de forma continua hasta la punta. Las partidas aplican los mínimos en todo su largo.
   - Resultado: entre el 85 % y el 95 % del largo supera 0,15 mm, también al 0,2. El aspecto al 0,6 apenas cambia (renders revisados).
-  - Los valores son provisionales hasta calibrarlos con una impresión de prueba.
+  - Los valores son provisionales hasta calibrarlos con una impresión de prueba. `python dev.py calibrate` (`tools/print_test.py`) genera una placa de 72 × 44 mm, cerrada y de una sola pieza, con leyenda: filas de ancho, de profundidad y de pivotes, y dos piedras reales en Detalle. El usuario decidió no imprimirla (2026-09-25): los valores se quedan como están, elegidos a partir de la ficha de la impresora; la placa queda disponible como herramienta opcional.
 
 Pendiente:
 

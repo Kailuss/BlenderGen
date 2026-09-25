@@ -25,6 +25,7 @@ python dev.py test --update-expected
 python dev.py test --baseline ../outputs/muro_20/generador_muro.py
 python dev.py pack
 python dev.py pack --project
+python dev.py calibrate
 ```
 
 En este equipo Python no figura en PATH. Puedes usar:
@@ -39,6 +40,8 @@ $ruinasPython = 'C:\Users\yhora\.cache\codex-runtimes\codex-primary-runtime\depe
 `test` exige que cada pieza generada cierre (sin aristas abiertas) y que ninguna grieta reduzca una pieza por debajo de la mitad de su tamaño, y compara digests y caras degeneradas con `reports/expected.json`. Si la versión de Blender es otra, avisa y omite la comparación. `test --update-expected` acepta la geometría actual como nueva referencia: úsalo solo tras revisar render y cierre de un cambio de geometría intencionado.
 
 `test --baseline` compara vértices redondeados a 6 decimales, caras y nombres contra el monolito, con semilla de ruido de Blender controlada para la prueba. No compara renders píxel a píxel ni demuestra equivalencia de todas las combinaciones posibles. Cada escenario también se regenera desde caché y debe coincidir exactamente.
+
+`calibrate` genera `dist/placa_prueba_resina.stl` y su leyenda `.md`: ranuras en V de 0,05 a 0,40 mm, profundidades de 0,10 a 0,80 mm, pivotes de 0,2 a 1,0 mm y dos piedras reales agrietadas. Imprímela con la misma orientación que los muros, porque en caras verticales el detalle depende de la altura de capa. Con lo que se vea tras imprimar se ajusta `config.CRACK_PRINT`.
 
 `pack` crea solo el addon, con rutas portables y sin renders ni cachés. No ejecuta Blender: ejecuta la prueba relevante antes de distribuirlo.
 `pack --project` añade un segundo ZIP con el proyecto, documentación, habilidad y pruebas.
