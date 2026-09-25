@@ -11,6 +11,11 @@ SOLID_NAME = 'MURO · sólido exportable'
 
 # Aplicar modificadores en una escena de taller que solo contiene la pieza: el coste de cada
 # operador deja de crecer con el número de objetos de la escena principal.
+# Pausa de la vista automática según lo que tardó la última generación de cada calidad:
+# el refinado espera a «Actualizar» por encima de 'refine' s; la vista rápida, por encima de 'fast' s.
+PREVIEW_PAUSE_SECONDS = {'refine': 4.0, 'fast': 10.0}
+
+
 ISOLATE_MODIFIERS = True
 STAGE_SCENE = 'RUINAS · taller'
 

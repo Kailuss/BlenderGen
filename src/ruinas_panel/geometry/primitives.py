@@ -25,6 +25,8 @@ def mesh_obj(name, verts, faces, coll, mat):
     obj['ruin_key'] = name
     coll.objects.link(obj)
     obj.data.materials.append(mat)
+    if runtime.progress:
+        runtime.progress()
     return obj
 
 
@@ -46,6 +48,17 @@ def set_coords(obj, data):
 def piece_key(obj):
     'IA: Clave estable de una pieza para semillas; no cambia aunque Blender añada sufijos .001 al nombre.'
     return obj.get('ruin_key', obj.name)
+
+
+def remove_objects(objects):
+    'IA: Borra muchos objetos y sus mallas sin usuarios con batch_remove; borrar uno a uno recorre todo el archivo en cada llamada.'
+    objects = list(objects)
+    meshes = {ob.data for ob in objects if ob.data is not None}
+    if objects:
+        bpy.data.batch_remove(ids=objects)
+    orphans = [mesh for mesh in meshes if mesh.users == 0]
+    if orphans:
+        bpy.data.batch_remove(ids=orphans)
 
 
 def stage_scene():

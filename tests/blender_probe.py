@@ -108,6 +108,16 @@ def session_checks(g, state, config, case):
     assert state.pending == bpy.context.scene.name and bpy.app.timers.is_registered(preview.refresh_timer)
     preview.cancel_pending()
     p.seed -= 1
+    # Pausa automática: si Borrador tardó más del umbral, un cambio no programa vista previa y lo explica.
+    state.durations['DRAFT'] = config.PREVIEW_PAUSE_SECONDS['fast'] + 6
+    state.busy = False
+    try:
+        p.seed += 1
+        assert state.pending is None and p.status.startswith('Pausa'), (state.pending, p.status)
+    finally:
+        state.busy = True
+        state.durations.clear()
+        p.seed -= 1
     # Operador: un error de validación llega como informe, no como traza, y no toca la escena.
     before = set(bpy.data.objects.keys())
     for key, value in {'build_type': 'FORTRESS', 'layout_mode': 'TWO', 'length': 60, 'door_enabled': True}.items():

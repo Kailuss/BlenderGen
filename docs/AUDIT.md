@@ -56,7 +56,7 @@ Severidad: **Alta** significa resultado incorrecto, riesgo de cierre de Blender 
 | R2 | Media | Rendimiento | ✅ Mejorado: hasta ~9 booleanos EXACT por piedra en grietas; ahora Manifold y como mucho una rama por grieta | Código + datos |
 | R3 | Media | Densidad | Parcial: en Detalle la densidad va por mm en caras visibles; Trabajo sigue con ~1 000 caras por piedra | Datos |
 | R4 | Baja | Rendimiento | ✅ Casi resuelto: bucles Python por vértice (quedan `settle_rubble`, `hole_fragment` y el ruido del desgaste) | Código |
-| R5 | Media | UX | Vista previa bloqueante, sin progreso ni pausa automática | Datos |
+| R5 | Media | UX | ✅ Resuelto: vista previa bloqueante, sin progreso ni pausa automática | Datos |
 | T1 | Alta | Pruebas | Parcial: la exportación Manifold y el modo exportación se prueban; falta un caso en Detalle, ahora la calidad por defecto | Código |
 | T2 | Media | Pruebas | ✅ Resuelto: sin referencia v20 ni digests guardados que actúen como referencia | Código |
 | T3 | Media | Pruebas | Ciclo de vida desconectado y dependiente de un .blend externo | Código |
@@ -179,7 +179,7 @@ Esfuerzo: **S** es un cambio local en uno o dos archivos; **M** abarca varios m�
 | 0.1 | ✅ `git init`, `.gitattributes` con finales de línea y primer commit que incluya `reports/` | M7 | S |
 | 0.2 | ✅ `dev.py test` compara con `reports/expected.json` (digests, versión de Blender, caras degeneradas conocidas); `--update-expected` acepta cambios | T2 | S |
 | 0.3 | ✅ Comprobación de cierre por pieza en `blender_probe`: falla ante aristas abiertas y registra las caras de área casi nula | T4, C9 | S |
-| 0.4 | Casos nuevos: `holes_cracks_work` (L, agujeros, grietas 0,6), `export_work` (`preview=False`, `make_solid` y comprobación manifold) y `detail_smoke` | T1, C1, C3 | M |
+| 0.4 | ✅ (como `window_detail`) Casos nuevos: `holes_cracks_work` (L, agujeros, grietas 0,6), `export_work` (`preview=False`, `make_solid` y comprobación manifold) y `detail_smoke` | T1, C1, C3 | M |
 | 0.5 | `dev.py test --lifecycle` con un .blend creado por la propia prueba; pasos: deshacer, abrir otro archivo y regenerar | T3, C2, C5 | M |
 | 0.6 | `dev.py`: ✅ salida en UTF-8; pendiente: versión leída de `bl_info` y casos en una sola lista | T6 | S |
 
@@ -233,7 +233,7 @@ Criterio: digests idénticos y tiempos medidos en los mismos casos. Si 2.2 no co
 
 | # | Propuesta | Resuelve | Esf. |
 |---|---|---|---|
-| 5.1 | Barra de progreso (`window_manager.progress_*`) y pausa automática de la vista previa cuando la última generación supere un umbral (por ejemplo, 3 s), con aviso en el panel | R5 | S |
+| 5.1 | ✅ Barra de progreso (`window_manager.progress_*`) y pausa automática de la vista previa cuando la última generación supere un umbral (por ejemplo, 3 s), con aviso en el panel | R5 | S |
 | 5.2 | Subpaneles plegables (`layout.panel` o `bl_parent_id`), conservando los identificadores RNA | UX | S |
 | 5.3 | ✅ Mensajes de error de exportación que digan qué cambiar | C4 | S |
 | 5.4 | `blender_manifest.toml` junto a `bl_info`, con una única fuente de versión y el autor correcto | M8, T6 | S |
@@ -333,6 +333,13 @@ El coste por llamada crece de forma lineal, así que el total es cuadrático. La
   - Además, Detalle parte de subdivisión nivel 2 en vez de 3, y `refine_visible` pone la densidad solo en caras visibles. Así desaparece también el reborde de los bordes superiores.
   - Puerta con grietas al 0,6 en Detalle: generar 87 → 34 s, fundir 74 → 34 s, STL de 1 091 000 → 607 000 caras. Trabajo y Borrador también mejoran (puerta 6,7 → 4,3 s).
   - Las referencias cambian como mucho 0,0002 mm en tierra y escombros, por el BVH en float32.
+- **Caso `window_detail` (0.4).** Genera en Detalle y en modo exportación un muro de 80 mm con ventana, agujero y grietas al 0,6. Exige que ningún booleano se revierta y que el sólido Manifold salga en una sola pieza cerrada.
+- **Vista previa sin bloqueos largos (5.1, R5).**
+  - `preview.ProgressCursor` muestra el progreso en el cursor, contando las piezas creadas frente a la generación anterior.
+  - `runtime.durations` guarda lo que tardó la última generación de cada calidad. Con `config.PREVIEW_PAUSE_SECONDS`, el refinado espera a «Actualizar» por encima de 4 s y la vista rápida por encima de 10 s; el panel lo explica.
+  - Probado con interfaz (Vulkan) en una habitación: Borrador sigue siendo automático y Trabajo (31 s) queda en pausa.
+  - `primitives.remove_objects` borra con `bpy.data.batch_remove`. Borrar pieza a pieza recorría el archivo en cada llamada: tras una habitación en Trabajo, regenerar Borrador pasa de 12,1 a 6,5 s.
+  - Pendiente: la habitación en Trabajo con grietas al 0,6 tarda 31 s.
 
 Pendiente:
 

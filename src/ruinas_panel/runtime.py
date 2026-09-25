@@ -29,3 +29,15 @@ cache = {}
 
 
 timings = {}
+
+
+# Segundos de la última generación de vista previa por calidad; decide la pausa automática.
+durations = {}
+
+
+# Piezas creadas en la última generación por calidad; escala el progreso del cursor.
+pieces = {}
+
+
+# Progreso en curso: función sin argumentos que avisa de una pieza creada, o None.
+progress = None

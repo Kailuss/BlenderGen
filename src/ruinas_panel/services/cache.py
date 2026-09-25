@@ -2,6 +2,7 @@
 
 from .. import config
 from .. import runtime
+from ..geometry import primitives
 from ..structure import layout
 import bpy
 
@@ -18,11 +19,7 @@ def clear_cache(key=None):
         entry=runtime.cache.pop(key,None)
         if not entry:
             continue
-        for ob in entry['objects']:
-            mesh=ob.data
-            bpy.data.objects.remove(ob,do_unlink=True)
-            if mesh.users==0:
-                bpy.data.meshes.remove(mesh)
+        primitives.remove_objects(entry['objects'])
 
 
 def forget_cache():
@@ -34,11 +31,7 @@ def purge_orphan_templates():
     'IA: Borra plantillas huérfanas buscándolas por prefijo en bpy.data; no actúa si la caché sigue en uso.'
     if runtime.cache:
         return
-    for ob in [o for o in bpy.data.objects if o.name.startswith(config.CACHE_PREFIX) and o.users==0]:
-        mesh=ob.data
-        bpy.data.objects.remove(ob,do_unlink=True)
-        if mesh and mesh.users==0:
-            bpy.data.meshes.remove(mesh)
+    primitives.remove_objects(o for o in bpy.data.objects if o.name.startswith(config.CACHE_PREFIX) and o.users==0)
 
 
 def clear_source():
@@ -46,11 +39,7 @@ def clear_source():
     coll=bpy.data.collections.get(config.COLLECTION)
     if not coll:
         return
-    for ob in list(coll.objects):
-        mesh=ob.data
-        bpy.data.objects.remove(ob,do_unlink=True)
-        if mesh.users==0:
-            bpy.data.meshes.remove(mesh)
+    primitives.remove_objects(coll.objects)
     bpy.data.collections.remove(coll)
 
 

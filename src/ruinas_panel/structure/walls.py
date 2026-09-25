@@ -101,11 +101,7 @@ def _build_wall(context, p):
         raise ValueError('Mínimos del prototipo: longitud 60, altura 25 y grosor 8 mm.')
     old = bpy.data.collections.get(config.COLLECTION)
     if old:
-        for obj in list(old.objects):
-            mesh=obj.data
-            bpy.data.objects.remove(obj, do_unlink=True)
-            if mesh.users==0:
-                bpy.data.meshes.remove(mesh)
+        primitives.remove_objects(old.objects)
         bpy.data.collections.remove(old)
     coll = bpy.data.collections.new(config.COLLECTION)
     context.scene.collection.children.link(coll)

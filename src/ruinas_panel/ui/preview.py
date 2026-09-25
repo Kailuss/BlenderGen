@@ -31,7 +31,48 @@ def settings_changed(self, context):
     self.status = 'Cambios pendientes'
     if not self.live_preview:
         return
+    first='DRAFT' if self.quick_edit else self.preview_quality
+    if slow(first,'fast'):
+        self.status = paused_status(first)
+        return
     schedule_refresh(self.id_data)
+
+
+def slow(quality,stage):
+    'IA: True si la última vista previa en esa calidad superó el umbral de config.PREVIEW_PAUSE_SECONDS para stage (fast o refine).'
+    return runtime.durations.get(quality,0)>config.PREVIEW_PAUSE_SECONDS[stage]
+
+
+def paused_status(quality):
+    'IA: Texto de estado de la pausa automática, con la duración que la provocó.'
+    return 'Pausa: %s tarda %.0f s · pulsa Actualizar'%(quality.lower(),runtime.durations.get(quality,0))
+
+
+class ProgressCursor:
+    'IA: Progreso en el cursor mientras se genera; avanza por piezas creadas frente a la generación anterior de esa calidad.'
+    def __init__(self,context,quality):
+        'IA: Guarda la ventana y la estimación de piezas; no dibuja nada hasta entrar.'
+        self.wm=context.window_manager
+        self.quality=quality
+        self.expected=max(50,runtime.pieces.get(quality,300))
+        self.count=0
+    def tick(self):
+        'IA: Cuenta una pieza y actualiza el cursor cada 10; nunca supera el 99 %.'
+        self.count+=1
+        if self.count%10==0:
+            self.wm.progress_update(min(99,int(100*self.count/self.expected)))
+    def __enter__(self):
+        'IA: Activa el aviso de piezas en runtime y el progreso del cursor.'
+        self.wm.progress_begin(0,100)
+        runtime.progress=self.tick
+        return self
+    def __exit__(self,*exc):
+        'IA: Retira el aviso y cierra el progreso aunque la generación falle; guarda el recuento si hubo piezas nuevas.'
+        runtime.progress=None
+        self.wm.progress_end()
+        if self.count:
+            runtime.pieces[self.quality]=self.count
+        return False
 
 
 def schedule_refresh(scene):
@@ -73,6 +114,11 @@ def refresh_timer():
     try:
         if runtime.phase=='FAST' and p.quick_edit and p.preview_quality!='DRAFT':
             update_preview(bpy.context,'DRAFT')
+            if slow(p.preview_quality,'refine'):
+                # Borrador sigue siendo automático; el refinado lento espera a «Actualizar».
+                runtime.pending=None
+                p.status=paused_status(p.preview_quality)
+                return None
             runtime.phase='REFINE'
             runtime.deadline=time.monotonic()+.65
             return .65
@@ -95,8 +141,12 @@ def update_preview(context, quality=None):
             old.hide_set(True)
             old.hide_render=True
         bpy.ops.object.select_all(action='DESELECT')
-        generation.generate(context,context.scene.ruin_settings,quality)
-        context.scene.ruin_settings.status='Vista '+(runtime.quality.lower())+' · %.2f s'%(time.perf_counter()-start)
+        target=quality or context.scene.ruin_settings.preview_quality
+        with ProgressCursor(context,target):
+            generation.generate(context,context.scene.ruin_settings,quality)
+        elapsed=time.perf_counter()-start
+        runtime.durations[runtime.quality]=elapsed
+        context.scene.ruin_settings.status='Vista '+(runtime.quality.lower())+' · %.2f s'%elapsed
         for screen in bpy.data.screens:
             for area in screen.areas:
                 if area.type=='VIEW_3D':
@@ -113,7 +163,8 @@ def prepare_detail(context):
     runtime.busy=True
     try:
         bpy.ops.object.select_all(action='DESELECT')
-        generation.generate(context,context.scene.ruin_settings)
+        with ProgressCursor(context,context.scene.ruin_settings.export_quality):
+            generation.generate(context,context.scene.ruin_settings)
         result=export.make_solid(context)
         result.hide_set(False)
         result.hide_render=False
