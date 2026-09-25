@@ -2,28 +2,26 @@
   "blender": "5.2.2 LTS",
   "cases": {
     "basic_draft": {
-      "digest": "8864f018b697feeead2ed8200acc44a8cc112abd33c3b0bd31e2f9ee23295b9c",
-      "faces": 17175,
+      "digest": "fc8251f8859735037f93fa2d52ab065ebd2043e1350d8572de89ab5f25392041",
+      "faces": 4387,
       "degenerate_faces": []
     },
     "door_windows_work": {
-      "digest": "6628aa83ed837e164e88745842d3eda27b51d4fb5d39719f9c9ac85111f904ed",
-      "faces": 144991,
-      "degenerate_faces": [
-        "Piedra caída · fractura 3551.1",
-        "Piedra entera · hilada 05.00"
-      ]
+      "digest": "2edf55caaceb55976a2626fb6278082878627766fc4a496fa5e9793d4cbad081",
+      "faces": 21778,
+      "degenerate_faces": []
     },
     "room_beams_draft": {
-      "digest": "01ff4ed4192b66411e6348b4538a821fd0cc9983c9bfb507d19eaf10f22bb171",
-      "faces": 58243,
+      "digest": "eff95fe052351785ad12da24c7ea29c0a28b181b429d6aa553fd21a718647b57",
+      "faces": 24971,
       "degenerate_faces": []
     },
     "window_detail": {
-      "digest": "efca2446e7071ac4f5846b06fc30f1efae0bcab5a126d5974a8a6e16cd0fcee6",
-      "faces": 507344,
+      "digest": "2cf2fabfeca49e1a4f3846d2aa89ce4788baf918b3bff14ce172e6af08fc2d86",
+      "faces": 508287,
       "degenerate_faces": [
-        "Piedra entera · hilada 01.02"
+        "Piedra entera · hilada 03.05",
+        "Piedra entera · hilada 05.05"
       ]
     }
   }

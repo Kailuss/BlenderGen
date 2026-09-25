@@ -1,5 +1,6 @@
 """Invariantes de aparejo y alturas: se ejecutan con Python sin Blender."""
 from types import SimpleNamespace
+import random
 import unittest
 
 from ruinas_panel import config, runtime
@@ -30,8 +31,24 @@ class LayoutTests(unittest.TestCase):
         """IA: aplicar presets dentro de una operación protegida no debe reactivar callbacks."""
         for busy in (False,True):
             runtime.busy=busy
-            p=SimpleNamespace(build_type='WALL',height_type='TWO',layout_mode='ROOM',extra_side='RIGHT',building_depth=50)
+            p=SimpleNamespace(build_type='WALL',height_type='TWO',layout_mode='ROOM',extra_side='RIGHT',building_depth=50,wear_level='HEAVY')
             layout.apply_profiles(p)
             self.assertEqual(runtime.busy,busy)
-            self.assertEqual((p.height,p.thickness),(102,12))
+            self.assertEqual((p.height,p.thickness,p.wear),(102,12,config.WEAR_LEVELS['HEAVY']))
         runtime.busy=False
+
+
+class NoiseTests(unittest.TestCase):
+    """Ruido blanco gaussiano filtrado del perfil de derrumbe."""
+
+    def test_filtered_noise_depends_on_seed(self):
+        """IA: misma semilla, mismo perfil; otra semilla, otro perfil; normalizado a media 0 y desviación 1."""
+        a=layout.filtered_noise(random.Random(5),48,3)
+        b=layout.filtered_noise(random.Random(5),48,3)
+        c=layout.filtered_noise(random.Random(6),48,3)
+        samples=[a(i/200) for i in range(201)]
+        self.assertEqual(samples,[b(i/200) for i in range(201)])
+        self.assertNotEqual(samples,[c(i/200) for i in range(201)])
+        knots=[a(i/47) for i in range(48)]
+        self.assertAlmostEqual(sum(knots)/48,0,places=6)
+        self.assertAlmostEqual((sum(v*v for v in knots)/48)**.5,1,places=6)

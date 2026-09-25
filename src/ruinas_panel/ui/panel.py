@@ -105,6 +105,8 @@ def section_panel(index, section):
             row = col.row()
             row.enabled = enabled(p, field)
             row.prop(p, field, expand=field in config.EXPANDED_ENUMS, slider=True)
+        if section['id'] in ('finish', 'cracks') and p.preview_quality not in config.DAMAGE_QUALITIES:
+            col.label(text='Desgaste, grietas y escombros se ven en Detalle', icon='INFO')
         if section['id'] == 'build':
             col.label(text='Grosor %.0f mm · altura %.0f mm' % (config.BUILD_TYPES[p.build_type][0], config.HEIGHT_TYPES[p.height_type]))
         if section['id'] == 'windows' and p.windows_enabled:

@@ -4,10 +4,6 @@ from .. import config
 from .. import runtime
 from ..geometry import primitives
 from ..services import profiling
-from mathutils import Vector
-from mathutils import noise
-import bpy
-import random
 
 
 def refine_visible(obj, target):
@@ -49,61 +45,94 @@ def refine_visible(obj, target):
         me.update()
 
 
-def fine_relief(obj, spec, amount):
-    'IA: Picado Voronoi y grano de nubes hacia dentro con Displace en coordenadas globales: rápido, determinista y sin hinchar la pieza.'
-    layers=(('Ruinas · picado','VORONOI',spec['pit_scale'],spec['pits']),('Ruinas · grano','CLOUDS',spec['grain_scale'],spec['grain']))
-    for name,kind,size,depth in layers:
-        texture=bpy.data.textures.get(name) or bpy.data.textures.new(name,kind)
-        texture.noise_scale=size
-        texture.use_clamp=True
-        mod=obj.modifiers.new(name,'DISPLACE')
-        mod.texture=texture
-        mod.texture_coords='GLOBAL'
-        mod.direction='NORMAL'
-        # Con mid_level 1, un valor de textura en [0,1] solo desplaza hacia dentro, hasta depth·amount.
-        mod.mid_level=1.0
-        mod.strength=depth*min(1.0,amount*1.4)
-        primitives.apply_modifier(obj,mod)
+def mesh_edges(obj):
+    'IA: Pares de vértices de las aristas como matriz numpy (n, 2) en una sola llamada C.'
+    import numpy
+    ends=numpy.empty(len(obj.data.edges)*2,dtype=numpy.int32)
+    obj.data.edges.foreach_get('vertices',ends)
+    return ends.reshape(-1,2)
+
+
+def vertex_normals(obj):
+    'IA: Normales de vértice como matriz numpy (n, 3); lee en float32, el tipo nativo.'
+    import numpy
+    data=numpy.empty(len(obj.data.vertices)*3,dtype=numpy.float32)
+    obj.data.vertices.foreach_get('normal',data)
+    return data.reshape(-1,3).astype(numpy.float64)
+
+
+def gaussian_field(edges,count,rng,iterations):
+    'IA: Ruido blanco gaussiano por vértice difundido iterations veces entre vecinos (aprox. filtro gaussiano en la malla); media 0, desviación 1.'
+    import numpy
+    field=rng.standard_normal(count)
+    if len(edges) and iterations:
+        a,b=edges[:,0],edges[:,1]
+        degree=numpy.bincount(edges.ravel(),minlength=count).astype(float)
+        degree[degree==0]=1
+        for _ in range(iterations):
+            total=numpy.bincount(a,weights=field[b],minlength=count)+numpy.bincount(b,weights=field[a],minlength=count)
+            field=.5*field+.5*total/degree
+    field=field-field.mean()
+    spread=field.std()
+    return field/spread if spread>0 else field
+
+
+def fine_relief(obj, spec, amount, seed):
+    'IA: Poros y grano de ruido blanco gaussiano filtrado sobre la malla densa, sembrados por pieza; siempre hacia dentro.'
+    import numpy
+    rng=numpy.random.default_rng(seed+9001)
+    edges=mesh_edges(obj)
+    count=len(obj.data.vertices)
+    strength=min(1.0,amount*1.4)
+    pits=gaussian_field(edges,count,rng,spec['pit_iterations'])
+    grain=gaussian_field(edges,count,rng,spec['grain_iterations'])
+    # Poros donde el campo cae por debajo del umbral; el grano se normaliza a [0,1] para no sacar material.
+    depth=spec['pits']*numpy.clip((-pits-spec['pit_threshold'])/1.2,0,1)**.7
+    depth+=spec['grain']*(grain-grain.min())/max(1e-9,numpy.ptp(grain))
+    co=primitives.coords(obj)-vertex_normals(obj)*(depth*strength)[:,None]
+    primitives.set_coords(obj,co)
 
 
 @profiling.timed("desgaste")
 def weather_stone(obj, amount, seed):
     # Erosión hacia dentro; no desplaza las hiladas ni hincha los ladrillos.
-    'IA: Desgaste hacia dentro sin cambiar hiladas; en calidades de config.FINE_DETAIL añade densidad visible y picado imprimible.'
-    if amount<=0:
+    'IA: Desgaste hacia dentro con ruido blanco gaussiano filtrado sembrado por pieza; en config.FINE_DETAIL añade densidad visible y poros.'
+    import numpy
+    if amount<=0 or runtime.quality not in config.DAMAGE_QUALITIES:
         return
-    # Misma geometría de desgaste al editar y al preparar el sólido.
-    # La densidad depende de milímetros, no de un número fijo por ladrillo.
     # Malla ligera desde el principio, sin crear alta resolución para reducirla después.
     mod=obj.modifiers.new('Superficie de trabajo lowpoly','SUBSURF')
     mod.subdivision_type='SIMPLE'
-    mod.levels=1 if obj.name.startswith('Esquirla') else config.QUALITY[runtime.quality][0]
+    # Esquirlas y fragmentos de agujero son prismas irregulares triangulados: más densidad los arruga.
+    irregular=obj.name.startswith(('Esquirla','Piedra parcial'))
+    mod.levels=1 if irregular else config.QUALITY[runtime.quality][0]
     primitives.apply_modifier(obj,mod)
     obj['vertices_desgaste_actuales']=len(obj.data.vertices)
     obj.data.update()
-    coords=[v.co.copy() for v in obj.data.vertices]
-    normals=[v.normal.copy() for v in obj.data.vertices]
-    lo=Vector(tuple(min(q[i] for q in coords) for i in range(3)))
-    hi=Vector(tuple(max(q[i] for q in coords) for i in range(3)))
-    rr=random.Random(seed+5123)
-    character=rr.uniform(.8,1.15)
-    scale=rr.uniform(.16,.30)
-    bins=[[],[],[],[]]
-    offset=Vector((seed*.137,seed*.071,seed*.193))
-    for v,q,n in zip(obj.data.vertices,coords,normals):
-        distances=sorted(min(q[i]-lo[i],hi[i]-q[i]) for i in range(3))
-        edge=max(0,1-distances[1]/1.3)
-        broad=noise.noise_vector(q*scale+offset).x
-        patch=noise.noise_vector(q*.12+offset).y
-        grain=noise.noise_vector(q*.35+offset).z
-        mask=max(.05,min(1,.4+patch))
-        # Grandes depresiones suaves y pequeñas zonas erosionadas, no ruido uniforme.
-        loss=amount*character*(.08+.90*max(0,broad+.25)**2+
-                              .22*mask*max(0,grain+.3)+edge*(.12+.3*max(0,broad)))
-        v.co=q-n*loss
-        bins[max(0,min(3,int((patch+.65)*3)))].append(v.index)
+    co=primitives.coords(obj)
+    normals=vertex_normals(obj)
+    edges=mesh_edges(obj)
+    count=len(co)
+    rng=numpy.random.default_rng(seed+5123)
+    character=rng.uniform(.8,1.15)
+    scale=config.WEAR_NOISE['scale']
+    broad=gaussian_field(edges,count,rng,config.WEAR_NOISE['broad'])*scale
+    patch=gaussian_field(edges,count,rng,config.WEAR_NOISE['patch'])*scale
+    grain=gaussian_field(edges,count,rng,config.WEAR_NOISE['grain'])*scale
+    lo=co.min(axis=0)
+    hi=co.max(axis=0)
+    # Distancia a la segunda cara más cercana de la caja: cerca de una arista la erosión aumenta.
+    border=numpy.sort(numpy.minimum(co-lo,hi-co),axis=1)[:,1]
+    edge=numpy.clip(1-border/1.3,0,None)
+    mask=numpy.clip(.4+patch,.05,1)
+    # Grandes depresiones suaves y pequeñas zonas erosionadas, no ruido uniforme.
+    loss=amount*character*(.08+.90*numpy.clip(broad+.25,0,None)**2
+                           +.22*mask*numpy.clip(grain+.3,0,None)+edge*(.12+.3*numpy.clip(broad,0,None)))
+    primitives.set_coords(obj,co-normals*loss[:,None])
+    bins=numpy.clip(((patch+.65)*3).astype(int),0,3)
     smooth_group=obj.vertex_groups.new(name='Erosion suavizada por zonas')
-    for i,ids in enumerate(bins):
+    for i in range(4):
+        ids=numpy.nonzero(bins==i)[0].tolist()
         if ids:
             smooth_group.add(ids,.2+i*.25,'REPLACE')
     mod=obj.modifiers.new('Suavizado irregular de piedra','SMOOTH')
@@ -112,9 +141,7 @@ def weather_stone(obj, amount, seed):
     mod.vertex_group=smooth_group.name
     primitives.apply_modifier(obj,mod)
     spec=config.FINE_DETAIL.get(runtime.quality)
-    if spec and not obj.name.startswith('Esquirla'):
+    if spec and not irregular:
         refine_visible(obj,spec['edge'])
-        fine_relief(obj,spec,amount)
-    for face in obj.data.polygons:
-        face.use_smooth=True
-    obj.data.update()
+        fine_relief(obj,spec,amount,seed)
+    obj.data.shade_smooth()

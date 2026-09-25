@@ -63,27 +63,36 @@ def crack_paths(rr,p,amount,u0,u1,z0,z1,split=False):
         z=max(z0+.3,min(z1-.3,q.y)) if through!='u' else q.y
         return Vector((u,z))
     def trace(start,heading,length,width,depth,wobble,through=None):
-        'IA: Polilínea en zigzag desde start que termina al tocar un borde; se afina hasta la punta, o con through sale por el borde opuesto; None si queda corta.'
+        'IA: Paseo gaussiano de rumbo desde start que termina al tocar un borde; se afina hasta la punta, o con through sale por el borde opuesto; None si queda corto.'
+        # Paseo aleatorio de rumbo con incrementos de ruido blanco gaussiano (Tarbell, «Substrate»):
+        # cada tramo gira un ángulo gaussiano y tiende a volver a la dirección inicial.
         steps=max(3,round(length/.8))
-        across=Vector((-heading.y,heading.x))
-        phase=rr.uniform(0,math.tau)
+        step=length/steps
+        angle=0.0
         points=[start]
         ts=[0.0]
-        sign=rr.choice((-1,1))
+        pos=start.copy()
         for k in range(1,steps+1):
-            t=min(1,(k+(rr.uniform(-.3,.3) if k<steps else 0))/steps)
-            sign=-sign if rr.random()<.7 else sign
-            zig=sign*rr.uniform(.08,.3)*wobble*(1-.5*t)
-            drift=.25*wobble*math.sin(t*math.pi+phase)
-            wanted=start+heading*length*t+across*(zig+drift)
+            angle=max(-1.1,min(1.1,.55*angle+rr.gauss(0,.45)*wobble))
+            turn=Vector((heading.x*math.cos(angle)-heading.y*math.sin(angle),heading.x*math.sin(angle)+heading.y*math.cos(angle)))
+            wanted=pos+turn*step*max(.4,1+rr.gauss(0,.25))
             q=clamp(wanted,through)
-            # Recortar contra el borde deja puntos repetidos o pliegues: el cortador se autointerseca y EXACT falla.
+            # Recortar contra el borde deja puntos repetidos o pliegues: el cortador se autointerseca.
             clipped=(q-wanted).length>1e-6
             if (q-points[-1]).length>=.2:
                 points.append(q)
-                ts.append(t)
+                ts.append(k/steps)
+                pos=q
             if clipped:
                 break
+        if through and len(points)>=2:
+            # Una partida sale siempre por el borde opuesto, aunque el paseo se haya quedado corto.
+            last=points[-1]
+            short=last.y>z0-.2 if through=='u' else last.x<u1+.2
+            exit_point=Vector((last.x,z0-.4)) if through=='u' else Vector((u1+.4,last.y))
+            if short and (exit_point-last).length>=.2:
+                points.append(exit_point)
+                ts.append(1.0)
         if len(points)<2:
             return None
         f=[t/ts[-1] for t in ts]
@@ -275,9 +284,12 @@ def hole_fragment(coll,mat,mortar,a,b,z0,z1,thickness,projection,damage,seed,wea
     for v in support.data.vertices:
         if v.co.z>z0:
             v.co.z-=rr.uniform(0,.35)
-    for v in ob.data.vertices:
-        if abs(v.co.y)<reach+.01:
-            v.co.x+=v.co.y/ max(1,reach)*rr.uniform(.0,.18)*damage
+    # Inclinación del fragmento con un solo factor: un valor aleatorio por vértice lo arrugaba
+    # en cuanto el desgaste añadía vértices.
+    co=primitives.coords(ob)
+    inside=numpy.abs(co[:,1])<reach+.01
+    co[inside,0]+=co[inside,1]/max(1,reach)*rr.uniform(.0,.18)*damage
+    primitives.set_coords(ob,co)
     return ob
 
 
@@ -476,7 +488,7 @@ def crack_stress(ob,walls,openings):
 
 def apply_damage(coll,p):
     'IA: Aplica grietas tras la caché, más y partidas cerca de huecos y extremos; omite Borrador; la selección depende de piece_key, no del nombre visible.'
-    if runtime.quality=='DRAFT' or p.cracks<=0:
+    if runtime.quality not in config.DAMAGE_QUALITIES or p.cracks<=0:
         return
     stone=primitives.material('Piedra · neutro',(.52,.52,.52))
     walls={w['id']:w for w in meta.get(bpy.context.scene,'paredes_generadas',[])}
@@ -490,13 +502,14 @@ def apply_damage(coll,p):
     for ob in list(coll.objects):
         if not ob.name.startswith(('Piedra','Pilar')) or ob.get('connection_face'):
             continue
-        if 'núcleo' in ob.name or 'pie' in ob.name:
+        # Los fragmentos de agujero ya son piedra rota y miden ~3,5 mm: las ranuras los dejarían como una hoja rasgada.
+        if 'núcleo' in ob.name or 'pie' in ob.name or ob.name.startswith('Piedra parcial'):
             continue
         key=zlib.crc32(primitives.piece_key(ob).encode('utf8'))
         if ob.get('escombro') and random.Random(p.seed+key+34).random()>.2:
             continue
         stress=0.0 if ob.get('escombro') else crack_stress(ob,walls,openings)
         chance=min(.95,p.cracks*(tuning['base']+tuning['gain']*stress))
-        if ob.name.startswith('Piedra parcial') or random.Random(p.seed+key).random()<chance:
+        if random.Random(p.seed+key).random()<chance:
             split=not ob.get('escombro') and random.Random(p.seed+key+71).random()<p.cracks*(tuning['split']+tuning['split_gain']*stress)
             crack_stone(ob,p.cracks,(p.seed+key)%1000000,coll,stone,crack_frame(ob,walls,center),split)

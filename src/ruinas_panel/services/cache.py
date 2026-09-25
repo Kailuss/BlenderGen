@@ -47,6 +47,9 @@ def clear_source():
 def cache_signature(context,p):
     'IA: Incluye parámetros de geometría; excluye solo daños que se reaplican sobre copia limpia.'
     ignored=set(config.CRACK_FIELDS)|{'preview_quality','export_quality','quick_edit'}
+    if runtime.quality not in config.DAMAGE_QUALITIES:
+        # Sin daño en esta calidad: cambiar desgaste o escombros no invalida la geometría guardada.
+        ignored|={'wear','wear_level','rubble_amount'}
     return (context.scene.as_pointer(),runtime.quality,layout.distribution_seed(p),tuple((k,getattr(p,k)) for k in config.FIELDS if k not in ignored))
 
 

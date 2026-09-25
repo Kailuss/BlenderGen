@@ -67,6 +67,7 @@ class RuinSettings(bpy.types.PropertyGroup):
     hole_size: FloatProperty(name='Tamaño (mm)',description='Tamaño de los agujeros',default=14,min=7,max=30)
     collapse: FloatProperty(name='Derrumbe',description='Intensidad del derrumbe de la coronación',default=.76,min=0,max=.95)
     break_position: FloatProperty(name='Posición',description='Posición del derrumbe a lo largo del muro',default=.72,min=.25,max=.85)
+    wear_level: EnumProperty(name='Desgaste',default='MEDIUM',items=[('LIGHT','Ligero','Aristas algo gastadas'),('MEDIUM','Medio','Erosión visible en caras y aristas'),('HEAVY','Fuerte','Piedra muy envejecida')])
     wear: FloatProperty(name='Desgaste',description='Erosión física de caras y aristas: 0 intacto, 1 envejecido',default=.55,min=0,max=1)
     cracks: FloatProperty(name='Grietas',description='Cantidad de grietas y desconchados',default=.6,min=0,max=1)
     hole_damage: FloatProperty(name='Rotura en bordes',default=.7,min=0,max=1)

@@ -17,6 +17,8 @@ Usa solo una copia del complemento. Si abres un archivo de la v0.20, no ejecutes
 - **Otra variante** (el botón junto a la semilla) cambia los detalles sin cambiar los ajustes.
 - El **candado** junto a la semilla fija la distribución de piedras, pilares y agujeros: con él cerrado, la semilla solo cambia el desgaste y las grietas.
 
+El derrumbe tiene una silueta irregular que cambia con la semilla (con el candado cerrado, solo cambia al abrirlo o al tocar la semilla de distribución).
+
 La ruina se crea en la colección **MURO · fuente procedural**. No la edites a mano, porque se regenera en cada cambio.
 
 ## El panel
@@ -27,7 +29,7 @@ Arriba están las acciones y el estado. Debajo, un subpanel por tema, con un bot
 |---|---|
 | **Construcción** | Tipo (Tabique 8 mm, Pared 12 mm o Muralla 18 mm de grosor), altura (Baja 27 mm, 1 planta 52 mm o 2 plantas 102 mm), longitud y vigas de entreplanta (solo con 2 plantas) |
 | **Distribución** | Paredes contiguas: ninguna, L, U o habitación. También el fondo y el lado de la L |
-| **Acabado** | Derrumbe, desgaste, grietas, escombros, y tierra y grava |
+| **Acabado** | Derrumbe, desgaste (Ligero / Medio / Fuerte), grietas, escombros, y tierra y grava |
 | **Puerta** | La casilla de la cabecera activa la puerta. Dentro: hoja, posición, anchura, altura, marco y vetas |
 | **Ventanas** | La casilla de la cabecera las activa. Se colocan solo donde hay piedra que las sostenga, así que puede haber menos de las pedidas |
 | **Calidad** | Calidad de edición y de exportación, y vista rápida |
@@ -39,15 +41,17 @@ Los controles que no aplican se ven atenuados, por ejemplo el fondo con una sola
 
 - Salen más cerca de puertas, ventanas, agujeros y extremos de muro. Ahí algunas piedras quedan partidas de borde a borde.
 - Los sillares de los pilares también se agrietan. Los pilares de conexión no, para que encajen al montar módulos.
-- En **Borrador** no hay grietas: esa calidad sirve para ajustar la forma general.
+- Las grietas, como el desgaste, cambian con la semilla: siguen un recorrido aleatorio distinto en cada variante.
 
 ## Calidades y vista previa
 
 | Calidad | Para qué |
 |---|---|
-| **Borrador** | Estructura rápida, sin grietas |
-| **Trabajo** | Edición con grietas y desgaste |
-| **Detalle** | Exportación para resina: poros y grano finos en las caras visibles. Es la calidad de exportación por defecto y la más lenta |
+| **Borrador** | Estructura con biseles mínimos, instantánea |
+| **Trabajo** | Estructura con biseles y aberturas, sin desgaste, grietas ni escombros. Para editar la forma |
+| **Detalle** | Todo: desgaste, grietas, escombros, y poros y grano finos para resina. Es la calidad de exportación por defecto y la más lenta |
+
+El desgaste, las grietas y los escombros solo se ven en Detalle; el panel lo recuerda en Acabado y Grietas. Para verlos mientras editas, pon la calidad de edición en Detalle.
 
 Con **Vista rápida**, cada cambio muestra primero Borrador y después refina en la calidad de edición. Si una generación tarda demasiado, la vista automática se pausa y el estado lo indica, por ejemplo «Pausa: work tarda 31 s · pulsa Actualizar»:
 

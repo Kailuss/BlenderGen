@@ -16,6 +16,8 @@ Límites demostrados en Blender 5.2.2 (2026-09-25; detalle en `docs/AUDIT.md`), 
 - La primera generación tras cargar otro archivo falla con `ReferenceError`. Resuelto después: handlers de carga y deshacer sueltan las referencias.
 - El coste de cada bisel crece de forma lineal con el número de objetos (2 ms → 47 ms), así que el total es cuadrático. Resuelto después: los modificadores se aplican en una escena de taller (habitación en Borrador: 74 s → 7 s, misma geometría).
 
+Borrador y Trabajo muestran solo la estructura; desgaste (tres niveles), grietas y escombros aparecen en Detalle. El derrumbe tiene silueta irregular dependiente de la semilla.
+
 El sólido exportable se une con Manifold y conserva el detalle de la fuente (antes, el remallado vóxel de 0,32 mm borraba grietas y vetas).
 
 Las pruebas de migración están en `reports/`; los resultados históricos de cierre de malla v20 están en `../outputs/muro_20`. Para cambios posteriores de geometría debe renovarse la validación correspondiente.

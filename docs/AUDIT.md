@@ -350,6 +350,19 @@ El coste por llamada crece de forma lineal, así que el total es cuadrático. La
   - `AddonPreferences`: umbrales de pausa, escena en mm y fusión (Manifold por defecto).
   - Los metadatos pasan de 14 propiedades sueltas a un grupo `scene['ruinas']`.
   - Revisado con capturas reales de Blender (Vulkan).
+- **Derrumbe irregular, calidades de edición ligeras y ruido gaussiano (petición de uso, 2026-09-25).**
+  - **Escalera de 45°.** Tenía dos causas deterministas. La regla de apoyo con umbral fijo del 62 %, con hiladas a media piedra, quitaba siempre la piedra del borde (50 % de apoyo). Y la protección de la puerta anulaba la variación en todo su entorno.
+    - Ahora el umbral de apoyo es aleatorio por piedra (entre 35 % y 72 %), y la protección solo llega a la hilada sobre el dintel.
+    - La silueta es un paseo aleatorio gaussiano con reversión al perfil, con caídas ocasionales, laderas asimétricas y, a veces, una muesca secundaria.
+    - Las piedras del borde caen al azar y a veces sobrevive un diente apoyado.
+    - Mosaicos de cuatro semillas revisados.
+  - **Borrador y Trabajo solo estructura** (`config.DAMAGE_QUALITIES`): sin desgaste, grietas ni escombros, que aparecen en Detalle. Puerta en Trabajo: 4,3 s → 0,44 s; habitación: 31 s → 2,5 s. En esas calidades, desgaste y escombros no invalidan la caché.
+  - **Desgaste en tres niveles** (`wear_level`: Ligero, Medio o Fuerte → `config.WEAR_LEVELS`).
+  - **Ruido blanco gaussiano sembrado por pieza.**
+    - Grietas con rumbo en paseo aleatorio de incrementos gaussianos (método «Substrate» de Tarbell).
+    - Desgaste y poros a partir de ruido blanco gaussiano difundido en la malla (`weather.gaussian_field`). Sustituye al Perlin global y a las texturas Displace, que eran iguales en todas las semillas. También está vectorizado.
+  - **Fragmentos de agujero:** sin grietas, con subdivisión mínima e inclinación con un solo factor, porque antes se arrugaban en Detalle.
+  - **Recorte de huecos:** elimina las láminas finas que quedan junto al hueco.
 
 Pendiente:
 

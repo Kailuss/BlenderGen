@@ -26,6 +26,15 @@ def wall_local(w,q):
     return (dx*a[0]+dy*a[1],-dx*a[1]+dy*a[0],q[2])
 
 
+def sliver(ob,w,before):
+    'IA: True si tras recortar queda una lámina: menos de 2,5 mm a lo largo del tramo, menos de 1,5 mm de alto o menos del 20 % del volumen.'
+    world=primitives.coords(ob)
+    a,o=w['axis'],w['origin']
+    along=(world[:,0]-o[0])*a[0]+(world[:,1]-o[1])*a[1]
+    tall=world[:,2].max()-world[:,2].min()
+    return along.max()-along.min()<2.5 or tall<1.5 or primitives.mesh_volume(ob.data)<.2*before
+
+
 def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
     'Booleanos locales solo sobre piezas que intersectan el hueco.\n\nIA: Recorta solo piezas solapadas con BOOLEAN_SOLVER; elimina piezas contenidas; restaura la pieza si el booleano quita más que el cruce con el hueco.'
     verts=[(x0,-T,z0),(x1,-T,z0),(x1,T,z0),(x0,T,z0),(x0,-T,z1),(x1,-T,z1),(x1,T,z1),(x0,T,z1)]
@@ -85,6 +94,10 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
             bpy.data.meshes.remove(failed)
             ob['hueco_revertido']=True
         bpy.data.meshes.remove(backup)
+        if ob.data.vertices and not ob.get('hueco_revertido') and sliver(ob,w,before):
+            # Una lámina junto al hueco es frágil al imprimir y se ve arrugada: se elimina como las piezas contenidas.
+            primitives.remove_objects([ob])
+            continue
         if not ob.data.vertices:
             mesh=ob.data
             bpy.data.objects.remove(ob,do_unlink=True)

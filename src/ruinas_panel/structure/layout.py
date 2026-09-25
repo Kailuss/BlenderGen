@@ -45,6 +45,7 @@ def apply_profiles(p):
     try:
         p.thickness,p.stone_size,p.projection,p.pillar_width=config.BUILD_TYPES[p.build_type]
         p.height=config.HEIGHT_TYPES[p.height_type]
+        p.wear=config.WEAR_LEVELS[p.wear_level]
         p.left_height=p.height
         p.right_height=p.height
         p.left_turn='RIGHT' if p.layout_mode in ('TWO','ROOM') or (p.layout_mode=='ONE' and p.extra_side=='LEFT') else 'NONE'
@@ -53,6 +54,22 @@ def apply_profiles(p):
         p.right_return_length=p.building_depth
     finally:
         runtime.busy=busy
+
+
+def filtered_noise(rng,samples,passes):
+    'IA: Ruido blanco gaussiano suavizado (filtro 1-2-1 repetido) y normalizado a desviación 1; devuelve una función de u en [0,1].'
+    values=[rng.gauss(0,1) for _ in range(samples)]
+    for _ in range(passes):
+        values=[(values[max(0,i-1)]+2*values[i]+values[min(samples-1,i+1)])/4 for i in range(samples)]
+    mean=sum(values)/samples
+    spread=(sum((v-mean)**2 for v in values)/samples)**.5 or 1
+    values=[(v-mean)/spread for v in values]
+    def at(u):
+        'IA: Interpolación lineal del ruido suavizado en u (0-1).'
+        f=max(0,min(1,u))*(samples-1)
+        i=min(samples-2,int(f))
+        return values[i]+(values[i+1]-values[i])*(f-i)
+    return at
 
 
 def merge_thin_stones(line,minimum):

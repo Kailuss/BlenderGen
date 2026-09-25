@@ -2,6 +2,7 @@
 
 from .. import meta
 from .. import config
+from .. import runtime
 from ..geometry import fracture
 from ..geometry import primitives
 from ..geometry import rubble
@@ -121,19 +122,68 @@ def _build_wall(context, p):
     # Una franja corta en cada extremo preserva su altura y el apoyo de sus piedras.
     edge=min(.20,max(.10,2.2*rh/L))
     center=max(.05,min(.95,(p.break_position-edge)/(1-2*edge)))
-    g0=math.exp(-(center/.24)**2)
-    g1=math.exp(-((1-center)/.24)**2)
-    peak=max(.1,1-((1-center)*g0+center*g1))
-    def requested_height(x):
-        'IA: Perfil de derrumbe previo al escalonado; conserva apoyo suficiente sobre el dintel.'
+    # Irregularidad del derrumbe, fijada por la semilla de distribución: laderas asimétricas,
+    # a veces una muesca secundaria y una silueta que sigue el perfil con un paseo aleatorio gaussiano.
+    cr=random.Random(dseed+61717)
+    wide=(.24*cr.uniform(.7,1.35),.24*cr.uniform(.7,1.35))
+    notch=(center+cr.choice((-1,1))*cr.uniform(.15,.3),cr.uniform(.08,.14),cr.uniform(.25,.5)) if cr.random()<.5 else None
+    def bell(u):
+        'IA: Campana del derrumbe con ancho distinto a cada lado del centro, más la muesca secundaria si la hay.'
+        value=math.exp(-((u-center)/wide[0 if u<center else 1])**2)
+        if notch:
+            value=max(value,notch[2]*math.exp(-((u-notch[0])/notch[1])**2))
+        return value
+    g0=bell(0)
+    g1=bell(1)
+    peak=max(.1,max(bell(center),1)-((1-center)*g0+center*g1))
+    def collapse_loss(x):
+        'IA: Pérdida 0-1 del perfil de derrumbe en x; 0 en las franjas extremas que conservan su altura.'
+        u=max(0,min(1,(x/L+.5-edge)/(1-2*edge)))
+        return max(0,min(1,(bell(u)-((1-u)*g0+u*g1))/peak))
+    def smooth_height(x):
+        'IA: Perfil continuo del derrumbe (sin irregularidad), entre la altura de los extremos y 12 mm.'
         u=max(0,min(1,(x/L+.5-edge)/(1-2*edge)))
         baseline=left*(1-u)+right*u
-        gaussian=math.exp(-((u-center)/.24)**2)
-        loss=max(0,min(1,(gaussian-((1-u)*g0+u*g1))/peak))
-        result=max(12,baseline-p.collapse*(baseline-12)*loss)
+        return baseline,max(12,baseline-p.collapse*(baseline-12)*collapse_loss(x))
+    # Silueta: paseo aleatorio gaussiano cada media piedra que vuelve hacia el perfil (reversión 0,25);
+    # el ruido crece con la pérdida local, y caídas bruscas ocasionales dejan cortes casi verticales.
+    step=max(2.0,L/max(3,round(L/(rh*1.8)))/2)
+    samples=int(L/step)+1
+    outline=[]
+    level=smooth_height(-L/2)[1]
+    for i in range(samples):
+        x=-L/2+i*step
+        baseline,target=smooth_height(x)
+        loss=collapse_loss(x)
+        level+=.25*(target-level)+cr.gauss(0,1)*rh*(.5+1.3*loss)*p.collapse
+        if cr.random()<.12*loss*p.collapse:
+            level-=rh*cr.uniform(1.5,3)
+        level=max(12,min(baseline,level))
+        outline.append(level)
+    def requested_height(x):
+        'IA: Silueta irregular del derrumbe previa al escalonado; conserva apoyo suficiente sobre el dintel.'
+        f=max(0,min(samples-1,(x+L/2)/step))
+        i=min(samples-2,int(f))
+        result=outline[i]+(outline[i+1]-outline[i])*(f-i)
         if door and door['left']-3*rh<=x<=door['right']+3*rh:
             result=max(result,door['lintel_top'])
         return result
+    def erode_edges(line,rng,z):
+        'IA: Quita al azar piedras del borde de un hueco según la pérdida local; las de encima caen por la regla de apoyo.'
+        result=[]
+        for i,(a,b) in enumerate(line):
+            mid=(a+b)/2
+            open_left=i==0 or abs(line[i-1][1]-a)>.01
+            open_right=i==len(line)-1 or abs(line[i+1][0]-b)>.01
+            wall_end=a<=-L/2+.01 or b>=L/2-.01
+            exposed=(open_left and a>-L/2+.01) or (open_right and b<L/2-.01)
+            if exposed and not wall_end and not near_door(mid,z) and rng.random()<p.collapse*(.1+.45*collapse_loss(mid)):
+                continue
+            result.append((a,b))
+        return result
+    def near_door(x,z):
+        'IA: Protege el entorno del dintel hasta una hilada por encima; más arriba el derrumbe varía como el resto.'
+        return door and door['left']-3*rh<=x<=door['right']+3*rh and z<=door['lintel_top']+rh
     # Aparejo a media pieza: ambos extremos terminan en piezas enteras o medias,
     # nunca en lascas residuales por acumular anchuras aleatorias.
     bays=max(3,round(L/(rh*1.8)))
@@ -152,11 +202,25 @@ def _build_wall(context, p):
                 joints.append(x+jr.uniform(-1,1)*local_pitch*jitter*p.stone_variation)
         joints.append(L/2)
         kept=[]
+        kr=random.Random(dseed+row*7919+5)
         for x,end in zip(joints,joints[1:]):
-            wanted=(z_edges[row]+z_edges[row+1])/2<=requested_height((x+end)/2)
+            mid=(x+end)/2
+            # Variación gaussiana por piedra: escalones desiguales en vez de una piedra menos por hilada.
+            zmid=(z_edges[row]+z_edges[row+1])/2
+            spread=0 if near_door(mid,zmid) else kr.gauss(0,1)*rh*(.15+1.0*collapse_loss(mid))*p.collapse
+            wanted=(z_edges[row]+z_edges[row+1])/2<=requested_height(mid)+spread
             support=1.0 if row==0 else sum(max(0,min(end,b)-max(x,a)) for a,b in courses[row-1])/(end-x)
-            if wanted and support>=.62:
+            # Umbral de apoyo variable por piedra: con hiladas a media piedra, un umbral fijo del 62 %
+            # quitaba siempre la piedra del borde (50 % de apoyo) y dejaba una escalera perfecta de 45°.
+            need=.62 if near_door(mid,zmid) else kr.uniform(.35,.72)
+            if support<need:
+                continue
+            # Diente: a veces sobrevive una piedra apoyada por encima del perfil.
+            tooth=not near_door(mid,zmid) and kr.random()<.12*p.collapse*collapse_loss(mid)
+            if wanted or tooth:
                 kept.append((x,end))
+        if row>0:
+            kept=erode_edges(kept,kr,(z_edges[row]+z_edges[row+1])/2)
         courses.append(kept)
     def height(x):
         'IA: Consulta altura real de hiladas conservadas, no el perfil continuo del derrumbe.'
@@ -340,7 +404,8 @@ def _build_wall(context, p):
             else:
                 ob['connection_face']=True
     meta.put(context.scene,'pilares_generados',centers)
-    rubble.build_rubble(coll,stone,mortar,p,door,rh)
+    if runtime.quality in config.DAMAGE_QUALITIES:
+        rubble.build_rubble(coll,stone,mortar,p,door,rh)
     timber.wooden_frame(coll,p,door)
     timber.wooden_door(coll,p,door)
     for ob in coll.objects:
