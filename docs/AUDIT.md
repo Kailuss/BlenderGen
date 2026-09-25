@@ -53,14 +53,14 @@ Severidad: **Alta** significa resultado incorrecto, riesgo de cierre de Blender 
 | C8 | Baja | Efectos | Unidades, materiales y RNA se reescriben en cada generación | Código |
 | C9 | Baja | Geometría | Recorte de X de todos los vértices a ±L/2 | No confirmado en Blender |
 | R1 | Alta | Rendimiento | ✅ Resuelto: escalado cuadrático por `bpy.ops` en bucle | Blender |
-| R2 | Media | Rendimiento | Mejorado: hasta ~9 booleanos EXACT por piedra en grietas; ahora Manifold y como mucho una rama por grieta | Código + datos |
-| R3 | Media | Densidad | ~1 000 caras por piedra en Trabajo; densidad fija por calidad | Datos |
-| R4 | Baja | Rendimiento | Bucles Python por vértice | Código |
+| R2 | Media | Rendimiento | ✅ Mejorado: hasta ~9 booleanos EXACT por piedra en grietas; ahora Manifold y como mucho una rama por grieta | Código + datos |
+| R3 | Media | Densidad | Parcial: en Detalle la densidad va por mm en caras visibles; Trabajo sigue con ~1 000 caras por piedra | Datos |
+| R4 | Baja | Rendimiento | ✅ Casi resuelto: bucles Python por vértice (quedan `settle_rubble`, `hole_fragment` y el ruido del desgaste) | Código |
 | R5 | Media | UX | Vista previa bloqueante, sin progreso ni pausa automática | Datos |
-| T1 | Alta | Pruebas | Paridad solo en modo vista previa y en 3 casos | Código |
-| T2 | Media | Pruebas | Sin referencia v20 ni digests guardados que actúen como referencia | Código |
+| T1 | Alta | Pruebas | Parcial: la exportación Manifold y el modo exportación se prueban; falta un caso en Detalle, ahora la calidad por defecto | Código |
+| T2 | Media | Pruebas | ✅ Resuelto: sin referencia v20 ni digests guardados que actúen como referencia | Código |
 | T3 | Media | Pruebas | Ciclo de vida desconectado y dependiente de un .blend externo | Código |
-| T4 | Media | Pruebas | La prueba no comprueba el cierre de las piezas fuente (hoy cierran; ver resultados) | Blender |
+| T4 | Media | Pruebas | ✅ Resuelto: la prueba no comprobaba el cierre de las piezas fuente | Blender |
 | T5 | Media | Pruebas | Planificación de `_build_wall` sin pruebas puras | Código |
 | T6 | Baja | Herramientas | Salida no UTF-8; versión repetida en tres sitios | Datos |
 | M1–M9 | Baja | Mantenimiento | Ver detalle | Código |
@@ -204,8 +204,8 @@ Criterio de salida: los casos actuales conservan su digest. Los casos nuevos que
 |---|---|---|---|
 | 2.1 | ✅ Contar llamadas a `bpy.ops` y medir ms por llamada según el número de objetos (ampliando `profiling.timed`) | R1 | S |
 | 2.2 | ✅ Experimento de «escena de trabajo»: aplicar bisel, subdivisión, suavizado y booleanos de cada pieza en una escena temporal que solo contiene esa pieza y su cortador, y enlazarla después a la colección. Con los mismos modificadores, los digests deberían ser idénticos. Objetivo: coste por llamada constante | R1, R2 | M |
-| 2.3 | `carve_rectangle`: caja envolvente con `foreach_get` y numpy, con la misma lógica de inclusión | R4 | S |
-| 2.4 | Vectorizar las transformaciones de 90° y el recorte de X; usar `shade_smooth()` | R4 | S |
+| 2.3 | ✅ `carve_rectangle`: caja envolvente con `foreach_get` y numpy, con la misma lógica de inclusión | R4 | S |
+| 2.4 | ✅ (salvo `shade_smooth()`) Vectorizar las transformaciones de 90° y el recorte de X; usar `shade_smooth()` | R4 | S |
 | 2.5 | Componentes conexos de `make_solid` y `crack_stone` con numpy (union-find) | R4 | S |
 
 Criterio: digests idénticos y tiempos medidos en los mismos casos. Si 2.2 no conserva la paridad, pasa a la Fase 3.
