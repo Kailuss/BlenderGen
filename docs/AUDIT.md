@@ -237,7 +237,7 @@ Criterio: digests idénticos y tiempos medidos en los mismos casos. Si 2.2 no co
 | 5.2 | ✅ Subpaneles plegables (`layout.panel` o `bl_parent_id`), conservando los identificadores RNA | UX | S |
 | 5.3 | ✅ Mensajes de error de exportación que digan qué cambiar | C4 | S |
 | 5.4 | ⏸ Descartado por ahora (decisión del usuario) `blender_manifest.toml` junto a `bl_info`, con una única fuente de versión y el autor correcto | M8, T6 | S |
-| 5.5 | `USERGUIDE.md` real (parámetros, flujo, exportación STL, límites) y README sin rutas de otro equipo | M6 | S |
+| 5.5 | ✅ `USERGUIDE.md` real (parámetros, flujo, exportación STL, límites) y README sin rutas de otro equipo | M6 | S |
 | 5.6 | ✅ (preferencia «Escena en milímetros») Fijar las unidades solo al crear la colección la primera vez, o mediante una opción, y documentarlo | C8 | S |
 | 5.7 | ✅ (grupo `scene['ruinas']`, `meta.py`) Guardar los metadatos JSON en la colección o bajo una sola clave | C8 | S |
 

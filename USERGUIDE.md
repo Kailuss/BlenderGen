@@ -1,57 +1,97 @@
-Ruinas v0.21 — proyecto modular para Blender
+# Guía de uso · Ruinas v0.21
 
-El código activo está en `src/ruinas_panel/`. Los módulos separan geometría, estructura, generación/caché e interfaz. Cada función contiene un contrato breve `IA:`. Las versiones anteriores permanecen en `../outputs/`.
+Ruinas genera muros de mampostería en ruinas para miniaturas de 28 a 35 mm, listos para imprimir en resina. Todo se mide en milímetros.
 
-## Usarlo en Blender
+## Instalación
 
-**Uso normal:** instala `dist/ruinas_panel_v021.zip` desde Preferencias → Complementos → Instalar desde disco, actívalo y abre Vista 3D → N → Ruinas. Puedes abrir un .blend de v0.20: conserva los campos guardados. No ejecutes su antiguo `generador_muro.py`, porque volvería a registrar la versión anterior.
+1. En Blender 5.0 o posterior: **Editar → Preferencias → Complementos → Instalar desde disco** y elige `dist/ruinas_panel_v021.zip`.
+2. Activa **Ruinas — Muro de fantasía**.
+3. Abre la barra lateral de la Vista 3D (tecla **N**) y la pestaña **Ruinas**.
 
-**Desarrollo:** abre `tools/load_in_blender.py` como archivo en el editor de texto de Blender y pulsa Ejecutar script. Repite tras editar un módulo: limpia callbacks y caché, recarga el paquete y mantiene los parámetros guardados. No es necesario volver a empaquetar ni reiniciar Blender. Usa solo una copia del addon activa.
+Usa solo una copia del complemento. Si abres un archivo de la v0.20, no ejecutes su antiguo `generador_muro.py`: los ajustes guardados se conservan igualmente.
 
-El lanzador necesita la carpeta completa `ruinas`; los .py ya no funcionan aislados. No se concatenan módulos con `exec` ni se mantienen copias separadas de la lógica.
+## Primera ruina
 
-## Comandos de desarrollo
+- **Añadir → Malla → Ruina**, o el botón **Actualizar** del panel, genera la ruina con los ajustes de la escena.
+- Con **Vista previa automática** activada, cada cambio de un control regenera la vista unos instantes después.
+- **Otra variante** (el botón junto a la semilla) cambia los detalles sin cambiar los ajustes.
+- El **candado** junto a la semilla fija la distribución de piedras, pilares y agujeros: con él cerrado, la semilla solo cambia el desgaste y las grietas.
 
-Desde esta carpeta, con Python 3.11 o posterior:
+La ruina se crea en la colección **MURO · fuente procedural**. No la edites a mano, porque se regenera en cada cambio.
 
-```powershell
-python dev.py check
-python dev.py find grieta
-python dev.py find carve_rectangle
-python dev.py test --case basic_draft
-python dev.py test --case door_windows_work
-python dev.py test
-python dev.py test --baseline ../outputs/muro_20/generador_muro.py
-python dev.py pack
-python dev.py pack --project
-```
+## El panel
 
-En este equipo Python no figura en PATH. Puedes usar:
+Arriba están las acciones y el estado. Debajo, un subpanel por tema, con un botón ↶ para volver a los valores por defecto de ese subpanel.
 
-```powershell
-$ruinasPython = 'C:\Users\yhora\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
-& $ruinasPython dev.py check
-```
+| Subpanel | Qué controla |
+|---|---|
+| **Construcción** | Tipo (Tabique 8 mm, Pared 12 mm o Muralla 18 mm de grosor), altura (Baja 27 mm, 1 planta 52 mm o 2 plantas 102 mm), longitud y vigas de entreplanta (solo con 2 plantas) |
+| **Distribución** | Paredes contiguas: ninguna, L, U o habitación. También el fondo y el lado de la L |
+| **Acabado** | Derrumbe, desgaste, grietas, escombros, y tierra y grava |
+| **Puerta** | La casilla de la cabecera activa la puerta. Dentro: hoja, posición, anchura, altura, marco y vetas |
+| **Ventanas** | La casilla de la cabecera las activa. Se colocan solo donde hay piedra que las sostenga, así que puede haber menos de las pedidas |
+| **Calidad** | Calidad de edición y de exportación, y vista rápida |
+| Avanzados, plegados | **Aparejo**, **Grietas**, **Derrumbe y agujeros**, **Pilares** |
 
-`check` valida sintaxis, contratos y tres grupos de pruebas de cálculo puro, sin Blender. `find` consulta el AST sin cargar todas las fuentes en el chat. `test --case` limita el trabajo a un escenario; sin ese argumento ejecuta tres. `--blender <ruta>` permite elegir otra instalación. Los logs y resultados JSON se guardan en `reports/`.
+Los controles que no aplican se ven atenuados, por ejemplo el fondo con una sola pared. Pasa el ratón sobre cualquier control para ver su descripción.
 
-`test --baseline` compara vértices redondeados a 6 decimales, caras y nombres contra el monolito, con semilla de ruido de Blender controlada para la prueba. No compara renders píxel a píxel ni demuestra equivalencia de todas las combinaciones posibles. Cada escenario también se regenera desde caché y debe coincidir exactamente.
+### Grietas
 
-`pack` crea solo el addon, con rutas portables y sin renders ni cachés. No ejecuta Blender: ejecuta la prueba relevante antes de distribuirlo.
-`pack --project` añade un segundo ZIP con el proyecto, documentación, habilidad y pruebas.
+- Salen más cerca de puertas, ventanas, agujeros y extremos de muro. Ahí algunas piedras quedan partidas de borde a borde.
+- Los sillares de los pilares también se agrietan. Los pilares de conexión no, para que encajen al montar módulos.
+- En **Borrador** no hay grietas: esa calidad sirve para ajustar la forma general.
 
-## Agente especializado en este mismo chat
+## Calidades y vista previa
 
-Se entrega como habilidad **ruinas-dev**, con instrucciones de proyecto y herramientas deterministas. No es un modelo nuevo ni un proceso autónomo que trabaje sin instrucciones.
+| Calidad | Para qué |
+|---|---|
+| **Borrador** | Estructura rápida, sin grietas |
+| **Trabajo** | Edición con grietas y desgaste |
+| **Detalle** | Exportación para resina: poros y grano finos en las caras visibles. Es la calidad de exportación por defecto y la más lenta |
 
-Puedes escribir ahora:
+Con **Vista rápida**, cada cambio muestra primero Borrador y después refina en la calidad de edición. Si una generación tarda demasiado, la vista automática se pausa y el estado lo indica, por ejemplo «Pausa: work tarda 31 s · pulsa Actualizar»:
 
-> Usa la habilidad `ruinas/agent/ruinas-dev/SKILL.md` y continúa con las grietas, manteniendo la densidad actual.
+- por defecto, el refinado se pausa si tardó más de 4 s;
+- la vista rápida entera, si tardó más de 10 s.
 
-Si está descubierta en el selector, basta con `$ruinas-dev` y la petición. La copia preparada está en `agent/ruinas-dev/`; para descubrimiento local se coloca esa carpeta bajo `.agents/skills/` del directorio de trabajo. No hace falta una API key ni otro chat. La guía raíz `AGENTS.md` dirige a los módulos aunque no se use el selector.
+**Actualizar** siempre genera. Mientras trabaja, el cursor muestra el progreso.
 
-La instalación de habilidades y la carga gradual de instrucciones están descritas en la [documentación oficial de habilidades](https://learn.chatgpt.com/docs/build-skills); la guía persistente usa [AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md).
+## Exportar para imprimir
 
-## Coste y límites
+1. Pulsa **Preparar sólido**. Genera en la calidad de exportación y une todas las piezas en un único sólido cerrado, **MURO · sólido exportable**, que queda seleccionado. En Detalle, un muro con puerta tarda alrededor de un minuto.
+2. **Archivo → Exportar → STL** con **Solo selección**, **Escala 1** y **Unidad de escena** desactivada. El STL sale en milímetros.
+3. En el slicer, el tamaño está pensado para 28 mm. Para escala de 35 mm, escala al 125 %.
 
-Esta reorganización reduce búsquedas, contexto repetido y pasos manuales de edición. No garantiza un porcentaje de ahorro de tokens ni acelera por sí sola los operadores de Blender. `docs/ARCHITECTURE.md` permite localizar el cambio y `docs/STATUS.md` recoge limitaciones actuales. El aumento de resolución sigue siendo una decisión explícita; la prioridad es lowpoly.
+El sólido conserva todo el detalle de la vista: grietas, vetas y biseles. Los restos diminutos y los huecos cerrados interiores se eliminan solos.
+
+Consejos para resina (Anycubic Photon P1 Max o similar):
+- Imprime los muros con la misma orientación siempre: el ancho de las grietas en caras verticales depende de la altura de capa.
+- Las grietas mantienen al menos 0,15 mm de ancho y 0,5 mm de fondo en casi todo su largo, y se afinan hasta la punta.
+- `python dev.py calibrate` genera una placa de prueba opcional para comprobar qué detalles sobreviven a tu resina y tu imprimación.
+
+## Preferencias del complemento
+
+En **Preferencias → Complementos → Ruinas**:
+
+| Preferencia | Por defecto |
+|---|---|
+| Pausar refinado a partir de | 4 s |
+| Pausar vista rápida a partir de | 10 s |
+| Escena en milímetros: pone las unidades de la escena en mm al generar | activada |
+| Fusión del sólido | Unión exacta (conserva el detalle). Vóxel suaviza y pierde el detalle fino |
+
+## Mensajes frecuentes
+
+| Mensaje | Qué hacer |
+|---|---|
+| «No cabe la puerta entre los pilares» | Alarga el muro, reduce el grosor o quita los pilares de conexión |
+| «Fragmento suelto de … mm» al preparar el sólido | Alguna pieza no toca el resto. Prueba **Otra variante** o reduce derrumbe y daño |
+| «Pausa: … tarda … s» | Normal con habitaciones o calidades altas. Pulsa **Actualizar** cuando quieras ver el resultado |
+| Botones desactivados | Cambia a **Modo Objeto** |
+
+## Límites actuales
+
+- No hay suelos de tablones, cubiertas ni simulación física de escombros.
+- Las alturas 27, 52 y 102 mm son medidas de diseño, no reglas de ningún juego.
+- Una habitación de dos plantas en Trabajo con muchas grietas puede tardar medio minuto.
+- Si el Detalle se queda corto o el sólido tarda demasiado, anótalo: son las siguientes mejoras previstas.
