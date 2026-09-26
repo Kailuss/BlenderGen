@@ -1,4 +1,4 @@
-# Ruinas v0.21 — proyecto modular para Blender
+# RuinOS — proyecto modular para Blender
 
 El código activo está en `src/ruinas_panel/`. Los módulos separan geometría, estructura, generación/caché e interfaz. Cada función contiene un contrato breve `IA:`. Las versiones anteriores permanecen en `../outputs/`.
 
