@@ -6,7 +6,7 @@ import bpy
 import json
 
 
-CATEGORY = 'Ruinas'
+CATEGORY = 'Ruins'
 _parsed = {}
 
 
