@@ -1,4 +1,4 @@
-"""Herramientas locales sin dependencias externas: comprobar, localizar, probar y empaquetar."""
+"""Herramientas  que ta locales sin dependencias externas: comprobar, localizar, probar y empaquetar."""
 import argparse
 import ast
 import hashlib
