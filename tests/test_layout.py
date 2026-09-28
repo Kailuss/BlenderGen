@@ -37,6 +37,14 @@ class LayoutTests(unittest.TestCase):
             self.assertEqual((p.height,p.thickness,p.wear),(102,12,config.WEAR_LEVELS['HEAVY']))
         runtime.busy=False
 
+    def test_custom_wear_survives_profiles(self):
+        """IA: regenerar con intensidad personalizada conserva incluso cero y uno, sin imponer el preset."""
+        for amount in (0, .42, 1):
+            p=SimpleNamespace(build_type='WALL',height_type='ONE',layout_mode='NONE',
+                              extra_side='RIGHT',building_depth=50,wear_level='CUSTOM',wear=amount)
+            layout.apply_profiles(p)
+            self.assertEqual(p.wear,amount)
+
 
 class NoiseTests(unittest.TestCase):
     """Ruido blanco gaussiano filtrado del perfil de derrumbe."""

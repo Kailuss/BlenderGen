@@ -4,7 +4,7 @@ El código activo está en `src/ruinas_panel/`. Los módulos separan geometría,
 
 ## Usarlo en Blender
 
-**Uso normal:** guía completa en [USERGUIDE.md](USERGUIDE.md). En resumen: instala `dist/ruinas_panel_v021.zip` desde Preferencias → Complementos → Instalar desde disco, actívalo y abre Vista 3D → N → Ruinas. Puedes abrir un .blend de v0.20: conserva los campos guardados. No ejecutes su antiguo `generador_muro.py`, porque volvería a registrar la versión anterior.
+**Uso normal:** guía completa en [USERGUIDE.md](USERGUIDE.md). En resumen: instala `dist/ruinas_panel_v031.zip` desde Preferencias → Complementos → Instalar desde disco, actívalo y abre Vista 3D → N → Ruinas. Puedes abrir un .blend de v0.20: conserva los campos guardados. No ejecutes su antiguo `generador_muro.py`, porque volvería a registrar la versión anterior.
 
 **Desarrollo:** abre `tools/load_in_blender.py` como archivo en el editor de texto de Blender y pulsa Ejecutar script. Repite tras editar un módulo: limpia callbacks y caché, recarga el paquete y mantiene los parámetros guardados. No es necesario volver a empaquetar ni reiniciar Blender. Usa solo una copia del addon activa.
 
@@ -30,7 +30,7 @@ python dev.py calibrate
 
 Si `python` no está en PATH, usa la ruta completa de tu intérprete (3.11 o posterior).
 
-`check` valida sintaxis, contratos y tres grupos de pruebas de cálculo puro, sin Blender. `find` consulta el AST sin cargar todas las fuentes en el chat. `test --case` limita el trabajo a un escenario; sin ese argumento ejecuta tres. `--blender <ruta>` permite elegir otra instalación. Los logs y resultados JSON se guardan en `reports/`.
+`check` valida sintaxis, contratos y tres grupos de pruebas de cálculo puro, sin Blender. `find` consulta el AST sin cargar todas las fuentes en el chat. `test --case` limita el trabajo a un escenario; sin ese argumento ejecuta cuatro. `--blender <ruta>` permite elegir otra instalación. Los logs y resultados JSON se guardan en `reports/`.
 
 `test` exige que cada pieza generada cierre (sin aristas abiertas) y que ninguna grieta reduzca una pieza por debajo de la mitad de su tamaño, y compara digests y caras degeneradas con `reports/expected.json`. Si la versión de Blender es otra, avisa y omite la comparación. `test --update-expected` acepta la geometría actual como nueva referencia: úsalo solo tras revisar render y cierre de un cambio de geometría intencionado.
 

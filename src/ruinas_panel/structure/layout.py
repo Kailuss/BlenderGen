@@ -39,13 +39,14 @@ def corner_width(p):
 
 
 def apply_profiles(p):
-    'IA: Deriva medidas de presets bajo busy; restaura el estado previo y evita recursión RNA.'
+    'IA: Deriva medidas de presets bajo busy; CUSTOM conserva wear; restaura el estado previo y evita recursión RNA.'
     busy=runtime.busy
     runtime.busy=True
     try:
         p.thickness,p.stone_size,p.projection,p.pillar_width=config.BUILD_TYPES[p.build_type]
         p.height=config.HEIGHT_TYPES[p.height_type]
-        p.wear=config.WEAR_LEVELS[p.wear_level]
+        if p.wear_level in config.WEAR_LEVELS:
+            p.wear=config.WEAR_LEVELS[p.wear_level]
         p.left_height=p.height
         p.right_height=p.height
         p.left_turn='RIGHT' if p.layout_mode in ('TWO','ROOM') or (p.layout_mode=='ONE' and p.extra_side=='LEFT') else 'NONE'

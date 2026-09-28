@@ -32,7 +32,7 @@ def status_icon(status):
 
 
 class RUIN_PT_panel(bpy.types.Panel):
-    bl_label = 'Muro de fantasía · v0.21'
+    bl_label = 'Muro de fantasía · v0.31'
     bl_idname = 'RUIN_PT_panel'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -73,6 +73,8 @@ def enabled(p, field):
         return p.height_type == 'TWO'
     if field == 'connection_side':
         return p.connection_enabled
+    if field == 'wear':
+        return p.wear_level == 'CUSTOM'
     return True
 
 

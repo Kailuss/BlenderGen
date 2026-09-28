@@ -78,12 +78,12 @@ def gaussian_field(edges,count,rng,iterations):
 
 
 def fine_relief(obj, spec, amount, seed):
-    'IA: Poros y grano de ruido blanco gaussiano filtrado sobre la malla densa, sembrados por pieza; siempre hacia dentro.'
+    'IA: Poros y grano sembrados por pieza hacia dentro; intensidad progresiva sin saturar antes de amount=1.'
     import numpy
     rng=numpy.random.default_rng(seed+9001)
     edges=mesh_edges(obj)
     count=len(obj.data.vertices)
-    strength=min(1.0,amount*1.4)
+    strength=amount*(.7+.8*amount)
     pits=gaussian_field(edges,count,rng,spec['pit_iterations'])
     grain=gaussian_field(edges,count,rng,spec['grain_iterations'])
     # Poros donde el campo cae por debajo del umbral; el grano se normaliza a [0,1] para no sacar material.
@@ -96,7 +96,7 @@ def fine_relief(obj, spec, amount, seed):
 @profiling.timed("desgaste")
 def weather_stone(obj, amount, seed):
     # Erosión hacia dentro; no desplaza las hiladas ni hincha los ladrillos.
-    'IA: Desgaste hacia dentro con ruido blanco gaussiano filtrado sembrado por pieza; en config.FINE_DETAIL añade densidad visible y poros.'
+    'IA: Erosión progresiva hacia dentro, limitada por espesor; semillas y densidad constantes entre intensidades positivas; cero no modifica la pieza.'
     import numpy
     if amount<=0 or runtime.quality not in config.DAMAGE_QUALITIES:
         return
@@ -109,6 +109,10 @@ def weather_stone(obj, amount, seed):
     primitives.apply_modifier(obj,mod)
     obj['vertices_desgaste_actuales']=len(obj.data.vertices)
     obj.data.update()
+    spec=config.FINE_DETAIL.get(runtime.quality)
+    if spec and not irregular:
+        # Refinar antes de deformar conserva la rejilla y la densidad entre intensidades.
+        refine_visible(obj,spec['edge'])
     co=primitives.coords(obj)
     normals=vertex_normals(obj)
     edges=mesh_edges(obj)
@@ -128,6 +132,8 @@ def weather_stone(obj, amount, seed):
     # Grandes depresiones suaves y pequeñas zonas erosionadas, no ruido uniforme.
     loss=amount*character*(.08+.90*numpy.clip(broad+.25,0,None)**2
                            +.22*mask*numpy.clip(grain+.3,0,None)+edge*(.12+.3*numpy.clip(broad,0,None)))
+    loss*=1+config.WEAR_RESPONSE['gain']*amount
+    loss=numpy.minimum(loss, (hi-lo).min()*config.WEAR_RESPONSE['max_fraction'])
     primitives.set_coords(obj,co-normals*loss[:,None])
     bins=numpy.clip(((patch+.65)*3).astype(int),0,3)
     smooth_group=obj.vertex_groups.new(name='Erosion suavizada por zonas')
@@ -136,12 +142,10 @@ def weather_stone(obj, amount, seed):
         if ids:
             smooth_group.add(ids,.2+i*.25,'REPLACE')
     mod=obj.modifiers.new('Suavizado irregular de piedra','SMOOTH')
-    mod.factor=.35
+    mod.factor=.35*amount
     mod.iterations=1
     mod.vertex_group=smooth_group.name
     primitives.apply_modifier(obj,mod)
-    spec=config.FINE_DETAIL.get(runtime.quality)
     if spec and not irregular:
-        refine_visible(obj,spec['edge'])
         fine_relief(obj,spec,amount,seed)
     obj.data.shade_smooth()

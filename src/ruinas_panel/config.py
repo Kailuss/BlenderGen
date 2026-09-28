@@ -45,6 +45,9 @@ FINE_DETAIL={'DETAIL':{'edge':.22,'pits':.12,'pit_iterations':3,'pit_threshold':
 # rasgos más grandes (abolladuras amplias, manchas, grano). scale ajusta la amplitud al perfil anterior.
 WEAR_NOISE={'broad':12,'patch':20,'grain':2,'scale':.3}
 
+# Amplitud creciente sin aumentar densidad; límite por la menor dimensión de la pieza.
+WEAR_RESPONSE={'gain':1.2,'max_fraction':.12}
+
 
 # Calidades que generan desgaste, grietas y escombros. Borrador y Trabajo muestran solo la
 # estructura para editar rápido; todo el daño aparece en Detalle.
@@ -104,7 +107,7 @@ TURN_ITEMS=[('NONE','Recto','Sin tramo perpendicular'),('LEFT','Giro izq.','Giro
 SECTIONS=(
  {'id':'build','title':'Construcción','fields':('build_type','height_type','length','floor_beams'),'closed':False},
  {'id':'layout','title':'Distribución','fields':('layout_mode','building_depth','extra_side'),'closed':False},
- {'id':'finish','title':'Acabado','fields':('collapse','wear_level','cracks','rubble_amount','ground_roughness'),'closed':False},
+ {'id':'finish','title':'Acabado','fields':('collapse','wear_level','wear','cracks','rubble_amount','ground_roughness'),'closed':False},
  {'id':'door','title':'Puerta','toggle':'door_enabled','fields':('door_leaf','door_position','door_width','door_height','wood_frame','wood_grain'),'closed':True},
  {'id':'windows','title':'Ventanas','toggle':'windows_enabled','fields':('windows_per_wall',),'closed':True},
  {'id':'quality','title':'Calidad','fields':('preview_quality','export_quality','quick_edit'),'closed':True},
@@ -116,5 +119,5 @@ SECTIONS=(
 
 # Enums de 2-3 opciones que definen un modo: botones en fila. FULL_WIDTH: sin etiqueta y a todo lo
 # ancho, porque cada botón se explica solo y con etiqueta no caben en la barra lateral.
-EXPANDED_ENUMS=('extra_side','wear_level')
+EXPANDED_ENUMS=('extra_side',)
 FULL_WIDTH_ENUMS=('build_type','height_type')

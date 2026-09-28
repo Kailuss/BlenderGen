@@ -1,10 +1,10 @@
-# Guía de uso · Ruinas v0.21
+# Guía de uso · Ruinas v0.31
 
 Ruinas genera muros de mampostería en ruinas para miniaturas de 28 a 35 mm, listos para imprimir en resina. Todo se mide en milímetros.
 
 ## Instalación
 
-1. En Blender 5.0 o posterior: **Editar → Preferencias → Complementos → Instalar desde disco** y elige `dist/ruinas_panel_v021.zip`.
+1. En Blender 5.0 o posterior: **Editar → Preferencias → Complementos → Instalar desde disco** y elige `dist/ruinas_panel_v031.zip`.
 2. Activa **Ruinas — Muro de fantasía**.
 3. Abre la barra lateral de la Vista 3D (tecla **N**) y la pestaña **Ruinas**.
 
@@ -29,7 +29,7 @@ Arriba están las acciones y el estado. Debajo, un subpanel por tema, con un bot
 |---|---|
 | **Construcción** | Tipo (Tabique 8 mm, Pared 12 mm o Muralla 18 mm de grosor), altura (Baja 27 mm, 1 planta 52 mm o 2 plantas 102 mm), longitud y vigas de entreplanta (solo con 2 plantas) |
 | **Distribución** | Paredes contiguas: ninguna, L, U o habitación. También el fondo y el lado de la L |
-| **Acabado** | Derrumbe, desgaste (Ligero / Medio / Fuerte), grietas, escombros, y tierra y grava |
+| **Acabado** | Derrumbe, desgaste (Ligero / Medio / Fuerte / Personalizado), intensidad personalizada, grietas, escombros, y tierra y grava |
 | **Puerta** | La casilla de la cabecera activa la puerta. Dentro: hoja, posición, anchura, altura, marco y vetas |
 | **Ventanas** | La casilla de la cabecera las activa. Se colocan solo donde hay piedra que las sostenga, así que puede haber menos de las pedidas |
 | **Calidad** | Calidad de edición y de exportación, y vista rápida |
@@ -52,6 +52,14 @@ Los controles que no aplican se ven atenuados, por ejemplo el fondo con una sola
 | **Detalle** | Todo: desgaste, grietas, escombros, y poros y grano finos para resina. Es la calidad de exportación por defecto y la más lenta |
 
 El desgaste, las grietas y los escombros solo se ven en Detalle; el panel lo recuerda en Acabado y Grietas. Para verlos mientras editas, pon la calidad de edición en Detalle.
+
+En **Desgaste → Personalizado**, el deslizador **Intensidad** permite ajustar de 0 (sin
+erosión superficial) a 1 (máxima). En los otros modos queda atenuado y muestra la
+intensidad del preset después de generar. El desgaste no desactiva los daños de agujeros,
+derrumbe ni grietas: tienen sus propios controles. La 0.31 acentúa las depresiones y
+mantiene una respuesta progresiva del grano hasta el máximo, sin subir la resolución
+configurada. Los archivos anteriores conservan las claves y presets; su acabado en
+Detalle cambia al regenerar con el nuevo algoritmo.
 
 Con **Vista rápida**, cada cambio muestra primero Borrador y después refina en la calidad de edición. Si una generación tarda demasiado, la vista automática se pausa y el estado lo indica, por ejemplo «Pausa: work tarda 31 s · pulsa Actualizar»:
 

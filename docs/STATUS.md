@@ -1,5 +1,25 @@
 # Estado del proyecto
 
+## 0.31 — desgaste y controles (2026-09-28)
+
+Desgaste reforzado con amplitud progresiva, límite de erosión principal según el tamaño
+de pieza y grano que no satura antes del máximo. El refinado ocurre antes de deformar:
+no cambia el objetivo de 0,22 mm, pero sí la topología respecto a versiones anteriores.
+Nuevo modo Personalizado: conserva `wear` entre generaciones, incluidos 0 y 1. Los tres
+presets y las claves RNA existentes se conservan. Borrador y Trabajo siguen omitiendo
+desgaste, grietas y escombros por diseño.
+
+Validación en Blender 5.2.2: cuatro escenarios, caché, ciclo de vida y sólido conectado;
+sin nuevas caras degeneradas en los escenarios de regresión. Prueba adicional de
+desgaste personalizado 0/0,55/1, cierre y exportación al máximo. Comparación visual y
+mediciones en [WEAR_031.md](WEAR_031.md). No se ha validado cada combinación ni impreso
+la nueva erosión. La geometría de Detalle cambia al regenerar archivos antiguos.
+
+Las cinco prioridades constructivas acordadas quedan en [ROADMAP.md](ROADMAP.md);
+no se añaden cubiertas ni destrucción regional en 0.31.
+
+## Antecedentes y límites
+
 Base: v0.20, convertida a paquete modular v0.21. El usuario prioriza modelos lowpoly, mampostería coherente y edición fácil. Actualización (2026-09-25): el destino es la impresión en resina, así que se prioriza el detalle imprimible y se aceptan cambios de geometría revisados.
 
 Ya existe: perfiles Tabique/Pared/Muralla; ruina baja/una/dos plantas; Ninguna/L/U/Habitación; ventanas por pared con apoyo; puerta de madera con picaporte; vigas alojadas; derrumbes escalonados; daño de agujeros, grietas ramificadas; tierra/grava y escombros asentados.

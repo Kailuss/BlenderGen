@@ -17,12 +17,9 @@
       "degenerate_faces": []
     },
     "window_detail": {
-      "digest": "2cf2fabfeca49e1a4f3846d2aa89ce4788baf918b3bff14ce172e6af08fc2d86",
-      "faces": 508287,
-      "degenerate_faces": [
-        "Piedra entera · hilada 03.05",
-        "Piedra entera · hilada 05.05"
-      ]
+      "digest": "3831a02c4915fce741416d29694b5e95dc488bd110ac3e1b7278d17a45d32bd8",
+      "faces": 549847,
+      "degenerate_faces": []
     }
   }
 }
