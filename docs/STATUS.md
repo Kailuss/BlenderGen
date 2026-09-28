@@ -1,5 +1,27 @@
 # Estado del proyecto
 
+## 0.31 completa — revisión de la casa aportada
+
+La base actual procede del addon incluido en `dist/ruinas_v031_completo.zip`, aportado
+por el usuario después del primer push 0.31. Es una línea más avanzada: incluye
+plantas de 55 mm, grosores 6/9/15 mm, balcones, suelos, escaleras, cubierta y geometría
+instanciada. Se han incorporado sus módulos a `src/ruinas_panel/`; los apartados
+anteriores se conservan como historial, no describen esta nueva base completa.
+
+Revisión terminada: chimenea desde planta baja con hogar abierto, campana, conducto
+hueco y leños carbonizados; reserva de paso por forjado y cubierta; babero y peto.
+Las tejas y la cumbrera tienen sección de media caña y espesor. Los hastiales tienen
+revoco de 3,2–5 mm retranqueado y entramado visible. Las huellas de piedra tienen
+relieve físico y cantos gastados, conservando apoyo central de 20 × 20 mm y acceso
+de 35 mm. Se conserva el modo de desgaste Personalizado del repositorio.
+
+Validación en `docs/HOUSE_REVISION.md`. Piezas nuevas cerradas, conducto libre y
+caché reproducible; no se entrega un sólido fusionado de la casa completa.
+Límites heredados y reproducidos contra el ZIP: caras de área inferior a 1e-8 mm²
+en algunos escenarios y rechazo de fragmentos aislados al fusionar ciertas ruinas
+dañadas. La chimenea se coloca solo si hay un tramo conservado sin vanos ni escalera;
+puede quedar desactivada geométricamente si no existe ese espacio.
+
 ## 0.31 — desgaste y controles (2026-09-28)
 
 Desgaste reforzado con amplitud progresiva, límite de erosión principal según el tamaño

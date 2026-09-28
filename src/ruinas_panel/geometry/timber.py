@@ -9,7 +9,17 @@ import math
 import random
 
 
-def timber_beam(coll,mat,name,a,b,width,depth,seed):
+def decay_relief(u,t,phase,amount):
+    'IA: Pérdida longitudinal continua en mm: fisura sinuosa y bolsa de pudrición; no añade densidad ni material exterior.'
+    center=.24*math.sin(phase*1.7)+.045*math.sin(t*17+phase)
+    width=.045+.02*(.5+.5*math.sin(phase))
+    envelope=max(0,math.sin(math.pi*t))**.6
+    split=math.exp(-((u-center)/width)**2)*envelope
+    pocket=math.exp(-((u+.27*math.cos(phase))/.22)**2-((t-.5-.2*math.sin(phase))/.18)**2)
+    return amount*(.75*split+.6*pocket)
+
+
+def timber_beam(coll,mat,name,a,b,width,depth,seed,coarse=False):
     'Fibra alargada desviada por nudos; surcos interrumpidos en una malla cerrada.\n\nIA: Viga entre puntos 3D con sección cerrada; conserva el marco ortogonal para ejes X/Y/Z.'
     rr=random.Random(seed)
     axis=Vector(b)-Vector(a)
@@ -20,13 +30,18 @@ def timber_beam(coll,mat,name,a,b,width,depth,seed):
     side=front.cross(axis).normalized()
     segments={'DRAFT':6,'WORK':12,'DETAIL':18}[runtime.quality]
     stations=max(5,min(60,round(length/({'DRAFT':3,'WORK':1.3,'DETAIL':.8}[runtime.quality]))))
+    # Rastreles pequeños: misma fórmula de veta, muestreo acotado independiente de Detalle.
+    if coarse:segments=min(segments,4);stations=min(stations,8)
     verts=[]
     faces=[]
+    uvs=[]
     n=segments+1
     phase=rr.uniform(0,6)
+    character=rr.uniform(.5,1.15)
     freq=rr.uniform(2.3,3.5)
     knots=[(rr.uniform(-.22,.22),rr.uniform(.22,.78),rr.uniform(.055,.09)) for _ in range(1+(length>20))]
     amount=runtime.settings.wood_grain
+    damage=runtime.settings.wood_damage
     for station in range(stations):
         t=station/(stations-1)
         for back in (0,1):
@@ -40,16 +55,21 @@ def timber_beam(coll,mat,name,a,b,width,depth,seed):
                     influence=math.exp(-.5*dt*dt)
                     warp+=.19*math.tanh(du*2)*influence
                     pit+=.26*math.exp(-du*du*2-dt*dt*1.5)
-                fiber=math.cos((u+warp)*freq*math.tau+phase)
+                fiber=math.cos((u+warp)*freq*math.tau+phase+back*.85)
                 groove=max(0,fiber)**8
                 breakup=.45+.55*(.5+.5*math.sin(t*15+u*8+phase))
-                relief=amount*(-.40*groove*breakup-pit+.045*math.sin(u*27+t*41+phase))
+                relief=amount*character*(-.28*groove*breakup-pit+.025*math.sin(u*27+t*17+phase))
+                relief-=decay_relief(u,t,phase+back*1.1,damage)
                 # Les arêtes restent solides; irrégularité douce, pas de rubans saillants.
                 if k in (0,segments):
-                    relief=amount*(-.05+.03*math.sin(t*17+phase))
+                    relief=amount*(-.05+.03*math.sin(t*17+phase))-damage*.24*max(0,math.sin(t*25+phase))**6
                 transverse=u*width+amount*.04*math.sin(t*9+phase)*(1-abs(2*u))
-                y=(depth/2+max(-depth*.23,relief))*(1 if back else -1)
-                verts.append(tuple(Vector(a)+axis*(length*t)+side*transverse+front*y))
+                y=(depth/2+max(-depth*.36,relief))*(1 if back else -1)
+                # Extremos astillados, con pérdida acotada que conserva el encaje estructural.
+                splinter=damage*min(.55,length/(stations-1)*.3)*( .5+.5*math.sin(u*39+phase))
+                axial=length*t+splinter*((1-t)**10-t**10)
+                verts.append(tuple(Vector(a)+axis*axial+side*transverse+front*y))
+                uvs.append((u+.5+warp*.35,t*length/8))
     for station in range(stations-1):
         base=station*2*n
         nextbase=base+2*n
@@ -61,7 +81,9 @@ def timber_beam(coll,mat,name,a,b,width,depth,seed):
     last=(stations-1)*2*n
     for k in range(segments):
         faces.extend([(k,n+k,n+k+1,k+1),(last+k,last+k+1,last+n+k+1,last+n+k)])
-    ob=primitives.mesh_obj(name,verts,faces,coll,mat)
+    from . import surfaces
+    ob=primitives.mesh_obj(name,verts,faces,coll,surfaces.variant(mat,seed%5))
+    surfaces.grain_uv(ob,uvs)
     import bmesh
     bm=bmesh.new()
     bm.from_mesh(ob.data)
@@ -71,6 +93,7 @@ def timber_beam(coll,mat,name,a,b,width,depth,seed):
     for face in ob.data.polygons:
         face.use_smooth=True
     ob['madera']=True
+    ob['wood_damage']=damage
     return ob
 
 

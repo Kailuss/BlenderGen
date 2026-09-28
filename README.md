@@ -2,6 +2,10 @@
 
 El código activo está en `src/ruinas_panel/`. Los módulos separan geometría, estructura, generación/caché e interfaz. Cada función contiene un contrato breve `IA:`. Las versiones anteriores permanecen en `../outputs/`.
 
+La revisión actual incorpora la casa completa del ZIP aportado: chimenea desde planta
+baja, tejas de media caña, hastiales con entramado y escalera de piedra con relieve.
+Entrega y validación en [docs/HOUSE_REVISION.md](docs/HOUSE_REVISION.md).
+
 ## Usarlo en Blender
 
 **Uso normal:** guía completa en [USERGUIDE.md](USERGUIDE.md). En resumen: instala `dist/ruinas_panel_v031.zip` desde Preferencias → Complementos → Instalar desde disco, actívalo y abre Vista 3D → N → Ruinas. Puedes abrir un .blend de v0.20: conserva los campos guardados. No ejecutes su antiguo `generador_muro.py`, porque volvería a registrar la versión anterior.

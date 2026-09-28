@@ -1,8 +1,10 @@
 """services /export — ver docs/ARCHITECTURE.md para contratos y dependencias."""
 
 from .. import config
+from .. import runtime
 from ..services import generation
 from ..services import profiling
+from ..geometry import primitives
 import bpy
 import math
 import time
@@ -82,7 +84,7 @@ def fuse_voxel(obj,voxel):
         face.use_smooth=True
 
 
-def fuse_manifold(context,obj,names):
+def fuse_manifold(context,obj,names,validate=True):
     'IA: Une obj con el resto de copias mediante booleano Manifold exacto; limpia residuos y huecos interiores por volumen.'
     import bmesh
     union=bpy.data.collections.new('MURO · unión temporal')
@@ -98,10 +100,14 @@ def fuse_manifold(context,obj,names):
         mod.collection=union
         mod.solver='MANIFOLD'
         context.view_layer.objects.active=obj
-        bpy.ops.object.modifier_apply(modifier=mod.name)
+        result=bpy.ops.object.modifier_apply(modifier=mod.name)
+        if 'FINISHED' not in result:
+            raise ValueError('No se pudo unir el lote: '+obj.name)
     finally:
         discard_objects(names[1:])
         bpy.data.collections.remove(union)
+    if not validate:
+        return
     bm=bmesh.new()
     bm.from_mesh(obj.data)
     parts=sorted(shells(bm),key=lambda part:part[1],reverse=True)
@@ -124,25 +130,99 @@ def fuse_manifold(context,obj,names):
     obj['huecos_interiores_eliminados']=cavities
 
 
+def fuse_heights(context,names):
+    'IA: Une piezas completas en lotes de altura de 20 mm y hasta 60k caras; no corta superficies ni elimina componentes intermedios.'
+    buckets={}
+    for name in names:
+        obj=bpy.data.objects[name]
+        co=primitives.coords(obj)
+        band=int(float((co[:,2].min()+co[:,2].max())/2)//20)
+        buckets.setdefault(band,[]).append(name)
+    stage=[]
+    for band,group in sorted(buckets.items()):
+        chunk=[];count=0
+        for name in group:
+            faces=len(bpy.data.objects[name].data.polygons)
+            if chunk and count+faces>60000:
+                first=bpy.data.objects[chunk[0]]
+                fuse_manifold(context,first,chunk,validate=False);stage.append(first.name)
+                chunk=[];count=0
+            chunk.append(name);count+=faces
+        if chunk:
+            first=bpy.data.objects[chunk[0]]
+            if len(chunk)>1:fuse_manifold(context,first,chunk,validate=False)
+            stage.append(first.name)
+    batches=len(stage)
+    # Árbol de uniones: reduce el número de operandos sin duplicar piezas entre franjas.
+    while len(stage)>4:
+        following=[]
+        for i in range(0,len(stage),4):
+            group=stage[i:i+4];first=bpy.data.objects[group[0]]
+            if len(group)>1:fuse_manifold(context,first,group,validate=False)
+            following.append(first.name)
+        stage=following
+    first=bpy.data.objects[stage[0]]
+    fuse_manifold(context,first,stage)
+    first['lotes_altura']=batches
+    return first
+
+
+def printable_mesh(obj,density):
+    'IA: Valida triángulos con vértices coincidentes soldados, como STL; si los n-gons booleanos fallan, normaliza por vóxel antes de entregar.'
+    import bmesh
+    for attempt in range(2):
+        bm=bmesh.new();bm.from_mesh(obj.data)
+        bmesh.ops.triangulate(bm,faces=list(bm.faces),quad_method='FIXED',ngon_method='EAR_CLIP')
+        bmesh.ops.remove_doubles(bm,verts=list(bm.verts),dist=.000001)
+        valid=bool(bm.faces) and all(e.is_manifold for e in bm.edges) and all(f.calc_area()>1e-12 for f in bm.faces)
+        if valid:
+            bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces))
+            bm.to_mesh(obj.data);bm.free();obj.data.update()
+            obj['triangulacion_validada']=True
+            return
+        bm.free()
+        if attempt==0:
+            # Remalla la superficie ya unida, nunca miles de piezas densas simultáneas.
+            resolution=.30+.15*(1-density)
+            bpy.context.view_layer.objects.active=obj
+            fuse_voxel(obj,resolution)
+            obj['normalizacion_voxel']=resolution
+    raise ValueError('La triangulación final no es cerrada. La fuente y el sólido anterior se conservan.')
+
+
 @profiling.timed("fusion")
 def make_solid(context, voxel=None, method=None):
     'IA: Fusiona copias (Manifold exacto o vóxel según config.EXPORT_METHOD) y valida cáscaras; si falla, borra copias y sólido parcial y deja la fuente intacta.'
     start=time.perf_counter()
     method=method or config.EXPORT_METHOD
+    from ..geometry import instances
     if voxel is None:
         voxel=config.QUALITY[context.scene.ruin_settings.export_quality][1]
     src=bpy.data.collections.get(config.COLLECTION)
     if not src or not src.objects:
         raise ValueError('Genera primero el muro.')
+    if any(ob.get('ruin_batch') for ob in src.objects):
+        # Las islas agrupadas son una representación de edición, no operandos de unión.
+        was_preview,was_busy=runtime.preview,runtime.busy
+        runtime.preview=False;runtime.busy=True
+        try:
+            src=generation.generate(context,context.scene.ruin_settings,context.scene.ruin_settings.export_quality)
+        finally:
+            runtime.preview=was_preview;runtime.busy=was_busy
+    faces=instances.expanded_faces(src)
+    if faces>config.EXPORT_FACE_LIMIT:
+        raise ValueError('Fuente de más de 4 millones de caras: reduce Densidad del sólido o divide en tramos antes de fusionar.')
     old=bpy.data.objects.get(config.SOLID_NAME)
-    if old:
-        bpy.data.objects.remove(old,do_unlink=True)
     bpy.ops.object.select_all(action='DESELECT')
     copies=[]
     try:
         for obj in src.objects:
-            ob=obj.copy()
-            ob.data=obj.data.copy()
+            if obj.get('ruin_instances'):
+                for ob in instances.export_copies(obj,context.scene.collection,context.scene.ruin_settings.export_density):
+                    ob.select_set(True)
+                    copies.append(ob.name)
+                continue
+            ob=primitives.reduced_copy(obj,context.scene.ruin_settings.export_density)
             context.scene.collection.objects.link(ob)
             ob.hide_set(False)
             ob.select_set(True)
@@ -150,19 +230,23 @@ def make_solid(context, voxel=None, method=None):
         first=bpy.data.objects[copies[0]]
         context.view_layer.objects.active=first
         if method=='MANIFOLD':
-            fuse_manifold(context,first,copies)
-            obj=first
+            obj=fuse_heights(context,copies)
         else:
             bpy.ops.object.join()
             obj=context.object
-        obj.name=config.SOLID_NAME
-        copies.append(obj.name)
         obj['metodo_fusion']=method
         if method!='MANIFOLD':
             fuse_voxel(obj,voxel)
+        printable_mesh(obj,context.scene.ruin_settings.export_density)
+        if old:
+            primitives.remove_objects([old])
+        obj.name=config.SOLID_NAME
+        copies.append(obj.name)
     except Exception:
         discard_objects(copies)
         raise
+    finally:
+        primitives.drop_stage()
     for ob in src.objects:
         ob.hide_set(True)
         ob.hide_render=True

@@ -46,7 +46,7 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
     bpy.context.view_layer.update()
     changed=[]
     for ob in list(coll.objects):
-        if ob==cutter or ob.get('wall_id','front')!=w['id'] or ob.get('escombro'):
+        if ob==cutter or ob.get('wall_id','front')!=w['id'] or ob.get('escombro') or ob.get('protected_sill'):
             continue
         if not ob.name.startswith(('Piedra','Mortero','Núcleo')):
             continue
@@ -104,6 +104,8 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
             if mesh.users==0:
                 bpy.data.meshes.remove(mesh)
         else:
+            ob['ruin_box']=False
+            ob['architectural_cut']=True
             changed.append(ob)
     mesh=cutter.data
     bpy.data.objects.remove(cutter,do_unlink=True)
@@ -118,7 +120,14 @@ def wall_tree(coll,w):
     tris=[]
     offset=0
     for ob in coll.objects:
-        if ob.get('wall_id','front')==w['id'] and not ob.get('escombro') and ob.name.startswith(('Piedra','Mortero')):
+        is_wall=ob.get('wall_id','front')==w['id'] and ob.name.startswith(('Piedra','Mortero'))
+        is_pillar=False
+        if ob.name.startswith('Pilar'):
+            co=primitives.coords(ob)
+            local=numpy.array([wall_local(w,v) for v in co])
+            # Solape real del sillar: el margen fijo de 12 mm excluía esquinas de Muralla.
+            is_pillar=local[:,0].max()>=w['start']-2 and local[:,0].min()<=w['end']+2 and local[:,1].min()<=2 and local[:,1].max()>=-2
+        if (is_wall or is_pillar) and not ob.get('escombro'):
             me=ob.data
             me.calc_loop_triangles()
             ids=numpy.empty(len(me.loop_triangles)*3,dtype=numpy.int32)
@@ -143,6 +152,8 @@ def window_timber(coll,wood,w,name,a,b,width,depth,seed):
     ob=timber.timber_beam(coll,wood,name,a,b,width,depth,seed)
     for v in ob.data.vertices:
         v.co=wall_point(w,*v.co)
+    ob['wall_id']=w['id']
+    ob['window_frame']=True
     return ob
 
 
@@ -150,22 +161,27 @@ def window_timber(coll,wood,w,name,a,b,width,depth,seed):
 def architectural_openings(coll,p,walls,door,edges):
     'IA: Distribuye huecos con jambas/dinteles apoyados; aloja vigas quitando ladrillos antes de añadir madera.'
     windows=[]
+    from . import placement
+    stair=placement.stair_reservation(p,walls)
+    from ..geometry import balconies
     beams=[]
     wood=primitives.material('Madera · envejecida',(.29,.21,.13))
     iron=primitives.material('Hierro · forjado',(.10,.105,.11))
     for w in walls:
         if not p.windows_enabled:
             break
-        ww=12 if p.build_type=='PARTITION' else 15
-        wh=16
-        usable=(w['start']+4,w['end']-4)
+        ww=p.window_width
+        margin=8 if p.balconies else 4
+        usable=(w['start']+margin,w['end']-margin)
         # Reservar columnas y puerta en la fachada.
         centers=meta.get(bpy.context.scene,'pilares_generados',[]) if w['id']=='front' else []
         floors=2 if p.height_type=='TWO' else 1
         made=0
         tree=wall_tree(coll,w)
-        for floor in range(floors):
-            z0=2+floor*50+14
+        for floor in (reversed(range(floors)) if p.balconies else range(floors)):
+            has_balcony=p.balconies and floor>0
+            wh=p.window_height+(14 if has_balcony else 0)
+            z0=2+floor*config.FLOOR_PITCH+(0 if has_balcony else 16)
             z1=z0+wh
             if z1+5>w['height']:
                 continue
@@ -176,6 +192,7 @@ def architectural_openings(coll,p,walls,door,edges):
                     break
                 x0=cx-ww/2
                 x1=cx+ww/2
+                if placement.blocks_stair(w,x0,x1,z0,stair,p):continue
                 if x1>usable[1]+.01 or x0<usable[0]-.01:
                     continue
                 if any(x0<c['x_mm']+c['width_mm']/2+3 and x1>c['x_mm']-c['width_mm']/2-3 for c in centers):
@@ -195,24 +212,34 @@ def architectural_openings(coll,p,walls,door,edges):
                 if not supported:
                     continue
                 carve_rectangle(coll,w,x0,x1,z0,z1,p.thickness+5,'Ventana')
-                yy=-p.thickness/2-.25
+                # El eje local +Y apunta al exterior solo en izquierda y trasera.
+                direction=(1 if w['id'] in ('left','back') else -1)*(1 if p.window_facing=='OUTSIDE' else -1)
+                # Cara posterior del marco a 0,35 mm dentro de la cara terminada de la piedra.
+                yy=direction*(p.thickness/2+p.projection*.75+3.2/2-.35)
+                # Travesaño exterior sobre la loseta; el reborde interior ocupa otro plano.
                 for x in (x0+.5,x1-.5):
-                    window_timber(coll,wood,w,'Madera · jamba ventana',(x,yy,z0-.3),(x,yy,z1+.3),2,3.2,p.seed+made+141)
-                for z in (z0+.45,z1-.45):
+                    window_timber(coll,wood,w,'Madera · jamba ventana',(x,yy,z0+2.1),(x,yy,z1-1.45),2,3.2,p.seed+made+141)
+                for z in (z0+2.1,z1-.45):
                     window_timber(coll,wood,w,'Madera · ventana travesaño',(x0-.2,yy,z),(x1+.2,yy,z),2,3.2,p.seed+made+181)
-                windows.append({'wall':w['id'],'x':cx,'x0':x0,'x1':x1,'z0':z0,'z1':z1})
+                balconies.sill(coll,p,w,x0,x1,z0)
+                balconies.window_iron(coll,p,w,x0,x1,z0,z1,yy)
+                if has_balcony:
+                    balconies.balcony(coll,p,w,x0,x1,z0,p.seed+made+len(w['id'])*337)
+                windows.append({'wall':w['id'],'x':cx,'x0':x0,'x1':x1,'z0':z0,'z1':z1,'frame_y':yy,'balcony':has_balcony})
                 made+=1
     if p.floor_beams and p.height_type=='TWO':
-        z=49.5
+        z=config.BEAM_LEVEL if p.layout_mode=='ROOM' else config.UPPER_FLOOR-2.5
         size=4.5
         targets=[w for w in walls if w['id']=='front'] if p.layout_mode=='ROOM' else walls
+        # Congelar apoyos antes del primer alojamiento: un recorte no cambia la decisión del siguiente.
+        support_trees={w['id']:wall_tree(coll,w) for w in walls}
         for w in targets:
-            support_tree=wall_tree(coll,w)
+            support_tree=support_trees[w['id']]
             count=max(1,int((w['end']-w['start'])/24))
             span=(w['end']-w['start'])/(count+1)
             for i in range(count):
                 x=w['start']+(i+1)*span
-                if not all(wall_hit(support_tree,w,p,sx,z-2.7) for sx in (x-2.8,x,x+2.8)):
+                if sum(wall_hit(support_tree,w,p,sx,z-2.7) for sx in (x-1.5,x,x+1.5))<2:
                     continue
                 if any(h['wall']==w['id'] and h['x0']-3<x<h['x1']+3 and h['z0']<z+size/2 and h['z1']>z-size/2 for h in windows):
                     continue
@@ -221,6 +248,10 @@ def architectural_openings(coll,p,walls,door,edges):
                 if p.layout_mode=='ROOM':
                     rear=next(q for q in walls if q['id']=='back')
                     if not rear['start']+3<x<rear['end']-3:
+                        continue
+                    if any(h['wall']=='back' and h['x0']-3<x<h['x1']+3 and h['z0']-1<z+size/2 and h['z1']+1>z-size/2 for h in windows):
+                        continue
+                    if sum(wall_hit(support_trees['back'],rear,p,sx,z-2.7) for sx in (x-1.5,x,x+1.5))<2:
                         continue
                 carve_rectangle(coll,w,x-2.5,x+2.5,z-2,z+size/2,p.thickness+6,'Alojamiento de viga')
                 length=p.thickness/2+4

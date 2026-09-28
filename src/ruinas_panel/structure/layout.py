@@ -11,7 +11,7 @@ def distribution_seed(p):
 
 def course_layout(p):
     'IA: Calcula cotas exactas de planta y mínimo de hilada; función sin geometría de Blender.'
-    span=25.0 if p.height_type=='RUIN' else 50.0
+    span=25.0 if p.height_type=='RUIN' else config.FLOOR_PITCH
     levels=2 if p.height_type=='TWO' else 1
     rows=max(3,round(span/p.stone_size))
     while True:

@@ -41,3 +41,7 @@ pieces = {}
 
 # Progreso en curso: función sin argumentos que avisa de una pieza creada, o None.
 progress = None
+
+# Fase ligera: conserva cajas y aplaza su acabado a variantes compartidas.
+instance_build = False
+detail_limited = False

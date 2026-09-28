@@ -10,3 +10,4 @@
 - No subas densidad por defecto para esconder artefactos. Mide tiempo, caras y resultado con los mismos parámetros. Borrador omite grietas booleanas por diseño.
 - Desarrollo interactivo: ejecutar `tools/load_in_blender.py` recarga módulos y limpia timers/caché. Empaquetar: `python dev.py pack`.
 - Alcance actual y limitaciones en `docs/STATUS.md`; documenta nuevos límites demostrados sin reescribir el historial del chat.
+- Publicación: por petición del usuario, al terminar cambios validados haz commit y push a `origin/develop`, salvo que indique otra rama o pida no publicar. No uses push forzado.

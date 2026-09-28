@@ -92,7 +92,7 @@ def stale_preview(scene):
     stored=meta.raw(scene,'parametros_muro')
     if p is None or not stored or not bpy.data.collections.get(config.COLLECTION):
         return False
-    ignored={'export_quality','quick_edit'}
+    ignored={'export_quality','quick_edit','export_density'}
     current=json.loads(json.dumps({k:getattr(p,k) for k in config.FIELDS if k not in ignored},ensure_ascii=False))
     saved={k:v for k,v in json.loads(stored).items() if k not in ignored}
     return saved!=current

@@ -32,7 +32,7 @@ def status_icon(status):
 
 
 class RUIN_PT_panel(bpy.types.Panel):
-    bl_label = 'Muro de fantasía · v0.31'
+    bl_label = 'Muro de fantasía · v0.26'
     bl_idname = 'RUIN_PT_panel'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -57,6 +57,14 @@ class RUIN_PT_panel(bpy.types.Panel):
         col.label(text=p.status, icon=status_icon(p.status))
         m = parsed(meta.raw(context.scene, 'ruinas_metricas') or '{}', {})
         col.label(text='%s caras%s' % (format(m.get('faces', 0), ','), ' · geometría en caché' if m.get('cached') else ''))
+        col.label(text='%s objetos · %.2f s' % (m.get('objects',0),m.get('seconds',0)))
+        if m.get('instances'):
+            col.label(text='%s instancias · %s variantes'%(m['instances'],m['variants']))
+            col.label(text='%s caras al convertir'%format(m['expanded_faces'],','))
+        if m.get('detail_limited'):
+            col.label(text='Detalle limitado por presupuesto',icon='INFO')
+        if p.preview_quality=='DETAIL' and not p.microdetail_preview:
+            col.label(text='Poros finos al preparar Detalle')
         row = layout.row(align=True)
         row.prop(p, 'seed')
         row.operator('ruin.next_seed', text='', icon='RNDCURVE')
@@ -65,6 +73,14 @@ class RUIN_PT_panel(bpy.types.Panel):
 
 def enabled(p, field):
     'IA: Controles que no aplican se atenúan en lugar de ocultarse.'
+    if field=='wear':return p.wear_level=='CUSTOM'
+    if field in ('roof_curve','roof_tiles','roof_gables','chimneys','brass_pipes','roof_damage'):return p.layout_mode=='ROOM' and p.roof_frame
+    if field in ('stair_type','stair_side'):return p.layout_mode=='ROOM' and p.height_type=='TWO' and p.upper_floor and p.floor_beams
+    if field=='roof_frame':return p.layout_mode=='ROOM'
+    if field=='upper_floor':return p.layout_mode=='ROOM' and p.height_type=='TWO' and p.floor_beams
+    if field in ('ground_floor','floor_damage'):return p.layout_mode=='ROOM'
+    if field=='balconies':return p.height_type=='TWO'
+    if field in ('iron_mode','iron_damage'):return p.balconies and p.height_type=='TWO'
     if field == 'building_depth':
         return p.layout_mode != 'NONE'
     if field == 'extra_side':
@@ -73,8 +89,6 @@ def enabled(p, field):
         return p.height_type == 'TWO'
     if field == 'connection_side':
         return p.connection_enabled
-    if field == 'wear':
-        return p.wear_level == 'CUSTOM'
     return True
 
 
@@ -111,6 +125,19 @@ def section_panel(index, section):
             col.label(text='Desgaste, grietas y escombros se ven en Detalle', icon='INFO')
         if section['id'] == 'build':
             col.label(text='Grosor %.0f mm · altura %.0f mm' % (config.BUILD_TYPES[p.build_type][0], config.HEIGHT_TYPES[p.height_type]))
+        if section['id']=='floors':
+            col.label(text='Requiere Habitación; entreplanta sobre vigas')
+        if section['id']=='stairs':
+            col.label(text='Habitación · 2 plantas · entreplanta y vigas')
+            stair=parsed(meta.raw(context.scene,'escalera_generada') or '{}',{})
+            if stair.get('error'):col.label(text=stair['error'],icon='INFO')
+            elif stair:
+                col.label(text='%s peldaños · huella útil 20 × 20 mm'%stair['steps'])
+                col.label(text='Acceso libre: 35 mm')
+        if section['id']=='collapse':
+            col.operator('ruin.next_holes',icon='FILE_REFRESH')
+            holes=parsed(meta.raw(context.scene,'huecos_generados') or '[]',[])
+            col.label(text='Huecos generados: %s · respetan anclajes'%len(holes))
         if section['id'] == 'windows' and p.windows_enabled:
             windows = parsed(meta.raw(context.scene, 'ventanas_generadas') or '[]', [])
             col.label(text='Generadas: %s · limitadas por apoyos y espacio' % len(windows))

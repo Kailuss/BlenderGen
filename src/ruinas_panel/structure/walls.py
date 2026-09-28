@@ -18,6 +18,7 @@ import random
 
 def rear_pier(coll,p,x,y,edges,index):
     'IA: Esquina trasera con suelo y hiladas compatibles con las paredes contiguas.'
+    before=set(coll.objects)
     stone=primitives.material('Piedra · neutro',(.52,.52,.52))
     mortar=primitives.material('Núcleo · neutro',(.44,.44,.44))
     width=layout.corner_width(p)
@@ -26,7 +27,9 @@ def rear_pier(coll,p,x,y,edges,index):
     primitives.block('Pilar trasero · núcleo',x-width/2+.8,x+width/2-.8,y-T/2-1.5,y+T/2+1.5,1.5,p.height-1.5,coll,mortar)
     for r,(z0,z1) in enumerate(zip(edges,edges[1:])):
         ob=primitives.block('Pilar trasero · sillar %s.%s'%(index,r),x-width/2,x+width/2,y-T/2-3.1,y+T/2+3.1,z0+.18,z1-.18,coll,stone)
+        weather.weather_stone(ob,p.wear,p.seed+1911+r*31+index)
     terrain.earth_patch(coll,primitives.material('Tierra · arena',(.36,.31,.24)),'Tierra · pilar trasero',x,y,width/2+5,T/2+8,1.6,p.seed+890+index,p.ground_roughness)
+    for ob in set(coll.objects)-before:ob['wall_id']='back'
 
 
 def segment_wall(coll,p,wall_id,start,end,origin,axis,height,edges):
@@ -97,7 +100,7 @@ def build_returns(coll,p,centers,edges):
 
 
 def _build_wall(context, p):
-    'IA: Orquesta construcción física de la fuente; no cambies orden aleatorio ni nombres sin revisar caché y semillas.'
+    'IA: Primera fase: fábrica base, pilares y suelo exterior; assembly añade influencias y carpintería después. Mantén nombres y semillas.'
     if p.thickness < 8 or p.length < 60 or p.height < 25:
         raise ValueError('Mínimos del prototipo: longitud 60, altura 25 y grosor 8 mm.')
     old = bpy.data.collections.get(config.COLLECTION)
@@ -273,60 +276,8 @@ def _build_wall(context, p):
         courses=layout.trim_door_courses(courses,door,z_edges)
     courses=[layout.merge_thin_stones(line,max(3.2,(z_edges[r+1]-z_edges[r])*.65)) for r,line in enumerate(courses)]
     meta.put(context.scene,'puerta_generada',door)
-    # Huecos pasantes definidos por piedras omitidas: sin cavidades de resina ni tapones de mortero.
-    cells=[(r,k,a,b) for r,line in enumerate(courses) for k,(a,b) in enumerate(line)]
-    candidates=[((a+b)/2,(z_edges[r]+z_edges[r+1])/2) for r,k,a,b in cells if r>=1]
-    random.Random(dseed+80431).shuffle(candidates)
-    holes=[]
-    omitted=set()
-    for cx,cz in candidates:
-        if len(holes)>=p.hole_count:
-            break
-        rx=p.hole_size/2
-        rz=rx*.8
-        group=[(r,k,a,b) for r,k,a,b in cells
-               if (((a+b)/2-cx)/rx)**2+(((z_edges[r]+z_edges[r+1])/2-cz)/rz)**2<=1]
-        if not group:
-            continue
-        if door and any(a<door["right"]+rh and b>door["left"]-rh for r,k,a,b in group):
-            continue
-        # Una selección debe formar un único hueco, no varias perforaciones separadas.
-        connected={0}
-        stack=[0]
-        while stack:
-            r,k,a,b=group[stack.pop()]
-            for q,(s,j,c,d) in enumerate(group):
-                adjacent=(r==s and min(b,d)-max(a,c)>=-.01) or (abs(r-s)==1 and min(b,d)-max(a,c)>1)
-                if q not in connected and adjacent:
-                    connected.add(q)
-                    stack.append(q)
-        if len(connected)!=len(group):
-            continue
-        x0=min(c[2] for c in group)
-        x1=max(c[3] for c in group)
-        z0=z_edges[min(c[0] for c in group)]
-        z1=z_edges[max(c[0] for c in group)+1]
-        # Mantener pie, extremos, espesor de pared sobre el hueco y separación entre huecos.
-        if z0<z_edges[1]-.01 or min(x0+L/2,L/2-x1)<rh:
-            continue
-        if any(x0<c['x_mm']+c['width_mm']/2+2 and x1>c['x_mm']-c['width_mm']/2-2 for c in centers):
-            continue
-        if min(height(x0+(x1-x0)*i/12) for i in range(13))-z1<rh*1.05:
-            continue
-        if any(x0<h['x1']+rh and x1>h['x0']-rh and z0<h['z1']+rh and z1>h['z0']-rh for h in holes):
-            continue
-        if (x1-x0)>max(p.hole_size*1.65,rh*2.0):
-            continue
-        holes.append({'x':cx,'z':cz,'x0':x0,'x1':x1,'z0':z0,'z1':z1,
-                      'removed_cells':[(r,k) for r,k,a,b in group]})
-        omitted.update((r,k) for r,k,a,b in group)
-    if p.hole_damage>0:
-        for hindex,h in enumerate(holes):
-            r,k=min(h['removed_cells'])
-            a,b=courses[r][k]
-            fracture.hole_fragment(coll,stone,mortar,a,b,z_edges[r]+.2,z_edges[r+1]-.25,T,p.projection,p.hole_damage,p.seed+8521+hindex,p.wear)
-    meta.put(context.scene,'huecos_generados',holes)
-    meta.put(context.scene,'huecos_solicitados',p.hole_count)
+    # Fábrica completa: las perforaciones se resuelven en assembly después de reservar apoyos.
+    holes=[];omitted=set()
     build_base_and_lintel(coll,stone,p,door,rh)
     audit=[]
     mortar_audit=[]
@@ -403,18 +354,13 @@ def _build_wall(context, p):
                 weather.weather_stone(ob,p.wear,p.seed+i*19+j)
             else:
                 ob['connection_face']=True
+                weather.weather_stone(ob,p.wear,p.seed+i*19+j)
     meta.put(context.scene,'pilares_generados',centers)
-    if runtime.quality in config.DAMAGE_QUALITIES:
-        rubble.build_rubble(coll,stone,mortar,p,door,rh)
-    timber.wooden_frame(coll,p,door)
-    timber.wooden_door(coll,p,door)
     for ob in coll.objects:
         co=primitives.coords(ob)
         co[:,0]=co[:,0].clip(-L/2,L/2)
         primitives.set_coords(ob,co)
-    terrain.pier_ground(coll,p,centers)
-    walls=build_returns(coll,p,centers,z_edges)
-    openings.architectural_openings(coll,p,walls,door,z_edges)
+    build_returns(coll,p,centers,z_edges)
     return coll
 
 

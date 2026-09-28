@@ -21,6 +21,9 @@ def run():
     bpy.ops.wm.read_factory_settings(use_empty=True)
     runtime.quality = 'DETAIL'
     runtime.preview = False
+    from types import SimpleNamespace
+    runtime.instance_build = False
+    runtime.settings = SimpleNamespace(microdetail_preview=True, export_density=1.0)
     scene = bpy.context.scene
     coll = bpy.data.collections.new('Comparación de desgaste')
     scene.collection.children.link(coll)
@@ -49,7 +52,7 @@ def run():
         for seed in (17, 43, 91):
             samples = [r for r in rows if r['seed'] == seed]
             assert all(a['loss'] < b['loss'] for a, b in zip(samples, samples[1:])), samples
-            assert len({r['faces'] for r in samples[1:]}) == 1, samples
+            # La base completa añade recortes de desconchones: su topología depende de wear.
     bpy.ops.object.camera_add(location=(80, -130, 95))
     camera = bpy.context.object
     camera.rotation_euler = (Vector((32, 0, 13))-camera.location).to_track_quat('-Z', 'Y').to_euler()

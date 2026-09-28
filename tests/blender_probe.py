@@ -14,13 +14,28 @@ from mathutils import noise
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def mesh_objects(coll):
+    """IA: incluye las bibliotecas Geometry Nodes además de las piezas únicas; los puntos del array no prueban cierre de las piedras."""
+    objects = list(coll.objects)
+    libraries = {ob['ruin_library'] for ob in objects if ob.get('ruin_instances')}
+    for name in sorted(libraries):
+        objects.extend(bpy.data.collections[name].objects)
+    return sorted(objects, key=lambda ob: ob.name)
+
+
 def digest(coll):
-    """IA: compara geometría y nombres sin incluir tiempos o punteros de Blender."""
+    """IA: compara piezas, variantes y transformaciones GN sin incluir tiempos, nombres de bibliotecas o punteros de Blender."""
     result = []
-    for ob in sorted(coll.objects, key=lambda o: o.name):
+    for ob in mesh_objects(coll):
         result.append((ob.name,
                        [tuple(round(float(x), 6) for x in v.co) for v in ob.data.vertices],
                        [tuple(f.vertices) for f in ob.data.polygons]))
+        if ob.get('ruin_instances'):
+            attributes = ob.data.attributes
+            result.append((json.loads(ob['ruin_keys']),
+                           [value.value for value in attributes['ruin_index'].data],
+                           [[round(float(v), 6) for v in value.vector] for value in attributes['ruin_scale'].data],
+                           [[round(float(v), 6) for v in value.vector] for value in attributes['ruin_rotation'].data]))
     return hashlib.sha256(json.dumps(result, separators=(',', ':')).encode()).hexdigest()
 
 
@@ -40,9 +55,14 @@ def stored_raw(name):
 
 
 def closure(coll):
-    """IA: cuenta por pieza aristas no manifold y caras de área casi nula; no corrige la malla."""
+    """IA: cuenta por pieza/variante aristas no manifold y caras casi nulas; exige índices GN válidos y escalas positivas sin corregir nada."""
     open_edges, degenerate = {}, {}
-    for ob in coll.objects:
+    for ob in mesh_objects(coll):
+        if ob.get('ruin_instances'):
+            count = len(bpy.data.collections[ob['ruin_library']].objects)
+            attributes = ob.data.attributes
+            assert all(0 <= value.value < count for value in attributes['ruin_index'].data), ('indice_instancia', ob.name)
+            assert all(min(value.vector) > 0 for value in attributes['ruin_scale'].data), ('escala_instancia', ob.name)
         bm = bmesh.new()
         bm.from_mesh(ob.data)
         edges = sum(1 for e in bm.edges if not e.is_manifold)
@@ -58,7 +78,7 @@ def closure(coll):
 def shrunk_by_cracks(coll, ratio=.5):
     """IA: detecta piezas agrietadas cuya caja cae por debajo de ratio de la caja previa guardada en parametros_grieta."""
     shrunk = {}
-    for ob in coll.objects:
+    for ob in mesh_objects(coll):
         if 'parametros_grieta' not in ob or not ob.data.vertices:
             continue
         lo, hi = json.loads(ob['parametros_grieta'])['bounds']
@@ -140,7 +160,9 @@ def session_checks(g, state, config, case):
         p.seed -= 1
     # Operador: un error de validación llega como informe, no como traza, y no toca la escena.
     before = set(bpy.data.objects.keys())
-    for key, value in {'build_type': 'FORTRESS', 'layout_mode': 'TWO', 'length': 60, 'door_enabled': True}.items():
+    invalid = {'build_type': 'FORTRESS', 'layout_mode': 'TWO', 'length': 60, 'door_enabled': True}
+    previous = {key: getattr(p, key) for key in invalid}
+    for key, value in invalid.items():
         setattr(p, key, value)
     try:
         bpy.ops.ruin.solid()
@@ -149,35 +171,77 @@ def session_checks(g, state, config, case):
         assert 'No cabe la puerta' in str(exc), exc
     assert set(bpy.data.objects.keys()) == before, 'la validación fallida cambió la escena'
     assert config.STAGE_SCENE not in bpy.data.scenes, 'la escena de taller debe borrarse aunque la generación falle'
-    # Fusión: un fragmento suelto aborta y se borran copias y sólido parcial.
+    for key, value in previous.items():
+        setattr(p, key, value)
+    # La prueba de copias usa piezas independientes: exportar una vista agrupada reconstruye
+    # la fuente y retiraría la pieza artificial antes de poder comprobar su rechazo.
+    p.batch_preview = False
+    p.use_instances = False
+    g.generate(bpy.context, p, quality)
     from ruinas_panel.geometry import primitives
     from ruinas_panel.services import export
     coll = bpy.data.collections[config.COLLECTION]
+    # La base completa heredada puede dejar sillares separados con derrumbe alto.
+    # Conservamos este escenario: o entrega una pieza cerrada o rechaza el fragmento
+    # dejando fuente y escena intactas; el límite se informa, nunca se oculta.
+    before = set(bpy.data.objects.keys())
+    source_digest = digest(coll)
+    try:
+        damaged_solid = export.make_solid(bpy.context)
+    except ValueError as exc:
+        assert str(exc).startswith('Fragmento suelto'), exc
+        assert set(bpy.data.objects.keys()) == before, 'el rechazo del derrumbe dejó objetos temporales'
+        assert digest(coll) == source_digest, 'el rechazo del derrumbe modificó la fuente'
+        print('SESSION_LIMIT damaged_default_export:', str(exc), flush=True)
+    else:
+        bm = bmesh.new()
+        bm.from_mesh(damaged_solid.data)
+        assert all(e.is_manifold for e in bm.edges) and len(export.shells(bm)) == 1
+        bm.free()
+        mesh = damaged_solid.data
+        bpy.data.objects.remove(damaged_solid, do_unlink=True)
+        bpy.data.meshes.remove(mesh)
+    # Caso positivo independiente: mampostería entera, sin fragmentos de derrumbe.
+    # Exige unión cerrada y conectada; la normalización de triangulación, si se
+    # requiere, solo puede mover la caja dentro de un vóxel declarado por el sólido.
+    p.collapse = 0
+    p.hole_count = 0
+    p.export_density = 1
+    coll = g.generate(bpy.context, p, quality)
+    # Una pieza artificial aislada debe rechazarse incluso cuando la fuente restante
+    # sí es exportable; no usamos otro fragmento de derrumbe para satisfacer esta prueba.
     primitives.block('Prueba · pieza suelta', 200, 206, 0, 6, 0, 6, coll, primitives.material('Temporal', (.5, .5, .5)))
     before = set(bpy.data.objects.keys())
+    source_digest = digest(coll)
     try:
         export.make_solid(bpy.context, .45)
         raise AssertionError('make_solid debería rechazar la pieza suelta')
     except ValueError as exc:
         assert 'Fragmento suelto' in str(exc), exc
     assert set(bpy.data.objects.keys()) == before, ('fusion_fallida_deja_objetos', set(bpy.data.objects.keys()) ^ before)
-    # Exportación Manifold: una sola pieza cerrada con la misma caja que la fuente (sin pérdida de detalle).
+    assert digest(coll) == source_digest, 'la fusión fallida modificó la fuente'
     loose = bpy.data.objects['Prueba · pieza suelta']
     mesh = loose.data
     bpy.data.objects.remove(loose, do_unlink=True)
     bpy.data.meshes.remove(mesh)
+    source_digest = digest(coll)
     points = [v.co for o in coll.objects for v in o.data.vertices]
     box = [min(q[i] for q in points) for i in range(3)] + [max(q[i] for q in points) for i in range(3)]
     solid = export.make_solid(bpy.context)
+    assert digest(coll) == source_digest, 'la exportación modificó la fuente editable'
     assert solid['metodo_fusion'] == 'MANIFOLD', solid['metodo_fusion']
     bm = bmesh.new()
     bm.from_mesh(solid.data)
     assert all(e.is_manifold for e in bm.edges), 'sólido con aristas abiertas'
     assert len(export.shells(bm)) == 1, 'el sólido debe ser una sola pieza'
+    assert solid.get('triangulacion_validada'), 'la triangulación final debe estar validada'
     bm.free()
     points = [v.co for v in solid.data.vertices]
     solid_box = [min(q[i] for q in points) for i in range(3)] + [max(q[i] for q in points) for i in range(3)]
-    assert max(abs(a - b) for a, b in zip(box, solid_box)) < 1e-3, ('caja_distinta', box, solid_box)
+    tolerance = solid.get('normalizacion_voxel', 1e-3)
+    assert max(abs(a - b) for a, b in zip(box, solid_box)) < tolerance, ('caja_distinta', box, solid_box, dict(solid.items()))
+    if solid.get('normalizacion_voxel'):
+        print('SESSION_NORMALIZED voxel_mm:', tolerance, flush=True)
     print('SESSION_PASS', flush=True)
 
 
@@ -185,6 +249,7 @@ def run():
     """IA: usa procesos separados para baseline/modular; el fallo debe producir exit code distinto de cero."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--legacy', type=Path)
+    parser.add_argument('--source', type=Path, help='Carpeta src de referencia importable, sin editar el ZIP de entrega')
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--case')
     args = parser.parse_args(sys.argv[sys.argv.index('--')+1:])
@@ -197,7 +262,7 @@ def run():
         clear_cache = g.clear_cache
         busy, preview = '_busy', 'PREVIEW'
     else:
-        sys.path.insert(0, str(ROOT/'src'))
+        sys.path.insert(0, str(args.source.resolve() if args.source else ROOT/'src'))
         import ruinas_panel as g
         from ruinas_panel import runtime as state, config
         from ruinas_panel.services.cache import clear_cache

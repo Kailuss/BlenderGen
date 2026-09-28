@@ -20,7 +20,8 @@ class LayoutTests(unittest.TestCase):
                         edges,_=layout.course_layout(p)
                         self.assertAlmostEqual(edges[-1],top)
                         self.assertTrue(all(b-a>=3-1e-8 for a,b in zip(edges,edges[1:])))
-                        if height=='TWO':self.assertIn(52.,edges)
+                        self.assertEqual(edges[0],2.)
+                        if height=='TWO':self.assertIn(config.UPPER_FLOOR,edges)
 
     def test_thin_stones_keep_gaps(self):
         """IA: fusionar una tira no debe tapar el hueco de una puerta o ventana."""
@@ -34,8 +35,17 @@ class LayoutTests(unittest.TestCase):
             p=SimpleNamespace(build_type='WALL',height_type='TWO',layout_mode='ROOM',extra_side='RIGHT',building_depth=50,wear_level='HEAVY')
             layout.apply_profiles(p)
             self.assertEqual(runtime.busy,busy)
-            self.assertEqual((p.height,p.thickness,p.wear),(102,12,config.WEAR_LEVELS['HEAVY']))
+            self.assertEqual((p.height,p.thickness,p.wear),(112,9,config.WEAR_LEVELS['HEAVY']))
         runtime.busy=False
+
+    def test_building_scale(self):
+        """IA: fija plantas de 55 mm y espesores de 6/9/15 mm; las cotas comunes deben coincidir con apoyos y desembarcos."""
+        self.assertEqual(config.FLOOR_PITCH,55.)
+        self.assertEqual(config.UPPER_FLOOR,57.)
+        self.assertAlmostEqual(config.BEAM_LEVEL+3.6,config.UPPER_FLOOR)
+        self.assertEqual(config.HEIGHT_TYPES,{'RUIN':27.,'ONE':57.,'TWO':112.})
+        self.assertEqual({kind:profile[0] for kind,profile in config.BUILD_TYPES.items()},
+                         {'PARTITION':6.,'WALL':9.,'FORTRESS':15.})
 
     def test_custom_wear_survives_profiles(self):
         """IA: regenerar con intensidad personalizada conserva incluso cero y uno, sin imponer el preset."""

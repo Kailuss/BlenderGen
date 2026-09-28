@@ -1,0 +1,262 @@
+{
+  "settings": {
+    "build_type": "WALL",
+    "height_type": "TWO",
+    "layout_mode": "ROOM",
+    "building_depth": 90.0,
+    "extra_side": "RIGHT",
+    "windows_enabled": true,
+    "windows_per_wall": 2,
+    "floor_beams": true,
+    "door_leaf": true,
+    "left_turn": "RIGHT",
+    "right_turn": "LEFT",
+    "left_return_length": 70.0,
+    "right_return_length": 70.0,
+    "rubble_amount": 0.800000011920929,
+    "ground_roughness": 0.6499999761581421,
+    "wood_frame": true,
+    "wood_grain": 0.699999988079071,
+    "length": 160.0,
+    "height": 112.0,
+    "left_height": 112.0,
+    "right_height": 112.0,
+    "thickness": 9.0,
+    "stone_size": 6.25,
+    "stone_variation": 0.20000000298023224,
+    "bond_subdivisions": 1,
+    "alternate_height": 1.0,
+    "projection": 1.0,
+    "pillar_count": 2,
+    "pillar_width": 10.0,
+    "hole_count": 1,
+    "hole_size": 14.0,
+    "collapse": 0.0,
+    "break_position": 0.7200000286102295,
+    "wear": 0.550000011920929,
+    "cracks": 0.15000000596046448,
+    "hole_damage": 0.699999988079071,
+    "seed": 17,
+    "wear_level": "MEDIUM",
+    "preview_quality": "DETAIL",
+    "export_quality": "DETAIL",
+    "quick_edit": true,
+    "randomness": 1.0,
+    "crack_length_var": 0.699999988079071,
+    "crack_width_var": 0.6000000238418579,
+    "crack_angle_var": 0.8500000238418579,
+    "crack_path_var": 0.699999988079071,
+    "cracks_per_stone": 3,
+    "door_enabled": true,
+    "door_position": 0.5,
+    "door_width": 32.0,
+    "door_height": 34.0,
+    "connection_enabled": false,
+    "connection_side": "BOTH",
+    "batch_preview": true,
+    "microdetail_preview": false,
+    "use_instances": true,
+    "export_density": 0.3499999940395355,
+    "window_width": 22.0,
+    "window_height": 20.0,
+    "balconies": true,
+    "iron_mode": "BROKEN",
+    "iron_damage": "2",
+    "window_facing": "OUTSIDE",
+    "ground_floor": true,
+    "upper_floor": true,
+    "floor_damage": 0.11999999731779099,
+    "wood_damage": 0.699999988079071,
+    "roof_frame": true,
+    "roof_curve": 0.75,
+    "roof_tiles": true,
+    "stair_type": "STONE",
+    "stair_side": "RIGHT",
+    "roof_gables": true,
+    "hole_seed": 1,
+    "roof_damage": 0.75,
+    "chimneys": true,
+    "brass_pipes": true
+  },
+  "walls": [
+    {
+      "id": "front",
+      "start": -80.0,
+      "end": 80.0,
+      "origin": [
+        0,
+        0
+      ],
+      "axis": [
+        1,
+        0
+      ],
+      "height": 112.0
+    },
+    {
+      "id": "left",
+      "start": 7.92,
+      "end": 90.0,
+      "origin": [
+        -74.35,
+        0
+      ],
+      "axis": [
+        0,
+        1
+      ],
+      "height": 112.0
+    },
+    {
+      "id": "right",
+      "start": 7.92,
+      "end": 90.0,
+      "origin": [
+        74.35,
+        0
+      ],
+      "axis": [
+        0,
+        1
+      ],
+      "height": 112.0
+    },
+    {
+      "id": "back",
+      "start": -68.44999999999999,
+      "end": 68.44999999999999,
+      "origin": [
+        0,
+        97.92
+      ],
+      "axis": [
+        1,
+        0
+      ],
+      "height": 112.0
+    }
+  ],
+  "windows": [
+    {
+      "wall": "front",
+      "x": -53.375,
+      "x0": -64.375,
+      "x1": -42.375,
+      "z0": 57.0,
+      "z1": 91.0,
+      "frame_y": -6.5,
+      "balcony": true
+    },
+    {
+      "wall": "front",
+      "x": -22.875,
+      "x0": -33.875,
+      "x1": -11.875,
+      "z0": 57.0,
+      "z1": 91.0,
+      "frame_y": -6.5,
+      "balcony": true
+    },
+    {
+      "wall": "left",
+      "x": 26.92,
+      "x0": 15.920000000000002,
+      "x1": 37.92,
+      "z0": 57.0,
+      "z1": 91.0,
+      "frame_y": 6.5,
+      "balcony": true
+    },
+    {
+      "wall": "left",
+      "x": 57.225,
+      "x0": 46.225,
+      "x1": 68.225,
+      "z0": 57.0,
+      "z1": 91.0,
+      "frame_y": 6.5,
+      "balcony": true
+    },
+    {
+      "wall": "right",
+      "x": 26.92,
+      "x0": 15.920000000000002,
+      "x1": 37.92,
+      "z0": 57.0,
+      "z1": 91.0,
+      "frame_y": -6.5,
+      "balcony": true
+    },
+    {
+      "wall": "right",
+      "x": 26.92,
+      "x0": 15.920000000000002,
+      "x1": 37.92,
+      "z0": 18.0,
+      "z1": 38.0,
+      "frame_y": -6.5,
+      "balcony": false
+    },
+    {
+      "wall": "back",
+      "x": -49.44999999999999,
+      "x0": -60.44999999999999,
+      "x1": -38.44999999999999,
+      "z0": 57.0,
+      "z1": 91.0,
+      "frame_y": 6.5,
+      "balcony": true
+    },
+    {
+      "wall": "back",
+      "x": -49.44999999999999,
+      "x0": -60.44999999999999,
+      "x1": -38.44999999999999,
+      "z0": 18.0,
+      "z1": 38.0,
+      "frame_y": 6.5,
+      "balcony": false
+    }
+  ],
+  "stairs": {
+    "x0": -31.44999999999999,
+    "x1": 35.75,
+    "y0": 67.62,
+    "y1": 90.02,
+    "bottom": 3.2,
+    "top": 57.0,
+    "steps": 3,
+    "reverse": false,
+    "opening": [
+      -31.94999999999999,
+      36.25,
+      66.82000000000001,
+      90.82
+    ],
+    "landing": [
+      35.75,
+      58.15
+    ],
+    "type": "STONE",
+    "usable_tread_mm": 20,
+    "pitch_mm": 22.4,
+    "riser_mm": 17.933333333333334,
+    "width_mm": 22.39999999999999,
+    "approach_mm": 35.0,
+    "approach": [
+      -67.94999999999999,
+      -32.94999999999999,
+      67.62,
+      90.02
+    ]
+  },
+  "chimney": [
+    {
+      "x": -33.6,
+      "y": 97.92,
+      "bottom": 109.0,
+      "top": 161.43200000000002,
+      "radius": 6
+    }
+  ]
+}

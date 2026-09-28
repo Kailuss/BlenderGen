@@ -1,6 +1,6 @@
 # Mapa de edición
 
-La versión 0.21 reorganiza v0.20. La geometría conserva sus algoritmos; el cambio principal es la mantenibilidad.
+La base 0.31 integra el edificio completo aportado en `dist/ruinas_v031_completo.zip`. El código editable vive únicamente en `src/ruinas_panel/`; el ZIP es una referencia de entrada, no una segunda fuente.
 
 | Tema | Archivo en `src/ruinas_panel` | Contrato principal |
 |---|---|---|
@@ -9,13 +9,26 @@ La versión 0.21 reorganiza v0.20. La geometría conserva sus algoritmos; el cam
 | Datos de auditoría en la escena | `meta.py` | Un solo grupo `scene['ruinas']` con JSON por clave; borra las claves sueltas antiguas |
 | Aparejo, alturas, planificación de puerta | `structure/layout.py` | Cálculo de intervalos y cotas sin crear mallas |
 | Fachada, pilares, paredes contiguas | `structure/walls.py` | Orquesta piezas; asigna wall_id |
+| Integración del edificio | `structure/assembly.py` | Ordena derrumbe, huecos, apoyos, suelos, escaleras y cubierta antes del acabado |
+| Derrumbe y continuidad espacial | `structure/destruction.py`, `structure/spatial.py` | Campo compartido entre muros y esquinas; retira piezas sin apoyo |
 | Ventanas, alojamientos y vigas | `structure/openings.py` | Recorta antes de añadir carpintería; exige apoyos |
+| Reserva de escalera y contactos | `structure/placement.py`, `structure/relations.py` | Evita vanos sobre el macizo y conserva mampostería junto a la carpintería |
+| Agujeros de daño | `structure/holes.py` | Perfora la fábrica montada respetando madera y contactos reservados |
+| Suelos y entreplanta | `structure/floors.py` | Tablones cerrados sobre apoyos; cotas comunes de `config` |
+| Escaleras | `structure/stairs.py` | Reserva huella y desembarco; acabado propio para piedra y madera |
+| Tejado, tejas y hastiales | `structure/roof.py` | Paños sobre cerchas supervivientes; perfil compartido de alero a cumbrera |
+| Daño y escombros de cubierta | `structure/roof_damage.py` | Regiones reproducibles cortan estructura y cubierta; escombros asociados |
+| Chimenea, canalones y bajantes | `structure/roof_accessories.py` | Planifica accesorios y sus reservas para integrarlos con muros y cubierta |
 | Cajas, bisel, material, recorte plano, aplicación de modificadores | `geometry/primitives.py` | Mallas cerradas en mm; modificadores de pieza solo con `apply_modifier` (escena de taller) |
 | Desgaste | `geometry/weather.py` | Erosión hacia dentro y densidad por calidad |
 | Grietas y roturas | `geometry/fracture.py` | Semillas locales, grietas desde aristas, sin islas grandes |
 | Tierra, peana, grava, asentamiento | `geometry/terrain.py` | Superficie física compartida con los escombros |
 | Cúmulos de escombros | `geometry/rubble.py` | Construye y asienta piezas con huella suficiente |
 | Puerta, marco, veta, herrajes | `geometry/timber.py` | Sección cerrada y orientación 3D coherente |
+| Balcones, alféizares e hierro | `geometry/balconies.py` | Piezas cerradas ancladas a los tramos; vanos libres |
+| Materiales y veta visual | `geometry/surfaces.py` | Paletas compartidas y UV; el bump visual no se exporta como relieve |
+| Instancias de mampostería | `geometry/instances.py` | Variantes compartidas en Geometry Nodes; materializa copias para exportación |
+| Agrupación de vista previa | `geometry/batching.py` | Agrupa sin fusionar sólidos; conserva IDs, UV y materiales |
 | Generación y métricas | `services/generation.py` | Validación → caché/construcción → daño → métricas |
 | Caché | `services/cache.py` | Plantillas anteriores a grietas, copiadas antes de editar |
 | Fusión/exportación | `services/export.py` | Fuente intacta; valida componentes del sólido |
@@ -29,10 +42,12 @@ La versión 0.21 reorganiza v0.20. La geometría conserva sus algoritmos; el cam
 
 ## Flujo
 
-`UI → preview → generation → walls/openings → geometry`
+`UI → preview → generation → walls → assembly → geometry`
 
-`generation → cache` almacena geometría antes de `fracture.apply_damage`.
-`export.make_solid` fusiona copias; nunca sustituye los originales editables.
+`assembly` resuelve derrumbe, ventanas/vigas, contactos, agujeros, suelos/escaleras y cubierta en ese orden. `roof` comparte el perfil de `spatial` y consulta reservas de chimenea y regiones de daño antes de colocar piezas.
+
+`generation → cache` almacena geometría antes de `fracture.apply_damage` o `instances.build`. La agrupación de vista previa se hace al final y nunca se guarda como plantilla.
+`export.make_solid` reconstruye la fuente si estaba agrupada, materializa las instancias y fusiona copias. Valida la triangulación imprimible; puede normalizar por vóxel si la unión exacta no triangula cerrada.
 Todos los módulos consultan `runtime` para calidad, parámetros activos y temporizadores.
 Los imports explícitos de módulos hacen visibles las dependencias. El ciclo entre generación y exportación solo referencia funciones en ejecución, no genera objetos al importar.
 
@@ -53,6 +68,9 @@ La API de `__init__.py` carga servicios de Blender al llamarlos. Por eso `config
 - Nunca uses `from runtime import quality` para estado mutable: quedaría una copia local del valor.
 - Para conservar partidas de aleatoriedad, usa `random.Random(seed)` local; no cambies el orden de llamadas durante un refactor sin comprobar diferencias.
 - Campos internos heredados de giros siguen presentes para leer .blend; los perfiles públicos los derivan.
+- Las plantas miden 55 mm; cimentación a 2 mm, entreplanta a 57 mm y coronación de dos plantas a 112 mm. Usa `config.FLOOR_PITCH`, `UPPER_FLOOR` y `BEAM_LEVEL` para que escaleras, vigas y suelos coincidan.
+- Los perfiles Tabique/Pared/Muralla tienen espesores de 6/9/15 mm; no reutilices las dimensiones anteriores a la base completa.
+- Borrador y Trabajo omiten el daño fino según `config.DAMAGE_QUALITIES`. Las pruebas de cierre y caché deben incluir las variantes y transformaciones de Geometry Nodes; los puntos del array por sí solos no prueban la geometría visible.
 
 ## Localización económica
 

@@ -76,6 +76,21 @@ class RUIN_OT_seed(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class RUIN_OT_holes(bpy.types.Operator):
+    bl_idname='ruin.next_holes'
+    bl_label='Redistribuir agujeros'
+    bl_description='Cambia solo la semilla de perforaciones; conserva el aparejo y los apoyos'
+    bl_options={'REGISTER','UNDO'}
+    poll=classmethod(ready)
+    def execute(self,context):
+        'IA: Variante independiente del bloqueo del aparejo; regenera explícitamente solo si la vista automática está apagada.'
+        p=context.scene.ruin_settings;p.hole_seed=(p.hole_seed+1)%1000000
+        if not p.live_preview:
+            try:preview.update_preview(context)
+            except Exception as exc:return fail(self,context,exc)
+        return {'FINISHED'}
+
+
 class RUIN_OT_reset(bpy.types.Operator):
     bl_idname='ruin.reset_section'
     bl_label='Restablecer sección'

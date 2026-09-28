@@ -1,5 +1,17 @@
 # Guía de uso · Ruinas v0.31
 
+Esta copia incorpora la casa completa aportada y su revisión de chimenea, escalera
+y tejado. En **Habitación**, activa **Armazón de tejado**, **Tejas solapadas** y
+**Cerrar hastiales**. **Chimenea** busca un tramo libre para el hogar desde planta
+baja; si los vanos o la escalera impiden colocarlo, no fuerza una intersección.
+Para la escalera elige dos plantas, entreplanta y vigas, con espacio interior suficiente.
+El relieve de las huellas se aprecia en calidad **Detalle**.
+
+La entrega `dist/ruinas_v031_revisada_completo.zip` incluye el `.blend`, addon y vistas.
+La base completa sustituye el algoritmo y los perfiles de la primera 0.31 del
+repositorio; la comparación histórica `docs/WEAR_031.md` corresponde a esa versión
+anterior. Los resultados actuales están en [docs/HOUSE_REVISION.md](docs/HOUSE_REVISION.md).
+
 Ruinas genera muros de mampostería en ruinas para miniaturas de 28 a 35 mm, listos para imprimir en resina. Todo se mide en milímetros.
 
 ## Instalación
@@ -27,7 +39,7 @@ Arriba están las acciones y el estado. Debajo, un subpanel por tema, con un bot
 
 | Subpanel | Qué controla |
 |---|---|
-| **Construcción** | Tipo (Tabique 8 mm, Pared 12 mm o Muralla 18 mm de grosor), altura (Baja 27 mm, 1 planta 52 mm o 2 plantas 102 mm), longitud y vigas de entreplanta (solo con 2 plantas) |
+| **Construcción** | Tipo (Tabique 6 mm, Pared 9 mm o Muralla 15 mm de grosor), altura (Baja 27 mm, 1 planta 57 mm o 2 plantas 112 mm), longitud y vigas de entreplanta (solo con 2 plantas) |
 | **Distribución** | Paredes contiguas: ninguna, L, U o habitación. También el fondo y el lado de la L |
 | **Acabado** | Derrumbe, desgaste (Ligero / Medio / Fuerte / Personalizado), intensidad personalizada, grietas, escombros, y tierra y grava |
 | **Puerta** | La casilla de la cabecera activa la puerta. Dentro: hoja, posición, anchura, altura, marco y vetas |
@@ -103,7 +115,7 @@ En **Preferencias → Complementos → Ruinas**:
 
 ## Límites actuales
 
-- No hay suelos de tablones, cubiertas ni simulación física de escombros.
-- Las alturas 27, 52 y 102 mm son medidas de diseño, no reglas de ningún juego.
+- Hay suelos de tablones, escaleras y cubiertas para Habitación; no hay simulación física completa de escombros.
+- Las alturas 27, 57 y 112 mm son medidas de diseño, no reglas de ningún juego.
 - Una habitación de dos plantas en Trabajo con muchas grietas puede tardar medio minuto.
 - Si el Detalle se queda corto o el sólido tarda demasiado, anótalo: son las siguientes mejoras previstas.

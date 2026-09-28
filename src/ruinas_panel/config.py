@@ -45,9 +45,6 @@ FINE_DETAIL={'DETAIL':{'edge':.22,'pits':.12,'pit_iterations':3,'pit_threshold':
 # rasgos más grandes (abolladuras amplias, manchas, grano). scale ajusta la amplitud al perfil anterior.
 WEAR_NOISE={'broad':12,'patch':20,'grain':2,'scale':.3}
 
-# Amplitud creciente sin aumentar densidad; límite por la menor dimensión de la pieza.
-WEAR_RESPONSE={'gain':1.2,'max_fraction':.12}
-
 
 # Calidades que generan desgaste, grietas y escombros. Borrador y Trabajo muestran solo la
 # estructura para editar rápido; todo el daño aparece en Detalle.
@@ -61,16 +58,21 @@ WEAR_LEVELS={'LIGHT':.3,'MEDIUM':.55,'HEAVY':.85}
 QUALITY_ITEMS=[('DRAFT','Borrador','Estructura rápida con biseles mínimos'),('WORK','Trabajo','Estructura con biseles y aberturas; sin desgaste, grietas ni escombros'),('DETAIL','Detalle','Todo: desgaste, grietas, escombros y relieve fino para resina; más lento')]
 
 
-BUILD_TYPES={'PARTITION':(8.0,4.5,.6,10.0),'WALL':(12.0,6.25,1.0,12.0),'FORTRESS':(18.0,8.0,1.3,15.0)}
+BUILD_TYPES={'PARTITION':(6.0,4.5,.6,8.0),'WALL':(9.0,6.25,1.0,10.0),'FORTRESS':(15.0,8.0,1.3,13.0)}
 
 
-HEIGHT_TYPES={'RUIN':27.0,'ONE':52.0,'TWO':102.0}
+FLOOR_PITCH=55.0
+UPPER_FLOOR=2.0+FLOOR_PITCH
+BEAM_LEVEL=UPPER_FLOOR-3.6
+HEIGHT_TYPES={'RUIN':27.0,'ONE':UPPER_FLOOR,'TWO':2.0+2*FLOOR_PITCH}
 
 
 CACHE_METADATA=('aparejo_escalonado','mortero_retranqueado','pilares_generados','huecos_generados','huecos_solicitados','puerta_generada','escombros_generados','hiladas_generadas','giros_generados','paredes_generadas','ventanas_generadas','vigas_generadas')
 
 
 CRACK_FIELDS=('cracks_per_stone','cracks','crack_length_var','crack_width_var','crack_angle_var','crack_path_var')
+
+CACHE_METADATA=CACHE_METADATA+('derrumbe_global','suelos_generados','cubierta_generada')
 
 
 # Una rama de grieta retira menos del 5 % de la piedra; perder más indica un booleano fallido.
@@ -99,6 +101,19 @@ CRACK_STRESS={'reach':16.0,'base':.6,'gain':1.2,'split':.12,'split_gain':.6,'pil
 FIELDS=('build_type','height_type','layout_mode','building_depth','extra_side','windows_enabled','windows_per_wall','floor_beams')+('door_leaf','left_turn','right_turn','left_return_length','right_return_length')+('rubble_amount','ground_roughness','wood_frame','wood_grain')+('length','height','left_height','right_height','thickness','stone_size','stone_variation','bond_subdivisions','alternate_height','projection','pillar_count','pillar_width','hole_count','hole_size','collapse','break_position','wear','cracks','hole_damage','seed','wear_level')+('preview_quality', 'export_quality', 'quick_edit', 'randomness', 'crack_length_var', 'crack_width_var', 'crack_angle_var', 'crack_path_var', 'cracks_per_stone', 'door_enabled', 'door_position', 'door_width', 'door_height', 'connection_enabled', 'connection_side')
 
 
+FIELDS=FIELDS+('batch_preview','microdetail_preview','use_instances','export_density','window_width','window_height','balconies','iron_mode','iron_damage')
+FIELDS=FIELDS+('window_facing','ground_floor','upper_floor','floor_damage')
+FIELDS=FIELDS+('wood_damage','roof_frame')
+FIELDS=FIELDS+('roof_curve','roof_tiles','stair_type','stair_side')
+FIELDS=FIELDS+('roof_gables',)
+FIELDS=FIELDS+('hole_seed','roof_damage','chimneys','brass_pipes')
+CACHE_METADATA=CACHE_METADATA+('relaciones_estructura',)
+CACHE_METADATA=CACHE_METADATA+('escalera_generada','cubierta_detalles')
+
+# Límites previos a operaciones costosas, no garantía de RAM en cualquier equipo.
+DETAIL_VERTEX_LIMIT=2400
+EXPORT_FACE_LIMIT=4000000
+
 TURN_ITEMS=[('NONE','Recto','Sin tramo perpendicular'),('LEFT','Giro izq.','Giro de 90 grados a la izquierda mirando hacia ese extremo'),('RIGHT','Giro der.','Giro de 90 grados a la derecha mirando hacia ese extremo')]
 
 
@@ -108,16 +123,21 @@ SECTIONS=(
  {'id':'build','title':'Construcción','fields':('build_type','height_type','length','floor_beams'),'closed':False},
  {'id':'layout','title':'Distribución','fields':('layout_mode','building_depth','extra_side'),'closed':False},
  {'id':'finish','title':'Acabado','fields':('collapse','wear_level','wear','cracks','rubble_amount','ground_roughness'),'closed':False},
- {'id':'door','title':'Puerta','toggle':'door_enabled','fields':('door_leaf','door_position','door_width','door_height','wood_frame','wood_grain'),'closed':True},
- {'id':'windows','title':'Ventanas','toggle':'windows_enabled','fields':('windows_per_wall',),'closed':True},
- {'id':'quality','title':'Calidad','fields':('preview_quality','export_quality','quick_edit'),'closed':True},
+ {'id':'door','title':'Puerta','toggle':'door_enabled','fields':('door_leaf','door_position','door_width','door_height','wood_frame'),'closed':True},
+ {'id':'windows','title':'Ventanas','toggle':'windows_enabled','fields':('window_facing','windows_per_wall','window_width','window_height','balconies','iron_mode','iron_damage'),'closed':False},
+ {'id':'wood','title':'Madera y cubierta','fields':('wood_grain','wood_damage','roof_frame','roof_curve','roof_tiles','roof_gables','roof_damage','chimneys','brass_pipes'),'closed':False},
+ {'id':'floors','title':'Suelos de madera','fields':('ground_floor','upper_floor','floor_damage'),'closed':False},
+ {'id':'stairs','title':'Escaleras','fields':('stair_type','stair_side'),'closed':False},
+ {'id':'quality','title':'Calidad','fields':('preview_quality','export_quality','export_density','use_instances','quick_edit','batch_preview','microdetail_preview'),'closed':True},
  {'id':'bond','title':'Aparejo','fields':('stone_variation','bond_subdivisions','alternate_height','randomness'),'closed':True},
  {'id':'cracks','title':'Grietas','fields':('cracks_per_stone','crack_length_var','crack_width_var','crack_angle_var','crack_path_var'),'closed':True},
- {'id':'collapse','title':'Derrumbe y agujeros','fields':('break_position','hole_count','hole_size','hole_damage'),'closed':True},
+ {'id':'collapse','title':'Derrumbe y agujeros','fields':('break_position','hole_count','hole_size','hole_seed','hole_damage'),'closed':True},
  {'id':'pillars','title':'Pilares','fields':('pillar_count','connection_enabled','connection_side'),'closed':True})
 
 
 # Enums de 2-3 opciones que definen un modo: botones en fila. FULL_WIDTH: sin etiqueta y a todo lo
 # ancho, porque cada botón se explica solo y con etiqueta no caben en la barra lateral.
-EXPANDED_ENUMS=('extra_side',)
+EXPANDED_ENUMS=('extra_side','window_facing')
 FULL_WIDTH_ENUMS=('build_type','height_type')
+
+CACHE_METADATA=CACHE_METADATA+('cubierta_roturas','chimeneas_generadas','bajantes_generadas','escombros_cubierta')

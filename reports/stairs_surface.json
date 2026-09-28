@@ -1,0 +1,289 @@
+[
+  {
+    "quality": "DRAFT",
+    "seed": 17,
+    "wear": 0,
+    "faces": 219,
+    "seconds": 0.0009627999970689416,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "DRAFT",
+    "seed": 17,
+    "wear": 0.55,
+    "faces": 219,
+    "seconds": 0.0006020000000717118,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "DRAFT",
+    "seed": 17,
+    "wear": 1,
+    "faces": 219,
+    "seconds": 0.000570099990000017,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "DRAFT",
+    "seed": 43,
+    "wear": 0,
+    "faces": 219,
+    "seconds": 0.0005882999976165593,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "DRAFT",
+    "seed": 43,
+    "wear": 0.55,
+    "faces": 219,
+    "seconds": 0.0005718000029446557,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "DRAFT",
+    "seed": 43,
+    "wear": 1,
+    "faces": 219,
+    "seconds": 0.0005787000118289143,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "DRAFT",
+    "seed": 91,
+    "wear": 0,
+    "faces": 219,
+    "seconds": 0.0006028000061633065,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "DRAFT",
+    "seed": 91,
+    "wear": 0.55,
+    "faces": 219,
+    "seconds": 0.0005636999994749203,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "DRAFT",
+    "seed": 91,
+    "wear": 1,
+    "faces": 219,
+    "seconds": 0.0005633999971905723,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "WORK",
+    "seed": 17,
+    "wear": 0,
+    "faces": 219,
+    "seconds": 0.0005600000004051253,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "WORK",
+    "seed": 17,
+    "wear": 0.55,
+    "faces": 219,
+    "seconds": 0.0005650999955832958,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "WORK",
+    "seed": 17,
+    "wear": 1,
+    "faces": 219,
+    "seconds": 0.0005597999988822266,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "WORK",
+    "seed": 43,
+    "wear": 0,
+    "faces": 219,
+    "seconds": 0.0005591000081039965,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "WORK",
+    "seed": 43,
+    "wear": 0.55,
+    "faces": 219,
+    "seconds": 0.0005692999984603375,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "WORK",
+    "seed": 43,
+    "wear": 1,
+    "faces": 219,
+    "seconds": 0.0006585000082850456,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "WORK",
+    "seed": 91,
+    "wear": 0,
+    "faces": 219,
+    "seconds": 0.0006264999974519014,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "WORK",
+    "seed": 91,
+    "wear": 0.55,
+    "faces": 219,
+    "seconds": 0.0006494999979622662,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "WORK",
+    "seed": 91,
+    "wear": 1,
+    "faces": 219,
+    "seconds": 0.0005873000045539811,
+    "volume": 529.4112245632268,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "DETAIL",
+    "seed": 17,
+    "wear": 0,
+    "faces": 1983,
+    "seconds": 0.0032626000029267743,
+    "volume": 531.7023470954065,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "DETAIL",
+    "seed": 17,
+    "wear": 0.55,
+    "faces": 1983,
+    "seconds": 0.0033866000012494624,
+    "volume": 509.9537779469702,
+    "center_variation_mm": 0.1158285140991211,
+    "relief_mm": 0.3871812646196313
+  },
+  {
+    "quality": "DETAIL",
+    "seed": 17,
+    "wear": 1,
+    "faces": 1983,
+    "seconds": 0.0031430000090040267,
+    "volume": 492.8947352584055,
+    "center_variation_mm": 0.21059799194335938,
+    "relief_mm": 0.6057841174902387
+  },
+  {
+    "quality": "DETAIL",
+    "seed": 43,
+    "wear": 0,
+    "faces": 1983,
+    "seconds": 0.0033867000020109117,
+    "volume": 531.7240782529256,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "DETAIL",
+    "seed": 43,
+    "wear": 0.55,
+    "faces": 1983,
+    "seconds": 0.003389599994989112,
+    "volume": 510.07273161214073,
+    "center_variation_mm": 0.1181478500366211,
+    "relief_mm": 0.3909396929930264
+  },
+  {
+    "quality": "DETAIL",
+    "seed": 43,
+    "wear": 1,
+    "faces": 1983,
+    "seconds": 0.0032404000085080042,
+    "volume": 493.0715744753131,
+    "center_variation_mm": 0.2148141860961914,
+    "relief_mm": 0.6126176236236843
+  },
+  {
+    "quality": "DETAIL",
+    "seed": 91,
+    "wear": 0,
+    "faces": 1983,
+    "seconds": 0.003427399991778657,
+    "volume": 531.730719937348,
+    "center_variation_mm": 0.0,
+    "relief_mm": 0.12
+  },
+  {
+    "quality": "DETAIL",
+    "seed": 91,
+    "wear": 0.55,
+    "faces": 1983,
+    "seconds": 0.0031252000044332817,
+    "volume": 509.8086030316682,
+    "center_variation_mm": 0.11394691467285156,
+    "relief_mm": 0.3246515931259781
+  },
+  {
+    "quality": "DETAIL",
+    "seed": 91,
+    "wear": 1,
+    "faces": 1983,
+    "seconds": 0.0031134000018937513,
+    "volume": 492.5746734663042,
+    "center_variation_mm": 0.20717620849609375,
+    "relief_mm": 0.4920938056835965
+  },
+  {
+    "baseline": "losa lisa original",
+    "faces": 54,
+    "seconds": 0.0008288999961223453
+  },
+  {
+    "side": "RIGHT",
+    "steps": 3,
+    "faces": 110510,
+    "seconds": 1.1198116000014124
+  },
+  {
+    "side": "LEFT",
+    "steps": 3,
+    "faces": 110446,
+    "seconds": 1.0805731000000378
+  }
+]

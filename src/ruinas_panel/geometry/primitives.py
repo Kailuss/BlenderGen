@@ -12,6 +12,8 @@ def material(name, color):
     'IA: Reutiliza materiales por nombre; evita crear uno por ladrillo.'
     m = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     m.diffuse_color = (*color, 1)
+    from . import surfaces
+    surfaces.configure(m,color)
     return m
 
 
@@ -48,6 +50,35 @@ def set_coords(obj, data):
 def piece_key(obj):
     'IA: Clave estable de una pieza para semillas; no cambia aunque Blender añada sufijos .001 al nombre.'
     return obj.get('ruin_key', obj.name)
+
+
+def reduced_copy(obj,ratio):
+    'IA: Copia independiente de exportación; simplifica superficies densas sin tocar la fuente ni piezas con menos de 80 caras.'
+    copy=obj.copy();copy.data=obj.data.copy()
+    if ratio<.999 and len(copy.data.polygons)>80:
+        mod=copy.modifiers.new('Densidad de exportación','DECIMATE')
+        mod.ratio=max(ratio,48/len(copy.data.polygons))
+        apply_modifier(copy,mod)
+    import bmesh
+    bm=bmesh.new();bm.from_mesh(copy.data)
+    if any(not e.is_manifold for e in bm.edges):
+        # El colapso puede unir dos labios muy próximos de una grieta: conservar la pieza original.
+        bm.free()
+        old=copy.data;copy.data=obj.data.copy();bpy.data.meshes.remove(old)
+        bm=bmesh.new();bm.from_mesh(copy.data)
+    if any(not e.is_manifold for e in bm.edges):
+        bmesh.ops.remove_doubles(bm,verts=list(bm.verts),dist=.00001)
+        bmesh.ops.dissolve_degenerate(bm,edges=list(bm.edges),dist=.00001)
+        boundary=[e for e in bm.edges if e.is_boundary]
+        if boundary:bmesh.ops.holes_fill(bm,edges=boundary,sides=0)
+        bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces))
+        bm.to_mesh(copy.data)
+    valid=all(e.is_manifold for e in bm.edges)
+    bm.free()
+    if not valid:
+        remove_objects([copy])
+        raise ValueError('Pieza abierta al exportar: '+obj.name)
+    return copy
 
 
 def remove_objects(objects):
@@ -98,6 +129,9 @@ def apply_modifier(obj, mod, *operands):
 @profiling.timed("biseles")
 def bevel(obj, width):
     'IA: Aplica bisel según calidad; respeta la exclusión de mortero en previsualización.'
+    if runtime.instance_build and obj.get('ruin_box'):
+        obj['ruin_bevel']=width
+        return
     if runtime.preview and not (obj.name.startswith(('Piedra','Esquirla')) or '· sillar' in obj.name):
         return
     mod = obj.modifiers.new('Aristas modeladas', 'BEVEL')
@@ -115,6 +149,8 @@ def block(name, x0, x1, y0, y1, z0, z1, coll, mat, rng=None, wear=0):
                   z + rng.uniform(-wear,wear)) for x,y,z in verts]
     obj = mesh_obj(name, verts, [(0,3,2,1),(4,5,6,7),(0,1,5,4),
                    (1,2,6,5),(2,3,7,6),(3,0,4,7)], coll, mat)
+    if mat.name.startswith(('Piedra','Núcleo')):
+        obj['ruin_box']=True
     bevel(obj, min(.65, (z1-z0)*.12, (x1-x0)*.1))
     return obj
 

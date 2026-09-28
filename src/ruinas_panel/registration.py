@@ -14,12 +14,12 @@ import bpy
 
 
 for _field in config.FIELDS:
-    if _field not in ('export_quality','quick_edit'):
+    if _field not in ('export_quality','quick_edit','export_density'):
         settings.RuinSettings.__annotations__[_field].keywords['update']=preview.settings_changed
 
 
 CLASSES=(preferences.RuinPreferences,settings.RuinSettings,operators.RUIN_OT_generate,operators.RUIN_OT_solid,operators.RUIN_OT_seed,
-         operators.RUIN_OT_reset,panel.RUIN_PT_panel)+panel.SUBPANELS
+         operators.RUIN_OT_holes,operators.RUIN_OT_reset,panel.RUIN_PT_panel)+panel.SUBPANELS
 
 
 @persistent

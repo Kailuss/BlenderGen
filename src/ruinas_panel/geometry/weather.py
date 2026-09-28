@@ -12,6 +12,10 @@ def refine_visible(obj, target):
     import numpy
     me=obj.data
     for _ in range(8):
+        # Presupuesto conservador antes de reservar la subdivisión, también en exportación.
+        if len(me.vertices)>=config.DETAIL_VERTEX_LIMIT:
+            runtime.detail_limited=True
+            break
         co=primitives.coords(obj)
         ends=numpy.empty(len(me.edges)*2,dtype=numpy.int32)
         me.edges.foreach_get('vertices',ends)
@@ -27,6 +31,7 @@ def refine_visible(obj, target):
         me.loops.foreach_get('edge_index',loop_edges)
         # Incluir biseles (normal a ~45°): si solo se densifica la cara plana queda un labio en el borde.
         visible=(numpy.abs(normals[:,1])>.3)|(normals[:,2]>.3)
+        if obj.get('ruin_pillar'):visible|=numpy.abs(normals[:,0])>.3
         owner=numpy.repeat(numpy.arange(len(starts)),totals)
         loops=numpy.repeat(starts,totals)+numpy.arange(len(owner))-numpy.repeat(numpy.cumsum(totals)-totals,totals)
         edges=numpy.unique(loop_edges[loops[visible[owner]]])
@@ -35,11 +40,16 @@ def refine_visible(obj, target):
         if not len(cuts) or cuts.max()<1:
             break
         top=int(cuts.max())
+        while top>0 and len(me.vertices)+len(edges[cuts==int(cuts.max())])*(top+1)**2>config.DETAIL_VERTEX_LIMIT:
+            top-=1
+        if top<1:
+            runtime.detail_limited=True
+            break
         # Una sola longitud por pasada: las aristas opuestas reciben los mismos cortes y el relleno forma rejilla.
         bm=bmesh.new()
         bm.from_mesh(me)
         bm.edges.ensure_lookup_table()
-        bmesh.ops.subdivide_edges(bm,edges=[bm.edges[i] for i in edges[cuts==top]],cuts=top,use_grid_fill=True)
+        bmesh.ops.subdivide_edges(bm,edges=[bm.edges[i] for i in edges[cuts==int(cuts.max())]],cuts=top,use_grid_fill=True)
         bm.to_mesh(me)
         bm.free()
         me.update()
@@ -78,12 +88,12 @@ def gaussian_field(edges,count,rng,iterations):
 
 
 def fine_relief(obj, spec, amount, seed):
-    'IA: Poros y grano sembrados por pieza hacia dentro; intensidad progresiva sin saturar antes de amount=1.'
+    'IA: Poros y grano de ruido blanco gaussiano filtrado sobre la malla densa, sembrados por pieza; siempre hacia dentro.'
     import numpy
     rng=numpy.random.default_rng(seed+9001)
     edges=mesh_edges(obj)
     count=len(obj.data.vertices)
-    strength=amount*(.7+.8*amount)
+    strength=min(1.0,amount*1.4)
     pits=gaussian_field(edges,count,rng,spec['pit_iterations'])
     grain=gaussian_field(edges,count,rng,spec['grain_iterations'])
     # Poros donde el campo cae por debajo del umbral; el grano se normaliza a [0,1] para no sacar material.
@@ -96,31 +106,35 @@ def fine_relief(obj, spec, amount, seed):
 @profiling.timed("desgaste")
 def weather_stone(obj, amount, seed):
     # Erosión hacia dentro; no desplaza las hiladas ni hincha los ladrillos.
-    'IA: Erosión progresiva hacia dentro, limitada por espesor; semillas y densidad constantes entre intensidades positivas; cero no modifica la pieza.'
+    'IA: Desgaste hacia dentro con ruido blanco gaussiano filtrado sembrado por pieza; en config.FINE_DETAIL añade densidad visible y poros.'
     import numpy
+    if runtime.instance_build:
+        obj['ruin_weather']=[amount,seed]
+        return
     if amount<=0 or runtime.quality not in config.DAMAGE_QUALITIES:
         return
+    if primitives.piece_key(obj).startswith('Pilar'):obj['ruin_pillar']=True
     # Malla ligera desde el principio, sin crear alta resolución para reducirla después.
     mod=obj.modifiers.new('Superficie de trabajo lowpoly','SUBSURF')
     mod.subdivision_type='SIMPLE'
     # Esquirlas y fragmentos de agujero son prismas irregulares triangulados: más densidad los arruga.
     irregular=obj.name.startswith(('Esquirla','Piedra parcial'))
-    mod.levels=1 if irregular else config.QUALITY[runtime.quality][0]
+    interactive=(runtime.preview and not runtime.settings.microdetail_preview) or (not runtime.preview and runtime.settings.export_density<.75)
+    mod.levels=1 if irregular or interactive else config.QUALITY[runtime.quality][0]
+    while mod.levels>0 and len(obj.data.vertices)*4**mod.levels>config.DETAIL_VERTEX_LIMIT:
+        mod.levels-=1
+        runtime.detail_limited=True
     primitives.apply_modifier(obj,mod)
     obj['vertices_desgaste_actuales']=len(obj.data.vertices)
     obj.data.update()
-    spec=config.FINE_DETAIL.get(runtime.quality)
-    if spec and not irregular:
-        # Refinar antes de deformar conserva la rejilla y la densidad entre intensidades.
-        refine_visible(obj,spec['edge'])
     co=primitives.coords(obj)
     normals=vertex_normals(obj)
     edges=mesh_edges(obj)
     count=len(co)
     rng=numpy.random.default_rng(seed+5123)
-    character=rng.uniform(.8,1.15)
+    character=rng.uniform(.45,1.2)
     scale=config.WEAR_NOISE['scale']
-    broad=gaussian_field(edges,count,rng,config.WEAR_NOISE['broad'])*scale
+    broad=gaussian_field(edges,count,rng,int(rng.integers(8,21)))*scale
     patch=gaussian_field(edges,count,rng,config.WEAR_NOISE['patch'])*scale
     grain=gaussian_field(edges,count,rng,config.WEAR_NOISE['grain'])*scale
     lo=co.min(axis=0)
@@ -132,8 +146,6 @@ def weather_stone(obj, amount, seed):
     # Grandes depresiones suaves y pequeñas zonas erosionadas, no ruido uniforme.
     loss=amount*character*(.08+.90*numpy.clip(broad+.25,0,None)**2
                            +.22*mask*numpy.clip(grain+.3,0,None)+edge*(.12+.3*numpy.clip(broad,0,None)))
-    loss*=1+config.WEAR_RESPONSE['gain']*amount
-    loss=numpy.minimum(loss, (hi-lo).min()*config.WEAR_RESPONSE['max_fraction'])
     primitives.set_coords(obj,co-normals*loss[:,None])
     bins=numpy.clip(((patch+.65)*3).astype(int),0,3)
     smooth_group=obj.vertex_groups.new(name='Erosion suavizada por zonas')
@@ -142,10 +154,23 @@ def weather_stone(obj, amount, seed):
         if ids:
             smooth_group.add(ids,.2+i*.25,'REPLACE')
     mod=obj.modifiers.new('Suavizado irregular de piedra','SMOOTH')
-    mod.factor=.35*amount
+    mod.factor=.35
     mod.iterations=1
     mod.vertex_group=smooth_group.name
     primitives.apply_modifier(obj,mod)
-    if spec and not irregular:
+    # Desconchones grandes visibles también en edición ligera de Detalle: mismo tamaño físico en sillares y pared.
+    if not irregular:
+        from mathutils import Vector
+        for _ in range(1+int(amount*2)):
+            direction=Vector(rng.choice((-1.0,1.0),3).tolist()).normalized()
+            points=primitives.coords(obj)
+            corner=Vector(points[int((points@numpy.array(direction)).argmax())].tolist())
+            depth=min(float(numpy.ptp(points,axis=0).min())*.16,.25+amount*.65)
+            primitives.clip_closed(obj,corner-direction*depth,direction)
+        obj['erosion_chips']=1+int(amount*2)
+    spec=config.FINE_DETAIL.get(runtime.quality)
+    if spec and not irregular and (not runtime.preview or runtime.settings.microdetail_preview):
+        density=1 if runtime.preview else runtime.settings.export_density
+        refine_visible(obj,spec['edge']/density**.5)
         fine_relief(obj,spec,amount,seed)
     obj.data.shade_smooth()
