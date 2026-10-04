@@ -16,7 +16,7 @@ Ruinas genera muros de mampostería en ruinas para miniaturas de 28 a 35 mm, lis
 
 ## Instalación
 
-1. En Blender 5.0 o posterior: **Editar → Preferencias → Complementos → Instalar desde disco** y elige `dist/ruinas_panel_v032.zip`.
+1. En Blender 5.0 o posterior: **Editar → Preferencias → Complementos → Instalar desde disco** y elige `dist/ruinas_panel_v0321.zip`.
 2. Activa **Ruinas — Muro de fantasía**.
 3. Abre la barra lateral de la Vista 3D (tecla **N**) y la pestaña **Ruinas**.
 

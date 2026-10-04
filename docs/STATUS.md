@@ -1,5 +1,21 @@
 # Estado del proyecto
 
+## v0.32.1 — tabiques de madera
+
+Tabiques con juntas y veta geométrica por ambas caras, sin booleanas ni tablas
+sueltas; espesor mínimo 2,3 mm. Veta responde a `wood_grain` sin cambiar topología.
+Pruebas de triangulación, cierre, espesor y dos orientaciones en
+`tests/blender_wood_panel.py`; integración y caché en los tres planos correctas.
+Caso de tres estancias: 276.327 → 283.159 caras expandidas (+2,47 %),
+5,62 → 5,67 s en la medición realizada con los mismos ajustes. No es un benchmark
+de rendimiento estadístico. Pruebas generales sin cambios en sus referencias.
+
+Estudio de alternativas en [DESTRUCTION_STUDY.md](DESTRUCTION_STUDY.md):
+se recomienda evaluar módulos semánticos por plantas y física sobre copias
+simplificadas. No se ha cambiado el exportador ni implementado esa física.
+
+Entrega actual: `dist/ruinas_v0321_completo.zip`; addon `ruinas_panel_v0321.zip`.
+
 ## v0.32 — 2026-10-04
 
 Tejas alineadas y orientadas por pendiente, encuentro cerámico de chimenea,
