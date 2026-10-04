@@ -1,5 +1,13 @@
 # Estado del proyecto
 
+## v0.32 — 2026-10-04
+
+Tejas alineadas y orientadas por pendiente, encuentro cerámico de chimenea,
+canalización por secciones y primeros planos interiores de planta baja.
+Pruebas, entrega y límites en [V032.md](V032.md). Los apartados siguientes
+describen entregas anteriores; el solape de tejas se ha corregido en los casos
+ensayados de esta versión. El daño unificado y el grafo de apoyos siguen pendientes.
+
 ## Activación independiente del daño — 2026-10-04
 
 Nuevo control «Activar daño» en Acabado. Desactivarlo neutraliza derrumbe,

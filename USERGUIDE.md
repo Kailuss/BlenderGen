@@ -16,7 +16,7 @@ Ruinas genera muros de mampostería en ruinas para miniaturas de 28 a 35 mm, lis
 
 ## Instalación
 
-1. En Blender 5.0 o posterior: **Editar → Preferencias → Complementos → Instalar desde disco** y elige `dist/ruinas_panel_v031.zip`.
+1. En Blender 5.0 o posterior: **Editar → Preferencias → Complementos → Instalar desde disco** y elige `dist/ruinas_panel_v032.zip`.
 2. Activa **Ruinas — Muro de fantasía**.
 3. Abre la barra lateral de la Vista 3D (tecla **N**) y la pestaña **Ruinas**.
 
@@ -119,3 +119,9 @@ En **Preferencias → Complementos → Ruinas**:
 - Las alturas 27, 57 y 112 mm son medidas de diseño, no reglas de ningún juego.
 - Una habitación de dos plantas en Trabajo con muchas grietas puede tardar medio minuto.
 - Si el Detalle se queda corto o el sólido tarda demasiado, anótalo: son las siguientes mejoras previstas.
+
+## Novedades 0.32
+
+En Distribución → Habitaciones, elige Planta abierta, Dos estancias o Tres estancias. Los tabiques se generan solo en planta baja de Habitación. Se requieren 70 × 64 mm interiores; tres estancias necesitan además espacio para dos cuartos de al menos 32 mm y una puerta exterior compatible. El panel explica si no cabe la distribución. La escalera queda en la estancia trasera y los pasos interiores miden 25 mm.
+
+Activa cubierta, chimenea y canalones para ver las nuevas tejas alineadas, el encuentro cerámico y los tubos por tramos. Desgaste controla abolladuras y pérdidas de canalización; Activar daño apagado mantiene todos los tramos.

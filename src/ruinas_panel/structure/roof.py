@@ -84,9 +84,11 @@ def gable(coll,p,wood,xa,xb,xm,y,z,rise,index,chimney=None):
 
 
 def curved_tile(verts,faces,start,end,width,height,thickness=.58,taper=.90,chip=0):
-    'IA: Añade una media caña cerámica cerrada de ocho gajos y labio macizo; start/end son centros inferiores, eje X o Y, sin caras degeneradas.'
+    'IA: Media caña cerrada de ocho gajos; sección perpendicular al eje 3D y normal superior, sin cizallar la cerámica según la pendiente.'
     dx=end[0]-start[0];dy=end[1]-start[1];length=math.hypot(dx,dy)
-    cross=(-dy/length,dx/length);count=9;offset=len(verts)
+    dz=end[2]-start[2];spatial_length=math.hypot(length,dz)
+    cross=(-dy/length,dx/length);normal=(-dx*dz/(length*spatial_length),-dy*dz/(length*spatial_length),length/spatial_length)
+    count=9;offset=len(verts)
     # Dos arcos concéntricos hacen visible el hueco real del extremo del alero.
     for station,center in enumerate((start,end)):
         scale=1 if station==0 else taper
@@ -97,9 +99,10 @@ def curved_tile(verts,faces,start,end,width,height,thickness=.58,taper=.90,chip=
                 angle=k*math.pi/(count-1)
                 transverse=radius*math.cos(angle)
                 axial=chip*(1-k/(count-1))**5 if station==0 else 0
-                verts.append((center[0]+cross[0]*transverse+dx*axial,
-                              center[1]+cross[1]*transverse+dy*axial,
-                              center[2]+crown*math.sin(angle)+(end[2]-start[2])*axial))
+                elevation=crown*math.sin(angle)
+                verts.append((center[0]+cross[0]*transverse+dx*axial+normal[0]*elevation,
+                              center[1]+cross[1]*transverse+dy*axial+normal[1]*elevation,
+                              center[2]+normal[2]*elevation+dz*axial))
     for layer in (0,1):
         for k in range(count-1):
             a=offset+layer*count+k;b=a+2*count
@@ -132,7 +135,7 @@ def ridge_cap(coll,mat,x,y0,y1,z,chimney=None):
     for k in range(courses):
         a=y0+(y1-y0)*k/courses;b=y0+(y1-y0)*(k+1)/courses+.6
         if chimney and abs(x-chimney['x'])<chimney['radius']+3.2 and a<chimney['y']+chimney['radius'] and b>chimney['y']-chimney['radius']:continue
-        curved_tile(verts,faces,(x,a,z+3.7),(x,b,z+3.9),6.4,2.9,taper=.94)
+        curved_tile(verts,faces,(x,a,z+4.7),(x,b,z+3.9),6.4,2.9,taper=.78)
         count+=1
     ceramic_mesh(coll,mat,'Tejas · cumbrera',verts,faces,count)
     return count
@@ -152,12 +155,12 @@ def curved_rafter(coll,wood,p,x0,x1,y,z,rise,seed,ta=0,tb=1):
 
 
 def tile_bay(coll,mat,p,xa,xm,y0,y1,z,rise,rows,seed,patches=(),missing=None,chimney=None):
-    'IA: Agrupa medias cañas cerradas y solapadas por paño; ocho gajos describen la curva real, sin incrementar resolución por desgaste.'
+    'IA: Filas alineadas con 30% de solape longitudinal; sección ortogonal, boca elevada y cola estrecha que encaja debajo de la fila superior.'
     verts=[];faces=[];rng=random.Random(seed);count=0
     columns=max(2,math.ceil((y1-y0)/5.5));pitch=(y1-y0)/columns
     for row in range(rows):
-        t0=max(0,(row-.25)/rows);t1=min(1,(row+1.45)/rows)
-        joints=[y0]+[y0+(j+(.5 if row%2 else 1))*pitch for j in range(columns) if y0+.1<y0+(j+(.5 if row%2 else 1))*pitch<y1-.1]+[y1]
+        t0=row/rows;t1=min(1,(row+1.3)/rows)
+        joints=[y0+j*pitch for j in range(columns+1)]
         for a,b in zip(joints,joints[1:]):
             cx=xa+(xm-xa)*(t0+t1)/2;cy=(a+b)/2
             q=roof_damage.distance(cx,cy,patches)
@@ -165,13 +168,13 @@ def tile_bay(coll,mat,p,xa,xm,y0,y1,z,rise,rows,seed,patches=(),missing=None,chi
                 if missing is not None:missing.append((cx,cy))
                 continue
             if chimney and abs(cx-chimney['x'])<chimney['radius']+.2+abs(xm-xa)*(t1-t0)/2 and abs(cy-chimney['y'])<chimney['radius']+.2+(b-a)/2:continue
-            lip=rng.uniform(-.10,.10)*(1+p.wood_damage*2)
-            tilt=rng.uniform(-.25,.25)*p.wood_damage
+            lip=rng.uniform(-.025,.025)*p.wood_damage
+            tilt=0
             chip=rng.uniform(.12,.36) if q<1.7 else rng.uniform(0,.055)*p.wear
             width=max(1.5,b-a+.12);crown=min(2.3,width*.45)
-            start=(xa+(xm-xa)*t0,cy,spatial.roof_height(t0,z,rise,p.roof_curve)+3.35+.75+lip)
+            start=(xa+(xm-xa)*t0,cy,spatial.roof_height(t0,z,rise,p.roof_curve)+3.35+1.15+lip)
             end=(xa+(xm-xa)*t1,cy,spatial.roof_height(t1,z,rise,p.roof_curve)+3.35+lip+tilt)
-            curved_tile(verts,faces,start,end,width,crown,thickness=min(.58,width*.25),chip=chip)
+            curved_tile(verts,faces,start,end,width,crown,thickness=min(.58,width*.25),taper=.72,chip=chip)
             count+=1
     ceramic_mesh(coll,mat,'Tejas · paño curvo',verts,faces,count)
     return count

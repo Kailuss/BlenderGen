@@ -33,7 +33,7 @@ def status_icon(status):
 
 
 class RUIN_PT_panel(bpy.types.Panel):
-    bl_label = 'Muro de fantasía · v0.26'
+    bl_label = 'Ruinas · v0.32'
     bl_idname = 'RUIN_PT_panel'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -74,6 +74,7 @@ class RUIN_PT_panel(bpy.types.Panel):
 
 def enabled(p, field):
     'IA: Controles que no aplican se atenúan en lugar de ocultarse.'
+    if field=='interior_layout':return p.layout_mode=='ROOM'
     if not p.damage_enabled and field in set(damage.DISABLED_VALUES)|{'wear_level','hole_size','hole_seed','break_position'}:return False
     if field=='wear':return p.wear_level=='CUSTOM'
     if field in ('roof_curve','roof_tiles','roof_gables','chimneys','brass_pipes','roof_damage'):return p.layout_mode=='ROOM' and p.roof_frame
@@ -127,6 +128,9 @@ def section_panel(index, section):
             col.label(text='Desgaste, grietas y escombros se ven en Detalle', icon='INFO')
         if section['id'] == 'build':
             col.label(text='Grosor %.0f mm · altura %.0f mm' % (config.BUILD_TYPES[p.build_type][0], config.HEIGHT_TYPES[p.height_type]))
+        if section['id']=='layout':
+            plan=parsed(meta.raw(context.scene,'plano_interior') or '{}',{})
+            if plan.get('error'):col.label(text=plan['error'],icon='INFO')
         if section['id']=='floors':
             col.label(text='Requiere Habitación; entreplanta sobre vigas')
         if section['id']=='stairs':

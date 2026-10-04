@@ -1,0 +1,239 @@
+[
+  {
+    "mode": "OPEN",
+    "plan": {},
+    "metrics": {
+      "quality": "WORK",
+      "objects": 1240,
+      "microdetail": false,
+      "faces": 220005,
+      "vertices": 227228,
+      "seconds": 5.285846499988111,
+      "stages": {
+        "biseles": 0.20395889985957183,
+        "desgaste": 0.001251999958185479,
+        "estructura_base": 0.1771768000035081,
+        "aberturas_y_vigas": 1.5736087000113912,
+        "integracion": 3.6493081000226084,
+        "preparacion": 4.418578299984802,
+        "total": 5.285846499988111
+      },
+      "cached": false,
+      "solid": false,
+      "expanded_faces": 276279,
+      "instances": 1667,
+      "variants": 29,
+      "detail_limited": false
+    },
+    "closure": {
+      "open_edges": {},
+      "degenerate_faces": {
+        "Piedra \u00b7 back.8.0": 1,
+        "Piedra \u00b7 back.8.1": 1,
+        "Piedra \u00b7 back.8.10": 1,
+        "Piedra \u00b7 back.8.11": 1,
+        "Piedra \u00b7 back.8.12": 1,
+        "Piedra \u00b7 back.8.13": 1,
+        "Piedra \u00b7 back.8.4": 1,
+        "Piedra \u00b7 back.8.5": 1,
+        "Piedra \u00b7 back.8.6": 1,
+        "Piedra \u00b7 back.8.7": 1,
+        "Piedra \u00b7 back.8.8": 1,
+        "Piedra \u00b7 back.8.9": 1
+      }
+    }
+  },
+  {
+    "mode": "TWO",
+    "plan": {
+      "rooms": [
+        {
+          "id": "front",
+          "bounds": [
+            -80.44999999999999,
+            80.44999999999999,
+            3.9,
+            48.959999999999994
+          ]
+        },
+        {
+          "id": "rear",
+          "bounds": [
+            -80.44999999999999,
+            80.44999999999999,
+            48.959999999999994,
+            94.02
+          ]
+        }
+      ],
+      "partitions": [
+        {
+          "axis": "x",
+          "fixed": 48.959999999999994,
+          "start": -80.44999999999999,
+          "end": 80.44999999999999,
+          "doors": [
+            0.0
+          ]
+        }
+      ],
+      "connections": [
+        [
+          "front",
+          "rear"
+        ]
+      ],
+      "entry_room": "front",
+      "door_width": 25,
+      "floor": 0,
+      "stair_room": "rear"
+    },
+    "metrics": {
+      "quality": "WORK",
+      "objects": 1244,
+      "microdetail": false,
+      "faces": 220029,
+      "vertices": 227260,
+      "seconds": 6.090469100017799,
+      "stages": {
+        "biseles": 0.208346500643529,
+        "desgaste": 0.00126750030904077,
+        "estructura_base": 0.2191424999909941,
+        "aberturas_y_vigas": 2.1195213999890257,
+        "integracion": 4.305247300013434,
+        "preparacion": 5.173299600020982,
+        "total": 6.090469100017799
+      },
+      "cached": false,
+      "solid": false,
+      "expanded_faces": 276303,
+      "instances": 1667,
+      "variants": 29,
+      "detail_limited": false
+    },
+    "closure": {
+      "open_edges": {},
+      "degenerate_faces": {
+        "Piedra \u00b7 back.8.0": 1,
+        "Piedra \u00b7 back.8.1": 1,
+        "Piedra \u00b7 back.8.10": 1,
+        "Piedra \u00b7 back.8.11": 1,
+        "Piedra \u00b7 back.8.12": 1,
+        "Piedra \u00b7 back.8.13": 1,
+        "Piedra \u00b7 back.8.4": 1,
+        "Piedra \u00b7 back.8.5": 1,
+        "Piedra \u00b7 back.8.6": 1,
+        "Piedra \u00b7 back.8.7": 1,
+        "Piedra \u00b7 back.8.8": 1,
+        "Piedra \u00b7 back.8.9": 1
+      }
+    }
+  },
+  {
+    "mode": "THREE",
+    "plan": {
+      "rooms": [
+        {
+          "id": "left",
+          "bounds": [
+            -80.44999999999999,
+            -20.0,
+            3.9,
+            48.959999999999994
+          ]
+        },
+        {
+          "id": "right",
+          "bounds": [
+            -20.0,
+            80.44999999999999,
+            3.9,
+            48.959999999999994
+          ]
+        },
+        {
+          "id": "rear",
+          "bounds": [
+            -80.44999999999999,
+            80.44999999999999,
+            48.959999999999994,
+            94.02
+          ]
+        }
+      ],
+      "partitions": [
+        {
+          "axis": "x",
+          "fixed": 48.959999999999994,
+          "start": -80.44999999999999,
+          "end": 80.44999999999999,
+          "doors": [
+            -50.224999999999994,
+            30.224999999999994
+          ]
+        },
+        {
+          "axis": "y",
+          "fixed": -20.0,
+          "start": 3.9,
+          "end": 48.959999999999994,
+          "doors": []
+        }
+      ],
+      "connections": [
+        [
+          "left",
+          "rear"
+        ],
+        [
+          "right",
+          "rear"
+        ]
+      ],
+      "entry_room": "right",
+      "door_width": 25,
+      "floor": 0,
+      "stair_room": "rear"
+    },
+    "metrics": {
+      "quality": "WORK",
+      "objects": 1248,
+      "microdetail": false,
+      "faces": 220053,
+      "vertices": 227292,
+      "seconds": 5.621414799999911,
+      "stages": {
+        "biseles": 0.20012759912060574,
+        "desgaste": 0.0013018998433835804,
+        "estructura_base": 0.23056290001841262,
+        "aberturas_y_vigas": 1.7574519999907352,
+        "integracion": 3.8734142999746837,
+        "preparacion": 4.751131600001827,
+        "total": 5.621414799999911
+      },
+      "cached": false,
+      "solid": false,
+      "expanded_faces": 276327,
+      "instances": 1667,
+      "variants": 29,
+      "detail_limited": false
+    },
+    "closure": {
+      "open_edges": {},
+      "degenerate_faces": {
+        "Piedra \u00b7 back.8.0": 1,
+        "Piedra \u00b7 back.8.1": 1,
+        "Piedra \u00b7 back.8.10": 1,
+        "Piedra \u00b7 back.8.11": 1,
+        "Piedra \u00b7 back.8.12": 1,
+        "Piedra \u00b7 back.8.13": 1,
+        "Piedra \u00b7 back.8.4": 1,
+        "Piedra \u00b7 back.8.5": 1,
+        "Piedra \u00b7 back.8.6": 1,
+        "Piedra \u00b7 back.8.7": 1,
+        "Piedra \u00b7 back.8.8": 1,
+        "Piedra \u00b7 back.8.9": 1
+      }
+    }
+  }
+]

@@ -161,7 +161,7 @@ def window_timber(coll,wood,w,name,a,b,width,depth,seed):
 def architectural_openings(coll,p,walls,door,edges):
     'IA: Distribuye huecos con jambas/dinteles apoyados; aloja vigas quitando ladrillos antes de añadir madera.'
     windows=[]
-    from . import placement
+    from . import placement,floor_plan
     stair=placement.stair_reservation(p,walls)
     from ..geometry import balconies
     beams=[]
@@ -193,6 +193,7 @@ def architectural_openings(coll,p,walls,door,edges):
                 x0=cx-ww/2
                 x1=cx+ww/2
                 if placement.blocks_stair(w,x0,x1,z0,stair,p):continue
+                if floor==0 and floor_plan.window_blocked(meta.get(bpy.context.scene,'plano_interior',{}),w['id'],x0,x1):continue
                 if x1>usable[1]+.01 or x0<usable[0]-.01:
                     continue
                 if any(x0<c['x_mm']+c['width_mm']/2+3 and x1>c['x_mm']-c['width_mm']/2-3 for c in centers):

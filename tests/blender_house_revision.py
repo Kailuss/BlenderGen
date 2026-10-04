@@ -90,9 +90,9 @@ def run():
     for block in list(bpy.data.texts):
         if block.name.endswith('.py'):bpy.data.texts.remove(block)
     text=bpy.data.texts.new('LEEME_RUINAS')
-    text.write('Casa 0.31 revisada. Instala ruinas_panel_v031.zip para regenerar. Fuente única: src/ruinas_panel/.')
+    text.write('Casa 0.32 revisada. Instala ruinas_panel_v032.zip para regenerar. Fuente única: src/ruinas_panel/.')
     p.live_preview=False
-    bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'dist/ruina_v031_revisada.blend'))
+    bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'dist/ruina_v032_revisada.blend'))
     result={'settings':{k:getattr(p,k) for k in config.FIELDS},'chimney':plan,'closure':sealed,
             'metrics':metrics,'elapsed_seconds':time.perf_counter()-started,'cache_identical':True,'wood_passage_clear':True}
     (ROOT/'reports/house_revision.json').write_text(json.dumps(result,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')

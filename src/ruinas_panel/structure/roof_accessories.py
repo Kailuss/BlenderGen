@@ -28,6 +28,13 @@ def chimney_plan(coll,p,walls,bounds,z,rise,patches):
             x=point[0]+normal[0]*(p.thickness/2+depth-.5)
             y=point[1]+normal[1]*(p.thickness/2+depth-.5)
             hx=depth if normal[0] else half;hy=half if normal[0] else depth
+            blocked=False
+            for part in meta.get(scene,'plano_interior',{}).get('partitions',[]):
+                if part['axis']=='x':
+                    blocked|=abs(y-part['fixed'])<hy+3 and x+hx>part['start'] and x-hx<part['end']
+                else:
+                    blocked|=abs(x-part['fixed'])<hx+3 and y+hy>part['start'] and y-hy<part['end']
+            if blocked:continue
             if stair and 'error' not in stair:
                 sx0=min(stair['opening'][0],stair['landing'][0],stair['approach'][0])
                 sx1=max(stair['opening'][1],stair['landing'][1],stair['approach'][1])
@@ -74,7 +81,9 @@ def chimney(coll,p,scene,plan):
         for side in range(4):
             cuts=[-r,-r*.35,r*.35,r] if row%2 else [-r,0,r]
             for part,(a,b) in enumerate(zip(cuts,cuts[1:])):
-                ob=primitives.block('Piedra · chimenea sillar',a+.05,b-.05,-r,-r+1.6,z0,z0+pitch-.12,coll,mat)
+                rng=random.Random(p.seed+60400+row*113+side*23+part)
+                ob=primitives.block('Piedra · chimenea sillar',a+.05,b-.05,-r,-r+1.6,z0,z0+pitch-.12,coll,mat,rng=rng,wear=.13)
+                ob['chimney_course']=row
                 co=primitives.coords(ob);angle=side*math.pi/2;c,s=math.cos(angle),math.sin(angle)
                 xx=co[:,0].copy();yy=co[:,1].copy();co[:,0]=c*xx-s*yy;co[:,1]=s*xx+c*yy
                 primitives.set_coords(ob,co);place_chimney(ob,plan)
@@ -159,17 +168,17 @@ def reserve_floors(coll,p,plan):
 
 
 def flashing(coll,plan):
-    'IA: Babero de cuatro bandas cerradas siguiendo pendiente local, solapado con tejas y zócalo vertical contra el conducto.'
+    'IA: Encuentro cerámico estrecho bajo medias cañas de borde; sigue pendiente y mantiene libre el conducto.'
     import bmesh
     xa,xb,z,rise,curve=plan['roof'];xm=(xa+xb)/2;x,y=plan['x'],plan['y'];r=plan['radius']
-    mat=primitives.material('Plomo · encuentro chimenea',(.23,.25,.25))
-    outer=r+7;inner=r-.3
+    mat=primitives.material('Tejas · arcilla',(.40,.20,.115))
+    outer=r+2.8;inner=r-.3
     verts=[]
     for layer in (0,.65):
         for radius in (outer,inner):
             for dx,dy in ((-radius,-radius),(radius,-radius),(radius,radius),(-radius,radius)):
                 xx=x+dx;t=(xx-xa)/(xm-xa) if xx<xm else (xb-xx)/(xb-xm)
-                verts.append((xx,y+dy,spatial.roof_height(t,z,rise,curve)+7.2+layer))
+                verts.append((xx,y+dy,spatial.roof_height(t,z,rise,curve)+3.65+layer))
     faces=[]
     for i in range(4):
         j=(i+1)%4
@@ -184,18 +193,65 @@ def flashing(coll,plan):
         for radius in (r+.6,r-.3):
             for dx,dy in ((-radius,-radius),(radius,-radius),(radius,radius),(-radius,radius)):
                 xx=x+dx;t=(xx-xa)/(xm-xa) if xx<xm else (xb-xx)/(xb-xm)
-                verts.append((xx,y+dy,spatial.roof_height(t,z,rise,curve)+7.2+layer))
+                verts.append((xx,y+dy,spatial.roof_height(t,z,rise,curve)+3.65+layer))
     ob=primitives.mesh_obj('Plomo · peto chimenea',verts,faces,coll,mat)
     bm=bmesh.new();bm.from_mesh(ob.data);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(ob.data);bm.free()
     ob['chimney']=True;ob['roof_flashing']=True
+    from . import roof
+    tile_verts=[];tile_faces=[];count=0
+    for side in (-1,1):
+        for j in range(max(3,math.ceil(2*(r+2.8)/4))):
+            n=max(3,math.ceil(2*(r+2.8)/4));yy=y-r-2.8+(j+.5)*2*(r+2.8)/n
+            ends=[]
+            for xx in (x+side*(r+3.6),x+side*(r+.1)):
+                t=(xx-xa)/(xm-xa) if xx<xm else (xb-xx)/(xb-xm)
+                ends.append((xx,yy,spatial.roof_height(t,z,rise,curve)+4.7))
+            roof.curved_tile(tile_verts,tile_faces,*ends,2*(r+2.8)/n,1.55,thickness=.5,taper=.85)
+            count+=1
+    roof.ceramic_mesh(coll,mat,'Tejas · encuentro chimenea',tile_verts,tile_faces,count)
 
 
-def gutter(coll,mat,x,y0,y1,z):
-    'IA: Canalón semicircular con pared física y extremos tapados; abierto por arriba, agrupado por luz soportada.'
-    profile=[(math.cos(i*math.pi/8)*1.8,-math.sin(i*math.pi/8)*1.8) for i in range(9)]
-    profile += [(math.cos(i*math.pi/8)*1.3,-math.sin(i*math.pi/8)*1.3) for i in range(8,-1,-1)]
-    n=len(profile);verts=[(x+dx,y,z+dz) for y in (y0,y1) for dx,dz in profile]
-    faces=[tuple(reversed(range(n))),tuple(range(n,2*n))]+[(i,(i+1)%n,(i+1)%n+n,i+n) for i in range(n)]
+def pipe_section(coll,mat,start,end,radius,seed,amount,name='Latón · bajante abollada'):
+    'IA: Tramo tubular hueco de pared .65 mm, tres anillos abollados y labios cerrados; deformación común conserva espesor.'
+    from mathutils import Vector
+    import bmesh
+    axis=(Vector(end)-Vector(start)).normalized()
+    u=axis.cross(Vector((0,1,0))).normalized();v=axis.cross(u).normalized()
+    rng=random.Random(seed);verts=[];faces=[];n=10
+    dents=[rng.uniform(-.24,.12)*amount for _ in range(n)]
+    for station in range(3):
+        center=Vector(start).lerp(Vector(end),station/2)
+        for layer in (0,1):
+            for j in range(n):
+                angle=j*math.tau/n
+                r=radius-layer*.65+dents[j]*(1 if station==1 else .25)
+                verts.append(tuple(center+r*(math.cos(angle)*u+math.sin(angle)*v)))
+    for station in range(2):
+        for layer in (0,1):
+            for j in range(n):
+                a=station*2*n+layer*n+j;b=station*2*n+layer*n+(j+1)%n
+                faces.append((a,b,b+2*n,a+2*n))
+    for station in (0,2):
+        for j in range(n):
+            a=station*2*n+j;b=station*2*n+(j+1)%n
+            faces.append((a,a+n,b+n,b))
+    ob=primitives.mesh_obj(name,verts,faces,coll,mat)
+    bm=bmesh.new();bm.from_mesh(ob.data);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(ob.data);bm.free()
+    ob['drain']=True;ob['pipe_section']=True;ob['wall_mm']=.65
+    return ob
+
+
+def gutter(coll,mat,x,y0,y1,z,seed=0,amount=0):
+    'IA: Canalón ancho de latón con tres estaciones abolladas y pared .7 mm; cada luz constituye una sección independiente.'
+    rng=random.Random(seed);verts=[];faces=[];n=18
+    for station,y in enumerate((y0,(y0+y1)/2,y1)):
+        dent=rng.uniform(-.35,.2)*amount if station==1 else 0
+        profile=[(math.cos(i*math.pi/8)*(2.6+dent),-math.sin(i*math.pi/8)*(2.6+dent)) for i in range(9)]
+        profile += [(math.cos(i*math.pi/8)*(1.9+dent),-math.sin(i*math.pi/8)*(1.9+dent)) for i in range(8,-1,-1)]
+        verts.extend((x+dx,y,z+dz) for dx,dz in profile)
+    faces=[tuple(reversed(range(n))),tuple(range(2*n,3*n))]
+    for station in range(2):
+        faces.extend((station*n+i,station*n+(i+1)%n,(station+1)*n+(i+1)%n,(station+1)*n+i) for i in range(n))
     ob=primitives.mesh_obj('Latón · canalón',verts,faces,coll,mat)
     import bmesh
     bm=bmesh.new();bm.from_mesh(ob.data);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(ob.data);bm.free()
@@ -214,17 +270,28 @@ def drains(coll,p,scene,walls,bounds,bays,z,patches):
         for a,b in zip(bays,bays[1:]):
             if b['index']!=a['index']+1:continue
             for lo,hi in roof_damage.segments(a['y'],b['y'],edge,patches,'y'):
-                gutter(coll,mat,edge,lo,hi,z+1);spans.append((lo,hi))
+                if hi-lo<2:continue
+                rng=random.Random(p.seed+round(lo*13)+side*97)
+                if rng.random()<p.wear*.18:continue
+                gap=.6*p.wear
+                gutter(coll,mat,edge,lo+gap,hi-gap,z+1,p.seed+round(lo*11),p.wear);spans.append((lo+gap,hi-gap))
         for y in (w['start']+8,w['end']-8,(w['start']+w['end'])/2):
             if not any(a+1<y<b-1 for a,b in spans):continue
             if any(h['wall']==wallid and h['x0']-5<y<h['x1']+5 for h in windows):continue
             if not all(openings.wall_hit(tree,w,p,y,h) for h in (8,p.height*.5,p.height-4)):continue
-            x=w['origin'][0]+side*(p.thickness/2+2.4)
-            rng=random.Random(p.seed+round(y*7));points=[(x+side*2,y,1.8),(x,y,4)]
-            points += [(x+rng.uniform(-.2,.2)*p.wear,y+rng.uniform(-.15,.15)*p.wear,h) for h in (p.height*.33,p.height*.66,p.height-1)]
-            points += [(edge,y,z-.3)]
-            ob=balconies.rod(coll,mat,identity,'Latón · bajante abollada',points,1.05);ob['drain']=True
-            for h in (8,p.height*.5,p.height-4):
-                ob=primitives.block('Latón · abrazadera',min(x,w['origin'][0]),max(x,w['origin'][0]),y-1.3,y+1.3,h-.65,h+.65,coll,mat);ob['drain']=True
-            result.append({'wall':wallid,'y':y});break
+            x=w['origin'][0]+side*(p.thickness/2+3.4)
+            rng=random.Random(p.seed+round(y*7));sections=max(3,math.ceil((p.height-4)/18));kept=[]
+            for i in range(sections):
+                low=4+(p.height-5)*i/sections;high=4+(p.height-5)*(i+1)/sections
+                if 0<i<sections-1 and rng.random()<p.wear*.24:continue
+                shift=rng.uniform(-.7,.7)*p.wear
+                bottom=(x+shift,y,low+.5*p.wear);top=(x,y,high+.25)
+                pipe_section(coll,mat,bottom,top,1.8,p.seed+62000+i,p.wear)
+                pipe_section(coll,mat,(x,y,high-1),(x,y,high+.5),2.15,p.seed+62100+i,p.wear,'Latón · manguito')
+                h=(low+high)/2
+                ob=primitives.block('Latón · abrazadera',min(x,w['origin'][0]),max(x,w['origin'][0]),y-2.1,y+2.1,h-.65,h+.65,coll,mat);ob['drain']=True
+                kept.append(i)
+            pipe_section(coll,mat,(x+side*3,y,1.8),(x,y,4.3),1.8,p.seed+62200,p.wear)
+            pipe_section(coll,mat,(x,y,p.height-1),(edge,y,z-.3),1.8,p.seed+62201,p.wear)
+            result.append({'wall':wallid,'y':y,'sections':sections,'surviving':kept});break
     meta.put(scene,'bajantes_generadas',result)

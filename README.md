@@ -4,11 +4,13 @@ El código activo está en `src/ruinas_panel/`. Los módulos separan geometría,
 
 La revisión actual incorpora la casa completa del ZIP aportado: chimenea desde planta
 baja, tejas de media caña, hastiales con entramado y escalera de piedra con relieve.
-Entrega y validación en [docs/HOUSE_REVISION.md](docs/HOUSE_REVISION.md).
+La v0.32 corrige solapes de tejas, incorpora encuentro cerámico de chimenea,
+bajantes por secciones y planos interiores iniciales. Entrega y límites en
+[docs/V032.md](docs/V032.md).
 
 ## Usarlo en Blender
 
-**Uso normal:** guía completa en [USERGUIDE.md](USERGUIDE.md). En resumen: instala `dist/ruinas_panel_v031.zip` desde Preferencias → Complementos → Instalar desde disco, actívalo y abre Vista 3D → N → Ruinas. Puedes abrir un .blend de v0.20: conserva los campos guardados. No ejecutes su antiguo `generador_muro.py`, porque volvería a registrar la versión anterior.
+**Uso normal:** guía completa en [USERGUIDE.md](USERGUIDE.md). En resumen: instala `dist/ruinas_panel_v032.zip` desde Preferencias → Complementos → Instalar desde disco, actívalo y abre Vista 3D → N → Ruinas. Puedes abrir un .blend de v0.20: conserva los campos guardados. No ejecutes su antiguo `generador_muro.py`, porque volvería a registrar la versión anterior.
 
 **Desarrollo:** abre `tools/load_in_blender.py` como archivo en el editor de texto de Blender y pulsa Ejecutar script. Repite tras editar un módulo: limpia callbacks y caché, recarga el paquete y mantiene los parámetros guardados. No es necesario volver a empaquetar ni reiniciar Blender. Usa solo una copia del addon activa.
 
