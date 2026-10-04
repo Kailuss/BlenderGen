@@ -2,6 +2,7 @@
 
 from .. import meta
 from .. import config
+from ..structure import damage
 import bpy
 import json
 
@@ -73,6 +74,7 @@ class RUIN_PT_panel(bpy.types.Panel):
 
 def enabled(p, field):
     'IA: Controles que no aplican se atenúan en lugar de ocultarse.'
+    if not p.damage_enabled and field in set(damage.DISABLED_VALUES)|{'wear_level','hole_size','hole_seed','break_position'}:return False
     if field=='wear':return p.wear_level=='CUSTOM'
     if field in ('roof_curve','roof_tiles','roof_gables','chimneys','brass_pipes','roof_damage'):return p.layout_mode=='ROOM' and p.roof_frame
     if field in ('stair_type','stair_side'):return p.layout_mode=='ROOM' and p.height_type=='TWO' and p.upper_floor and p.floor_beams

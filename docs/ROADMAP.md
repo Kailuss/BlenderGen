@@ -4,6 +4,11 @@ Decisión del usuario (2026-10-03): adoptar el rumbo de `ruinas_analisis_critica
 
 ## Orden de desarrollo
 
+Avance 2026-10-04: interruptor de daño implementado y diez semillas de habitación
+de una planta comprobadas en tres calidades. Falta ampliar la matriz a otras
+tipologías y validar explícitamente apoyos y encuentros; el punto 1 no se considera
+cerrado. Evidencia y límites en `STATUS.md`.
+
 1. **Construcción intacta verificable.** Separar la activación del daño de la calidad de acabado, conservando compatibilidad con las propiedades guardadas. Probar diez edificios intactos con semillas y parámetros registrados antes de extender la destrucción. Comprobar apoyos, vanos, encuentros, cierre y aspecto.
 2. **Modelo previo a las mallas.** Introducir datos de muros, vanos, plantas y planos de cubierta; empezar por vanos y cubierta. Las cotas deben proceder de ese modelo, sin deducir la envolvente a partir de piedras ya dañadas.
 3. **Campo de daño único.** Planificar eventos con posición, radio, tipo e intensidad. Muros, forjados y cubierta consultarán el mismo campo espacial; conservar controles independientes para deformación general, daño arquitectónico y desgaste superficial. Un mismo evento debe explicar las pérdidas relacionadas.

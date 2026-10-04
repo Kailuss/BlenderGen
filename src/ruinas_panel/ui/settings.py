@@ -11,6 +11,7 @@ import bpy
 
 
 class RuinSettings(bpy.types.PropertyGroup):
+    damage_enabled: BoolProperty(name='Activar daño',description='Desactiva derrumbes, agujeros, roturas, desgaste y escombros sin borrar sus ajustes; independiente de la calidad',default=True)
     hole_seed: IntProperty(name='Distribución de agujeros',description='Semilla independiente del bloqueo del aparejo; cambia la colocación en todas las paredes',default=0,min=0,max=999999)
     roof_damage: FloatProperty(name='Rotura de cubierta',description='Sectores perdidos con rastreles rotos y escombros asociados',default=0,min=0,max=1)
     chimneys: BoolProperty(name='Chimenea',description='Hogar abierto desde planta baja, conducto hueco y paso resuelto por forjado y tejas; necesita un tramo libre de vanos y escalera',default=False)

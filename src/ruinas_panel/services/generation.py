@@ -9,6 +9,7 @@ from ..geometry import batching
 from ..geometry import instances
 from ..services import cache
 from ..structure import layout
+from ..structure import damage
 from ..structure import walls
 import time
 import bpy
@@ -50,12 +51,14 @@ def set_units(scene):
 def build(context,p,quality):
     'IA: Cuerpo de generate; la escena de taller que usa apply_modifier se borra en generate aunque esto falle.'
     runtime.quality=quality or (p.preview_quality if runtime.preview else p.export_quality)
-    runtime.settings=p
     runtime.timings={}
     runtime.detail_limited=False
     runtime.instance_build=p.use_instances
     start=time.perf_counter()
     layout.apply_profiles(p)
+    original=p
+    p=damage.effective_settings(p)
+    runtime.settings=p
     layout.plan_door(p)  # Validar espacio antes de reemplazar la geometría existente.
     signature=cache.cache_signature(context,p)
     entry=runtime.cache.get(cache.cache_key())
@@ -80,5 +83,5 @@ def build(context,p,quality):
         batching.pack_preview(coll)
     runtime.timings['total']=time.perf_counter()-start
     metrics(context,coll,runtime.timings,cached)
-    meta.put(context.scene,'parametros_muro',{k:getattr(p,k) for k in config.FIELDS})
+    meta.put(context.scene,'parametros_muro',{k:getattr(original,k) for k in config.FIELDS})
     return coll

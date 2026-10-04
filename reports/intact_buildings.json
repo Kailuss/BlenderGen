@@ -1,0 +1,312 @@
+[
+  {
+    "seed": 101,
+    "quality": "DRAFT",
+    "closure": {
+      "open_edges": {},
+      "degenerate_faces": {}
+    },
+    "metrics": {
+      "quality": "DRAFT",
+      "objects": 529,
+      "microdetail": false,
+      "faces": 54386,
+      "vertices": 58095,
+      "seconds": 0.8604343999759294,
+      "stages": {
+        "biseles": 0.03085610005655326,
+        "desgaste": 0.00034130006679333746,
+        "estructura_base": 0.04803970002103597,
+        "aberturas_y_vigas": 0.1980145999987144,
+        "integracion": 0.6153383000055328,
+        "preparacion": 0.7755919999908656,
+        "total": 0.8604343999759294
+      },
+      "cached": false,
+      "solid": false,
+      "expanded_faces": 61294,
+      "instances": 398,
+      "variants": 22,
+      "detail_limited": false
+    }
+  },
+  {
+    "seed": 102,
+    "quality": "WORK",
+    "closure": {
+      "open_edges": {},
+      "degenerate_faces": {}
+    },
+    "metrics": {
+      "quality": "WORK",
+      "objects": 499,
+      "microdetail": false,
+      "faces": 97644,
+      "vertices": 100973,
+      "seconds": 1.1423429000133183,
+      "stages": {
+        "biseles": 0.034169200458563864,
+        "desgaste": 0.00035850005224347115,
+        "estructura_base": 0.05114369999500923,
+        "aberturas_y_vigas": 0.18065940000815317,
+        "integracion": 0.9281224000151269,
+        "preparacion": 1.04794670001138,
+        "total": 1.1423429000133183
+      },
+      "cached": false,
+      "solid": false,
+      "expanded_faces": 111480,
+      "instances": 418,
+      "variants": 26,
+      "detail_limited": false
+    }
+  },
+  {
+    "seed": 103,
+    "quality": "DETAIL",
+    "closure": {
+      "open_edges": {},
+      "degenerate_faces": {}
+    },
+    "metrics": {
+      "quality": "DETAIL",
+      "objects": 641,
+      "microdetail": false,
+      "faces": 149895,
+      "vertices": 152673,
+      "seconds": 1.9304483000014443,
+      "stages": {
+        "biseles": 0.10001900029601529,
+        "desgaste": 0.00032510014716535807,
+        "estructura_base": 0.05022360000293702,
+        "aberturas_y_vigas": 0.2512660000065807,
+        "integracion": 1.6097346000024118,
+        "preparacion": 1.758024499984458,
+        "total": 1.9304483000014443
+      },
+      "cached": false,
+      "solid": false,
+      "expanded_faces": 163371,
+      "instances": 406,
+      "variants": 25,
+      "detail_limited": false
+    }
+  },
+  {
+    "seed": 104,
+    "quality": "DRAFT",
+    "closure": {
+      "open_edges": {},
+      "degenerate_faces": {}
+    },
+    "metrics": {
+      "quality": "DRAFT",
+      "objects": 499,
+      "microdetail": false,
+      "faces": 53594,
+      "vertices": 57279,
+      "seconds": 0.7964308999944478,
+      "stages": {
+        "biseles": 0.027438100252766162,
+        "desgaste": 0.0003215000906493515,
+        "estructura_base": 0.05093140000826679,
+        "aberturas_y_vigas": 0.17878539999946952,
+        "integracion": 0.5885875999811105,
+        "preparacion": 0.7103908999997657,
+        "total": 0.7964308999944478
+      },
+      "cached": false,
+      "solid": false,
+      "expanded_faces": 60758,
+      "instances": 414,
+      "variants": 25,
+      "detail_limited": false
+    }
+  },
+  {
+    "seed": 105,
+    "quality": "WORK",
+    "closure": {
+      "open_edges": {},
+      "degenerate_faces": {}
+    },
+    "metrics": {
+      "quality": "WORK",
+      "objects": 641,
+      "microdetail": false,
+      "faces": 101783,
+      "vertices": 105479,
+      "seconds": 1.4113215999968816,
+      "stages": {
+        "biseles": 0.09639209977467544,
+        "desgaste": 0.0003424002497922629,
+        "estructura_base": 0.05385530000785366,
+        "aberturas_y_vigas": 0.202299700002186,
+        "integracion": 1.0775025000039022,
+        "preparacion": 1.2452453000005335,
+        "total": 1.4113215999968816
+      },
+      "cached": false,
+      "solid": false,
+      "expanded_faces": 115499,
+      "instances": 414,
+      "variants": 26,
+      "detail_limited": false
+    }
+  },
+  {
+    "seed": 106,
+    "quality": "DETAIL",
+    "closure": {
+      "open_edges": {},
+      "degenerate_faces": {}
+    },
+    "metrics": {
+      "quality": "DETAIL",
+      "objects": 499,
+      "microdetail": false,
+      "faces": 146146,
+      "vertices": 148535,
+      "seconds": 1.7231130999862216,
+      "stages": {
+        "biseles": 0.030361699988134205,
+        "desgaste": 0.00033220002660527825,
+        "estructura_base": 0.05618400001549162,
+        "aberturas_y_vigas": 0.23755920000257902,
+        "integracion": 1.507676300010644,
+        "preparacion": 1.63473919997341,
+        "total": 1.7231130999862216
+      },
+      "cached": false,
+      "solid": false,
+      "expanded_faces": 159862,
+      "instances": 414,
+      "variants": 25,
+      "detail_limited": false
+    }
+  },
+  {
+    "seed": 107,
+    "quality": "DRAFT",
+    "closure": {
+      "open_edges": {},
+      "degenerate_faces": {}
+    },
+    "metrics": {
+      "quality": "DRAFT",
+      "objects": 641,
+      "microdetail": false,
+      "faces": 55387,
+      "vertices": 58827,
+      "seconds": 0.9448307999991812,
+      "stages": {
+        "biseles": 0.08455450026667677,
+        "desgaste": 0.00031539995688945055,
+        "estructura_base": 0.046198799973353744,
+        "aberturas_y_vigas": 0.16433499997947365,
+        "integracion": 0.6506335999874864,
+        "preparacion": 0.7915021000080742,
+        "total": 0.9448307999991812
+      },
+      "cached": false,
+      "solid": false,
+      "expanded_faces": 62455,
+      "instances": 408,
+      "variants": 25,
+      "detail_limited": false
+    }
+  },
+  {
+    "seed": 108,
+    "quality": "WORK",
+    "closure": {
+      "open_edges": {},
+      "degenerate_faces": {}
+    },
+    "metrics": {
+      "quality": "WORK",
+      "objects": 499,
+      "microdetail": false,
+      "faces": 97644,
+      "vertices": 100963,
+      "seconds": 1.1468414000119083,
+      "stages": {
+        "biseles": 0.0309389001049567,
+        "desgaste": 0.0003512996481731534,
+        "estructura_base": 0.057968499982962385,
+        "aberturas_y_vigas": 0.19160130000091158,
+        "integracion": 0.9287038000184111,
+        "preparacion": 1.0573310000181664,
+        "total": 1.1468414000119083
+      },
+      "cached": false,
+      "solid": false,
+      "expanded_faces": 111180,
+      "instances": 408,
+      "variants": 27,
+      "detail_limited": false
+    }
+  },
+  {
+    "seed": 109,
+    "quality": "DETAIL",
+    "closure": {
+      "open_edges": {},
+      "degenerate_faces": {}
+    },
+    "metrics": {
+      "quality": "DETAIL",
+      "objects": 641,
+      "microdetail": false,
+      "faces": 149895,
+      "vertices": 152673,
+      "seconds": 1.940644499991322,
+      "stages": {
+        "biseles": 0.11346050002612174,
+        "desgaste": 0.0003255000337958336,
+        "estructura_base": 0.0525039000203833,
+        "aberturas_y_vigas": 0.23191900001256727,
+        "integracion": 1.5826684999919962,
+        "preparacion": 1.7454209999996237,
+        "total": 1.940644499991322
+      },
+      "cached": false,
+      "solid": false,
+      "expanded_faces": 163431,
+      "instances": 408,
+      "variants": 25,
+      "detail_limited": false
+    }
+  },
+  {
+    "seed": 110,
+    "quality": "DRAFT",
+    "closure": {
+      "open_edges": {},
+      "degenerate_faces": {}
+    },
+    "metrics": {
+      "quality": "DRAFT",
+      "objects": 499,
+      "microdetail": false,
+      "faces": 53594,
+      "vertices": 57277,
+      "seconds": 0.7942041000060271,
+      "stages": {
+        "biseles": 0.030406899750232697,
+        "desgaste": 0.0003470999654382467,
+        "estructura_base": 0.0515233000041917,
+        "aberturas_y_vigas": 0.16704110000864603,
+        "integracion": 0.5774799999780953,
+        "preparacion": 0.6995348999917042,
+        "total": 0.7942041000060271
+      },
+      "cached": false,
+      "solid": false,
+      "expanded_faces": 60726,
+      "instances": 412,
+      "variants": 25,
+      "detail_limited": false
+    }
+  }
+]

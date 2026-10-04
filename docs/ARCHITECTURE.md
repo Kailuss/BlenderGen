@@ -11,6 +11,7 @@ La base 0.31 integra el edificio completo aportado en `dist/ruinas_v031_completo
 | Fachada, pilares, paredes contiguas | `structure/walls.py` | Orquesta piezas; asigna wall_id |
 | Integración del edificio | `structure/assembly.py` | Ordena derrumbe, huecos, apoyos, suelos, escaleras y cubierta antes del acabado |
 | Derrumbe y continuidad espacial | `structure/destruction.py`, `structure/spatial.py` | Campo compartido entre muros y esquinas; retira piezas sin apoyo |
+| Activación de daño | `structure/damage.py` | Vista de lectura que neutraliza daño sin escribir ajustes RNA; generación y runtime consumen esa vista |
 | Ventanas, alojamientos y vigas | `structure/openings.py` | Recorta antes de añadir carpintería; exige apoyos |
 | Reserva de escalera y contactos | `structure/placement.py`, `structure/relations.py` | Evita vanos sobre el macizo y conserva mampostería junto a la carpintería |
 | Agujeros de daño | `structure/holes.py` | Perfora la fábrica montada respetando madera y contactos reservados |

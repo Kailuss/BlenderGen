@@ -1,5 +1,24 @@
 # Estado del proyecto
 
+## Activación independiente del daño — 2026-10-04
+
+Nuevo control «Activar daño» en Acabado. Desactivarlo neutraliza derrumbe,
+agujeros, roturas de suelo/cubierta/madera, desgaste, grietas, hierro dañado y
+escombros sin borrar intensidades ni semillas guardadas. Por defecto permanece
+activo, incluidos archivos anteriores. La calidad sigue regulando el acabado:
+Borrador y Trabajo no calculan las grietas finas de Detalle.
+
+Validación: `dev.py check`, `dev.py test` (cuatro escenarios sin cambios en sus
+referencias) y `tests/blender_intact.py`: diez semillas de habitación de una planta,
+80 × 70 mm, repartidas entre las tres calidades, con cubierta, ventanas, bajantes
+y chimenea alterna. Piezas cerradas y caché reproducible; apagar/encender/apagar
+recupera la geometría intacta. Informe y vista en `reports/intact_buildings.*`.
+
+Esto no valida todavía diez tipologías, todos los apoyos ni un sólido fusionado
+imprimible. La revisión visual confirma que el solape de tejas sigue pendiente.
+El modelo previo de construcción, campo común de daño y grafo de apoyos siguen
+en la hoja de ruta; este interruptor es su primera base de comparación.
+
 ## 0.31 completa — revisión de la casa aportada
 
 La base actual procede del addon incluido en `dist/ruinas_v031_completo.zip`, aportado

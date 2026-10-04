@@ -15,6 +15,6 @@ def finish(coll,p,scene):
     holes.apply(coll,p,scene,walls)
     floors.build(coll,p,scene);roof.build(coll,p,scene)
     terrain.pier_ground(coll,p,centers)
-    if runtime.quality in config.DAMAGE_QUALITIES:
+    if runtime.quality in config.DAMAGE_QUALITIES and getattr(p,'damage_enabled',True):
         stone=primitives.material('Piedra · neutro',(.52,.52,.52));mortar=primitives.material('Núcleo · neutro',(.44,.44,.44))
         rubble.build_rubble(coll,stone,mortar,p,door,rh)
