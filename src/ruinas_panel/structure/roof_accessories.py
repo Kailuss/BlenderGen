@@ -35,6 +35,11 @@ def chimney_plan(coll,p,walls,bounds,z,rise,patches):
                 else:
                     blocked|=abs(x-part['fixed'])<hx+3 and y+hy>part['start'] and y-hy<part['end']
             if blocked:continue
+            for room in meta.get(scene,'plano_interior',{}).get('rooms',[]):
+                if room.get('kind')!='corridor':continue
+                rx0,rx1,ry0,ry1=room['bounds']
+                blocked|=x+hx+1>rx0 and x-hx-1<rx1 and y+hy+3>ry0 and y-hy-1<ry1
+            if blocked:continue
             if stair and 'error' not in stair:
                 sx0=min(stair['opening'][0],stair['landing'][0],stair['approach'][0])
                 sx1=max(stair['opening'][1],stair['landing'][1],stair['approach'][1])

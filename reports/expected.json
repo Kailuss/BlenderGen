@@ -7,32 +7,19 @@
       "degenerate_faces": []
     },
     "door_windows_work": {
-      "digest": "f59fe5327c901b9e83dd26466baea76043277cdc4c27d26f608287839ed6e7e8",
-      "faces": 17336,
-      "degenerate_faces": [
-        "Tramo · right · Piedra · neutro"
-      ]
+      "digest": "6fb8eb77989cc55ed103a99e76b5710115532f75dedb356a201b82cf88cb3b21",
+      "faces": 17330,
+      "degenerate_faces": []
     },
     "room_beams_draft": {
-      "digest": "fb59ed6811f614632ce7052134076b9a9bac32f0c5885447e29f8c19da58ef85",
-      "faces": 26630,
-      "degenerate_faces": [
-        "Tramo · back · Piedra · neutro",
-        "Tramo · front · Piedra · neutro",
-        "Tramo · left · Piedra · neutro",
-        "Tramo · right · Piedra · neutro"
-      ]
+      "digest": "851b232920e427ded392c1ddc1b461a281b17ae733f5e3950d948fd7d70b3a38",
+      "faces": 26613,
+      "degenerate_faces": []
     },
     "window_detail": {
-      "digest": "7a65a0b7dc2cf66fdbe1c900e245adba75bf1ce5f0739f79b7118204d68e597c",
-      "faces": 38607,
-      "degenerate_faces": [
-        "Mortero · hilada 02.00",
-        "Mortero · hilada 02.01",
-        "Mortero · hilada 08.01",
-        "Piedra entera · hilada 02.00",
-        "RUIN_VARIANT_0009"
-      ]
+      "digest": "0b3db75571ddfe53fd3f47ff09332057ac4880f398873a10480c034c663ba5ee",
+      "faces": 38603,
+      "degenerate_faces": []
     }
   }
 }

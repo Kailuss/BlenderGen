@@ -40,7 +40,7 @@ class RuinSettings(bpy.types.PropertyGroup):
     build_type: EnumProperty(name='Construcción',items=[('PARTITION','Tabique','6 mm de grosor'),('WALL','Pared','9 mm de grosor'),('FORTRESS','Muralla','15 mm de grosor')],default='WALL')
     height_type: EnumProperty(name='Altura',items=[('RUIN','Baja','Ruina baja: 27 mm de alto'),('ONE','1 planta','57 mm de alto'),('TWO','2 plantas','112 mm de alto, nivel intermedio a 57 mm')],default='ONE')
     layout_mode: EnumProperty(name='Paredes',description='Paredes contiguas que forman L, U o habitación',items=[('NONE','Ninguna','Un muro'),('ONE','1 pared','Forma de L'),('TWO','2 paredes','Forma de U'),('ROOM','Habitación','Cuatro paredes sin cubierta')],default='NONE')
-    building_depth: FloatProperty(name='Fondo (mm)',default=50,min=40,max=90)
+    building_depth: FloatProperty(name='Fondo (mm)',default=50,min=40,max=240)
     extra_side: EnumProperty(name='Lado',description='Lado de la pared contigua en forma de L',items=[('LEFT','Izquierdo',''),('RIGHT','Derecho','')],default='RIGHT')
     windows_enabled: BoolProperty(name='Ventanas',default=False)
     windows_per_wall: IntProperty(name='Por pared',description='Ventanas por pared; se limitan por apoyos y espacio',default=1,min=1,max=3)

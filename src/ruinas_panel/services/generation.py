@@ -79,6 +79,7 @@ def build(context,p,quality):
         instances.build(coll,p)
     else:
         fracture.apply_damage(coll,p)
+        for piece in coll.objects:primitives.repair_precision(piece)
     if runtime.preview and p.batch_preview:
         batching.pack_preview(coll)
     runtime.timings['total']=time.perf_counter()-start

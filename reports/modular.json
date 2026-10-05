@@ -13,16 +13,16 @@
       "microdetail": false,
       "faces": 2296,
       "vertices": 2820,
-      "seconds": 0.1327500999905169,
+      "seconds": 0.06865589998778887,
       "stages": {
-        "biseles": 0.011883299943292513,
-        "desgaste": 0.00012749998131766915,
-        "estructura_base": 0.02740689998609014,
-        "aberturas_y_vigas": 0.0010871999838855118,
-        "integracion": 0.01308099998277612,
-        "preparacion": 0.10763010001392104,
-        "agrupacion": 0.003917099995305762,
-        "total": 0.1327500999905169
+        "biseles": 0.014309000136563554,
+        "desgaste": 0.0001364999625366181,
+        "estructura_base": 0.01802789999055676,
+        "aberturas_y_vigas": 0.0011069999891333282,
+        "integracion": 0.013154799991752952,
+        "preparacion": 0.03807979999692179,
+        "agrupacion": 0.004820299975108355,
+        "total": 0.06865589998778887
       },
       "cached": false,
       "solid": false,
@@ -126,34 +126,32 @@
   },
   {
     "case": "door_windows_work",
-    "digest": "f59fe5327c901b9e83dd26466baea76043277cdc4c27d26f608287839ed6e7e8",
+    "digest": "6fb8eb77989cc55ed103a99e76b5710115532f75dedb356a201b82cf88cb3b21",
     "blender": "5.2.2 LTS",
     "closure": {
       "open_edges": {},
-      "degenerate_faces": {
-        "Tramo \u00b7 right \u00b7 Piedra \u00b7 neutro": 6
-      }
+      "degenerate_faces": {}
     },
     "metrics": {
       "quality": "WORK",
       "objects": 20,
       "microdetail": false,
-      "faces": 17336,
-      "vertices": 17930,
-      "seconds": 0.2996034999960102,
+      "faces": 17330,
+      "vertices": 17922,
+      "seconds": 0.3656784000049811,
       "stages": {
-        "biseles": 0.018708799791056663,
-        "desgaste": 0.00020320015028119087,
-        "estructura_base": 0.02507020000484772,
-        "aberturas_y_vigas": 0.0954667000041809,
-        "integracion": 0.20156909999786876,
-        "preparacion": 0.23798669999814592,
-        "agrupacion": 0.028894599992781878,
-        "total": 0.2996034999960102
+        "biseles": 0.022553000133484602,
+        "desgaste": 0.0002156999835278839,
+        "estructura_base": 0.028147999983048066,
+        "aberturas_y_vigas": 0.13423389999661595,
+        "integracion": 0.2514713999989908,
+        "preparacion": 0.2907622999919113,
+        "agrupacion": 0.031719200022052974,
+        "total": 0.3656784000049811
       },
       "cached": false,
       "solid": false,
-      "expanded_faces": 23480,
+      "expanded_faces": 23474,
       "instances": 200,
       "variants": 17,
       "detail_limited": false
@@ -306,8 +304,8 @@
         ]
       },
       "Tramo \u00b7 right \u00b7 Piedra \u00b7 neutro": {
-        "faces": 536,
-        "vertices": 560,
+        "faces": 530,
+        "vertices": 552,
         "bounds": [
           [
             49.1,
@@ -509,37 +507,32 @@
   },
   {
     "case": "room_beams_draft",
-    "digest": "fb59ed6811f614632ce7052134076b9a9bac32f0c5885447e29f8c19da58ef85",
+    "digest": "851b232920e427ded392c1ddc1b461a281b17ae733f5e3950d948fd7d70b3a38",
     "blender": "5.2.2 LTS",
     "closure": {
       "open_edges": {},
-      "degenerate_faces": {
-        "Tramo \u00b7 back \u00b7 Piedra \u00b7 neutro": 13,
-        "Tramo \u00b7 front \u00b7 Piedra \u00b7 neutro": 1,
-        "Tramo \u00b7 left \u00b7 Piedra \u00b7 neutro": 1,
-        "Tramo \u00b7 right \u00b7 Piedra \u00b7 neutro": 2
-      }
+      "degenerate_faces": {}
     },
     "metrics": {
       "quality": "DRAFT",
       "objects": 42,
       "microdetail": false,
-      "faces": 26630,
-      "vertices": 29045,
-      "seconds": 1.7540340999839827,
+      "faces": 26613,
+      "vertices": 29018,
+      "seconds": 2.120372800010955,
       "stages": {
-        "biseles": 0.05484390087076463,
-        "desgaste": 0.0007229999173432589,
-        "estructura_base": 0.08974100000341423,
-        "aberturas_y_vigas": 1.0752244000032078,
-        "integracion": 1.2872203000006266,
-        "preparacion": 1.4811116999771912,
-        "agrupacion": 0.11251070001162589,
-        "total": 1.7540340999839827
+        "biseles": 0.06573470003786497,
+        "desgaste": 0.0007338001159951091,
+        "estructura_base": 0.09152050002012402,
+        "aberturas_y_vigas": 1.3784836999839172,
+        "integracion": 1.6035241000063252,
+        "preparacion": 1.7959212999849115,
+        "agrupacion": 0.13834249999490567,
+        "total": 2.120372800010955
       },
       "cached": false,
       "solid": false,
-      "expanded_faces": 39592,
+      "expanded_faces": 39575,
       "instances": 767,
       "variants": 18,
       "detail_limited": false
@@ -628,8 +621,8 @@
         ]
       },
       "Tramo \u00b7 front \u00b7 Piedra \u00b7 neutro": {
-        "faces": 815,
-        "vertices": 782,
+        "faces": 814,
+        "vertices": 781,
         "bounds": [
           [
             -48.34299,
@@ -692,8 +685,8 @@
         ]
       },
       "Tramo \u00b7 left \u00b7 Piedra \u00b7 neutro": {
-        "faces": 500,
-        "vertices": 468,
+        "faces": 499,
+        "vertices": 466,
         "bounds": [
           [
             -59.6,
@@ -756,8 +749,8 @@
         ]
       },
       "Tramo \u00b7 right \u00b7 Piedra \u00b7 neutro": {
-        "faces": 512,
-        "vertices": 480,
+        "faces": 510,
+        "vertices": 476,
         "bounds": [
           [
             49.1,
@@ -788,8 +781,8 @@
         ]
       },
       "Tramo \u00b7 back \u00b7 Piedra \u00b7 neutro": {
-        "faces": 804,
-        "vertices": 756,
+        "faces": 791,
+        "vertices": 736,
         "bounds": [
           [
             -48.27,
@@ -1247,38 +1240,32 @@
   },
   {
     "case": "window_detail",
-    "digest": "7a65a0b7dc2cf66fdbe1c900e245adba75bf1ce5f0739f79b7118204d68e597c",
+    "digest": "0b3db75571ddfe53fd3f47ff09332057ac4880f398873a10480c034c663ba5ee",
     "blender": "5.2.2 LTS",
     "closure": {
       "open_edges": {},
-      "degenerate_faces": {
-        "Mortero \u00b7 hilada 02.00": 1,
-        "Mortero \u00b7 hilada 02.01": 1,
-        "Mortero \u00b7 hilada 08.01": 1,
-        "Piedra entera \u00b7 hilada 02.00": 1,
-        "RUIN_VARIANT_0009": 1
-      }
+      "degenerate_faces": {}
     },
     "metrics": {
       "quality": "DETAIL",
       "objects": 81,
       "microdetail": true,
-      "faces": 38607,
-      "vertices": 45887,
-      "seconds": 1.95224149999558,
+      "faces": 38603,
+      "vertices": 45880,
+      "seconds": 1.985142999998061,
       "stages": {
-        "biseles": 0.057989400142105296,
-        "desgaste": 0.815247000020463,
-        "estructura_base": 0.01458499999716878,
-        "aberturas_y_vigas": 0.05542640000930987,
-        "integracion": 0.12276950001250952,
-        "preparacion": 0.1414461999956984,
-        "grietas": 0.940491900080815,
-        "total": 1.95224149999558
+        "biseles": 0.06372049995115958,
+        "desgaste": 0.8152624998474494,
+        "estructura_base": 0.017075100011425093,
+        "aberturas_y_vigas": 0.06027909999829717,
+        "integracion": 0.1298314999730792,
+        "preparacion": 0.1511973000015132,
+        "grietas": 0.9369328000175301,
+        "total": 1.985142999998061
       },
       "cached": false,
       "solid": false,
-      "expanded_faces": 90380,
+      "expanded_faces": 90372,
       "instances": 88,
       "variants": 31,
       "detail_limited": true
@@ -1335,8 +1322,8 @@
         ]
       },
       "Mortero \u00b7 hilada 02.00": {
-        "faces": 80,
-        "vertices": 84,
+        "faces": 79,
+        "vertices": 82,
         "bounds": [
           [
             -38.4,
@@ -1351,8 +1338,8 @@
         ]
       },
       "Piedra entera \u00b7 hilada 02.00": {
-        "faces": 933,
-        "vertices": 1194,
+        "faces": 932,
+        "vertices": 1193,
         "bounds": [
           [
             -39.92149,
@@ -1367,8 +1354,8 @@
         ]
       },
       "Mortero \u00b7 hilada 02.01": {
-        "faces": 80,
-        "vertices": 84,
+        "faces": 79,
+        "vertices": 82,
         "bounds": [
           [
             -28.52971,
@@ -1623,8 +1610,8 @@
         ]
       },
       "Mortero \u00b7 hilada 08.01": {
-        "faces": 59,
-        "vertices": 62,
+        "faces": 58,
+        "vertices": 60,
         "bounds": [
           [
             -28.679,
@@ -2608,6 +2595,6 @@
       "bajantes_generadas": "[]",
       "escombros_cubierta": "{}"
     },
-    "solid_faces": 70010
+    "solid_faces": 70024
   }
 ]

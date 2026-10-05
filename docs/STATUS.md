@@ -1,5 +1,16 @@
 # Estado del proyecto
 
+## v0.32.2 — 2026-10-05
+
+Tabiques seccionados, cuartos útiles de 60 × 60 mm, circulación de 35 mm y
+reparación local de caras degeneradas. Diagnóstico comparativo, pruebas y límites
+en [V0322.md](V0322.md). La revisión de todas las mallas del caso completo queda
+en `reports/physics_readiness.json`; no se certifican aún contactos físicos.
+
+La desviación del mortero de 0,01 mm no resolvió las 125 caras degeneradas del
+caso reproducido; la soldadura local de 0,00001 mm sí, conservando cotas. Sigue
+pendiente el problema independiente de fragmentos desconectados al exportar.
+
 ## v0.32.1 — tabiques de madera
 
 Tabiques con juntas y veta geométrica por ambas caras, sin booleanas ni tablas

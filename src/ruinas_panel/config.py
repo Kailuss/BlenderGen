@@ -29,6 +29,12 @@ EXPORT_METHOD = 'MANIFOLD'
 # Con MANIFOLD: cáscaras sueltas por debajo de este volumen (mm³) son residuos y se eliminan;
 # por encima, la exportación se rechaza. Los huecos cerrados interiores se eliminan siempre.
 EXPORT_DEBRIS_MM3 = 2.0
+INTERIOR_THICKNESS = 3.0
+INTERIOR_ROOM_MIN = 60.0
+INTERIOR_PASSAGE = 35.0
+PARTITION_SECTION_WIDTH = 12.0
+PARTITION_SECTION_HEIGHT = 18.0
+PARTITION_JOINT_OVERLAP = .02
 
 
 QUALITY = {'DRAFT':(1,.45,1),'WORK':(2,.32,2),'DETAIL':(2,.18,2)}

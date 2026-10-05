@@ -16,7 +16,7 @@ Ruinas genera muros de mampostería en ruinas para miniaturas de 28 a 35 mm, lis
 
 ## Instalación
 
-1. En Blender 5.0 o posterior: **Editar → Preferencias → Complementos → Instalar desde disco** y elige `dist/ruinas_panel_v0321.zip`.
+1. En Blender 5.0 o posterior: **Editar → Preferencias → Complementos → Instalar desde disco** y elige `dist/ruinas_panel_v0322.zip`.
 2. Activa **Ruinas — Muro de fantasía**.
 3. Abre la barra lateral de la Vista 3D (tecla **N**) y la pestaña **Ruinas**.
 
@@ -122,6 +122,12 @@ En **Preferencias → Complementos → Ruinas**:
 
 ## Novedades 0.32
 
-En Distribución → Habitaciones, elige Planta abierta, Dos estancias o Tres estancias. Los tabiques se generan solo en planta baja de Habitación. Se requieren 70 × 64 mm interiores; tres estancias necesitan además espacio para dos cuartos de al menos 32 mm y una puerta exterior compatible. El panel explica si no cabe la distribución. La escalera queda en la estancia trasera y los pasos interiores miden 25 mm.
+En Distribución → Habitaciones, elige Planta abierta, Dos estancias o Tres estancias. Los tabiques se generan solo en planta baja de Habitación. Solo se divide un recinto mayor de 80 × 80 mm si caben cuartos útiles de 60 × 60 mm, tabiques y circulación de 35 mm. El panel explica si no cabe la distribución. La escalera queda en la estancia trasera y los pasos interiores miden 35 mm.
 
 Activa cubierta, chimenea y canalones para ver las nuevas tejas alineadas, el encuentro cerámico y los tubos por tramos. Desgaste controla abolladuras y pérdidas de canalización; Activar daño apagado mantiene todos los tramos.
+
+## Revisión 0.32.2: dimensiones y secciones
+
+Solo se intenta dividir un recinto mayor de 80 × 80 mm. Cada cuarto debe conservar 60 × 60 mm útiles, descontando tabiques; distribuidores y pasos interiores requieren 35 mm libres. Si no cabe, el panel explica por qué y conserva la planta sin tabiques. El fondo admite ahora hasta 240 mm, manteniendo el valor inicial de 50 mm.
+
+Con habitaciones activadas, la entrada exterior reserva también 35 mm libres descontando las jambas, sin modificar el valor guardado del deslizador. Los tabiques se forman con secciones de hasta 12 × 18 mm; Derrumbe y Deterioro de madera reducen su coronación. Las secciones tienen un solape interno de 0,02 mm para impresión, no son todavía colisionadores físicos.

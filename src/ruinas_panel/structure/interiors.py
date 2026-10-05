@@ -1,7 +1,7 @@
 """Tabiques de madera de planta baja derivados del plano previo."""
 import math
 import random
-from .. import meta
+from .. import meta,config
 from ..geometry import primitives
 from . import spatial
 
@@ -41,25 +41,42 @@ def wood_panel(coll,mat,part,a,b,z0,z1,grain,seed):
 
 
 def build(coll,p,scene):
-    'IA: Tabiques de madera de 3 mm con veta física y pasos conservados; coronación limitada por el daño espacial existente.'
+    'IA: Secciones cerradas de madera con apoyo identificado, solape interno de .02 mm y pasos del plano libres; daño limita la coronación de cada columna.'
     plan=meta.get(scene,'plano_interior',{})
     if not plan or 'error' in plan:return
     mat=primitives.material('Madera · interior',(.37,.255,.145))
     wood=primitives.material('Madera · tabique',(.30,.20,.12))
     bottom=3 if p.ground_floor else .7;top=min(p.height,55.2)
     for index,part in enumerate(plan['partitions']):
-        doors=[(c-12.5,c+12.5) for c in part['doors']]
+        doors=[(c-plan['door_width']/2,c+plan['door_width']/2) for c in part['doors']]
         cuts=sorted({part['start'],part['end'],*[x for pair in doors for x in pair]})
         for a,b in zip(cuts,cuts[1:]):
             mid=(a+b)/2;over=any(lo<mid<hi for lo,hi in doors)
             z0=bottom+34 if over else bottom
             x,y=(mid,part['fixed']) if part['axis']=='x' else (part['fixed'],mid)
             z1=min(top,spatial.collapse_height(p,x,y))
-            if z1-z0<1:continue
+            if over and z1-z0<1:continue
             if part['axis']=='x':bounds=(a,b,y-1.5,y+1.5)
             else:bounds=(x-1.5,x+1.5,a,b)
-            ob=wood_panel(coll,mat,part,a,b,z0,z1,p.wood_grain,p.seed+71000+index*193+round(a*11))
-            ob['interior_partition']=True;ob['partition_id']=index
+            columns=max(1,math.ceil((b-a)/config.PARTITION_SECTION_WIDTH))
+            for column in range(columns):
+                left=a+(b-a)*column/columns;right=a+(b-a)*(column+1)/columns
+                mid=(left+right)/2
+                sx,sy=(mid,part['fixed']) if part['axis']=='x' else (part['fixed'],mid)
+                rng=random.Random(p.seed+72000+index*193+round(left*11))
+                height=min(top,spatial.collapse_height(p,sx,sy))-p.wood_damage*rng.uniform(0,5)
+                if height-z0<1:continue
+                rows=max(1,math.ceil((height-z0)/config.PARTITION_SECTION_HEIGHT));below='%s:%s:lintel'%(index,round(a,3)) if over else 'ground'
+                for row in range(rows):
+                    low=z0+config.PARTITION_SECTION_HEIGHT*row;high=min(height,low+config.PARTITION_SECTION_HEIGHT)
+                    if high-low<1:continue
+                    if row:low-=config.PARTITION_JOINT_OVERLAP
+                    if column:left_overlap=left-config.PARTITION_JOINT_OVERLAP
+                    else:left_overlap=left
+                    ob=wood_panel(coll,mat,part,left_overlap,right,low,high,p.wood_grain,p.seed+71000+index*193+round(left*11)+row*29)
+                    key='%s:%s:%s:%s'%(index,round(a,3),column,row)
+                    ob['interior_partition']=True;ob['partition_id']=index
+                    ob['partition_section']=key;ob['rests_on']=below;below=key
             if over:
                 ob=primitives.block('Madera · dintel interior',*bounds,z0-.6,min(z1,z0+2),coll,wood)
-                ob['interior_partition']=True
+                ob['interior_partition']=True;ob['partition_section']='%s:%s:lintel'%(index,round(a,3));ob['rests_on']='jambs'

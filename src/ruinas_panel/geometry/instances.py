@@ -100,6 +100,7 @@ def build(coll,p):
                 template.data.materials[0]=surfaces.variant(ob.data.materials[0],variant%5)
             template['ruin_pillar']=pillar
             template['ruin_cracked']=cracked
+            primitives.repair_precision(template)
             template.name='RUIN_VARIANT_%04d'%index
             templates[signature]=(index,template,size)
         index,template,size=templates[signature]
@@ -114,6 +115,7 @@ def build(coll,p):
             amount,seed=ob['ruin_weather']
             weather.weather_stone(ob,amount,int(seed))
     fracture.apply_damage(coll,p)
+    for piece in coll.objects:primitives.repair_precision(piece)
     if not records:
         bpy.data.collections.remove(library)
         return None

@@ -4,43 +4,30 @@
     "plan": {},
     "metrics": {
       "quality": "WORK",
-      "objects": 1240,
+      "objects": 1953,
       "microdetail": false,
-      "faces": 220005,
-      "vertices": 227228,
-      "seconds": 5.319191299990052,
+      "faces": 377371,
+      "vertices": 389160,
+      "seconds": 11.733692599984352,
       "stages": {
-        "biseles": 0.21845559912617318,
-        "desgaste": 0.0012887999473605305,
-        "estructura_base": 0.18077000000630505,
-        "aberturas_y_vigas": 1.5915411000023596,
-        "integracion": 3.708864899992477,
-        "preparacion": 4.469857899995986,
-        "total": 5.319191299990052
+        "biseles": 0.29937050098669715,
+        "desgaste": 0.0020159006817266345,
+        "estructura_base": 0.33200829999987036,
+        "aberturas_y_vigas": 3.76085960000637,
+        "integracion": 7.668747400020948,
+        "preparacion": 9.510111699986737,
+        "total": 11.733692599984352
       },
       "cached": false,
       "solid": false,
-      "expanded_faces": 276279,
-      "instances": 1667,
-      "variants": 29,
+      "expanded_faces": 465115,
+      "instances": 2672,
+      "variants": 31,
       "detail_limited": false
     },
     "closure": {
       "open_edges": {},
-      "degenerate_faces": {
-        "Piedra \u00b7 back.8.0": 1,
-        "Piedra \u00b7 back.8.1": 1,
-        "Piedra \u00b7 back.8.10": 1,
-        "Piedra \u00b7 back.8.11": 1,
-        "Piedra \u00b7 back.8.12": 1,
-        "Piedra \u00b7 back.8.13": 1,
-        "Piedra \u00b7 back.8.4": 1,
-        "Piedra \u00b7 back.8.5": 1,
-        "Piedra \u00b7 back.8.6": 1,
-        "Piedra \u00b7 back.8.7": 1,
-        "Piedra \u00b7 back.8.8": 1,
-        "Piedra \u00b7 back.8.9": 1
-      }
+      "degenerate_faces": {}
     }
   },
   {
@@ -50,28 +37,30 @@
         {
           "id": "front",
           "bounds": [
-            -80.44999999999999,
-            80.44999999999999,
+            -100.44999999999999,
+            100.44999999999999,
             3.9,
-            48.959999999999994
-          ]
+            83.25999999999999
+          ],
+          "kind": "room"
         },
         {
           "id": "rear",
           "bounds": [
-            -80.44999999999999,
-            80.44999999999999,
-            48.959999999999994,
-            94.02
-          ]
+            -100.44999999999999,
+            100.44999999999999,
+            86.25999999999999,
+            165.61999999999998
+          ],
+          "kind": "room"
         }
       ],
       "partitions": [
         {
           "axis": "x",
-          "fixed": 48.959999999999994,
-          "start": -80.44999999999999,
-          "end": 80.44999999999999,
+          "fixed": 84.75999999999999,
+          "start": -100.44999999999999,
+          "end": 100.44999999999999,
           "doors": [
             0.0
           ]
@@ -84,49 +73,37 @@
         ]
       ],
       "entry_room": "front",
-      "door_width": 25,
+      "door_width": 35.0,
       "floor": 0,
-      "stair_room": "rear"
+      "stair_room": "rear",
+      "minimum_room_mm": 60.0
     },
     "metrics": {
       "quality": "WORK",
-      "objects": 1244,
+      "objects": 1999,
       "microdetail": false,
-      "faces": 225497,
-      "vertices": 232728,
-      "seconds": 5.771030600008089,
+      "faces": 385867,
+      "vertices": 397748,
+      "seconds": 12.132724399998551,
       "stages": {
-        "biseles": 0.2110830998281017,
-        "desgaste": 0.0011995993263553828,
-        "estructura_base": 0.21266620000824332,
-        "aberturas_y_vigas": 1.944352999998955,
-        "integracion": 4.05360300000757,
-        "preparacion": 4.899535600008676,
-        "total": 5.771030600008089
+        "biseles": 0.31061120063532144,
+        "desgaste": 0.001958900480531156,
+        "estructura_base": 0.418631100008497,
+        "aberturas_y_vigas": 3.781723599997349,
+        "integracion": 7.818228999996791,
+        "preparacion": 10.001159999985248,
+        "total": 12.132724399998551
       },
       "cached": false,
       "solid": false,
-      "expanded_faces": 281771,
-      "instances": 1667,
-      "variants": 29,
+      "expanded_faces": 473611,
+      "instances": 2672,
+      "variants": 31,
       "detail_limited": false
     },
     "closure": {
       "open_edges": {},
-      "degenerate_faces": {
-        "Piedra \u00b7 back.8.0": 1,
-        "Piedra \u00b7 back.8.1": 1,
-        "Piedra \u00b7 back.8.10": 1,
-        "Piedra \u00b7 back.8.11": 1,
-        "Piedra \u00b7 back.8.12": 1,
-        "Piedra \u00b7 back.8.13": 1,
-        "Piedra \u00b7 back.8.4": 1,
-        "Piedra \u00b7 back.8.5": 1,
-        "Piedra \u00b7 back.8.6": 1,
-        "Piedra \u00b7 back.8.7": 1,
-        "Piedra \u00b7 back.8.8": 1,
-        "Piedra \u00b7 back.8.9": 1
-      }
+      "degenerate_faces": {}
     }
   },
   {
@@ -136,47 +113,50 @@
         {
           "id": "left",
           "bounds": [
-            -80.44999999999999,
-            -20.0,
+            -100.44999999999999,
+            -24.3,
             3.9,
-            48.959999999999994
-          ]
+            127.61999999999998
+          ],
+          "kind": "room"
         },
         {
           "id": "right",
           "bounds": [
-            -20.0,
-            80.44999999999999,
+            -21.3,
+            100.44999999999999,
             3.9,
-            48.959999999999994
-          ]
+            127.61999999999998
+          ],
+          "kind": "room"
         },
         {
           "id": "rear",
           "bounds": [
-            -80.44999999999999,
-            80.44999999999999,
-            48.959999999999994,
-            94.02
-          ]
+            -100.44999999999999,
+            100.44999999999999,
+            130.61999999999998,
+            165.61999999999998
+          ],
+          "kind": "corridor"
         }
       ],
       "partitions": [
         {
           "axis": "x",
-          "fixed": 48.959999999999994,
-          "start": -80.44999999999999,
-          "end": 80.44999999999999,
+          "fixed": 129.11999999999998,
+          "start": -100.44999999999999,
+          "end": 100.44999999999999,
           "doors": [
-            -50.224999999999994,
-            30.224999999999994
+            -62.37499999999999,
+            39.574999999999996
           ]
         },
         {
           "axis": "y",
-          "fixed": -20.0,
+          "fixed": -22.8,
           "start": 3.9,
-          "end": 48.959999999999994,
+          "end": 129.11999999999998,
           "doors": []
         }
       ],
@@ -191,49 +171,37 @@
         ]
       ],
       "entry_room": "right",
-      "door_width": 25,
+      "door_width": 35.0,
       "floor": 0,
-      "stair_room": "rear"
+      "stair_room": "rear",
+      "minimum_room_mm": 60.0
     },
     "metrics": {
       "quality": "WORK",
-      "objects": 1248,
+      "objects": 2030,
       "microdetail": false,
-      "faces": 226885,
-      "vertices": 234124,
-      "seconds": 5.672093300003326,
+      "faces": 391507,
+      "vertices": 403450,
+      "seconds": 12.483278400002746,
       "stages": {
-        "biseles": 0.2242860994010698,
-        "desgaste": 0.0012395999510772526,
-        "estructura_base": 0.21320539998123422,
-        "aberturas_y_vigas": 1.7174140000133775,
-        "integracion": 3.8424222999892663,
-        "preparacion": 4.728761599981226,
-        "total": 5.672093300003326
+        "biseles": 0.31184349942486733,
+        "desgaste": 0.001977100328076631,
+        "estructura_base": 0.41422470001270995,
+        "aberturas_y_vigas": 3.928649499983294,
+        "integracion": 8.093011599994497,
+        "preparacion": 10.306309999985388,
+        "total": 12.483278400002746
       },
       "cached": false,
       "solid": false,
-      "expanded_faces": 283159,
-      "instances": 1667,
-      "variants": 29,
+      "expanded_faces": 479251,
+      "instances": 2672,
+      "variants": 31,
       "detail_limited": false
     },
     "closure": {
       "open_edges": {},
-      "degenerate_faces": {
-        "Piedra \u00b7 back.8.0": 1,
-        "Piedra \u00b7 back.8.1": 1,
-        "Piedra \u00b7 back.8.10": 1,
-        "Piedra \u00b7 back.8.11": 1,
-        "Piedra \u00b7 back.8.12": 1,
-        "Piedra \u00b7 back.8.13": 1,
-        "Piedra \u00b7 back.8.4": 1,
-        "Piedra \u00b7 back.8.5": 1,
-        "Piedra \u00b7 back.8.6": 1,
-        "Piedra \u00b7 back.8.7": 1,
-        "Piedra \u00b7 back.8.8": 1,
-        "Piedra \u00b7 back.8.9": 1
-      }
+      "degenerate_faces": {}
     }
   }
 ]

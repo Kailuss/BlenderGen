@@ -128,7 +128,7 @@ def apply_modifier(obj, mod, *operands):
 
 @profiling.timed("biseles")
 def bevel(obj, width):
-    'IA: Aplica bisel según calidad; respeta la exclusión de mortero en previsualización.'
+    'IA: Aplica bisel según calidad y elimina degeneraciones numéricas submicrométricas; respeta exclusión de mortero en preview.'
     if runtime.instance_build and obj.get('ruin_box'):
         obj['ruin_bevel']=width
         return
@@ -138,6 +138,25 @@ def bevel(obj, width):
     mod.width = width
     mod.segments = config.QUALITY[runtime.quality][2]
     apply_modifier(obj, mod)
+    repair_precision(obj)
+
+
+def repair_precision(obj):
+    'IA: Repara solo caras casi nulas mediante soldadura de 0,00001 mm; acepta únicamente malla cerrada positiva, sin desplazar piezas completas.'
+    import bmesh
+    bm=bmesh.new();bm.from_mesh(obj.data)
+    bad=sum(f.calc_area()<1e-8 for f in bm.faces)
+    if not bad:
+        bm.free();return False
+    bmesh.ops.remove_doubles(bm,verts=list(bm.verts),dist=.00001)
+    bmesh.ops.dissolve_degenerate(bm,edges=list(bm.edges),dist=.00001)
+    bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces))
+    valid=bool(bm.faces) and all(e.is_manifold for e in bm.edges) and all(f.calc_area()>=1e-8 for f in bm.faces) and bm.calc_volume()>0
+    if valid:
+        bm.to_mesh(obj.data);obj.data.update();obj['precision_repaired']=bad
+    else:obj['precision_unresolved']=bad
+    bm.free()
+    return valid
 
 
 def block(name, x0, x1, y0, y1, z0, z1, coll, mat, rng=None, wear=0):

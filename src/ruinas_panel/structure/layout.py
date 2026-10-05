@@ -100,7 +100,7 @@ def merge_thin_stones(line,minimum):
 
 
 def plan_door(p):
-    'IA: Valida espacio antes de borrar la fuente; devuelve geometría lógica del hueco.'
+    'IA: Valida antes de borrar fuente; con habitaciones reserva 35 mm libres tras jambas sin modificar el ajuste guardado.'
     if not p.door_enabled:
         return None
     edges,rh=course_layout(p)
@@ -115,7 +115,11 @@ def plan_door(p):
     available=p.length-left_margin-right_margin
     if available<10:
         raise ValueError('No cabe la puerta entre los pilares: aumenta la longitud o reduce el grosor.')
-    width=min(p.door_width,available)
+    requested=p.door_width
+    if p.layout_mode=='ROOM' and getattr(p,'interior_layout','OPEN')!='OPEN':
+        requested=max(requested,config.INTERIOR_PASSAGE+(5.6 if p.wood_frame else 0))
+        if available<requested:raise ValueError('No cabe una entrada con 35 mm libres: aumenta la longitud.')
+    width=min(requested,available)
     center=(p.door_position-.5)*p.length
     center=max(-p.length/2+left_margin+width/2,min(p.length/2-right_margin-width/2,center))
     index=next((i for i in range(1,rows) if edges[i]>=p.door_height-.00001),rows-1)

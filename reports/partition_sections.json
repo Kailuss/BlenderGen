@@ -1,0 +1,13 @@
+{
+  "sections": [
+    74,
+    68
+  ],
+  "volume_mm3": [
+    40632.46470005298,
+    33977.399479851236
+  ],
+  "passage_mm": 35,
+  "closed": true,
+  "support_ids_resolve": true
+}
