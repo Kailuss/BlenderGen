@@ -81,7 +81,7 @@ class RuinSettings(bpy.types.PropertyGroup):
     height: FloatProperty(name='Altura máxima (mm)',default=52,min=25,max=160)
     left_height: FloatProperty(name='Extremo izquierdo (mm)',default=55,min=12,max=160)
     right_height: FloatProperty(name='Extremo derecho (mm)',default=40,min=12,max=160)
-    thickness: FloatProperty(name='Grosor nominal (mm)',default=12,min=8,max=22)
+    thickness: FloatProperty(name='Grosor nominal (mm)',default=12,min=6,max=22)
     stone_size: FloatProperty(name='Altura de hilada (mm)',default=6.5,min=4,max=10)
     stone_variation: FloatProperty(name='Anchuras',description='Variación de anchura entre piedras',default=.2,min=0,max=1)
     bond_subdivisions: IntProperty(name='Subdivisiones',description='Piezas por módulo en las hiladas alternas; limita piezas demasiado estrechas',default=1,min=1,max=3)

@@ -33,7 +33,7 @@ def status_icon(status):
 
 
 class RUIN_PT_panel(bpy.types.Panel):
-    bl_label = 'Ruinas · v0.32.2'
+    bl_label = 'Ruinas · v0.32.3'
     bl_idname = 'RUIN_PT_panel'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -47,6 +47,12 @@ class RUIN_PT_panel(bpy.types.Panel):
     def draw(self, context):
         'IA: Acciones, estado y semilla arriba; no generes ni modifiques geometría desde el panel.'
         layout = self.layout
+        if context.scene.get('ruinas_physics_lab'):
+            layout.label(text='Ensayo: piezas sueltas del primer tabique')
+            layout.label(text='Reproduce la animación (120 fotogramas)')
+            layout.label(text='Sin uniones estructurales todavía')
+            layout.operator('ruin.physics_return',icon='BACK')
+            return
         p = context.scene.ruin_settings
         row = layout.row(align=True)
         row.scale_y = 1.3
@@ -74,14 +80,16 @@ class RUIN_PT_panel(bpy.types.Panel):
 
 def enabled(p, field):
     'IA: Controles que no aplican se atenúan en lugar de ocultarse.'
-    if field=='interior_layout':return p.layout_mode=='ROOM'
+    if field=='interior_layout':return p.layout_mode=='ROOM' and p.height_type!='RUIN'
     if not p.damage_enabled and field in set(damage.DISABLED_VALUES)|{'wear_level','hole_size','hole_seed','break_position'}:return False
     if field=='wear':return p.wear_level=='CUSTOM'
     if field in ('roof_curve','roof_tiles','roof_gables','chimneys','brass_pipes','roof_damage'):return p.layout_mode=='ROOM' and p.roof_frame
+    if field=='stair_side' and p.stair_type=='NONE':return False
     if field in ('stair_type','stair_side'):return p.layout_mode=='ROOM' and p.height_type=='TWO' and p.upper_floor and p.floor_beams
     if field=='roof_frame':return p.layout_mode=='ROOM'
     if field=='upper_floor':return p.layout_mode=='ROOM' and p.height_type=='TWO' and p.floor_beams
-    if field in ('ground_floor','floor_damage'):return p.layout_mode=='ROOM'
+    if field=='floor_damage':return p.layout_mode=='ROOM' and (p.ground_floor or (p.upper_floor and p.floor_beams and p.height_type=='TWO'))
+    if field=='ground_floor':return p.layout_mode=='ROOM'
     if field=='balconies':return p.height_type=='TWO'
     if field in ('iron_mode','iron_damage'):return p.balconies and p.height_type=='TWO'
     if field == 'building_depth':
@@ -97,6 +105,10 @@ def enabled(p, field):
 
 def section_panel(index, section):
     'IA: Crea un subpanel para una entrada de config.SECTIONS: casilla en cabecera si hay toggle, restablecer a la derecha.'
+
+    def poll(cls,context):
+        'IA: Los controles de generación pertenecen a la casa, no a la escena aislada de ensayo físico.'
+        return not context.scene.get('ruinas_physics_lab',False)
 
     def draw_header(self, context):
         'IA: Casilla que activa el bloque, dibujada en la cabecera del subpanel.'
@@ -119,6 +131,7 @@ def section_panel(index, section):
             if field in config.FULL_WIDTH_ENUMS:
                 row = col.row(align=True)
                 row.use_property_split = False
+                row.enabled = enabled(p, field)
                 row.prop(p, field, expand=True)
                 continue
             row = col.row()
@@ -129,6 +142,9 @@ def section_panel(index, section):
         if section['id'] == 'build':
             col.label(text='Grosor %.0f mm · altura %.0f mm' % (config.BUILD_TYPES[p.build_type][0], config.HEIGHT_TYPES[p.height_type]))
         if section['id']=='layout':
+            col.operator('ruin.physics_lab',icon='PHYSICS')
+            if p.layout_mode!='ROOM':col.label(text='Habitaciones: requiere cuatro paredes',icon='INFO')
+            elif p.height_type=='RUIN':col.label(text='Habitaciones: requiere al menos una planta',icon='INFO')
             plan=parsed(meta.raw(context.scene,'plano_interior') or '{}',{})
             if plan.get('error'):col.label(text=plan['error'],icon='INFO')
         if section['id']=='floors':
@@ -157,6 +173,7 @@ def section_panel(index, section):
         'bl_parent_id': RUIN_PT_panel.bl_idname,
         'bl_options': {'DEFAULT_CLOSED'} if section['closed'] else set(),
         'draw': draw,
+        'poll': classmethod(poll),
         'draw_header_preset': draw_header_preset,
     }
     if 'toggle' in section:

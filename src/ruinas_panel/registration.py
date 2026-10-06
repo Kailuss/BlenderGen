@@ -19,7 +19,7 @@ for _field in config.FIELDS:
 
 
 CLASSES=(preferences.RuinPreferences,settings.RuinSettings,operators.RUIN_OT_generate,operators.RUIN_OT_solid,operators.RUIN_OT_seed,
-         operators.RUIN_OT_holes,operators.RUIN_OT_reset,panel.RUIN_PT_panel)+panel.SUBPANELS
+         operators.RUIN_OT_holes,operators.RUIN_OT_reset,operators.RUIN_OT_physics,operators.RUIN_OT_physics_return,panel.RUIN_PT_panel)+panel.SUBPANELS
 
 
 @persistent

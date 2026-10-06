@@ -1,5 +1,13 @@
 # Estado del proyecto
 
+## v0.32.3 — 2026-10-06
+
+Corregidos el grosor real del perfil Tabique, la variación ignorada en muros
+laterales/trasero y controles activos sin efecto. Primer ensayo físico separado
+con secciones recuperables también desde vista agrupada. Validación y límites
+en [V0323.md](V0323.md). Todavía no hay uniones ni derrumbe estructural simulado.
+Entrega actual: `dist/ruinas_v0323_completo.zip`.
+
 ## v0.32.2 — 2026-10-05
 
 Tabiques seccionados, cuartos útiles de 60 × 60 mm, circulación de 35 mm y

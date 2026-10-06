@@ -33,7 +33,7 @@ def rear_pier(coll,p,x,y,edges,index):
 
 
 def segment_wall(coll,p,wall_id,start,end,origin,axis,height,edges):
-    'IA: Construye un tramo en coordenadas locales y luego transforma; asigna wall_id a sus piezas.'
+    'IA: Construye un tramo local con variación de juntas y proyección compartida con fachada; semillas por pared e hilada, esquinas fijas y wall_id conservado.'
     stone=primitives.material('Piedra · neutro',(.52,.52,.52))
     coremat=primitives.material('Núcleo · neutro',(.44,.44,.44))
     soil=primitives.material('Tierra · arena',(.36,.31,.24))
@@ -50,18 +50,24 @@ def segment_wall(coll,p,wall_id,start,end,origin,axis,height,edges):
         z1=min(edges[row+1],height)-.25
         subdivisions=min(p.bond_subdivisions,max(1,int(pitch/3.2))) if row%2 else 1
         local=pitch/subdivisions
+        jr=random.Random(layout.distribution_seed(p)+row*3701+{'left':101,'right':211,'back':307}.get(wall_id,0))
         joints=[start]
         for j in range(bays*subdivisions):
             x=start+(j+(.5 if row%2 else 1))*local
             if start+.01<x<end-.01:
-                joints.append(x)
+                jitter=.12 if subdivisions==1 else .08
+                joints.append(x+jr.uniform(-1,1)*local*jitter*p.stone_variation)
         joints.append(end)
         pieces=layout.merge_thin_stones(list(zip(joints,joints[1:])),3.2)
         for j,(a,b) in enumerate(pieces):
             # El núcleo solo entra en un pilar real; el extremo libre queda retirado.
             core_end=b+.9 if p.layout_mode=='ROOM' and j==len(pieces)-1 else b-(1.1 if j==len(pieces)-1 else -.05)
             primitives.block('Mortero · '+wall_id,a-(1.4 if j==0 else .05),core_end,-p.thickness*.32,p.thickness*.32,z0-.85,z1-.7,coll,coremat)
-            ob=primitives.block('Piedra · %s.%s.%s'%(wall_id,row,j),a+.18,b-.18,-p.thickness/2-p.projection*.75,p.thickness/2+p.projection*.75,z0,z1,coll,stone)
+            rr=random.Random(p.seed+row*7919+j*31+{'left':101,'right':211,'back':307}.get(wall_id,0))
+            at_end=j in (0,len(pieces)-1)
+            front=p.thickness/2+p.projection*(.75 if at_end else .75+p.randomness*rr.uniform(-.15,.15))
+            back=p.thickness/2+p.projection*(.75 if at_end else .75+p.randomness*rr.uniform(-.15,.15))
+            ob=primitives.block('Piedra · %s.%s.%s'%(wall_id,row,j),a+.18,b-.18,-front,back,z0,z1,coll,stone)
             weather.weather_stone(ob,p.wear,p.seed+191+row*31+j+len(wall_id))
     for ob in set(coll.objects)-before:
         co=primitives.coords(ob)
@@ -101,8 +107,8 @@ def build_returns(coll,p,centers,edges):
 
 def _build_wall(context, p):
     'IA: Primera fase: fábrica base, pilares y suelo exterior; assembly añade influencias y carpintería después. Mantén nombres y semillas.'
-    if p.thickness < 8 or p.length < 60 or p.height < 25:
-        raise ValueError('Mínimos del prototipo: longitud 60, altura 25 y grosor 8 mm.')
+    if p.thickness < 6 or p.length < 60 or p.height < 25:
+        raise ValueError('Mínimos del prototipo: longitud 60, altura 25 y grosor 6 mm.')
     old = bpy.data.collections.get(config.COLLECTION)
     if old:
         primitives.remove_objects(old.objects)

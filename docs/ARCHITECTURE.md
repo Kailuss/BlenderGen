@@ -34,6 +34,7 @@ La base 0.31 integra el edificio completo aportado en `dist/ruinas_v031_completo
 | Generación y métricas | `services/generation.py` | Validación → caché/construcción → daño → métricas |
 | Caché | `services/cache.py` | Plantillas anteriores a grietas, copiadas antes de editar |
 | Fusión/exportación | `services/export.py` | Fuente intacta; valida componentes del sólido |
+| Ensayo físico de tabique | `services/physics.py` | Cajas en metros en escena separada; recupera IDs agrupados, rechaza solapes; sin uniones estructurales |
 | Revisión previa a física | `services/geometry_audit.py` | Auditoría de mallas y variantes; no valida contactos ni construye colisionadores |
 | Medición | `services/profiling.py` | Decorador acumulativo por etapa |
 | Propiedades guardadas | `ui/settings.py` | Mantener identificadores RNA compatibles; los nombres visibles son cortos y el detalle va en `description` |

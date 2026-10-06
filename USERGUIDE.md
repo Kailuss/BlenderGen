@@ -16,7 +16,7 @@ Ruinas genera muros de mampostería en ruinas para miniaturas de 28 a 35 mm, lis
 
 ## Instalación
 
-1. En Blender 5.0 o posterior: **Editar → Preferencias → Complementos → Instalar desde disco** y elige `dist/ruinas_panel_v0322.zip`.
+1. En Blender 5.0 o posterior: **Editar → Preferencias → Complementos → Instalar desde disco** y elige `dist/ruinas_panel_v0323.zip`.
 2. Activa **Ruinas — Muro de fantasía**.
 3. Abre la barra lateral de la Vista 3D (tecla **N**) y la pestaña **Ruinas**.
 
@@ -131,3 +131,9 @@ Activa cubierta, chimenea y canalones para ver las nuevas tejas alineadas, el en
 Solo se intenta dividir un recinto mayor de 80 × 80 mm. Cada cuarto debe conservar 60 × 60 mm útiles, descontando tabiques; distribuidores y pasos interiores requieren 35 mm libres. Si no cabe, el panel explica por qué y conserva la planta sin tabiques. El fondo admite ahora hasta 240 mm, manteniendo el valor inicial de 50 mm.
 
 Con habitaciones activadas, la entrada exterior reserva también 35 mm libres descontando las jambas, sin modificar el valor guardado del deslizador. Los tabiques se forman con secciones de hasta 12 × 18 mm; Derrumbe y Deterioro de madera reducen su coronación. Las secciones tienen un solape interno de 0,02 mm para impresión, no son todavía colisionadores físicos.
+
+## Correcciones y ensayo físico 0.32.3
+
+El perfil Tabique utiliza ahora los 6 mm anunciados. Variación de piedra e Irregularidad actúan también sobre los muros laterales y trasero. Las habitaciones conservan las reglas de espacio útil en los tres perfiles.
+
+En Distribución, «Ensayar física de tabique» crea una escena separada con cajas del primer tabique. Reproduce la animación y pulsa «Volver a la casa» para regresar. Es una prueba de piezas sueltas, todavía sin uniones ni derrumbe estructural. No cambia ni exporta el edificio original. Consulta [límites y pruebas](docs/V0323.md).

@@ -1,0 +1,37 @@
+{
+  "wall_controls": {
+    "stone_variation:left": true,
+    "stone_variation:right": true,
+    "stone_variation:back": true,
+    "randomness:left": true,
+    "randomness:right": true,
+    "randomness:back": true
+  },
+  "profiles": [
+    {
+      "profile": "PARTITION",
+      "thickness": 6.0,
+      "sections": 83,
+      "closed": true,
+      "cached": true
+    },
+    {
+      "profile": "WALL",
+      "thickness": 9.0,
+      "sections": 83,
+      "closed": true,
+      "cached": true
+    },
+    {
+      "profile": "FORTRESS",
+      "thickness": 15.0,
+      "sections": 83,
+      "closed": true,
+      "cached": true
+    }
+  ],
+  "physics_bodies": 42,
+  "source_unchanged": true,
+  "grouping_preserves_sections": true,
+  "simulation_frames": 120
+}

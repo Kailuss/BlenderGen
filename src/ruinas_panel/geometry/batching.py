@@ -43,7 +43,8 @@ def pack_preview(coll):
             loops.append(loop_ids+vo);starts.append(face_starts+lo);totals.append(face_totals)
             smooth.append(face_smooth);slots.append(face_slots);ids.append(np.full(face_count,index,dtype=np.int32))
             parts.append({'key':primitives.piece_key(ob),'name':ob.name,'vertex_start':vo,'vertex_count':len(co),
-                          'rubble':bool(ob.get('escombro'))})
+                          'rubble':bool(ob.get('escombro')),
+                          'partition':{k:ob[k] for k in ('partition_section','partition_id','rests_on') if k in ob}})
             vo+=len(co);lo+=len(me.loops)
         ob=primitives.mesh_obj('Tramo · '+wall+' · '+(materials[0] if materials else 'sin material'),[],[],coll,objects[0].data.materials[0])
         me=ob.data

@@ -9,6 +9,9 @@ import bpy
 
 def ready(cls,context):
     'IA: Poll común: exige ajustes registrados y Modo Objeto; explica en la interfaz por qué el botón está inactivo.'
+    if context.scene.get('ruinas_physics_lab'):
+        cls.poll_message_set('Vuelve a la casa original para editar o exportar.')
+        return False
     if getattr(context.scene,'ruin_settings',None) is None:
         cls.poll_message_set('Activa el complemento Ruinas en esta escena.')
         return False
@@ -55,6 +58,39 @@ class RUIN_OT_solid(bpy.types.Operator):
         except Exception as exc:
             return fail(self,context,exc)
         self.report({'INFO'},'Sólido seleccionado. Exporta STL: solo selección, escala 1, sin Scene Unit.')
+        return {'FINISHED'}
+
+
+class RUIN_OT_physics_return(bpy.types.Operator):
+    bl_idname='ruin.physics_return'
+    bl_label='Volver a la casa'
+    def execute(self,context):
+        'IA: Regresa a la escena original del ensayo sin borrar simulación ni modificar la casa.'
+        scene=bpy.data.scenes.get(context.scene.get('source_scene',''))
+        if scene is None:return {'CANCELLED'}
+        context.window.scene=scene
+        return {'FINISHED'}
+
+
+class RUIN_OT_physics(bpy.types.Operator):
+    bl_idname='ruin.physics_lab'
+    bl_label='Ensayar física de tabique'
+    bl_description='Abre una escena separada con cajas del primer tabique; reproduce la animación para ensayar caída libre, todavía sin uniones estructurales'
+    bl_options={'REGISTER','UNDO'}
+    poll=classmethod(ready)
+    def execute(self,context):
+        'IA: Prepara un ensayo independiente y abre su escena; conserva la casa, escala y animación originales.'
+        from ..services import physics
+        preview.cancel_pending()
+        try:scene=physics.prepare(context.scene)
+        except Exception as exc:return fail(self,context,exc)
+        context.window.scene=scene
+        for area in context.screen.areas:
+            if area.type=='VIEW_3D':
+                region=next((r for r in area.regions if r.type=='WINDOW'),None)
+                if region:
+                    with context.temp_override(area=area,region=region):bpy.ops.view3d.view_all(center=True)
+        self.report({'INFO'},'Ensayo del primer tabique: reproduce la animación. La casa permanece en su escena original.')
         return {'FINISHED'}
 
 
