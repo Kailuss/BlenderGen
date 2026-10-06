@@ -16,7 +16,7 @@ Ruinas genera muros de mampostería en ruinas para miniaturas de 28 a 35 mm, lis
 
 ## Instalación
 
-1. En Blender 5.0 o posterior: **Editar → Preferencias → Complementos → Instalar desde disco** y elige `dist/ruinas_panel_v0323.zip`.
+1. En Blender 5.0 o posterior: **Editar → Preferencias → Complementos → Instalar desde disco** y elige `dist/ruinas_panel_v0324.zip`.
 2. Activa **Ruinas — Muro de fantasía**.
 3. Abre la barra lateral de la Vista 3D (tecla **N**) y la pestaña **Ruinas**.
 
@@ -137,3 +137,13 @@ Con habitaciones activadas, la entrada exterior reserva también 35 mm libres de
 El perfil Tabique utiliza ahora los 6 mm anunciados. Variación de piedra e Irregularidad actúan también sobre los muros laterales y trasero. Las habitaciones conservan las reglas de espacio útil en los tres perfiles.
 
 En Distribución, «Ensayar física de tabique» crea una escena separada con cajas del primer tabique. Reproduce la animación y pulsa «Volver a la casa» para regresar. Es una prueba de piezas sueltas, todavía sin uniones ni derrumbe estructural. No cambia ni exporta el edificio original. Consulta [límites y pruebas](docs/V0323.md).
+
+## Física por estancia y relieve 0.32.4
+
+Instala la versión 0.32.4 antes de regenerar archivos anteriores. En Distribución elige una estancia y pulsa Preparar física de la zona. Simula, revisa y acepta para exportación; después usa Preparar sólido. Puedes descartar las poses. La simulación actual cubre tabiques y suelo plano, con dinteles fijos. Cambiar parámetros geométricos requiere descartar y repetir la física.
+
+Ejemplo completo: `dist/ruinas_v0324_proceso_completo.blend`, con cinco escenas de etapas y STL verificado. [Pruebas y límites](docs/V0324.md).
+
+## Ver la física en funcionamiento
+
+Abre `dist/ruinas_v0324_fisica_interactiva.blend` y pulsa Espacio. Para cambiar entre reproducción, casa con tejado, casa editable y laboratorio utiliza el selector de escena de Blender. [Manual paso a paso](docs/MANUAL_FISICA.md). El archivo anterior de proceso completo se conserva como prueba de exportación; abre en el sólido final y no es la demostración principal.

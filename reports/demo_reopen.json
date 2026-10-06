@@ -1,0 +1,9 @@
+{
+  "opens_in_replay": true,
+  "works_without_addon": true,
+  "scene_count": 4,
+  "replay_modules": 32,
+  "maximum_motion_mm": 37.96050401906256,
+  "roof_present": true,
+  "manual_embedded": true
+}

@@ -19,7 +19,8 @@ for _field in config.FIELDS:
 
 
 CLASSES=(preferences.RuinPreferences,settings.RuinSettings,operators.RUIN_OT_generate,operators.RUIN_OT_solid,operators.RUIN_OT_seed,
-         operators.RUIN_OT_holes,operators.RUIN_OT_reset,operators.RUIN_OT_physics,operators.RUIN_OT_physics_return,panel.RUIN_PT_panel)+panel.SUBPANELS
+         operators.RUIN_OT_holes,operators.RUIN_OT_reset,operators.RUIN_OT_physics,operators.RUIN_OT_physics_return,
+         operators.RUIN_OT_physics_simulate,operators.RUIN_OT_physics_accept,operators.RUIN_OT_physics_clear,operators.RUIN_OT_physics_release,panel.RUIN_PT_panel)+panel.SUBPANELS
 
 
 @persistent
@@ -28,6 +29,7 @@ def before_data_reload(*args):
     preview.cancel_pending()
     cache.forget_cache()
     runtime.settings=None
+    runtime.physics_simulations.clear()
 
 
 @persistent

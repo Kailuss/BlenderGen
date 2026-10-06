@@ -192,7 +192,7 @@ def printable_mesh(obj,density):
 
 @profiling.timed("fusion")
 def make_solid(context, voxel=None, method=None):
-    'IA: Fusiona copias (Manifold exacto o vóxel según config.EXPORT_METHOD) y valida cáscaras; si falla, borra copias y sólido parcial y deja la fuente intacta.'
+    'IA: Omite piezas sin caras, fusiona copias (Manifold o vóxel) y valida cáscaras; si falla, borra copias y sólido parcial y deja la fuente intacta.'
     start=time.perf_counter()
     method=method or config.EXPORT_METHOD
     from ..geometry import instances
@@ -222,11 +222,16 @@ def make_solid(context, voxel=None, method=None):
                     ob.select_set(True)
                     copies.append(ob.name)
                 continue
+            if not obj.data.polygons:continue
             ob=primitives.reduced_copy(obj,context.scene.ruin_settings.export_density)
+            if not ob.data.polygons:
+                primitives.remove_objects([ob])
+                continue
             context.scene.collection.objects.link(ob)
             ob.hide_set(False)
             ob.select_set(True)
             copies.append(ob.name)
+        if not copies:raise ValueError('No quedan caras exportables tras los recortes de daño.')
         first=bpy.data.objects[copies[0]]
         context.view_layer.objects.active=first
         if method=='MANIFOLD':

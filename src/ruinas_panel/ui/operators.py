@@ -9,7 +9,7 @@ import bpy
 
 def ready(cls,context):
     'IA: Poll común: exige ajustes registrados y Modo Objeto; explica en la interfaz por qué el botón está inactivo.'
-    if context.scene.get('ruinas_physics_lab'):
+    if context.scene.get('ruinas_physics_lab') or context.scene.get('ruinas_replay'):
         cls.poll_message_set('Vuelve a la casa original para editar o exportar.')
         return False
     if getattr(context.scene,'ruin_settings',None) is None:
@@ -61,6 +61,16 @@ class RUIN_OT_solid(bpy.types.Operator):
         return {'FINISHED'}
 
 
+def frame_view(context):
+    'IA: Reencuadra al cambiar entre casa en mm y ensayo en metros, evitando volver con una vista mil veces menor.'
+    if context.screen is None:return
+    for area in context.screen.areas:
+        if area.type=='VIEW_3D':
+            region=next((r for r in area.regions if r.type=='WINDOW'),None)
+            if region:
+                with context.temp_override(area=area,region=region):bpy.ops.view3d.view_all(center=True)
+
+
 class RUIN_OT_physics_return(bpy.types.Operator):
     bl_idname='ruin.physics_return'
     bl_label='Volver a la casa'
@@ -69,28 +79,82 @@ class RUIN_OT_physics_return(bpy.types.Operator):
         scene=bpy.data.scenes.get(context.scene.get('source_scene',''))
         if scene is None:return {'CANCELLED'}
         context.window.scene=scene
+        frame_view(context)
         return {'FINISHED'}
 
 
 class RUIN_OT_physics(bpy.types.Operator):
     bl_idname='ruin.physics_lab'
-    bl_label='Ensayar física de tabique'
-    bl_description='Abre una escena separada con cajas del primer tabique; reproduce la animación para ensayar caída libre, todavía sin uniones estructurales'
+    bl_label='Preparar física de la zona'
+    bl_description='Prepara tabiques de la estancia elegida con el daño actual; simula y revisa antes de aceptar para exportación'
     bl_options={'REGISTER','UNDO'}
     poll=classmethod(ready)
     def execute(self,context):
         'IA: Prepara un ensayo independiente y abre su escena; conserva la casa, escala y animación originales.'
         from ..services import physics
         preview.cancel_pending()
-        try:scene=physics.prepare(context.scene)
+        try:
+            if preview.stale_preview(context.scene):preview.update_preview(context)
+            scene=physics.prepare(context.scene)
         except Exception as exc:return fail(self,context,exc)
         context.window.scene=scene
-        for area in context.screen.areas:
-            if area.type=='VIEW_3D':
-                region=next((r for r in area.regions if r.type=='WINDOW'),None)
-                if region:
-                    with context.temp_override(area=area,region=region):bpy.ops.view3d.view_all(center=True)
-        self.report({'INFO'},'Ensayo del primer tabique: reproduce la animación. La casa permanece en su escena original.')
+        frame_view(context)
+        self.report({'INFO'},'Zona preparada: simula y revisa antes de aceptar. La casa permanece en su escena original.')
+        return {'FINISHED'}
+
+
+class RUIN_OT_physics_release(bpy.types.Operator):
+    bl_idname='ruin.physics_release'
+    bl_label='Retirar apoyo seleccionado (ensayo)'
+    bl_description='Prueba controlada: desplaza una sección de base y permite que las de encima caigan por gravedad'
+    bl_options={'REGISTER','UNDO'}
+    def execute(self,context):
+        'IA: Programa una retirada de apoyo solicitada explícitamente desde el ensayo, nunca durante generación normal.'
+        from ..services import physics
+        try:physics.release_support(context.scene,context.active_object)
+        except Exception as exc:return fail(self,context,exc)
+        return {'FINISHED'}
+
+
+class RUIN_OT_physics_simulate(bpy.types.Operator):
+    bl_idname='ruin.physics_simulate'
+    bl_label='Simular derrumbe'
+    bl_options={'REGISTER','UNDO'}
+    def execute(self,context):
+        'IA: Calcula el ensayo hasta el último fotograma sin aceptar ni modificar la casa.'
+        from ..services import physics
+        try:physics.simulate(context.scene)
+        except Exception as exc:return fail(self,context,exc)
+        return {'FINISHED'}
+
+
+class RUIN_OT_physics_accept(bpy.types.Operator):
+    bl_idname='ruin.physics_accept'
+    bl_label='Aceptar para exportación'
+    bl_description='Conserva las poses del ensayo sobre la geometría detallada; después usa Preparar sólido en la casa'
+    bl_options={'REGISTER','UNDO'}
+    def execute(self,context):
+        'IA: Guarda las poses revisadas, vuelve a la casa y regenera el detalle conservando las transformaciones físicas.'
+        from ..services import physics
+        try:
+            source=physics.accept(context.scene);context.window.scene=source
+            preview.update_preview(context)
+            frame_view(context)
+        except Exception as exc:return fail(self,context,exc)
+        return {'FINISHED'}
+
+
+class RUIN_OT_physics_clear(bpy.types.Operator):
+    bl_idname='ruin.physics_clear'
+    bl_label='Descartar resultado físico'
+    bl_options={'REGISTER','UNDO'}
+    poll=classmethod(ready)
+    def execute(self,context):
+        'IA: Borra solo las poses aceptadas y recupera el edificio procedural; conserva escenas de ensayo.'
+        from .. import meta
+        meta.put(context.scene,'physics_result',{})
+        try:preview.update_preview(context)
+        except Exception as exc:return fail(self,context,exc)
         return {'FINISHED'}
 
 

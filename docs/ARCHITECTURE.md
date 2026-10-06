@@ -22,6 +22,7 @@ La base 0.31 integra el edificio completo aportado en `dist/ruinas_v031_completo
 | Daño y escombros de cubierta | `structure/roof_damage.py` | Regiones reproducibles cortan estructura y cubierta; escombros asociados |
 | Chimenea, canalones y bajantes | `structure/roof_accessories.py` | Planifica accesorios y sus reservas para integrarlos con muros y cubierta |
 | Cajas, bisel, material, recorte plano, aplicación de modificadores | `geometry/primitives.py` | Mallas cerradas en mm; modificadores de pieza solo con `apply_modifier` (escena de taller) |
+| Relieve de cal | `geometry/plaster.py` | Cuadrícula recortada, malla cerrada con borde conservado |
 | Desgaste | `geometry/weather.py` | Erosión hacia dentro y densidad por calidad |
 | Grietas y roturas | `geometry/fracture.py` | Semillas locales, grietas desde aristas, sin islas grandes |
 | Tierra, peana, grava, asentamiento | `geometry/terrain.py` | Superficie física compartida con los escombros |
@@ -34,7 +35,7 @@ La base 0.31 integra el edificio completo aportado en `dist/ruinas_v031_completo
 | Generación y métricas | `services/generation.py` | Validación → caché/construcción → daño → métricas |
 | Caché | `services/cache.py` | Plantillas anteriores a grietas, copiadas antes de editar |
 | Fusión/exportación | `services/export.py` | Fuente intacta; valida componentes del sólido |
-| Ensayo físico de tabique | `services/physics.py` | Cajas en metros en escena separada; recupera IDs agrupados, rechaza solapes; sin uniones estructurales |
+| Ensayo físico de tabique | `services/physics.py` | Cajas en metros por estancia; poses aceptadas se aplican fuera de caché antes de agrupar/exportar; firma bloquea resultados obsoletos |
 | Revisión previa a física | `services/geometry_audit.py` | Auditoría de mallas y variantes; no valida contactos ni construye colisionadores |
 | Medición | `services/profiling.py` | Decorador acumulativo por etapa |
 | Propiedades guardadas | `ui/settings.py` | Mantener identificadores RNA compatibles; los nombres visibles son cortos y el detalle va en `description` |

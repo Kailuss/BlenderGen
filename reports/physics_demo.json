@@ -1,0 +1,17 @@
+{
+  "scenes": [
+    "00 REPRODUCIR - Espacio para ver la ca\u00edda",
+    "01 CASA CON TEJADO - detalle completo",
+    "02 CASA EDITABLE - piezas y da\u00f1o",
+    "03 LABORATORIO - f\u00edsica recalculable"
+  ],
+  "support_removed": "0:-75.45:1:0",
+  "descendant_drop_mm": {
+    "0:-75.45:1:1": 25.32000048086047,
+    "0:-75.45:1:2": 37.37360378727317
+  },
+  "frames": 120,
+  "animation_baked_to_keyframes": true,
+  "source_unchanged": true,
+  "replay_modules": 32
+}

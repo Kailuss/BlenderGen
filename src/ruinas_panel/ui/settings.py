@@ -11,6 +11,8 @@ import bpy
 
 
 class RuinSettings(bpy.types.PropertyGroup):
+    physics_target: EnumProperty(name='Zona de física',items=[('PARTITION','Primer tabique','Ensayo libre de un tabique'),('ROOM1','Estancia 1','Tabiques junto a la primera estancia del plano'),('ROOM2','Estancia 2','Tabiques junto a la segunda estancia del plano'),('ROOM3','Estancia 3','Tabiques junto a la tercera estancia o distribuidor')],default='PARTITION')
+    physics_frames: IntProperty(name='Fotogramas',default=120,min=24,max=240)
     interior_layout: EnumProperty(name='Habitaciones',items=[('OPEN','Planta abierta','Sin tabiques interiores'),('TWO','Dos estancias','Estancia de acceso y habitación trasera'),('THREE','Tres estancias','Dos cuartos conectados mediante distribuidor trasero')],default='OPEN')
     damage_enabled: BoolProperty(name='Activar daño',description='Desactiva derrumbes, agujeros, roturas, desgaste y escombros sin borrar sus ajustes; independiente de la calidad',default=True)
     hole_seed: IntProperty(name='Distribución de agujeros',description='Semilla independiente del bloqueo del aparejo; cambia la colocación en todas las paredes',default=0,min=0,max=999999)

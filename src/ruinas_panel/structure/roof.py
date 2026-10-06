@@ -3,7 +3,7 @@ import math
 import random
 import bmesh
 from .. import meta
-from ..geometry import primitives,timber
+from ..geometry import primitives,timber,plaster
 from . import openings,spatial,roof_damage,roof_accessories
 
 
@@ -34,7 +34,7 @@ def roof_segments(a,b,fixed,patches,axis,chimney=None,clearance=2):
 
 
 def gable(coll,p,wood,xa,xb,xm,y,z,rise,index,chimney=None):
-    'IA: Hastial grueso retranqueado tras montantes y riostras; sigue los pares y deja la reserva de chimenea sin booleanos.'
+    'IA: Hastial de cal rugosa con relieve real de .28 mm, retranqueado tras entramado; contorno de pares y reserva de chimenea cerrados sin booleanos.'
     mat=primitives.material('Revoco · cal',(.66,.60,.47))
     # Paño retranqueado respecto a la cara de madera, siguiendo exactamente su curva.
     left,right=xa+4,xb-4
@@ -47,15 +47,14 @@ def gable(coll,p,wood,xa,xb,xm,y,z,rise,index,chimney=None):
     cut_y=chimney['y'] if cuts else y
     verts=[];faces=[]
     for lo,hi in roof_segments(left,right,cut_y,(),'x',cuts,.35):
-        points=[(lo,p.height-.3),(hi,p.height-.3)]
-        samples=sorted({lo,hi,*[left+(right-left)*i/16 for i in range(17) if lo<left+(right-left)*i/16<hi]},reverse=True)
+        count=max(2,math.ceil((hi-lo)/4))
+        samples=sorted({lo,hi,*([xm] if lo<xm<hi else []),*[lo+(hi-lo)*i/count for i in range(1,count)]})
+        tops=[]
         for x in samples:
             t=(x-xa)/(xm-xa) if x<=xm else (xb-x)/(xb-xm)
-            points.append((x,spatial.roof_height(t,z,rise,p.roof_curve)-1.85))
-        n=len(points);start=len(verts)
-        verts.extend((x,face_y,h) for face_y in (min(outer,inner),max(outer,inner)) for x,h in points)
-        faces.extend([tuple(start+i for i in reversed(range(n))),tuple(start+i for i in range(n,2*n))])
-        faces.extend((start+i,start+(i+1)%n,start+(i+1)%n+n,start+i+n) for i in range(n))
+            tops.append(spatial.roof_height(t,z,rise,p.roof_curve)-1.85)
+        vv,ff=plaster.panel(samples,p.height-.3,tops,min(outer,inner),max(outer,inner),p.seed+9400+index)
+        start=len(verts);verts.extend(vv);faces.extend(tuple(start+i for i in face) for face in ff)
     ob=primitives.mesh_obj('Revoco · hastial %s'%index,verts,faces,coll,mat)
     bm=bmesh.new();bm.from_mesh(ob.data);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(ob.data);bm.free()
     ob['roof_gable']=True;ob['gable_depth_mm']=thickness
@@ -119,7 +118,9 @@ def ceramic_mesh(coll,mat,name,verts,faces,count):
     'IA: Agrupa medias cañas cerradas; una variante por pieza y cantidad explícita; no crea objetos vacíos si el daño suprime el paño.'
     if not count:return None
     ob=primitives.mesh_obj(name,verts,faces,coll,mat)
-    bm=bmesh.new();bm.from_mesh(ob.data);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(ob.data);bm.free()
+    bm=bmesh.new();bm.from_mesh(ob.data);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces))
+    for face in bm.faces:face.smooth=abs(face.normal.y)>.8
+    bm.to_mesh(ob.data);bm.free()
     from ..geometry import surfaces
     for k in range(5):ob.data.materials.append(surfaces.variant(mat,k))
     for face in ob.data.polygons:

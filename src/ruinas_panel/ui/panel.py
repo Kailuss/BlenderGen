@@ -33,7 +33,7 @@ def status_icon(status):
 
 
 class RUIN_PT_panel(bpy.types.Panel):
-    bl_label = 'Ruinas · v0.32.3'
+    bl_label = 'Ruinas · v0.32.4'
     bl_idname = 'RUIN_PT_panel'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -47,10 +47,18 @@ class RUIN_PT_panel(bpy.types.Panel):
     def draw(self, context):
         'IA: Acciones, estado y semilla arriba; no generes ni modifiques geometría desde el panel.'
         layout = self.layout
+        if context.scene.get('ruinas_replay'):
+            layout.label(text='Demostración calculada · pulsa Espacio')
+            layout.label(text='Fotogramas 1 → 120 · apoyo rojo')
+            layout.label(text='Cambia de etapa en el selector de escena')
+            layout.operator('ruin.physics_return',icon='BACK')
+            return
         if context.scene.get('ruinas_physics_lab'):
-            layout.label(text='Ensayo: piezas sueltas del primer tabique')
-            layout.label(text='Reproduce la animación (120 fotogramas)')
-            layout.label(text='Sin uniones estructurales todavía')
+            layout.label(text='Física · '+context.scene.get('physics_room','tabique'))
+            layout.label(text='Solo tabiques y suelo; revisa contactos')
+            layout.operator('ruin.physics_release',icon='RIGID_BODY')
+            layout.operator('ruin.physics_simulate',icon='PLAY')
+            layout.operator('ruin.physics_accept',icon='CHECKMARK')
             layout.operator('ruin.physics_return',icon='BACK')
             return
         p = context.scene.ruin_settings
@@ -108,7 +116,7 @@ def section_panel(index, section):
 
     def poll(cls,context):
         'IA: Los controles de generación pertenecen a la casa, no a la escena aislada de ensayo físico.'
-        return not context.scene.get('ruinas_physics_lab',False)
+        return not (context.scene.get('ruinas_physics_lab',False) or context.scene.get('ruinas_replay',False))
 
     def draw_header(self, context):
         'IA: Casilla que activa el bloque, dibujada en la cabecera del subpanel.'
@@ -142,7 +150,13 @@ def section_panel(index, section):
         if section['id'] == 'build':
             col.label(text='Grosor %.0f mm · altura %.0f mm' % (config.BUILD_TYPES[p.build_type][0], config.HEIGHT_TYPES[p.height_type]))
         if section['id']=='layout':
+            col.prop(p,'physics_target')
+            col.prop(p,'physics_frames')
             col.operator('ruin.physics_lab',icon='PHYSICS')
+            result=parsed(meta.raw(context.scene,'physics_result') or '{}',{})
+            if result:
+                col.label(text='Física aceptada · '+result['room'],icon='CHECKMARK')
+                col.operator('ruin.physics_clear')
             if p.layout_mode!='ROOM':col.label(text='Habitaciones: requiere cuatro paredes',icon='INFO')
             elif p.height_type=='RUIN':col.label(text='Habitaciones: requiere al menos una planta',icon='INFO')
             plan=parsed(meta.raw(context.scene,'plano_interior') or '{}',{})

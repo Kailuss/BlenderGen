@@ -1,5 +1,13 @@
 # Estado del proyecto
 
+## v0.32.4 — 2026-10-06
+
+Relieve geométrico de madera y cal; física por estancia con aceptación de poses
+antes de exportar. Ejemplo completo reabierto y STL reimportado, ambos validados.
+Alcance limitado a tabiques y suelo plano: [V0324.md](V0324.md).
+Entrega: `dist/ruinas_v0324_proceso_completo.blend`.
+
+
 ## v0.32.3 — 2026-10-06
 
 Corregidos el grosor real del perfil Tabique, la variación ignorada en muros

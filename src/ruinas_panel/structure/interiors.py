@@ -19,10 +19,10 @@ def wood_panel(coll,mat,part,a,b,z0,z1,grain,seed):
             for i in range(nx+1):
                 u=i/nx;along=a+(b-a)*u;board=min(boards-1,i//6);local=(i%6)/6
                 phase=phases[board]+(0 if side<0 else .7)
-                seam=.18 if i%6==0 and 0<i<nx else 0
+                seam=.32 if i%6==0 and 0<i<nx else 0
                 fiber=max(0,math.cos(local*math.tau*2+.25*math.sin(t*9+phase)))**6
                 knot=math.exp(-((local-.5)/.22)**2-((t-.45-.15*math.sin(phase))/.13)**2)
-                relief=min(.35,seam+grain*(.14*fiber+.12*knot))
+                relief=min(.35,seam+grain*(.30*fiber+.20*knot))
                 cross=part['fixed']+side*(1.5-relief)
                 verts.append((along,cross,z) if part['axis']=='x' else (cross,along,z))
                 uvs.append((u*boards,(z-z0)/8))
