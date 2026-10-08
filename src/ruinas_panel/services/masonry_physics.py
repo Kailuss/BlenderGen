@@ -1,4 +1,4 @@
-"""Ensayo acotado de mampostería seca: contacto y gravedad, sin resortes."""
+"""Ensayo acotado de mampostería seca: contacto y gravedad, con juntas rompibles."""
 import math
 import bpy
 from .. import config,runtime
@@ -10,7 +10,7 @@ def prepare(source):
     p=source.ruin_settings
     scene=bpy.data.scenes.new('LAB · ladrillos '+p.physics_masonry_shape)
     scene['ruinas_physics_lab']=True;scene['structural_physics']=True;scene['masonry_lab']=True
-    scene['source_scene']=source.name;scene['physics_room']='mampostería seca'
+    scene['source_scene']=source.name;scene['physics_room']='mampostería con cohesión'
     scene.unit_settings.system='METRIC';scene.unit_settings.length_unit='MILLIMETERS'
     scene.frame_end=p.physics_frames
     mat=bpy.data.materials.new('Piedra · ensayo');mat.diffuse_color=(.48,.32,.20,1)
@@ -30,10 +30,19 @@ def prepare(source):
         ob=physics.body(scene,'Ladrillo %03d'%index,(x-hx,y-hy,z-2.98),(x+hx,y+hy,z+2.98),True)
         ob['masonry_brick']=True;ob['course']=int(z//6)
         ob.rigid_body.mass=11.96*5.96*5.96*1e-9*2200*config.PHYSICS_MASS_SCALE
-        ob.rigid_body.friction=.65;ob.data.materials.append(mat)
+        ob.rigid_body.friction=1;ob.data.materials.append(mat)
         bevel=ob.modifiers.new('Aristas de piedra','BEVEL');bevel.width=.00015;bevel.segments=1
     floor=physics.body(scene,'Suelo de colisión',(-500,-500,-5),(500,500,0),False)
     floor['collision_floor']=True
+    from . import structural_physics
+    scene.view_layers[0].update()
+    bricks=[o for o in scene.objects if o.get('masonry_brick')]
+    template=None
+    for index,a in enumerate(bricks):
+        for b in bricks[index+1:]:
+            delta=b.location-a.location;limits=(a.dimensions+b.dimensions)*.5
+            if all(abs(delta[k])<=limits[k]+.00006 for k in range(3)):
+                template=structural_physics.joint(scene,a,b,(a.location+b.location)*500,2,template)
     scene['brick_count']=len(poses)
     world=scene.rigidbody_world;world.substeps_per_frame=20;world.solver_iterations=40;world.time_scale=.3
     world.point_cache.frame_end=scene.frame_end
@@ -47,6 +56,9 @@ def remove_selected(scene,objects):
     chosen=[o for o in objects if o.name in scene.objects and o.get('masonry_brick')]
     if not chosen:raise ValueError('Selecciona varios ladrillos con Mayús o B; el suelo está protegido.')
     scene.frame_set(1)
+    for ob in list(scene.objects):
+        c=ob.rigid_body_constraint
+        if c and (c.object1 in chosen or c.object2 in chosen):bpy.data.objects.remove(ob,do_unlink=True)
     for ob in chosen:bpy.data.objects.remove(ob,do_unlink=True)
     scene['brick_count']=sum(bool(o.get('masonry_brick')) for o in scene.objects)
     scene['physics_simulated']=0;runtime.physics_simulations.discard(scene.as_pointer())
@@ -65,6 +77,6 @@ def impactor(scene):
         bpy.ops.rigidbody.object_add(type='ACTIVE')
     ob.name='Piedra de impacto';ob['impactor']=True
     rb=ob.rigid_body;rb.collision_shape='SPHERE';rb.mass=4/3*math.pi*.018**3*2200*config.PHYSICS_MASS_SCALE
-    rb.friction=.65;rb.restitution=0;rb.use_margin=True;rb.collision_margin=.00001
+    rb.friction=1;rb.restitution=0;rb.use_margin=True;rb.collision_margin=.00001
     scene['physics_simulated']=0;runtime.physics_simulations.discard(scene.as_pointer())
     return ob

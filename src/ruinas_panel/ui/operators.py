@@ -40,6 +40,7 @@ class RUIN_OT_generate(bpy.types.Operator):
         preview.cancel_pending()
         try:
             preview.update_preview(context)
+            configure_view(context)
         except Exception as exc:
             return fail(self,context,exc)
         return {'FINISHED'}
@@ -61,14 +62,34 @@ class RUIN_OT_solid(bpy.types.Operator):
         return {'FINISHED'}
 
 
-def frame_view(context):
-    'IA: Reencuadra al cambiar entre casa en mm y ensayo en metros, evitando volver con una vista mil veces menor.'
+def configure_view(context):
+    'IA: Ajusta recorte a las coordenadas mm del generador o metros del laboratorio; evita pérdida de precisión del búfer de profundidad.'
     if context.screen is None:return
+    from mathutils import Vector
+    physical=context.scene.get('ruinas_physics_lab') or context.scene.get('ruinas_replay')
+    points=[o.matrix_world@Vector(v) for o in context.scene.objects if o.type=='MESH' and not o.get('collision_floor') for v in o.bound_box]
+    span=max((max(v[k] for v in points)-min(v[k] for v in points) for k in range(3)),default=.2 if physical else 200)
+    span=max(span,.01 if physical else 10)
     for area in context.screen.areas:
         if area.type=='VIEW_3D':
-            region=next((r for r in area.regions if r.type=='WINDOW'),None)
-            if region:
-                with context.temp_override(area=area,region=region):bpy.ops.view3d.view_all(center=True)
+            space=area.spaces.active
+            space.clip_start=span/2000
+            space.clip_end=max(span*100,space.region_3d.view_distance*4)
+
+
+
+def frame_view(context):
+    'IA: Reencuadra al cambiar entre casa en mm y ensayo en metros, evitando volver con una vista mil veces menor.'
+    from mathutils import Vector
+    if context.screen is None:return
+    points=[o.matrix_world@Vector(v) for o in context.scene.objects if o.type=='MESH' and not o.get('collision_floor') for v in o.bound_box]
+    if points:
+        lo=Vector([min(v[k] for v in points) for k in range(3)]);hi=Vector([max(v[k] for v in points) for k in range(3)])
+        for area in context.screen.areas:
+            if area.type=='VIEW_3D':
+                view=area.spaces.active.region_3d;view.view_location=(lo+hi)/2;view.view_distance=max((hi-lo).length*1.6,.001)
+    configure_view(context)
+
 
 
 class RUIN_OT_physics_return(bpy.types.Operator):
@@ -85,7 +106,7 @@ class RUIN_OT_physics_return(bpy.types.Operator):
 
 class RUIN_OT_physics(bpy.types.Operator):
     bl_idname='ruin.physics_lab'
-    bl_label='Preparar física de la zona'
+    bl_label='Preparar casa diseñada / zona'
     bl_description='Prepara el edificio completo sin mortero o el ensayo antiguo de tabiques; conserva la fuente'
     bl_options={'REGISTER','UNDO'}
     poll=classmethod(ready)
@@ -94,7 +115,8 @@ class RUIN_OT_physics(bpy.types.Operator):
         from ..services import physics
         preview.cancel_pending()
         try:
-            if context.scene.ruin_settings.physics_target!='MASONRY' and preview.stale_preview(context.scene):preview.update_preview(context)
+            if context.scene.ruin_settings.physics_target=='MASONRY':context.scene.ruin_settings.physics_target='BUILDING'
+            if preview.stale_preview(context.scene):preview.update_preview(context)
             scene=physics.prepare(context.scene)
         except Exception as exc:return fail(self,context,exc)
         context.window.scene=scene
@@ -234,8 +256,8 @@ class RUIN_OT_masonry_impact(bpy.types.Operator):
     bl_options={'REGISTER','UNDO'}
     def execute(self,context):
         'IA: Añade un proyectil de gravedad al laboratorio acotado.'
-        from ..services import masonry_physics
-        try:masonry_physics.impactor(context.scene)
+        from ..services import impact_physics
+        try:impact_physics.launch(context.scene,context.selected_objects)
         except Exception as exc:return fail(self,context,exc)
         return {'FINISHED'}
 
@@ -248,4 +270,42 @@ class RUIN_OT_physics_edit(bpy.types.Operator):
         scene=bpy.data.scenes.get(context.scene.get('lab_scene',''))
         if scene is None:return {'CANCELLED'}
         context.window.scene=scene;scene.frame_set(1);frame_view(context)
+        return {'FINISHED'}
+
+
+class RUIN_OT_physics_demo(bpy.types.Operator):
+    bl_idname='ruin.physics_demo'
+    bl_label='Crear ejemplo aislado (no usa la casa)'
+    bl_options={'REGISTER','UNDO'}
+    poll=classmethod(ready)
+    def execute(self,context):
+        'IA: El ejemplo solo se crea con esta acción explícita; nunca sustituye una casa al prepararla.'
+        from ..services import masonry_physics
+        try:scene=masonry_physics.prepare(context.scene)
+        except Exception as exc:return fail(self,context,exc)
+        context.window.scene=scene;frame_view(context)
+        return {'FINISHED'}
+
+
+class RUIN_OT_physics_fracture(bpy.types.Operator):
+    bl_idname='ruin.physics_fracture'
+    bl_label='Preparar rotura de ladrillos seleccionados'
+    bl_options={'REGISTER','UNDO'}
+    def execute(self,context):
+        'IA: Prefractura varias piedras del laboratorio con juntas rompibles y conserva la casa original.'
+        from ..services import impact_physics
+        try:impact_physics.fracture(context.scene,context.selected_objects)
+        except Exception as exc:return fail(self,context,exc)
+        return {'FINISHED'}
+
+
+class RUIN_OT_physics_limit(bpy.types.Operator):
+    bl_idname='ruin.physics_limit'
+    bl_label='Simular solo la selección; resto como soporte'
+    bl_options={'REGISTER','UNDO'}
+    def execute(self,context):
+        'IA: Acota los cuerpos móviles conservando toda la casa visible y colisionable.'
+        from ..services import impact_physics
+        try:impact_physics.limit_to_selection(context.scene,context.selected_objects)
+        except Exception as exc:return fail(self,context,exc)
         return {'FINISHED'}

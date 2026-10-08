@@ -33,7 +33,7 @@ def status_icon(status):
 
 
 class RUIN_PT_panel(bpy.types.Panel):
-    bl_label = 'Ruinas · v0.32.6'
+    bl_label = 'Ruinas · v0.32.7'
     bl_idname = 'RUIN_PT_panel'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -60,13 +60,21 @@ class RUIN_PT_panel(bpy.types.Panel):
             layout.label(text='Edificio sin mortero · experimental' if structural else 'Ensayo antiguo: solo tabiques')
             if structural:
                 report=parsed(context.scene.get('preparation_report','{}'),{})
-                layout.label(text='%s piezas · %s uniones'%(report.get('bodies',context.scene.get('brick_count',0)),report.get('constraints',0)))
+                layout.label(text='%s cuerpos móviles · %s uniones'%(sum(bool(o.rigid_body and o.rigid_body.type=='ACTIVE') for o in context.scene.objects),sum(o.rigid_body_constraint is not None for o in context.scene.objects)))
                 if report.get('unconnected'):layout.label(text='%s piezas sin unión inicial'%len(report['unconnected']),icon='ERROR')
             if context.scene.get('masonry_lab'):
-                layout.label(text='Todos los ladrillos activos · sin uniones')
+                layout.label(text='Ladrillos activos · juntas rompibles')
                 layout.operator('ruin.masonry_remove')
-                layout.operator('ruin.masonry_impact')
+
             else:layout.operator('ruin.physics_release',text='Soltar uniones seleccionadas' if structural else 'Retirar apoyo (ensayo antiguo)',icon='RIGID_BODY')
+            if structural:
+                p=context.scene.ruin_settings
+                layout.prop(p,'physics_brick_limit');layout.operator('ruin.physics_limit')
+                layout.prop(p,'fracture_strength');layout.operator('ruin.physics_fracture')
+                layout.prop(p,'impact_direction');layout.prop(p,'impact_speed')
+                layout.prop(p,'impact_radius');layout.prop(p,'impact_mass');layout.prop(p,'impact_mode')
+                layout.operator('ruin.masonry_impact',text='Añadir impacto dirigido')
+                layout.label(text='Apunta a la selección; sin selección, al edificio')
             layout.operator('ruin.physics_simulate',icon='PLAY')
             if not structural:layout.operator('ruin.physics_accept',icon='CHECKMARK')
             else:layout.label(text='Exportación con mortero aún no disponible')
@@ -167,6 +175,7 @@ def section_panel(index, section):
                 col.prop(p,'physics_brick_limit');col.prop(p,'physics_masonry_shape')
             if p.physics_target=='BUILDING':col.prop(p,'physics_strength')
             col.operator('ruin.physics_lab',icon='PHYSICS')
+            col.operator('ruin.physics_demo')
             result=parsed(meta.raw(context.scene,'physics_result') or '{}',{})
             if result:
                 col.label(text='Física aceptada · '+result['room'],icon='CHECKMARK')

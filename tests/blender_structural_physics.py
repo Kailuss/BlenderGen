@@ -24,7 +24,7 @@ def run():
     lab=physics.prepare(source);lab.name='02 LABORATORIO ESTRUCTURAL';bpy.context.window.scene=lab
     assert digest(coll)==before;report=json.loads(lab['preparation_report'])
     assert report['binder_excluded'] and report['roles']['tile'] and report['roles']['wood'] and report['roles']['stone']
-    bodies=[o for o in lab.objects if o.rigid_body];assert all(o.rigid_body.collision_shape=='MESH' for o in bodies)
+    bodies=[o for o in lab.objects if o.rigid_body and not o.get('collision_floor')];assert all(o.rigid_body.collision_shape=='MESH' for o in bodies)
     assert all(o.rigid_body_constraint.type=='FIXED' for o in lab.objects if o.rigid_body_constraint)
     report['source_unchanged']=True
     (ROOT/'reports/structural_physics.json').write_text(json.dumps(report,indent=2,ensure_ascii=False),encoding='utf8')

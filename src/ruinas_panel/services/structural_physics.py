@@ -164,15 +164,22 @@ def resolve(objects,report):
         if not target.data.polygons:
             removed.add(target);report['covered_pieces_removed']+=1;bpy.data.meshes.remove(backup);continue
         after=valid(target.data)
-        if not after:
+        if not after or after>before+max(.001,before*.0001):
             failed=target.data;target.data=backup.copy();bpy.data.meshes.remove(failed)
             mod=target.modifiers.new('Encaje exacto para física','BOOLEAN');mod.operation='DIFFERENCE';mod.solver='EXACT';mod.object=cutter
             primitives.apply_modifier(target,mod,cutter)
             primitives.repair_precision(target);after=valid(target.data)
+            if not target.data.polygons:
+                removed.add(target);report['covered_pieces_removed']+=1;bpy.data.meshes.remove(backup);continue
         if not after or after>before+max(.001,before*.0001):
             print('INVALID_JOINT',target.name,cutter.name,before,after,flush=True)
             failed=target.data;target.data=backup;bpy.data.meshes.remove(failed)
             raise ValueError('Encaje no válido entre '+target['source_piece']+' y '+cutter['source_piece'])
+        if after<config.PHYSICS_RESIDUE_MAX_VOLUME and before-after>max(1e-5,before*1e-7):
+            area=sum(p.area for p in target.data.polygons)
+            if area and 2*after/area<config.PHYSICS_RESIDUE_MAX_THICKNESS:
+                removed.add(target)
+                report.setdefault('thin_residues_removed',[]).append({'piece':target['source_piece'],'volume_mm3':after,'effective_thickness_mm':2*after/area})
         if before-after>max(1e-5,before*1e-7):report['joints_cut']+=1
         bpy.data.meshes.remove(backup)
     remaining=[o for o in objects if o not in removed]
@@ -191,7 +198,7 @@ def rigid(scene,ob):
         with bpy.context.temp_override(scene=scene,view_layer=scene.view_layers[0],object=ob,active_object=ob,selected_objects=[ob],selected_editable_objects=[ob]):
             bpy.ops.rigidbody.object_add(type='ACTIVE')
     rb=ob.rigid_body;rb.type='PASSIVE' if static else 'ACTIVE';rb.collision_shape='MESH';rb.mesh_source='BASE';rb.use_margin=True;rb.collision_margin=0
-    rb.mass=max(.001,volume*1e-9*density*config.PHYSICS_MASS_SCALE);rb.friction=.7;rb.restitution=0
+    rb.mass=max(.001,volume*1e-9*density*config.PHYSICS_MASS_SCALE);rb.friction=1;rb.restitution=0;rb.angular_damping=.5
     ob['initial_matrix']=json.dumps([list(r) for r in ob.matrix_world])
 
 
@@ -250,7 +257,13 @@ def prepare(source_scene):
         if not objects:raise ValueError('No hay piezas físicas en la fuente.')
         with bpy.context.temp_override(scene=scene,view_layer=scene.view_layers[0],object=objects[0],active_object=objects[0],selected_objects=objects,selected_editable_objects=objects):
             bpy.ops.rigidbody.objects_add(type='ACTIVE')
+        extent=[bounds(o) for o in objects]
         for ob in objects:rigid(scene,ob)
+        lo=[min(b[0][k] for b in extent) for k in range(3)];hi=[max(b[1][k] for b in extent) for k in range(3)]
+        margin=max(100,hi[2]-lo[2])*3
+        floor=physics.body(scene,'Suelo de seguridad',(lo[0]-margin,lo[1]-margin,lo[2]-5),(hi[0]+margin,hi[1]+margin,lo[2]-.02),False)
+        floor['collision_floor']=True;floor['physical_role']='ground';floor['source_piece']='Suelo de seguridad'
+        objects.append(floor)
         template=None
         for a,b,point in contacts:
             if a.rigid_body.type==b.rigid_body.type=='PASSIVE':continue

@@ -147,6 +147,8 @@ def update_preview(context, quality=None):
         target=quality or context.scene.ruin_settings.preview_quality
         with ProgressCursor(context,target):
             generation.generate(context,context.scene.ruin_settings,quality,preferences.value('scene_units',True))
+        from .operators import configure_view
+        configure_view(context)
         elapsed=time.perf_counter()-start
         runtime.durations[runtime.quality]=elapsed
         context.scene.ruin_settings.status='Vista '+(runtime.quality.lower())+' · %.2f s'%elapsed

@@ -84,3 +84,5 @@ La API de `__init__.py` carga servicios de Blender al llamarlos. Por eso `config
 El índice se calcula desde AST sin importar Blender y sin un archivo duplicado que pueda quedar desactualizado.
 
 El laboratorio acotado vive en `services/masonry_physics.py`: piezas activas independientes, colisiones primitivas, retirada múltiple, suelo y proyectil. No consume ni modifica la geometría de la casa. Los controles se guardan en RNA y no afectan la caché de generación.
+
+`services/impact_physics.py` controla lanzamiento, empuje y prefractura del laboratorio en metros. No modifica geometría fuente ni depende de UI. `ui/operators.configure_view` y `frame_view` ajustan recorte y encuadre según cotas de la escena, excluyendo el suelo de seguridad.

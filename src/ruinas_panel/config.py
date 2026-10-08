@@ -152,3 +152,7 @@ EXPANDED_ENUMS=('extra_side','window_facing')
 FULL_WIDTH_ENUMS=('build_type','height_type')
 
 CACHE_METADATA=CACHE_METADATA+('cubierta_roturas','chimeneas_generadas','bajantes_generadas','escombros_cubierta')
+
+# Solo residuos posteriores a recortes físicos: no filtra piezas originales.
+PHYSICS_RESIDUE_MAX_VOLUME=1.0
+PHYSICS_RESIDUE_MAX_THICKNESS=.01

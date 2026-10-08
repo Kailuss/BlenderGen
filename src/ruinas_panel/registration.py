@@ -20,7 +20,7 @@ for _field in config.FIELDS:
 
 CLASSES=(preferences.RuinPreferences,settings.RuinSettings,operators.RUIN_OT_generate,operators.RUIN_OT_solid,operators.RUIN_OT_seed,
          operators.RUIN_OT_holes,operators.RUIN_OT_reset,operators.RUIN_OT_physics,operators.RUIN_OT_physics_return,
-         operators.RUIN_OT_physics_simulate,operators.RUIN_OT_physics_accept,operators.RUIN_OT_physics_clear,operators.RUIN_OT_physics_release,operators.RUIN_OT_masonry_remove,operators.RUIN_OT_masonry_impact,operators.RUIN_OT_physics_edit,panel.RUIN_PT_panel)+panel.SUBPANELS
+         operators.RUIN_OT_physics_simulate,operators.RUIN_OT_physics_accept,operators.RUIN_OT_physics_clear,operators.RUIN_OT_physics_release,operators.RUIN_OT_masonry_remove,operators.RUIN_OT_masonry_impact,operators.RUIN_OT_physics_edit,operators.RUIN_OT_physics_demo,operators.RUIN_OT_physics_fracture,operators.RUIN_OT_physics_limit,panel.RUIN_PT_panel)+panel.SUBPANELS
 
 
 @persistent

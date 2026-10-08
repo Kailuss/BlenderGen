@@ -24,7 +24,7 @@ def run():
         else:masonry.impactor(lab)
         objects=[o for o in lab.objects if o.type=='MESH'];bricks=[o for o in objects if o.get('masonry_brick')]
         assert len(bricks)<=96 and all(o.rigid_body.type=='ACTIVE' for o in bricks)
-        assert not any(o.rigid_body_constraint for o in lab.objects)
+        assert any(o.rigid_body_constraint for o in lab.objects)
         poses=[];started=time.perf_counter()
         for frame in range(1,121):
             lab.frame_set(frame);deps=bpy.context.evaluated_depsgraph_get()

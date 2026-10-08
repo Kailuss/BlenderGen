@@ -15,7 +15,7 @@ físico todavía no se convierte automáticamente en un sólido imprimible.
 
 ## Usarlo en Blender
 
-**Uso normal:** guía completa en [USERGUIDE.md](USERGUIDE.md). En resumen: instala `dist/ruinas_panel_v0325.zip` desde Preferencias → Complementos → Instalar desde disco, actívalo y abre Vista 3D → N → Ruinas. Puedes abrir un .blend de v0.20: conserva los campos guardados. No ejecutes su antiguo `generador_muro.py`, porque volvería a registrar la versión anterior.
+**Uso normal:** guía completa en [USERGUIDE.md](USERGUIDE.md). En resumen: instala `dist/ruinas_panel_v0327.zip` desde Preferencias → Complementos → Instalar desde disco, actívalo y abre Vista 3D → N → Ruinas. Puedes abrir un .blend de v0.20: conserva los campos guardados. No ejecutes su antiguo `generador_muro.py`, porque volvería a registrar la versión anterior.
 
 **Desarrollo:** abre `tools/load_in_blender.py` como archivo en el editor de texto de Blender y pulsa Ejecutar script. Repite tras editar un módulo: limpia callbacks y caché, recarga el paquete y mantiene los parámetros guardados. No es necesario volver a empaquetar ni reiniciar Blender. Usa solo una copia del addon activa.
 
@@ -69,3 +69,5 @@ La instalación de habilidades y la carga gradual de instrucciones están descri
 Esta reorganización reduce búsquedas, contexto repetido y pasos manuales de edición. No garantiza un porcentaje de ahorro de tokens ni acelera por sí sola los operadores de Blender. `docs/ARCHITECTURE.md` permite localizar el cambio y `docs/STATUS.md` recoge limitaciones actuales. El aumento de resolución sigue siendo una decisión explícita; la prioridad es lowpoly.
 
 Ensayo de ladrillos 0.32.6: [manual de impacto, selección múltiple y huecos](docs/MANUAL_LADRILLOS.md). Entrega local en `dist/ruinas_v0326_completo.zip`.
+
+La v0.32.7 corrige la vista entre escalas y el traslado de la casa; añade impactos dirigidos, empuje y prefractura con juntas rompibles. [Manual de impactos](docs/MANUAL_IMPACTOS.md). Entrega: `dist/ruinas_v0327_completo.zip`.

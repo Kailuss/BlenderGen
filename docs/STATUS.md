@@ -146,3 +146,9 @@ Las pruebas de migración están en `reports/`; los resultados históricos de ci
 ## 0.32.6 — 8 de octubre de 2026
 
 Ensayo acotado de mampostería seca: muro/torre, hasta 256 ladrillos activos independientes, retirada múltiple y piedra bajo gravedad, con suelo pasivo. Archivo reproducible y manual en docs/MANUAL_LADRILLOS.md. Corrige selección múltiple de uniones en el laboratorio estructural anterior. El ensayo acotado todavía no extrae zonas de la casa ni fractura internamente los ladrillos; no reconstruye mortero imprimible. Validación: tests/blender_masonry_physics.py y blender_masonry_reopen.py, además de las regresiones existentes.
+
+## 0.32.7 — 9 de octubre de 2026
+
+Corrección de recorte y encuadre al pasar entre generador en mm y laboratorio en metros. Preparar casa deja de crear inadvertidamente el ejemplo; este tiene botón independiente. Impactos múltiples dirigidos y empuje cinemático, suelo de seguridad bajo la casa, zona móvil limitada por selección y prefractura acotada de piedras con juntas rompibles. La prefractura usa dos mitades oblicuas, no fractura adaptativa. El empuje prescribe movimiento, no fuerza calibrada. Aún sin reconstrucción imprimible del mortero. Manual: docs/MANUAL_IMPACTOS.md.
+
+Validación 0.32.7: casa completa de 1.549 cuerpos tras preparar 16 ladrillos en 32 fragmentos; 29 fragmentos se desplazan en el impacto calculado, fuente intacta. Reapertura sin autorun y auditoría de cierre de todas las mallas del laboratorio. Vista de la casa: distancia 332 unidades mm, recorte adaptativo; laboratorio: distancia 0,378 m. Prueba pequeña de cohesión: deriva 0,021 mm en reposo y separación tras impacto. El cálculo de la zona acotada tarda unos 77 s en esta máquina. Dos residuos del tejado (0,200 y 0,049 mm³, espesor equivalente inferior a 0,01 mm) se excluyen de las copias físicas tras recortes.

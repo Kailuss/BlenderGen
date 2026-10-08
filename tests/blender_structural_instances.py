@@ -15,7 +15,9 @@ def run():
     source=bpy.context.scene;p=source.ruin_settings;p.live_preview=False;p.length=80;p.height_type='RUIN';p.layout_mode='NONE'
     p.damage_enabled=False;p.use_instances=True;p.batch_preview=True;p.roof_frame=False;p.door_enabled=False;p.windows_enabled=False
     coll=addon.generate(bpy.context,p,'WORK');assert any(o.get('ruin_instances') for o in coll.objects)
-    initial=digest(coll);lab=structural_physics.prepare(source);assert digest(coll)==initial
+    initial=digest(coll);p.physics_target='MASONRY'
+    assert bpy.ops.ruin.physics_lab()=={'FINISHED'}
+    lab=bpy.context.scene;assert not lab.get('masonry_lab') and p.physics_target=='BUILDING';assert digest(coll)==initial
     report=json.loads(lab['preparation_report']);assert report['roles']['stone']>20 and report['binder_excluded']>0
     assert all(o.get('source_piece') for o in lab.objects if o.rigid_body)
     print('STRUCTURAL_INSTANCES_PASSED',report,flush=True)
