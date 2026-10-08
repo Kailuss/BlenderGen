@@ -86,7 +86,7 @@ class RUIN_OT_physics_return(bpy.types.Operator):
 class RUIN_OT_physics(bpy.types.Operator):
     bl_idname='ruin.physics_lab'
     bl_label='Preparar física de la zona'
-    bl_description='Prepara tabiques de la estancia elegida con el daño actual; simula y revisa antes de aceptar para exportación'
+    bl_description='Prepara el edificio completo sin mortero o el ensayo antiguo de tabiques; conserva la fuente'
     bl_options={'REGISTER','UNDO'}
     poll=classmethod(ready)
     def execute(self,context):
@@ -99,17 +99,17 @@ class RUIN_OT_physics(bpy.types.Operator):
         except Exception as exc:return fail(self,context,exc)
         context.window.scene=scene
         frame_view(context)
-        self.report({'INFO'},'Zona preparada: simula y revisa antes de aceptar. La casa permanece en su escena original.')
+        self.report({'INFO'},'Laboratorio preparado. La casa permanece en su escena original; consulta los límites en el panel.')
         return {'FINISHED'}
 
 
 class RUIN_OT_physics_release(bpy.types.Operator):
     bl_idname='ruin.physics_release'
     bl_label='Retirar apoyo seleccionado (ensayo)'
-    bl_description='Prueba controlada: desplaza una sección de base y permite que las de encima caigan por gravedad'
+    bl_description='En el edificio completo suelta las uniones sin mover la pieza; el ensayo antiguo retira una sección de base'
     bl_options={'REGISTER','UNDO'}
     def execute(self,context):
-        'IA: Programa una retirada de apoyo solicitada explícitamente desde el ensayo, nunca durante generación normal.'
+        'IA: Solicita soltar uniones en estructura completa o retirar apoyo en el ensayo antiguo; nunca altera la generación normal.'
         from ..services import physics
         try:physics.release_support(context.scene,context.active_object)
         except Exception as exc:return fail(self,context,exc)

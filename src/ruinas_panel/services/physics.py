@@ -11,7 +11,7 @@ def signature(p):
     'IA: Firma del modelo para no reaplicar poses a otras semillas o dimensiones; opciones de calidad y presentación no invalidan los IDs de tabique.'
     ignored={'preview_quality','export_quality','quick_edit','batch_preview','microdetail_preview','use_instances','export_density'}
     values={k:getattr(p,k) for k in config.FIELDS if k not in ignored}
-    values.update(lock_distribution=p.lock_distribution,distribution_seed=p.distribution_seed)
+    values.update(lock_distribution=p.lock_distribution,distribution_seed=p.distribution_seed,physics_schema=2)
     return hashlib.sha256(json.dumps(values,sort_keys=True).encode()).hexdigest()
 
 
@@ -27,6 +27,9 @@ def sections(coll):
         for rec in records:
             tags=rec.get('partition',{})
             if not tags:continue
+            # El laboratorio antiguo solo conoce paneles; el nuevo simula
+            # también travesaños y el resto del edificio con contactos reales.
+            if ':rail' in tags['partition_section']:continue
             points=[ob.matrix_world@v.co for v in ob.data.vertices[rec['vertex_start']:rec['vertex_start']+rec['vertex_count']]]
             result.append({'id':tags['partition_section'],'support':tags['rests_on'],'partition':tags.get('partition_id',int(tags['partition_section'].split(':')[0])),
                            'lo':[min(v[i] for v in points) for i in range(3)],'hi':[max(v[i] for v in points) for i in range(3)]})
@@ -48,8 +51,11 @@ def body(scene,name,lo,hi,active):
 
 
 def prepare(source_scene):
-    'IA: Ensayo separado del primer tabique o de los tabiques de una estancia; daño libera columnas y sus descendientes, sin simular mampostería ni tejado.'
+    'IA: BUILDING delega el edificio completo; las opciones heredadas preparan cajas de tabiques por estancia, sin mampostería ni tejado.'
     p=source_scene.ruin_settings;target=p.physics_target
+    if target=='BUILDING':
+        from . import structural_physics
+        return structural_physics.prepare(source_scene)
     if meta.get(source_scene,'physics_result',{}):raise ValueError('Descarta el resultado físico anterior antes de iniciar otro ensayo.')
     coll=bpy.data.collections.get(config.COLLECTION)
     if coll and not any(ob.name in source_scene.objects for ob in coll.objects):coll=None
@@ -120,7 +126,10 @@ def simulate(scene):
 
 
 def release_support(scene,ob):
-    'IA: Ensayo explícito: retira lateralmente una sección de base entre fotogramas 1 y 12 y la libera en 13; descendientes caen por física, sin animarlos a mano.'
+    'IA: En estructura completa suelta uniones; solo el laboratorio heredado retira lateralmente un apoyo entre 1 y 12 y lo libera en 13.'
+    if scene.get('structural_physics'):
+        from . import structural_physics
+        return structural_physics.release(scene,ob)
     if not scene.get('ruinas_physics_lab') or ob is None or ob.get('source_support')!='ground':
         raise ValueError('Selecciona una sección de base del tabique en la escena de ensayo.')
     if scene.get('support_release'):
@@ -148,6 +157,8 @@ def release_support(scene,ob):
 
 def accept(scene):
     'IA: Guarda transformaciones en mm para aplicar a piezas detalladas al regenerar y exportar; exige simulación, firma e IDs vigentes.'
+    if scene.get('structural_physics'):
+        raise ValueError('Ensayo estructural: todavía no se reconstruye mortero imprimible. Conserva el laboratorio; no se puede aplicar al exportador antiguo.')
     source=bpy.data.scenes.get(scene.get('source_scene',''))
     if source is None or signature(source.ruin_settings)!=scene.get('source_signature'):raise ValueError('La casa ha cambiado; prepara de nuevo la física.')
     if scene.as_pointer() not in runtime.physics_simulations or scene.get('physics_simulated')!=scene.frame_current:

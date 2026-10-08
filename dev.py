@@ -122,13 +122,13 @@ def pack(project=False):
     """IA: empaqueta únicamente fuentes del addon; excluye cachés, renders y pruebas del ZIP instalable."""
     check()
     out=ROOT/'dist';out.mkdir(exist_ok=True)
-    target=out/'ruinas_panel_v0324.zip'
+    target=out/'ruinas_panel_v0325.zip'
     with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED) as archive:
         for file in sorted(SOURCE.rglob('*.py')):archive.write(file,file.relative_to(SOURCE.parent))
     with zipfile.ZipFile(target) as archive:assert archive.testzip() is None
     print('PACKAGED',target)
     if project:
-        bundle=out/'ruinas_desarrollo_v0324.zip'
+        bundle=out/'ruinas_desarrollo_v0325.zip'
         files=[ROOT/'README.md',ROOT/'AGENTS.md',ROOT/'dev.py',ROOT/'.gitignore',target]
         for folder in ('src','tools','tests','docs','agent'):
             files.extend(p for p in (ROOT/folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix!='.pyc')

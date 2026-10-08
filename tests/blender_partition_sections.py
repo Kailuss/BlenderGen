@@ -35,7 +35,7 @@ def run():
                         point=(door+offset,part['fixed'],20)
                         assert not all(min(v[i] for v in co)<point[i]<max(v[i] for v in co) for i in range(3)),ob.name
         counts.append(len(coll.objects));volumes.append(volume)
-    assert volumes[1]<volumes[0] and counts[1]<counts[0],(counts,volumes)
+    assert volumes[1]<volumes[0] and counts[1]<=counts[0],(counts,volumes)
     report={'sections':counts,'volume_mm3':volumes,'passage_mm':35,'closed':True,'support_ids_resolve':True}
     (ROOT/'reports/partition_sections.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
     print('PARTITION_SECTIONS_PASSED',report,flush=True)

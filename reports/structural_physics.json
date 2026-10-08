@@ -1,0 +1,76 @@
+{
+  "binder_excluded": 457,
+  "joints_cut": 4145,
+  "covered_pieces_removed": 0,
+  "numeric_fragments_removed": 163,
+  "bodies": 3018,
+  "constraints": 13470,
+  "roles": {
+    "wood": 1018,
+    "stone": 515,
+    "tile": 1443,
+    "metal": 32,
+    "ground": 10
+  },
+  "seconds": 176.13,
+  "cpu_seconds": 202.625,
+  "faces": 570570,
+  "unconnected": [],
+  "source_unchanged": true,
+  "intact_motion_24_frames_mm": {
+    "max": 1.5132430408514108,
+    "mean": 0.002937848247353434
+  },
+  "largest_initial_movements": [
+    {
+      "piece": "Madera · rastrel cubierta.439",
+      "motion_mm": 1.5132430408514108,
+      "volume_mm3": 0.002455391748213409
+    },
+    {
+      "piece": "Madera · rastrel cubierta.039",
+      "motion_mm": 0.5819540478897599,
+      "volume_mm3": 2.1561360254079842e-05
+    },
+    {
+      "piece": "Madera · rastrel cubierta.439",
+      "motion_mm": 0.42023952885759186,
+      "volume_mm3": 0.0006418580927394779
+    },
+    {
+      "piece": "Madera · rastrel cubierta.039",
+      "motion_mm": 0.36540109076862204,
+      "volume_mm3": 2.1561196917652126e-05
+    },
+    {
+      "piece": "Madera · rastrel cubierta.439",
+      "motion_mm": 0.268633392419283,
+      "volume_mm3": 0.024911398017953168
+    },
+    {
+      "piece": "Madera · rastrel cubierta.319",
+      "motion_mm": 0.23050030917542239,
+      "volume_mm3": 0.005652690867510246
+    },
+    {
+      "piece": "Madera · rastrel cubierta.319",
+      "motion_mm": 0.1403254037342963,
+      "volume_mm3": 0.0025397249684041
+    },
+    {
+      "piece": "Madera · rastrel cubierta.319",
+      "motion_mm": 0.058462389163525856,
+      "volume_mm3": 1.0561743634193503
+    },
+    {
+      "piece": "Madera · rastrel cubierta.439",
+      "motion_mm": 0.051486004685393334,
+      "volume_mm3": 0.1685620002516428
+    },
+    {
+      "piece": "Madera · rastrel cubierta.079",
+      "motion_mm": 0.012456725443972397,
+      "volume_mm3": 0.000325982213672138
+    }
+  ]
+}

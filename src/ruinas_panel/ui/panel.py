@@ -48,17 +48,23 @@ class RUIN_PT_panel(bpy.types.Panel):
         'IA: Acciones, estado y semilla arriba; no generes ni modifiques geometría desde el panel.'
         layout = self.layout
         if context.scene.get('ruinas_replay'):
-            layout.label(text='Demostración calculada · pulsa Espacio')
+            layout.label(text=context.scene.get('playback_instructions','Demostración calculada · pulsa Espacio'))
             layout.label(text='Fotogramas 1 → 120 · apoyo rojo')
             layout.label(text='Cambia de etapa en el selector de escena')
             layout.operator('ruin.physics_return',icon='BACK')
             return
         if context.scene.get('ruinas_physics_lab'):
             layout.label(text='Física · '+context.scene.get('physics_room','tabique'))
-            layout.label(text='Solo tabiques y suelo; revisa contactos')
-            layout.operator('ruin.physics_release',icon='RIGID_BODY')
+            structural=context.scene.get('structural_physics',False)
+            layout.label(text='Edificio sin mortero · experimental' if structural else 'Ensayo antiguo: solo tabiques')
+            if structural:
+                report=parsed(context.scene.get('preparation_report','{}'),{})
+                layout.label(text='%s piezas · %s uniones'%(report.get('bodies',0),report.get('constraints',0)))
+                if report.get('unconnected'):layout.label(text='%s piezas sin unión inicial'%len(report['unconnected']),icon='ERROR')
+            layout.operator('ruin.physics_release',text='Soltar uniones seleccionadas' if structural else 'Retirar apoyo (ensayo antiguo)',icon='RIGID_BODY')
             layout.operator('ruin.physics_simulate',icon='PLAY')
-            layout.operator('ruin.physics_accept',icon='CHECKMARK')
+            if not structural:layout.operator('ruin.physics_accept',icon='CHECKMARK')
+            else:layout.label(text='Exportación con mortero aún no disponible')
             layout.operator('ruin.physics_return',icon='BACK')
             return
         p = context.scene.ruin_settings
@@ -152,6 +158,7 @@ def section_panel(index, section):
         if section['id']=='layout':
             col.prop(p,'physics_target')
             col.prop(p,'physics_frames')
+            if p.physics_target=='BUILDING':col.prop(p,'physics_strength')
             col.operator('ruin.physics_lab',icon='PHYSICS')
             result=parsed(meta.raw(context.scene,'physics_result') or '{}',{})
             if result:

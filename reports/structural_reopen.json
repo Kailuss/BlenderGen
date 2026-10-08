@@ -1,0 +1,11 @@
+{
+  "opens_at_scene": "00 REPRODUCIR - edificio completo",
+  "bodies": 3018,
+  "roof_present": true,
+  "all_pieces_closed": true,
+  "drop_mm": 45.459453482180834,
+  "addon_registered": false,
+  "mass_scale": 10000.0,
+  "manual_embedded": true,
+  "editable_parameters_preserved": true
+}

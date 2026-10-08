@@ -1,0 +1,21 @@
+{
+  "bodies": 3018,
+  "animated_bodies": 33,
+  "released_piece": "Madera · travesaño interior.001",
+  "drop_mm": 45.459453482180834,
+  "frames": 120,
+  "scenes": [
+    "00 REPRODUCIR - edificio completo",
+    "01 CASA EDITABLE",
+    "02 LABORATORIO ESTRUCTURAL",
+    "03 INTERIOR - misma simulación",
+    "RUINAS · taller"
+  ],
+  "full_roof": true,
+  "baked_without_addon": true,
+  "calibrated_initial_stability": {
+    "max_mm": 1.5132430408514108,
+    "mean_mm": 0.002937848247353434,
+    "mass_scale": 10000.0
+  }
+}

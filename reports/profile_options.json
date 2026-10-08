@@ -11,26 +11,26 @@
     {
       "profile": "PARTITION",
       "thickness": 6.0,
-      "sections": 83,
+      "sections": 64,
       "closed": true,
       "cached": true
     },
     {
       "profile": "WALL",
       "thickness": 9.0,
-      "sections": 83,
+      "sections": 64,
       "closed": true,
       "cached": true
     },
     {
       "profile": "FORTRESS",
       "thickness": 15.0,
-      "sections": 83,
+      "sections": 61,
       "closed": true,
       "cached": true
     }
   ],
-  "physics_bodies": 42,
+  "physics_bodies": 33,
   "source_unchanged": true,
   "grouping_preserves_sections": true,
   "simulation_frames": 120

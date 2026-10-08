@@ -1,5 +1,14 @@
 # Estado del proyecto
 
+## v0.32.5 — 2026-10-08
+
+Tablas interiores continuas con travesaños y ensayo experimental del edificio
+completo, sin mortero físico, con recortes de encuentros y uniones rompibles.
+Conserva la fuente y añade reproducción horneada con vista interior separada.
+No reconstruye todavía mortero imprimible tras la simulación.
+Validación y límites: [V0325.md](V0325.md). Uso: [MANUAL_ESTRUCTURA.md](MANUAL_ESTRUCTURA.md).
+Entrega: `dist/ruinas_v0325_estructura_interactiva.blend`.
+
 ## v0.32.4 — 2026-10-06
 
 Relieve geométrico de madera y cal; física por estancia con aceptación de poses

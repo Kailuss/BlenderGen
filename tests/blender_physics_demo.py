@@ -37,6 +37,11 @@ def frame_views(scene):
 
 def run():
     'IA: Genera casa con tejado, daño y módulos; calcula caída, hornea transformaciones visibles sin addon y verifica desplazamiento real de descendientes.'
+    if addon.bl_info['version']>=(0,32,5):
+        # La demostración de bloques apilados solo describe la versión anterior.
+        # La preparación nueva se valida en blender_structural_physics.py.
+        from blender_structural_demo import build_demo
+        return build_demo()
     bpy.ops.wm.read_factory_settings(use_empty=True);addon.register();runtime.busy=True;runtime.preview=True
     source=bpy.context.scene;source.name='02 CASA EDITABLE - piezas y daño';p=source.ruin_settings;p.live_preview=False
     p.layout_mode='ROOM';p.interior_layout='TWO';p.length=170;p.building_depth=155;p.height_type='ONE';p.seed=17;p.lock_distribution=False

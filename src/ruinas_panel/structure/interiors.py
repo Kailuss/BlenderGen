@@ -19,7 +19,7 @@ def wood_panel(coll,mat,part,a,b,z0,z1,grain,seed):
             for i in range(nx+1):
                 u=i/nx;along=a+(b-a)*u;board=min(boards-1,i//6);local=(i%6)/6
                 phase=phases[board]+(0 if side<0 else .7)
-                seam=.32 if i%6==0 and 0<i<nx else 0
+                seam=.18 if i in (0,nx) else (.32 if i%6==0 else 0)
                 fiber=max(0,math.cos(local*math.tau*2+.25*math.sin(t*9+phase)))**6
                 knot=math.exp(-((local-.5)/.22)**2-((t-.45-.15*math.sin(phase))/.13)**2)
                 relief=min(.35,seam+grain*(.30*fiber+.20*knot))
@@ -41,7 +41,7 @@ def wood_panel(coll,mat,part,a,b,z0,z1,grain,seed):
 
 
 def build(coll,p,scene):
-    'IA: Secciones cerradas de madera con apoyo identificado, solape interno de .02 mm y pasos del plano libres; daño limita la coronación de cada columna.'
+    'IA: Tablas verticales continuas de hasta 6 mm, sin juntas horizontales ficticias; travesaños posteriores por intervalo conservan los pasos de 35 mm.'
     plan=meta.get(scene,'plano_interior',{})
     if not plan or 'error' in plan:return
     mat=primitives.material('Madera · interior',(.37,.255,.145))
@@ -66,7 +66,7 @@ def build(coll,p,scene):
                 rng=random.Random(p.seed+72000+index*193+round(left*11))
                 height=min(top,spatial.collapse_height(p,sx,sy))-p.wood_damage*rng.uniform(0,5)
                 if height-z0<1:continue
-                rows=max(1,math.ceil((height-z0)/config.PARTITION_SECTION_HEIGHT));below='%s:%s:lintel'%(index,round(a,3)) if over else 'ground'
+                rows=1;below='%s:%s:lintel'%(index,round(a,3)) if over else 'ground'
                 for row in range(rows):
                     low=z0+config.PARTITION_SECTION_HEIGHT*row;high=min(height,low+config.PARTITION_SECTION_HEIGHT)
                     if high-low<1:continue
@@ -77,6 +77,18 @@ def build(coll,p,scene):
                     key='%s:%s:%s:%s'%(index,round(a,3),column,row)
                     ob['interior_partition']=True;ob['partition_id']=index
                     ob['partition_section']=key;ob['rests_on']=below;below=key
+                    ob['madera']=True;ob['partition_member']='plank'
+            # Travesaños en la cara posterior: contactan con tablas sin invadir
+            # puertas. El ensayo estructural resuelve el encaje sobre sus copias.
+            for rail,z in enumerate((z0+5,z1-5)):
+                if z1-z0<14:continue
+                cross=part['fixed']+2.35
+                if part['axis']=='x':rail_bounds=(a,b,cross-.9,cross+.9)
+                else:rail_bounds=(cross-.9,cross+.9,a,b)
+                ob=primitives.block('Madera · travesaño interior',*rail_bounds,z-1.5,z+1.5,coll,wood)
+                ob['interior_partition']=True;ob['partition_id']=index;ob['madera']=True
+                ob['partition_section']='%s:%s:rail%s'%(index,round(a,3),rail)
+                ob['rests_on']='jambs';ob['partition_member']='rail'
             if over:
                 ob=primitives.block('Madera · dintel interior',*bounds,z0-.6,min(z1,z0+2),coll,wood)
                 ob['interior_partition']=True;ob['partition_section']='%s:%s:lintel'%(index,round(a,3));ob['rests_on']='jambs'

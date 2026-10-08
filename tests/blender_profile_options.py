@@ -18,7 +18,7 @@ def run():
     bpy.ops.wm.read_factory_settings(use_empty=True);addon.register();runtime.busy=True;runtime.preview=True
     source=bpy.context.scene;p=source.ruin_settings;p.live_preview=False;p.batch_preview=False;p.lock_distribution=False
     p.layout_mode='ROOM';p.length=220;p.building_depth=190;p.height_type='ONE';p.damage_enabled=False;p.interior_layout='THREE'
-    p.windows_enabled=True;p.door_enabled=True;p.door_width=40;p.roof_frame=False
+    p.physics_target='PARTITION';p.windows_enabled=True;p.door_enabled=True;p.door_width=40;p.roof_frame=False
     reports=[]
     for profile,thickness in (('PARTITION',6),('WALL',9),('FORTRESS',15)):
         p.build_type=profile;cache.clear_cache();coll=addon.generate(bpy.context,p,'WORK')

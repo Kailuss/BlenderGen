@@ -8,9 +8,14 @@ La v0.32 corrige solapes de tejas, incorpora encuentro cerámico de chimenea,
 bajantes por secciones y planos interiores iniciales. Entrega y límites en
 [docs/V032.md](docs/V032.md).
 
+La v0.32.5 añade tabiques de tablas continuas y un laboratorio experimental de
+estructura completa sin mortero, con encajes y uniones rompibles. Consulta
+[el manual](docs/MANUAL_ESTRUCTURA.md) y [sus límites](docs/V0325.md): el resultado
+físico todavía no se convierte automáticamente en un sólido imprimible.
+
 ## Usarlo en Blender
 
-**Uso normal:** guía completa en [USERGUIDE.md](USERGUIDE.md). En resumen: instala `dist/ruinas_panel_v0324.zip` desde Preferencias → Complementos → Instalar desde disco, actívalo y abre Vista 3D → N → Ruinas. Puedes abrir un .blend de v0.20: conserva los campos guardados. No ejecutes su antiguo `generador_muro.py`, porque volvería a registrar la versión anterior.
+**Uso normal:** guía completa en [USERGUIDE.md](USERGUIDE.md). En resumen: instala `dist/ruinas_panel_v0325.zip` desde Preferencias → Complementos → Instalar desde disco, actívalo y abre Vista 3D → N → Ruinas. Puedes abrir un .blend de v0.20: conserva los campos guardados. No ejecutes su antiguo `generador_muro.py`, porque volvería a registrar la versión anterior.
 
 **Desarrollo:** abre `tools/load_in_blender.py` como archivo en el editor de texto de Blender y pulsa Ejecutar script. Repite tras editar un módulo: limpia callbacks y caché, recarga el paquete y mantiene los parámetros guardados. No es necesario volver a empaquetar ni reiniciar Blender. Usa solo una copia del addon activa.
 

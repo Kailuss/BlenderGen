@@ -32,9 +32,14 @@ EXPORT_DEBRIS_MM3 = 2.0
 INTERIOR_THICKNESS = 3.0
 INTERIOR_ROOM_MIN = 60.0
 INTERIOR_PASSAGE = 35.0
-PARTITION_SECTION_WIDTH = 12.0
-PARTITION_SECTION_HEIGHT = 18.0
+PARTITION_SECTION_WIDTH = 6.0
+# Las tablas recorren toda la altura: no se fracturan en hiladas de bloques.
+PARTITION_SECTION_HEIGHT = 60.0
 PARTITION_JOINT_OVERLAP = .02
+# Blender limita masas a 1 g; factor común para conservar mejor sus proporciones
+# a escala de maqueta. Los umbrales de unión usan las mismas masas normalizadas.
+PHYSICS_MASS_SCALE = 10000.0
+PHYSICS_DENSITIES = {'wood':600,'stone':2200,'tile':1800,'metal':7800,'ground':1800}
 
 
 QUALITY = {'DRAFT':(1,.45,1),'WORK':(2,.32,2),'DETAIL':(2,.18,2)}
