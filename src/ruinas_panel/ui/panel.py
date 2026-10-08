@@ -33,7 +33,7 @@ def status_icon(status):
 
 
 class RUIN_PT_panel(bpy.types.Panel):
-    bl_label = 'Ruinas · v0.32.4'
+    bl_label = 'Ruinas · v0.32.6'
     bl_idname = 'RUIN_PT_panel'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -49,7 +49,8 @@ class RUIN_PT_panel(bpy.types.Panel):
         layout = self.layout
         if context.scene.get('ruinas_replay'):
             layout.label(text=context.scene.get('playback_instructions','Demostración calculada · pulsa Espacio'))
-            layout.label(text='Fotogramas 1 → 120 · apoyo rojo')
+            layout.label(text='Reproducción calculada; edita en el laboratorio')
+            if context.scene.get('lab_scene'):layout.operator('ruin.physics_edit')
             layout.label(text='Cambia de etapa en el selector de escena')
             layout.operator('ruin.physics_return',icon='BACK')
             return
@@ -59,9 +60,13 @@ class RUIN_PT_panel(bpy.types.Panel):
             layout.label(text='Edificio sin mortero · experimental' if structural else 'Ensayo antiguo: solo tabiques')
             if structural:
                 report=parsed(context.scene.get('preparation_report','{}'),{})
-                layout.label(text='%s piezas · %s uniones'%(report.get('bodies',0),report.get('constraints',0)))
+                layout.label(text='%s piezas · %s uniones'%(report.get('bodies',context.scene.get('brick_count',0)),report.get('constraints',0)))
                 if report.get('unconnected'):layout.label(text='%s piezas sin unión inicial'%len(report['unconnected']),icon='ERROR')
-            layout.operator('ruin.physics_release',text='Soltar uniones seleccionadas' if structural else 'Retirar apoyo (ensayo antiguo)',icon='RIGID_BODY')
+            if context.scene.get('masonry_lab'):
+                layout.label(text='Todos los ladrillos activos · sin uniones')
+                layout.operator('ruin.masonry_remove')
+                layout.operator('ruin.masonry_impact')
+            else:layout.operator('ruin.physics_release',text='Soltar uniones seleccionadas' if structural else 'Retirar apoyo (ensayo antiguo)',icon='RIGID_BODY')
             layout.operator('ruin.physics_simulate',icon='PLAY')
             if not structural:layout.operator('ruin.physics_accept',icon='CHECKMARK')
             else:layout.label(text='Exportación con mortero aún no disponible')
@@ -158,6 +163,8 @@ def section_panel(index, section):
         if section['id']=='layout':
             col.prop(p,'physics_target')
             col.prop(p,'physics_frames')
+            if p.physics_target=='MASONRY':
+                col.prop(p,'physics_brick_limit');col.prop(p,'physics_masonry_shape')
             if p.physics_target=='BUILDING':col.prop(p,'physics_strength')
             col.operator('ruin.physics_lab',icon='PHYSICS')
             result=parsed(meta.raw(context.scene,'physics_result') or '{}',{})

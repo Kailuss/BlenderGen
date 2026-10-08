@@ -67,3 +67,5 @@ La instalación de habilidades y la carga gradual de instrucciones están descri
 ## Coste y límites
 
 Esta reorganización reduce búsquedas, contexto repetido y pasos manuales de edición. No garantiza un porcentaje de ahorro de tokens ni acelera por sí sola los operadores de Blender. `docs/ARCHITECTURE.md` permite localizar el cambio y `docs/STATUS.md` recoge limitaciones actuales. El aumento de resolución sigue siendo una decisión explícita; la prioridad es lowpoly.
+
+Ensayo de ladrillos 0.32.6: [manual de impacto, selección múltiple y huecos](docs/MANUAL_LADRILLOS.md). Entrega local en `dist/ruinas_v0326_completo.zip`.

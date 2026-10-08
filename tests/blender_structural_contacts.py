@@ -27,7 +27,7 @@ def run():
     bpy.context.window.scene=lab
     plank=next(o for o in lab.objects if o.get('source_piece')=='Madera tabla colgada')
     beam=next(o for o in lab.objects if o.get('source_piece')=='Madera viga')
-    structural.release(lab,beam);assert not plank.animation_data
+    structural.release(lab,[beam,plank]);assert not plank.animation_data
     animated=[o for o in lab.objects if o.animation_data]
     assert len(animated)==2 and animated[0].animation_data.action==animated[1].animation_data.action
     positions=[]

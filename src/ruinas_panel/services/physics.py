@@ -51,8 +51,11 @@ def body(scene,name,lo,hi,active):
 
 
 def prepare(source_scene):
-    'IA: BUILDING delega el edificio completo; las opciones heredadas preparan cajas de tabiques por estancia, sin mampostería ni tejado.'
+    'IA: MASONRY prepara un ensayo seco acotado, BUILDING el edificio completo; las opciones heredadas preparan cajas de tabiques por estancia, sin mampostería ni tejado.'
     p=source_scene.ruin_settings;target=p.physics_target
+    if target=='MASONRY':
+        from . import masonry_physics
+        return masonry_physics.prepare(source_scene)
     if target=='BUILDING':
         from . import structural_physics
         return structural_physics.prepare(source_scene)

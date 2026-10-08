@@ -1,0 +1,20 @@
+{
+  "HUECO": {
+    "bricks": 85,
+    "moved_over_6mm": 83,
+    "lowest_mm": -0.00045109783286534366,
+    "seconds": 1.8690018000197597
+  },
+  "IMPACTO": {
+    "bricks": 96,
+    "moved_over_6mm": 74,
+    "lowest_mm": -4.114001939115042e-05,
+    "seconds": 3.336471699993126
+  },
+  "TORRE": {
+    "bricks": 84,
+    "moved_over_6mm": 16,
+    "lowest_mm": -0.0002073488616360919,
+    "seconds": 3.6736130999634042
+  }
+}

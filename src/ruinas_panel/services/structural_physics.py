@@ -273,13 +273,15 @@ def prepare(source_scene):
 
 
 def release(scene,ob):
-    'IA: Suelta a partir del fotograma 13 las uniones de una pieza elegida; no prescribe desplazamientos ni elimina su colisionador.'
-    if ob is None or not ob.rigid_body or ob.rigid_body.type!='ACTIVE':raise ValueError('Selecciona una pieza móvil del edificio, no el terreno ni una unión.')
+    'IA: Suelta a partir del fotograma 13 las uniones de todas las piezas elegidas; no prescribe desplazamientos ni elimina su colisionador.'
+    chosen=[ob] if isinstance(ob,bpy.types.Object) else list(ob or [])
+    chosen={o for o in chosen if o.name in scene.objects and o.rigid_body and o.rigid_body.type=='ACTIVE'}
+    if not chosen:raise ValueError('Selecciona piezas móviles del edificio.')
     if scene.get('support_release'):raise ValueError('Prepara otro ensayo para cambiar la pieza liberada.')
     scene.frame_set(1);affected=[]
     for other in scene.objects:
         c=other.rigid_body_constraint
-        if c and ob in (c.object1,c.object2):affected.append(other)
+        if c and chosen.intersection((c.object1,c.object2)):affected.append(other)
     if not affected:raise ValueError('La pieza no tiene uniones; ya está libre.')
     first=affected[0];c=first.rigid_body_constraint
     c.enabled=True;c.keyframe_insert(data_path='enabled',frame=1);c.keyframe_insert(data_path='enabled',frame=12)
@@ -289,5 +291,5 @@ def release(scene,ob):
     for other in affected[1:]:
         animation=other.animation_data_create();animation.action=first.animation_data.action
         animation.action_slot=first.animation_data.action_slot
-    scene['support_release']=ob.name;scene['physics_simulated']=0;runtime.physics_simulations.discard(scene.as_pointer())
+    scene['support_release']=json.dumps(sorted(o.name for o in chosen));scene['physics_simulated']=0;runtime.physics_simulations.discard(scene.as_pointer())
     scene.timeline_markers.new('Soltar uniones; caída sin trayectoria impuesta',frame=13);scene.frame_set(1)

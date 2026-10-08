@@ -94,7 +94,7 @@ class RUIN_OT_physics(bpy.types.Operator):
         from ..services import physics
         preview.cancel_pending()
         try:
-            if preview.stale_preview(context.scene):preview.update_preview(context)
+            if context.scene.ruin_settings.physics_target!='MASONRY' and preview.stale_preview(context.scene):preview.update_preview(context)
             scene=physics.prepare(context.scene)
         except Exception as exc:return fail(self,context,exc)
         context.window.scene=scene
@@ -111,7 +111,7 @@ class RUIN_OT_physics_release(bpy.types.Operator):
     def execute(self,context):
         'IA: Solicita soltar uniones en estructura completa o retirar apoyo en el ensayo antiguo; nunca altera la generación normal.'
         from ..services import physics
-        try:physics.release_support(context.scene,context.active_object)
+        try:physics.release_support(context.scene,context.selected_objects if context.scene.get('structural_physics') else context.active_object)
         except Exception as exc:return fail(self,context,exc)
         return {'FINISHED'}
 
@@ -213,4 +213,39 @@ class RUIN_OT_reset(bpy.types.Operator):
         finally:
             runtime.busy=False
         preview.settings_changed(p,context)
+        return {'FINISHED'}
+
+
+class RUIN_OT_masonry_remove(bpy.types.Operator):
+    bl_idname='ruin.masonry_remove'
+    bl_label='Abrir hueco: retirar ladrillos seleccionados'
+    bl_options={'REGISTER','UNDO'}
+    def execute(self,context):
+        'IA: Retira la selección múltiple de ladrillos del ensayo, nunca la fuente.'
+        from ..services import masonry_physics
+        try:masonry_physics.remove_selected(context.scene,context.selected_objects)
+        except Exception as exc:return fail(self,context,exc)
+        return {'FINISHED'}
+
+
+class RUIN_OT_masonry_impact(bpy.types.Operator):
+    bl_idname='ruin.masonry_impact'
+    bl_label='Añadir piedra de impacto'
+    bl_options={'REGISTER','UNDO'}
+    def execute(self,context):
+        'IA: Añade un proyectil de gravedad al laboratorio acotado.'
+        from ..services import masonry_physics
+        try:masonry_physics.impactor(context.scene)
+        except Exception as exc:return fail(self,context,exc)
+        return {'FINISHED'}
+
+
+class RUIN_OT_physics_edit(bpy.types.Operator):
+    bl_idname='ruin.physics_edit'
+    bl_label='Abrir laboratorio editable'
+    def execute(self,context):
+        'IA: Abre la escena física asociada a una reproducción horneada.'
+        scene=bpy.data.scenes.get(context.scene.get('lab_scene',''))
+        if scene is None:return {'CANCELLED'}
+        context.window.scene=scene;scene.frame_set(1);frame_view(context)
         return {'FINISHED'}

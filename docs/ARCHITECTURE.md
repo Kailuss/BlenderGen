@@ -82,3 +82,5 @@ La API de `__init__.py` carga servicios de Blender al llamarlos. Por eso `config
 
 `python dev.py find ventana`, `python dev.py find cache`, `python dev.py find timber_beam`.
 El índice se calcula desde AST sin importar Blender y sin un archivo duplicado que pueda quedar desactualizado.
+
+El laboratorio acotado vive en `services/masonry_physics.py`: piezas activas independientes, colisiones primitivas, retirada múltiple, suelo y proyectil. No consume ni modifica la geometría de la casa. Los controles se guardan en RNA y no afectan la caché de generación.

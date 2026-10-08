@@ -142,3 +142,7 @@ Borrador y Trabajo muestran solo la estructura; desgaste (tres niveles), grietas
 El sólido exportable se une con Manifold y conserva el detalle de la fuente (antes, el remallado vóxel de 0,32 mm borraba grietas y vetas).
 
 Las pruebas de migración están en `reports/`; los resultados históricos de cierre de malla v20 están en `../outputs/muro_20`. Para cambios posteriores de geometría debe renovarse la validación correspondiente.
+
+## 0.32.6 — 8 de octubre de 2026
+
+Ensayo acotado de mampostería seca: muro/torre, hasta 256 ladrillos activos independientes, retirada múltiple y piedra bajo gravedad, con suelo pasivo. Archivo reproducible y manual en docs/MANUAL_LADRILLOS.md. Corrige selección múltiple de uniones en el laboratorio estructural anterior. El ensayo acotado todavía no extrae zonas de la casa ni fractura internamente los ladrillos; no reconstruye mortero imprimible. Validación: tests/blender_masonry_physics.py y blender_masonry_reopen.py, además de las regresiones existentes.
