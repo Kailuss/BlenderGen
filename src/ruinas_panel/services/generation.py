@@ -63,7 +63,8 @@ def build(context,p,quality):
         raise ValueError('Resultado físico obsoleto: descártalo y vuelve a simular tras los cambios.')
     p=damage.effective_settings(p)
     runtime.settings=p
-    layout.plan_door(p)  # Validar espacio antes de reemplazar la geometría existente.
+    door_plan=layout.plan_door(p)  # Validar espacio antes de reemplazar la geometría existente.
+    layout.pillar_layout(p,door_plan,layout.course_layout(p)[1])
     signature=cache.cache_signature(context,p)
     entry=runtime.cache.get(cache.cache_key())
     cached=entry is not None and entry['signature']==signature

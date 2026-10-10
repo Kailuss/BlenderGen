@@ -209,6 +209,7 @@ def rigid(scene,ob):
     lo,hi=bounds(ob);center=(lo+hi)/2;volume=valid(ob.data)
     ob['physical_volume_mm3']=volume
     density=config.PHYSICS_DENSITIES[ob['physical_role']]
+    if ob.get('fragile_material')=='plaster':density=1200
     ob.data.transform(Matrix.Translation(-center));ob.data.transform(Matrix.Scale(.001,4));ob.matrix_world=Matrix.Translation(center*.001)
     static=ob['physical_role']=='ground' or (ob['physical_role']=='stone' and hi.z<=3.1 and lo.z<.65)
     if not ob.rigid_body:
@@ -231,6 +232,7 @@ def joint(scene,a,b,point,strength,template=None):
         with bpy.context.temp_override(scene=scene,view_layer=scene.view_layers[0],object=ob,active_object=ob,selected_objects=[ob]):bpy.ops.rigidbody.constraint_add()
     c=ob.rigid_body_constraint;c.type='FIXED';c.object1=a;c.object2=b;c.disable_collisions=True
     c.use_breaking=True;c.breaking_threshold=max(.00001,(a.rigid_body.mass+b.rigid_body.mass)*9.81/24*strength)
+    c.breaking_threshold*=min(config.PHYSICS_FRAGILE_STRENGTH.get(a.get('fragile_material'),1),config.PHYSICS_FRAGILE_STRENGTH.get(b.get('fragile_material'),1))
     return ob
 
 
@@ -240,6 +242,7 @@ def optimise_collisions(scene):
     for ob in scene.objects:
         rb=ob.rigid_body
         if not rb or rb.type!='ACTIVE' or rb.collision_shape!='MESH':continue
+        if ob.get('fragile_material')=='plaster':retained+=1;continue
         if ob.get('physical_role') not in ('stone','wood'):retained+=1;continue
         bm=bmesh.new();bm.from_mesh(ob.data)
         try:
@@ -344,6 +347,8 @@ def prepare(source_scene):
                 for key in ob.keys():clone[key]=ob[key]
                 clone['cut_component']=index;objects.append(clone)
             objects.remove(ob);primitives.remove_objects([ob])
+        from . import fragile_physics
+        objects=fragile_physics.fragment(objects,coll,report,p.physics_fragile_size)
         trees={o:tree(o) for o in objects};contacts=[]
         for a,b,ba,bb in pairs(objects,.8):
             if a['physical_role']==b['physical_role']=='ground':continue
@@ -370,9 +375,11 @@ def prepare(source_scene):
         report['unconnected']=[o.name for o in objects if o not in connected and o.rigid_body.type=='ACTIVE']
         scene['ruinas_physics_lab']=True;scene['structural_physics']=True;scene['source_scene']=source_scene.name
         scene['source_signature']=physics.signature(p);scene['physics_room']='edificio completo';scene['preparation_report']=json.dumps(report,ensure_ascii=False)
-        scene['limitations']='Experimental: uniones rígidas rompibles, sin flexión ni fractura interna. Sin reconstrucción de mortero para exportar.'
+        scene['limitations']='Experimental: uniones rígidas rompibles y prefractura de revocos/chimenea; sin flexión ni fractura adaptativa. Sin reconstrucción de mortero para exportar.'
         scene['mass_scale']=config.PHYSICS_MASS_SCALE
         scene.unit_settings.system='METRIC';scene.unit_settings.scale_length=1;scene.unit_settings.length_unit='MILLIMETERS'
+        for key in ('physics_strength','physics_fragile_size','physics_frames','physics_precision','physics_adaptive_collisions','physics_sparse_constraints'):
+            setattr(scene.ruin_settings,key,getattr(p,key))
         scene.frame_end=p.physics_frames;scene.gravity=(0,0,-9.81)
         world=scene.rigidbody_world;world.substeps_per_frame=40;world.solver_iterations=60;world.point_cache.frame_end=scene.frame_end;world.time_scale=.2
         print('STRUCTURAL_PREPARED',{k:(len(v) if isinstance(v,list) else v) for k,v in report.items()},flush=True)

@@ -1,5 +1,14 @@
 # Estado del proyecto
 
+## v0.32.9 — 2026-10-10
+
+Alturas independientes, ventanas/balcones repartidos, pilares equidistantes o
+manuales y cancelas sin aplastamiento. Prefractura cerrada de revocos/chimenea
+sobre copias físicas, con conductos huecos conservados y límite de 256 fragmentos.
+Pruebas de reposo/impacto, casa real y exportación de la reproducción reabierta.
+Uso y límites: [V0329.md](V0329.md). No se certifica todavía la casa máxima con
+esta nueva prefractura ni fractura adaptativa al impacto.
+
 ## v0.32.5 — 2026-10-08
 
 Tablas interiores continuas con travesaños y ensayo experimental del edificio

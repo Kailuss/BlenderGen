@@ -4,7 +4,7 @@ import random
 import bmesh
 from .. import meta,config,runtime
 from ..geometry import primitives,timber,weather
-from . import floors
+from . import floors,layout
 
 
 def plan(p,bounds):
@@ -23,9 +23,9 @@ def plan(p,bounds):
     if reverse:left=xmax-4-approach-run;right=xmax-4-approach
     x0=left-landing if reverse else left
     x1=right if reverse else right+landing
-    return {'x0':left,'x1':right,'y0':ya,'y1':yb,'bottom':bottom,'top':config.UPPER_FLOOR,'steps':steps,'reverse':reverse,
+    return {'x0':left,'x1':right,'y0':ya,'y1':yb,'bottom':bottom,'top':layout.upper_floor(p),'steps':steps,'reverse':reverse,
             'opening':[left-.5,right+.5,ya-.8,yb+.8],'landing':[x0,left] if reverse else [right,x1],'type':p.stair_type,
-            'usable_tread_mm':20,'pitch_mm':pitch,'riser_mm':(config.UPPER_FLOOR-bottom)/steps,'width_mm':yb-ya,'approach_mm':approach,'approach':[right+1.5,right+approach+1.5,ya,yb] if reverse else [left-approach-1.5,left-1.5,ya,yb]}
+            'usable_tread_mm':20,'pitch_mm':pitch,'riser_mm':(layout.upper_floor(p)-bottom)/steps,'width_mm':yb-ya,'approach_mm':approach,'approach':[right+1.5,right+approach+1.5,ya,yb] if reverse else [left-approach-1.5,left-1.5,ya,yb]}
 
 
 def stone_skin(coll,p,s,stone,xx):
@@ -109,7 +109,7 @@ def stone_tread(coll,stone,name,a,b,ya,yb,top,amount,seed):
 
 
 def build(coll,p,scene,plan):
-    'IA: Peldaños jugables y zancas o macizo hasta suelo; reserva 0,55 mm de relieve bajo losas de piedra; desembarco a config.UPPER_FLOOR y postes bajo cabecero.'
+    'IA: Peldaños jugables y zancas o macizo hasta suelo; reserva 0,55 mm de relieve bajo losas de piedra; desembarco a layout.upper_floor(p) y postes bajo cabecero.'
     meta.put(scene,'escalera_generada',plan or {})
     if not plan or 'error' in plan:return
     s=plan;wood=primitives.material('Madera · escalera',(.34,.235,.13));stone=primitives.material('Piedra · neutro',(.52,.52,.52))
@@ -146,7 +146,7 @@ def build(coll,p,scene,plan):
     for x in (x0-1.8,x1+1.8):
         ob=timber.timber_beam(coll,wood,'Madera · poste hueco escalera',(x,hy,.7),(x,hy,s['top']-3.5),3.8,3.8,p.seed+round(x*11))
         ob['stair']=True
-    ob=timber.timber_beam(coll,wood,'Madera · cabecero escalera',(x0-3,hy,config.BEAM_LEVEL),(x1+3,hy,config.BEAM_LEVEL),4.2,4.7,p.seed+27400);ob['stair']=True
+    ob=timber.timber_beam(coll,wood,'Madera · cabecero escalera',(x0-3,hy,(layout.upper_floor(p)-3.6)),(x1+3,hy,(layout.upper_floor(p)-3.6)),4.2,4.7,p.seed+27400);ob['stair']=True
     for x in s['landing']:
         ob=timber.timber_beam(coll,wood,'Madera · poste desembarco',(x,(ya+yb)/2,.7),(x,(ya+yb)/2,s['top']-1.5),4,4,p.seed+round(x*7));ob['stair']=True
     a,b=s['landing']

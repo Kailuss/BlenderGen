@@ -16,7 +16,7 @@ La base 0.31 integra el edificio completo aportado en `dist/ruinas_v031_completo
 | Ventanas, alojamientos y vigas | `structure/openings.py` | Recorta antes de añadir carpintería; exige apoyos |
 | Reserva de escalera y contactos | `structure/placement.py`, `structure/relations.py` | Evita vanos sobre el macizo y conserva mampostería junto a la carpintería |
 | Agujeros de daño | `structure/holes.py` | Perfora la fábrica montada respetando madera y contactos reservados |
-| Suelos y entreplanta | `structure/floors.py` | Tablones cerrados sobre apoyos; cotas comunes de `config` |
+| Suelos y entreplanta | `structure/floors.py` | Tablones cerrados sobre apoyos; cotas comunes de `structure/layout` |
 | Escaleras | `structure/stairs.py` | Reserva huella y desembarco; acabado propio para piedra y madera |
 | Tejado, tejas y hastiales | `structure/roof.py` | Paños sobre cerchas supervivientes; perfil compartido de alero a cumbrera |
 | Daño y escombros de cubierta | `structure/roof_damage.py` | Regiones reproducibles cortan estructura y cubierta; escombros asociados |
@@ -76,7 +76,7 @@ La API de `__init__.py` carga servicios de Blender al llamarlos. Por eso `config
 - Nunca uses `from runtime import quality` para estado mutable: quedaría una copia local del valor.
 - Para conservar partidas de aleatoriedad, usa `random.Random(seed)` local; no cambies el orden de llamadas durante un refactor sin comprobar diferencias.
 - Campos internos heredados de giros siguen presentes para leer .blend; los perfiles públicos los derivan.
-- Las plantas miden 55 mm; cimentación a 2 mm, entreplanta a 57 mm y coronación de dos plantas a 112 mm. Usa `config.FLOOR_PITCH`, `UPPER_FLOOR` y `BEAM_LEVEL` para que escaleras, vigas y suelos coincidan.
+- Las alturas de planta son independientes (55 mm por defecto), sobre una cimentación de 2 mm. Usa `layout.upper_floor(p)` y `layout.building_height(p)` para suelos, vigas, tabiques, escaleras y vanos; las constantes antiguas solo expresan valores por defecto.
 - Los perfiles Tabique/Pared/Muralla tienen espesores de 6/9/15 mm; no reutilices las dimensiones anteriores a la base completa.
 - Borrador y Trabajo omiten el daño fino según `config.DAMAGE_QUALITIES`. Las pruebas de cierre y caché deben incluir las variantes y transformaciones de Geometry Nodes; los puntos del array por sí solos no prueban la geometría visible.
 
@@ -88,3 +88,5 @@ El índice se calcula desde AST sin importar Blender y sin un archivo duplicado 
 El laboratorio acotado vive en `services/masonry_physics.py`: piezas activas independientes, colisiones primitivas, retirada múltiple, suelo y proyectil. No consume ni modifica la geometría de la casa. Los controles se guardan en RNA y no afectan la caché de generación.
 
 `services/impact_physics.py` controla lanzamiento, empuje y prefractura del laboratorio en metros. No modifica geometría fuente ni depende de UI. `ui/operators.configure_view` y `frame_view` ajustan recorte y encuadre según cotas de la escena, excluyendo el suelo de seguridad.
+
+`services/fragile_physics.py` prefractura revocos y chimenea sobre copias en mm, después de resolver encajes y antes de detectar contactos. Exige cierre y conservación de volumen; abre primero los anillos verticalmente para conservar el conducto. IDs derivados de pieza, componente, recorte y linaje. Máximo 256 fragmentos nuevos; falla explícitamente al superar el límite.

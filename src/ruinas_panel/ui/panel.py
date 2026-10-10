@@ -33,7 +33,7 @@ def status_icon(status):
 
 
 class RUIN_PT_panel(bpy.types.Panel):
-    bl_label = 'Ruinas · v0.32.8'
+    bl_label = 'Ruinas · v0.32.9'
     bl_idname = 'RUIN_PT_panel'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -116,6 +116,10 @@ class RUIN_PT_panel(bpy.types.Panel):
 
 def enabled(p, field):
     'IA: Controles que no aplican se atenúan en lugar de ocultarse.'
+    if field=='ground_storey_height':return p.height_type!='RUIN'
+    if field=='upper_storey_height':return p.height_type=='TWO'
+    if field=='low_wall_height':return p.height_type=='RUIN'
+    if field=='pillar_positions':return p.pillar_distribution=='CUSTOM' and p.pillar_count>0
     if field=='interior_layout':return p.layout_mode=='ROOM' and p.height_type!='RUIN'
     if not p.damage_enabled and field in set(damage.DISABLED_VALUES)|{'wear_level','hole_size','hole_seed','break_position'}:return False
     if field=='wear':return p.wear_level=='CUSTOM'
@@ -176,13 +180,15 @@ def section_panel(index, section):
         if section['id'] in ('finish', 'cracks') and p.preview_quality not in config.DAMAGE_QUALITIES:
             col.label(text='Desgaste, grietas y escombros se ven en Detalle', icon='INFO')
         if section['id'] == 'build':
-            col.label(text='Grosor %.0f mm · altura %.0f mm' % (config.BUILD_TYPES[p.build_type][0], config.HEIGHT_TYPES[p.height_type]))
+            from ..structure import layout as building_layout
+            col.label(text='Grosor %.0f mm · altura %.0f mm' % (config.BUILD_TYPES[p.build_type][0], building_layout.building_height(p)))
         if section['id']=='layout':
             col.prop(p,'physics_target')
             col.prop(p,'physics_frames')
             if p.physics_target=='MASONRY':
                 col.prop(p,'physics_brick_limit');col.prop(p,'physics_masonry_shape')
-            if p.physics_target=='BUILDING':col.prop(p,'physics_strength')
+            if p.physics_target=='BUILDING':
+                col.prop(p,'physics_strength');col.prop(p,'physics_fragile_size')
             col.operator('ruin.physics_lab',icon='PHYSICS')
             col.operator('ruin.physics_demo')
             result=parsed(meta.raw(context.scene,'physics_result') or '{}',{})

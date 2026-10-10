@@ -235,12 +235,8 @@ def _build_wall(context, p):
         'IA: Consulta altura real de hiladas conservadas, no el perfil continuo del derrumbe.'
         return max([z_edges[r+1] for r,line in enumerate(courses) for a,b in line if a<=x<=b] or [z_edges[1]])
     # Planificar refuerzos antes de huecos para mantenerlos íntegros.
-    pier_rng=random.Random(dseed+48193)
     centers=[]
-    for i in range(min(p.pillar_count,max(0,int(L/32)))):
-        u=(i+1)/(min(p.pillar_count,max(0,int(L/32)))+1)+pier_rng.uniform(-.065,.065)
-        cx=(u-.5)*L
-        width=p.pillar_width*pier_rng.uniform(.92,1.08)
+    for cx,width in layout.pillar_layout(p,door,rh):
         top=height(cx)
         clearance=2+max(2.8,rh*.65)
         if door and cx+width/2>door['left']-clearance and cx-width/2<door['right']+clearance:
@@ -375,7 +371,7 @@ def build_base_and_lintel(coll,stone,p,door,rh):
     bounds=[(-p.length/2,p.length/2)] if not door else [(-p.length/2,door['left']),(door['right'],p.length/2)]
     for i,(a,b) in enumerate(bounds):
         terrain.ground_strip(coll,primitives.material('Tierra · arena',(.36,.31,.24)),a,b,p.thickness,p.seed+i,p.ground_roughness)
-    if door:
+    if door and not door.get('gate'):
         mortar=primitives.material('Núcleo · neutro',(.44,.44,.44))
         for a,b in ((door['left']-3.5,door['left']-.1),(door['right']+.1,door['right']+3.5)):
             primitives.block('Asiento de dintel',a,b,-p.thickness*.36,p.thickness*.36,

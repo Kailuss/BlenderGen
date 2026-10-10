@@ -2,6 +2,8 @@
 
 from .. import config
 from .. import runtime
+from itertools import combinations
+import random
 
 
 def distribution_seed(p):
@@ -9,23 +11,83 @@ def distribution_seed(p):
     return p.distribution_seed if p.lock_distribution else p.seed
 
 
+def level_spans(p):
+    'IA: Alturas entre cotas de planta en mm; valores por defecto preservan 27/57/112 mm de las casas guardadas.'
+    if p.height_type=='RUIN':return [getattr(p,'low_wall_height',27.0)-2]
+    spans=[getattr(p,'ground_storey_height',config.FLOOR_PITCH)]
+    if p.height_type=='TWO':spans.append(getattr(p,'upper_storey_height',config.FLOOR_PITCH))
+    return spans
+
+
+def upper_floor(p):
+    'IA: Cota común de entreplanta y desembarco, independiente de la altura de la planta superior.'
+    return 2+getattr(p,'ground_storey_height',config.FLOOR_PITCH)
+
+
+def building_height(p):
+    'IA: Cota superior de los muros desde el origen del modelo; conserva dos mm de base.'
+    return 2+sum(level_spans(p))
+
+
+def spread_positions(candidates,count,start,end,minimum):
+    'IA: Elige el mayor número posible de posiciones con separación mínima, próximas a divisiones iguales del tramo; desempate determinista.'
+    values=sorted(set(candidates))
+    for n in range(min(count,len(values)),0,-1):
+        targets=[start+(end-start)*(i+1)/(n+1) for i in range(n)]
+        choices=(xs for xs in combinations(values,n) if all(b-a>=minimum-1e-6 for a,b in zip(xs,xs[1:])))
+        best=min(choices,key=lambda xs:sum((a-b)**2 for a,b in zip(xs,targets)),default=None)
+        if best is not None:return list(best)
+    return []
+
+
+def pillar_layout(p,door,rh):
+    'IA: Planifica pilares intermedios antes de borrar fuente; modo manual rechaza invasiones y modo equidistante reparte sobre candidatos libres.'
+    count=min(p.pillar_count,max(0,int(p.length/32)))
+    mode=getattr(p,'pillar_distribution','LEGACY');rng=random.Random(distribution_seed(p)+48193)
+    clearance=2+max(2.8,rh*.65)
+    def free(x,width):
+        'IA: Exige separación respecto a puerta y pilares de esquina/conexión, además del borde del muro.'
+        for side in (-1,1):
+            corner=turn_mode(p,side)!='NONE'
+            connected=p.connection_enabled and (p.connection_side=='BOTH' or p.connection_side==('LEFT' if side<0 else 'RIGHT'))
+            margin=(corner_width(p) if corner else 12) if corner or connected else 2
+            if side*x+width/2>p.length/2-margin-2:return False
+        return not (door and x+width/2>door['left']-clearance and x-width/2<door['right']+clearance)
+    if mode=='LEGACY':
+        result=[]
+        for i in range(count):
+            x=((i+1)/(count+1)+rng.uniform(-.065,.065)-.5)*p.length;width=p.pillar_width*rng.uniform(.92,1.08)
+            if not (door and x+width/2>door['left']-clearance and x-width/2<door['right']+clearance):result.append((x,width))
+        return result
+    if mode=='CUSTOM':
+        try:
+            values=[float(v.strip()) for v in p.pillar_positions.split(';') if v.strip()][:p.pillar_count]
+            if len(values)!=p.pillar_count or any(not 0<=v<=100 for v in values):raise ValueError()
+        except ValueError:raise ValueError('Pilares: introduce un porcentaje de 0 a 100 por pilar, separado por punto y coma.') from None
+        xs=sorted((u/100-.5)*p.length for u in values)
+        if any(not free(x,p.pillar_width) for x in xs) or any(b-a<p.pillar_width+2 for a,b in zip(xs,xs[1:])):
+            raise ValueError('Pilares manuales: invaden una puerta, una esquina o se solapan. Revisa sus posiciones.')
+    else:
+        candidates=[(i/24-.5)*p.length for i in range(1,24)]
+        candidates += [((i+1)/(count+1)-.5)*p.length for i in range(count)]
+        xs=spread_positions([x for x in candidates if free(x,p.pillar_width)],count,-p.length/2,p.length/2,p.pillar_width+2)
+    return [(x,p.pillar_width) for x in xs]
+
+
 def course_layout(p):
     'IA: Calcula cotas exactas de planta y mínimo de hilada; función sin geometría de Blender.'
-    span=25.0 if p.height_type=='RUIN' else config.FLOOR_PITCH
-    levels=2 if p.height_type=='TWO' else 1
-    rows=max(3,round(span/p.stone_size))
-    while True:
-        weights=[1 if r%2==0 else p.alternate_height for r in range(rows)]
-        scale=span/sum(weights)
-        if min(weights)*scale>=3 or rows<=3:
-            break
-        rows-=1
     edges=[2.0]
-    for floor in range(levels):
+    for span in level_spans(p):
+        base=edges[-1];rows=max(3,round(span/p.stone_size))
+        while True:
+            weights=[1 if r%2==0 else p.alternate_height for r in range(rows)]
+            scale=span/sum(weights)
+            if min(weights)*scale>=3 or rows<=3:break
+            rows-=1
         for weight in weights:
             edges.append(edges[-1]+weight*scale)
-        edges[-1]=2+(floor+1)*span
-    return edges,span/rows
+        edges[-1]=base+span
+    return edges,(edges[-1]-2)/(len(edges)-1)
 
 
 def turn_mode(p,side):
@@ -44,7 +106,7 @@ def apply_profiles(p):
     runtime.busy=True
     try:
         p.thickness,p.stone_size,p.projection,p.pillar_width=config.BUILD_TYPES[p.build_type]
-        p.height=config.HEIGHT_TYPES[p.height_type]
+        p.height=building_height(p)
         if p.wear_level in config.WEAR_LEVELS:
             p.wear=config.WEAR_LEVELS[p.wear_level]
         p.left_height=p.height
@@ -122,6 +184,11 @@ def plan_door(p):
     width=min(requested,available)
     center=(p.door_position-.5)*p.length
     center=max(-p.length/2+left_margin+width/2,min(p.length/2-right_margin-width/2,center))
+    style=getattr(p,'door_style','AUTO')
+    gate=style in ('WOOD_GATE','IRON_GATE') or (style=='AUTO' and (p.build_type=='PARTITION' or p.door_height+5>p.height))
+    if gate:
+        return {'left':center-width/2,'right':center+width/2,'top':p.door_height,'lintel_top':max(p.height,p.door_height)+1,'gate':True,'gate_material':'IRON' if style=='IRON_GATE' else 'WOOD'}
+    if p.door_height+3>p.height:raise ValueError('La puerta cerrada no cabe en altura: aumenta la planta o elige una cancela.')
     index=next((i for i in range(1,rows) if edges[i]>=p.door_height-.00001),rows-1)
     return {'left':center-width/2,'right':center+width/2,'top':edges[index],'lintel_top':edges[index+1]}
 

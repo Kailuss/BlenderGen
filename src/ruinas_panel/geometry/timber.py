@@ -113,6 +113,7 @@ def wooden_door(coll,p,door):
     'IA: Hoja, refuerzos y picaporte dentro del hueco previsto; conserva grosores resistentes.'
     if not door or not p.door_leaf:
         return
+    if door.get('gate'):return gate_door(coll,p,door)
     wood=primitives.material('Madera · tablones',(.33,.235,.14))
     iron=primitives.material('Hierro · forjado',(.10,.105,.11))
     left=door.get('clear_left',door['left']+.4)-.3
@@ -170,6 +171,15 @@ def wooden_frame(coll,p,door):
     'IA: Jambas y dintel apoyados en mampostería; respeta clear_left/right/top.'
     if not door or not p.wood_frame:
         return
+    if door.get('gate'):
+        iron=door['gate_material']=='IRON'
+        mat=primitives.material('Hierro · cancela' if iron else 'Madera · cancela',(.12,.12,.13) if iron else (.29,.21,.13))
+        for i,x in enumerate((door['left']+1.2,door['right']-1.2)):
+            if iron:primitives.block('Hierro · poste cancela',x-1.6,x+1.6,-2,2,.6,door['top']+2,coll,mat)
+            else:timber_beam(coll,mat,'Madera · poste cancela',(x,0,.6),(x,0,door['top']+2),3.2,4,p.seed+431+i)
+        door.update(clear_left=door['left']+2.8,clear_right=door['right']-2.8,clear_top=door['top'])
+        meta.put(bpy.context.scene,'puerta_generada',door)
+        return
     mat=primitives.material('Madera · envejecida',(.29,.21,.13))
     w=3.2
     depth=5.2
@@ -181,4 +191,23 @@ def wooden_frame(coll,p,door):
     door['clear_left']=door['left']+w-.4
     door['clear_right']=door['right']-w+.4
     door['clear_top']=door['top']-2.7
+    meta.put(bpy.context.scene,'puerta_generada',door)
+
+
+def gate_door(coll,p,door):
+    'IA: Cancela abierta con listones o barrotes y travesaños; respeta altura solicitada aunque sobresalga del muro bajo y no crea dintel.'
+    iron=door['gate_material']=='IRON';prefix='Hierro' if iron else 'Madera'
+    mat=primitives.material(prefix+' · cancela',(.12,.12,.13) if iron else (.33,.235,.14))
+    left=door.get('clear_left',door['left']+.6);right=door.get('clear_right',door['right']-.6)
+    bottom=.8;top=door['top'];count=max(3,round((right-left)/4));pitch=(right-left)/count
+    for i in range(count):
+        x=left+(i+.5)*pitch
+        if iron:ob=primitives.block(prefix+' · barrote cancela',x-.55,x+.55,-.8,.8,bottom,top,coll,mat)
+        else:ob=timber_beam(coll,mat,prefix+' · listón cancela',(x,0,bottom),(x,0,top),min(2.1,pitch*.65),2.2,p.seed+730+i*17)
+        ob['hoja_puerta']=True
+    for i,fraction in enumerate((.2,.8)):
+        z=bottom+(top-bottom)*fraction
+        if iron:primitives.block(prefix+' · travesaño cancela',left-.5,right+.5,-1.2,.4,z-.75,z+.75,coll,mat)
+        else:timber_beam(coll,mat,prefix+' · travesaño cancela',(left-.5,-.8,z),(right+.5,-.8,z),1.8,1.4,p.seed+801+i)
+    door.update(leaf=True,planks=count)
     meta.put(bpy.context.scene,'puerta_generada',door)

@@ -3,7 +3,7 @@ import math
 import random
 from .. import meta,config
 from ..geometry import primitives
-from . import spatial
+from . import spatial,layout
 
 
 def wood_panel(coll,mat,part,a,b,z0,z1,grain,seed):
@@ -46,7 +46,7 @@ def build(coll,p,scene):
     if not plan or 'error' in plan:return
     mat=primitives.material('Madera · interior',(.37,.255,.145))
     wood=primitives.material('Madera · tabique',(.30,.20,.12))
-    bottom=3 if p.ground_floor else .7;top=min(p.height,55.2)
+    bottom=3 if p.ground_floor else .7;top=min(p.height,layout.upper_floor(p)-1.8)
     for index,part in enumerate(plan['partitions']):
         doors=[(c-plan['door_width']/2,c+plan['door_width']/2) for c in part['doors']]
         cuts=sorted({part['start'],part['end'],*[x for pair in doors for x in pair]})
@@ -68,7 +68,7 @@ def build(coll,p,scene):
                 if height-z0<1:continue
                 rows=1;below='%s:%s:lintel'%(index,round(a,3)) if over else 'ground'
                 for row in range(rows):
-                    low=z0+config.PARTITION_SECTION_HEIGHT*row;high=min(height,low+config.PARTITION_SECTION_HEIGHT)
+                    low=z0+config.PARTITION_SECTION_HEIGHT*row;high=height
                     if high-low<1:continue
                     if row:low-=config.PARTITION_JOINT_OVERLAP
                     if column:left_overlap=left-config.PARTITION_JOINT_OVERLAP

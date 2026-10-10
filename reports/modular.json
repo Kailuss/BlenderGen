@@ -13,16 +13,16 @@
       "microdetail": false,
       "faces": 2296,
       "vertices": 2820,
-      "seconds": 0.30857229995308444,
+      "seconds": 0.2223682000185363,
       "stages": {
-        "biseles": 0.014796199859119952,
-        "desgaste": 0.00013369956286624074,
-        "estructura_base": 0.03453659999649972,
-        "aberturas_y_vigas": 0.0010976000339724123,
-        "integracion": 0.015778600005432963,
-        "preparacion": 0.2757552999537438,
-        "agrupacion": 0.005629100021906197,
-        "total": 0.30857229995308444
+        "biseles": 0.012326100026257336,
+        "desgaste": 0.00011740013724192977,
+        "estructura_base": 0.017742800002451986,
+        "aberturas_y_vigas": 0.0009932999964803457,
+        "integracion": 0.013554100005421788,
+        "preparacion": 0.19509699998889118,
+        "agrupacion": 0.004777900001499802,
+        "total": 0.2223682000185363
       },
       "cached": false,
       "solid": false,
@@ -126,7 +126,7 @@
   },
   {
     "case": "door_windows_work",
-    "digest": "44389be16b49389e72a13817e29b93e17dfd1bd7644d5a4d5b1f445adf8ec659",
+    "digest": "5a2e59a72ebcb9568c398691174e4072bb93b5f73f6a8bd7772668e7b295651c",
     "blender": "5.2.2 LTS",
     "closure": {
       "open_edges": {},
@@ -136,24 +136,24 @@
       "quality": "WORK",
       "objects": 20,
       "microdetail": false,
-      "faces": 17335,
-      "vertices": 17928,
-      "seconds": 0.32024299999466166,
+      "faces": 17350,
+      "vertices": 17949,
+      "seconds": 0.3341961999540217,
       "stages": {
-        "biseles": 0.02210699999704957,
-        "desgaste": 0.00019189983140677214,
-        "estructura_base": 0.02512390003539622,
-        "aberturas_y_vigas": 0.10393099999055266,
-        "integracion": 0.21187570004258305,
-        "preparacion": 0.2484480999992229,
-        "agrupacion": 0.03027520002797246,
-        "total": 0.32024299999466166
+        "biseles": 0.02202030032640323,
+        "desgaste": 0.0001754998811520636,
+        "estructura_base": 0.02381509996484965,
+        "aberturas_y_vigas": 0.10894509998615831,
+        "integracion": 0.2239518000278622,
+        "preparacion": 0.25932459998875856,
+        "agrupacion": 0.03199730004416779,
+        "total": 0.3341961999540217
       },
       "cached": false,
       "solid": false,
-      "expanded_faces": 23479,
+      "expanded_faces": 23494,
       "instances": 200,
-      "variants": 17,
+      "variants": 18,
       "detail_limited": false
     },
     "windows": 2,
@@ -224,33 +224,33 @@
         ]
       },
       "Tramo \u00b7 front \u00b7 N\u00facleo \u00b7 neutro": {
-        "faces": 50,
-        "vertices": 72,
+        "faces": 62,
+        "vertices": 88,
         "bounds": [
           [
-            -58.4,
+            -49.05336,
             -3.24,
             13.45222
           ],
           [
-            -32.55742,
+            -18.07944,
             3.24,
             37.56667
           ]
         ]
       },
       "Tramo \u00b7 front \u00b7 Piedra \u00b7 neutro": {
-        "faces": 592,
-        "vertices": 619,
+        "faces": 594,
+        "vertices": 622,
         "bounds": [
           [
-            -60.0,
-            -5.35583,
-            14.40411
+            -48.79096,
+            -5.34662,
+            14.40262
           ],
           [
-            -32.85844,
-            5.42676,
+            -16.44089,
+            5.40862,
             38.47339
           ]
         ]
@@ -260,7 +260,7 @@
         "vertices": 208,
         "bounds": [
           [
-            -56.8,
+            -40.63334,
             -6.5,
             17.15
           ],
@@ -293,28 +293,28 @@
         "bounds": [
           [
             51.47,
-            6.52,
+            17.71483,
             13.60222
           ],
           [
             57.23,
-            32.94949,
+            48.00958,
             37.71667
           ]
         ]
       },
       "Tramo \u00b7 right \u00b7 Piedra \u00b7 neutro": {
-        "faces": 535,
-        "vertices": 558,
+        "faces": 536,
+        "vertices": 560,
         "bounds": [
           [
-            48.96259,
-            8.1,
+            49.00367,
+            17.94483,
             14.45222
           ],
           [
             59.74656,
-            32.71949,
+            47.77958,
             38.41667
           ]
         ]
@@ -324,7 +324,7 @@
         "vertices": 1898,
         "bounds": [
           [
-            -56.5,
+            -40.33333,
             -8.11995,
             0.6
           ],
@@ -420,7 +420,7 @@
         "vertices": 460,
         "bounds": [
           [
-            -55.86,
+            -39.69333,
             -8.51177,
             7.04137
           ],
@@ -437,12 +437,12 @@
         "bounds": [
           [
             59.22994,
-            11.42,
+            24.92,
             19.1
           ],
           [
             62.46995,
-            27.42,
+            40.92,
             34.55
           ]
         ]
@@ -453,12 +453,12 @@
         "bounds": [
           [
             47.85,
-            11.12,
+            24.62,
             17.15
           ],
           [
             60.85,
-            27.72,
+            41.22,
             19.4
           ]
         ]
@@ -469,12 +469,12 @@
         "bounds": [
           [
             62.23823,
-            12.06,
+            25.56,
             21.8
           ],
           [
             62.86177,
-            27.52786,
+            41.02786,
             31.58
           ]
         ]
@@ -490,12 +490,12 @@
       "hiladas_generadas": "[2.0, 8.11111111111111, 14.222222222222221, 20.333333333333332, 26.444444444444443, 32.55555555555556, 38.66666666666667, 44.777777777777786, 50.8888888888889, 57.0]",
       "giros_generados": "[{\"id\": \"right\", \"start\": 7.92, \"end\": 57.92, \"origin\": [54.35, 0], \"axis\": [0, 1], \"height\": 50.8888888888889}]",
       "paredes_generadas": "[{\"id\": \"front\", \"start\": -60.0, \"end\": 60.0, \"origin\": [0, 0], \"axis\": [1, 0], \"height\": 57.0}, {\"id\": \"right\", \"start\": 7.92, \"end\": 57.92, \"origin\": [54.35, 0], \"axis\": [0, 1], \"height\": 50.8888888888889}]",
-      "ventanas_generadas": "[{\"wall\": \"front\", \"x\": -48.5, \"x0\": -56.0, \"x1\": -41.0, \"z0\": 18.0, \"z1\": 34.0, \"frame_y\": -6.5, \"balcony\": false}, {\"wall\": \"right\", \"x\": 19.42, \"x0\": 11.920000000000002, \"x1\": 26.92, \"z0\": 18.0, \"z1\": 34.0, \"frame_y\": -6.5, \"balcony\": false}]",
+      "ventanas_generadas": "[{\"wall\": \"front\", \"x\": -32.33333333333333, \"x0\": -39.83333333333333, \"x1\": -24.83333333333333, \"z0\": 18, \"z1\": 34.0, \"frame_y\": -6.5, \"balcony\": false}, {\"wall\": \"right\", \"x\": 32.92, \"x0\": 25.42, \"x1\": 40.42, \"z0\": 18, \"z1\": 34.0, \"frame_y\": -6.5, \"balcony\": false}]",
       "vigas_generadas": "[]",
       "derrumbe_global": "{\"front\": 2, \"sin_apoyo\": 0}",
       "suelos_generados": "[]",
       "cubierta_generada": "[]",
-      "relaciones_estructura": "[{\"element\": \"front:Madera \u00b7 jamba 0:242\", \"role\": \"wood\", \"supported_by\": [\"front:Asiento de dintel:6\", \"front:Piedra dintel de puerta:8\", \"front:Piedra entera \u00b7 hilada 00.03:16\", \"front:Piedra entera \u00b7 hilada 01.04:32\", \"front:Piedra entera \u00b7 hilada 02.03:48\", \"front:Piedra entera \u00b7 hilada 03.04:61\", \"front:Piedra entera \u00b7 hilada 04.03:76\", \"front:Piedra entera \u00b7 hilada 05.04:92\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba 1:243\", \"role\": \"wood\", \"supported_by\": [\"front:Asiento de dintel:7\", \"front:Piedra dintel de puerta:8\", \"front:Piedra entera \u00b7 hilada 00.04:18\", \"front:Piedra entera \u00b7 hilada 01.05:34\", \"front:Piedra entera \u00b7 hilada 02.04:50\", \"front:Piedra entera \u00b7 hilada 03.05:63\", \"front:Piedra entera \u00b7 hilada 04.04:78\", \"front:Piedra entera \u00b7 hilada 05.05:94\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 cabezal:244\", \"role\": \"wood\", \"supported_by\": [\"front:Asiento de dintel:6\", \"front:Asiento de dintel:7\", \"front:Piedra dintel de puerta:8\", \"front:Mortero \u00b7 hilada 05.04:91\", \"front:Piedra entera \u00b7 hilada 05.04:92\", \"front:Mortero \u00b7 hilada 05.05:93\", \"front:Piedra entera \u00b7 hilada 05.05:94\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba ventana:265\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.00:42\", \"front:Piedra entera \u00b7 hilada 03.00:55\", \"front:Piedra entera \u00b7 hilada 04.00:70\", \"front:Piedra entera \u00b7 hilada 05.00:84\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba ventana:266\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.01:44\", \"front:Piedra entera \u00b7 hilada 03.02:57\", \"front:Piedra entera \u00b7 hilada 04.01:72\", \"front:Piedra entera \u00b7 hilada 05.02:88\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 ventana travesa\u00f1o:267\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.00:42\", \"front:Piedra entera \u00b7 hilada 02.01:44\", \"front:Piedra entera \u00b7 hilada 03.00:55\", \"front:Piedra entera \u00b7 hilada 03.02:57\", \"front:Piedra \u00b7 alf\u00e9izar interior:269\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 ventana travesa\u00f1o:268\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 04.00:70\", \"front:Piedra entera \u00b7 hilada 04.01:72\", \"front:Piedra entera \u00b7 hilada 05.00:84\", \"front:Piedra entera \u00b7 hilada 05.01:86\", \"front:Piedra entera \u00b7 hilada 05.02:88\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 jamba ventana:279\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.2.0:181\", \"right:Piedra \u00b7 right.3.0:191\", \"right:Piedra \u00b7 right.4.0:201\", \"right:Piedra \u00b7 right.5.0:209\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 jamba ventana:280\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.2.1:183\", \"right:Piedra \u00b7 right.2.2:185\", \"right:Piedra \u00b7 right.3.2:193\", \"right:Piedra \u00b7 right.4.2:203\", \"right:Piedra \u00b7 right.5.2:213\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 ventana travesa\u00f1o:281\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.2.0:181\", \"right:Piedra \u00b7 right.2.1:183\", \"right:Piedra \u00b7 right.2.2:185\", \"right:Piedra \u00b7 right.3.0:191\", \"right:Piedra \u00b7 right.3.2:193\", \"right:Piedra \u00b7 alf\u00e9izar interior:283\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 ventana travesa\u00f1o:282\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.4.0:201\", \"right:Piedra \u00b7 right.5.0:209\", \"right:Piedra \u00b7 right.5.1:211\", \"right:Piedra \u00b7 right.5.2:213\"], \"policy\": \"reserve_contact\"}]",
+      "relaciones_estructura": "[{\"element\": \"front:Madera \u00b7 jamba 0:244\", \"role\": \"wood\", \"supported_by\": [\"front:Asiento de dintel:6\", \"front:Piedra dintel de puerta:8\", \"front:Piedra entera \u00b7 hilada 00.03:16\", \"front:Piedra entera \u00b7 hilada 01.04:32\", \"front:Piedra entera \u00b7 hilada 02.03:48\", \"front:Piedra entera \u00b7 hilada 03.04:64\", \"front:Piedra entera \u00b7 hilada 04.03:78\", \"front:Piedra entera \u00b7 hilada 05.04:94\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba 1:245\", \"role\": \"wood\", \"supported_by\": [\"front:Asiento de dintel:7\", \"front:Piedra dintel de puerta:8\", \"front:Piedra entera \u00b7 hilada 00.04:18\", \"front:Piedra entera \u00b7 hilada 01.05:34\", \"front:Piedra entera \u00b7 hilada 02.04:50\", \"front:Piedra entera \u00b7 hilada 03.05:66\", \"front:Piedra entera \u00b7 hilada 04.04:80\", \"front:Piedra entera \u00b7 hilada 05.05:96\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 cabezal:246\", \"role\": \"wood\", \"supported_by\": [\"front:Asiento de dintel:6\", \"front:Asiento de dintel:7\", \"front:Piedra dintel de puerta:8\", \"front:Mortero \u00b7 hilada 05.04:93\", \"front:Piedra entera \u00b7 hilada 05.04:94\", \"front:Mortero \u00b7 hilada 05.05:95\", \"front:Piedra entera \u00b7 hilada 05.05:96\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba ventana:267\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.01:44\", \"front:Piedra entera \u00b7 hilada 03.02:60\", \"front:Piedra entera \u00b7 hilada 04.01:76\", \"front:Piedra entera \u00b7 hilada 05.02:90\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba ventana:268\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.03:48\", \"front:Piedra entera \u00b7 hilada 03.03:62\", \"front:Piedra entera \u00b7 hilada 04.03:78\", \"front:Piedra entera \u00b7 hilada 05.03:92\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 ventana travesa\u00f1o:269\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.01:44\", \"front:Piedra entera \u00b7 hilada 02.03:48\", \"front:Piedra entera \u00b7 hilada 03.02:60\", \"front:Piedra entera \u00b7 hilada 03.03:62\", \"front:Piedra \u00b7 alf\u00e9izar interior:271\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 ventana travesa\u00f1o:270\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 04.01:76\", \"front:Piedra entera \u00b7 hilada 04.03:78\", \"front:Piedra entera \u00b7 hilada 05.02:90\", \"front:Piedra entera \u00b7 hilada 05.03:92\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 jamba ventana:281\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.2.1:185\", \"right:Piedra \u00b7 right.3.2:197\", \"right:Piedra \u00b7 right.4.1:205\", \"right:Piedra \u00b7 right.5.2:215\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 jamba ventana:282\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.2.3:189\", \"right:Piedra \u00b7 right.4.3:207\", \"right:Piedra \u00b7 right.5.3:217\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 ventana travesa\u00f1o:283\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.2.1:185\", \"right:Piedra \u00b7 right.2.3:189\", \"right:Piedra \u00b7 right.3.2:197\", \"right:Piedra \u00b7 alf\u00e9izar interior:285\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 ventana travesa\u00f1o:284\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.4.1:205\", \"right:Piedra \u00b7 right.4.3:207\", \"right:Piedra \u00b7 right.5.2:215\", \"right:Piedra \u00b7 right.5.3:217\"], \"policy\": \"reserve_contact\"}]",
       "escalera_generada": "{}",
       "cubierta_detalles": "{}",
       "plano_interior": "{}",
@@ -507,7 +507,7 @@
   },
   {
     "case": "room_beams_draft",
-    "digest": "dc3b0630f6eb7321438c846dc217f6860051894b3b72b2c840fba1b30b90091a",
+    "digest": "b412349e3b74236bf3bc28abe4413e3cb8b6ac2ac0f6f59268a9eb48443af02d",
     "blender": "5.2.2 LTS",
     "closure": {
       "open_edges": {},
@@ -517,23 +517,23 @@
       "quality": "DRAFT",
       "objects": 42,
       "microdetail": false,
-      "faces": 26488,
-      "vertices": 28902,
-      "seconds": 1.8824925000080839,
+      "faces": 26548,
+      "vertices": 28959,
+      "seconds": 3.0575796000193805,
       "stages": {
-        "biseles": 0.05859909893479198,
-        "desgaste": 0.0007410003454424441,
-        "estructura_base": 0.09411559998989105,
-        "aberturas_y_vigas": 1.135348999989219,
-        "integracion": 1.3695089999819174,
-        "preparacion": 1.5703684000181966,
-        "agrupacion": 0.13126510003348812,
-        "total": 1.8824925000080839
+        "biseles": 0.11599419917911291,
+        "desgaste": 0.000848099822178483,
+        "estructura_base": 0.09062139998422936,
+        "aberturas_y_vigas": 1.827581099991221,
+        "integracion": 2.256614800018724,
+        "preparacion": 2.5361043000011705,
+        "agrupacion": 0.207419500045944,
+        "total": 3.0575796000193805
       },
       "cached": false,
       "solid": false,
-      "expanded_faces": 39534,
-      "instances": 771,
+      "expanded_faces": 39626,
+      "instances": 773,
       "variants": 18,
       "detail_limited": false
     },
@@ -574,7 +574,7 @@
       },
       "MURO \u00b7 array de instancias": {
         "faces": 0,
-        "vertices": 771,
+        "vertices": 773,
         "bounds": [
           [
             -54.46782,
@@ -605,8 +605,8 @@
         ]
       },
       "Tramo \u00b7 front \u00b7 N\u00facleo \u00b7 neutro": {
-        "faces": 176,
-        "vertices": 256,
+        "faces": 164,
+        "vertices": 240,
         "bounds": [
           [
             -49.55,
@@ -621,17 +621,17 @@
         ]
       },
       "Tramo \u00b7 front \u00b7 Piedra \u00b7 neutro": {
-        "faces": 814,
-        "vertices": 781,
+        "faces": 765,
+        "vertices": 734,
         "bounds": [
           [
             -48.34299,
-            -5.42031,
-            14.39029
+            -5.38741,
+            14.38913
           ],
           [
             48.3299,
-            5.42838,
+            5.42926,
             56.80467
           ]
         ]
@@ -641,7 +641,7 @@
         "vertices": 148,
         "bounds": [
           [
-            -44.675,
+            -38.6125,
             -6.5,
             17.15
           ],
@@ -669,33 +669,33 @@
         ]
       },
       "Tramo \u00b7 left \u00b7 N\u00facleo \u00b7 neutro": {
-        "faces": 104,
-        "vertices": 148,
+        "faces": 110,
+        "vertices": 156,
         "bounds": [
           [
             -57.23,
-            6.52,
+            12.96784,
             13.60222
           ],
           [
             -51.47,
-            44.78311,
+            44.96793,
             92.71667
           ]
         ]
       },
       "Tramo \u00b7 left \u00b7 Piedra \u00b7 neutro": {
-        "faces": 471,
-        "vertices": 438,
+        "faces": 498,
+        "vertices": 464,
         "bounds": [
           [
             -59.69916,
-            8.1,
+            13.19784,
             14.45222
           ],
           [
-            -48.98015,
-            44.5531,
+            -48.96338,
+            44.73793,
             93.41666
           ]
         ]
@@ -733,40 +733,40 @@
         ]
       },
       "Tramo \u00b7 right \u00b7 N\u00facleo \u00b7 neutro": {
-        "faces": 112,
-        "vertices": 160,
+        "faces": 116,
+        "vertices": 164,
         "bounds": [
           [
             51.47,
-            6.52,
+            12.91378,
             13.60222
           ],
           [
             57.23,
-            34.50421,
+            44.97163,
             92.71667
           ]
         ]
       },
       "Tramo \u00b7 right \u00b7 Piedra \u00b7 neutro": {
-        "faces": 510,
-        "vertices": 476,
+        "faces": 525,
+        "vertices": 490,
         "bounds": [
           [
             48.95148,
-            8.1,
+            13.14378,
             14.45222
           ],
           [
-            59.74656,
-            34.27421,
+            59.72111,
+            44.74163,
             93.41666
           ]
         ]
       },
       "Tramo \u00b7 back \u00b7 N\u00facleo \u00b7 neutro": {
-        "faces": 184,
-        "vertices": 264,
+        "faces": 190,
+        "vertices": 272,
         "bounds": [
           [
             -49.85,
@@ -781,8 +781,8 @@
         ]
       },
       "Tramo \u00b7 back \u00b7 Piedra \u00b7 neutro": {
-        "faces": 698,
-        "vertices": 652,
+        "faces": 761,
+        "vertices": 710,
         "bounds": [
           [
             -48.27,
@@ -801,7 +801,7 @@
         "vertices": 812,
         "bounds": [
           [
-            -44.375,
+            -42.36812,
             -8.49155,
             0.76589
           ],
@@ -929,7 +929,7 @@
         "vertices": 728,
         "bounds": [
           [
-            -43.735,
+            -40.4,
             -8.85,
             7.04137
           ],
@@ -946,12 +946,12 @@
         "bounds": [
           [
             -62.46975,
-            11.42,
+            20.96,
             19.1
           ],
           [
             -59.22993,
-            27.42,
+            36.96,
             34.55
           ]
         ]
@@ -962,7 +962,7 @@
         "bounds": [
           [
             -60.85,
-            11.12,
+            20.66,
             17.15
           ],
           [
@@ -978,7 +978,7 @@
         "bounds": [
           [
             -62.86177,
-            12.06,
+            21.6,
             21.8
           ],
           [
@@ -1010,12 +1010,12 @@
         "bounds": [
           [
             59.23025,
-            11.42,
+            20.96,
             19.1
           ],
           [
             62.47007,
-            27.42,
+            36.96,
             34.55
           ]
         ]
@@ -1026,12 +1026,12 @@
         "bounds": [
           [
             47.85,
-            11.12,
+            20.66,
             17.15
           ],
           [
             60.85,
-            27.72,
+            37.26,
             74.4
           ]
         ]
@@ -1042,12 +1042,12 @@
         "bounds": [
           [
             62.23823,
-            12.06,
+            21.6,
             21.8
           ],
           [
             62.86177,
-            27.52786,
+            37.06786,
             86.58
           ]
         ]
@@ -1058,12 +1058,12 @@
         "bounds": [
           [
             59.23446,
-            11.42,
+            20.96,
             74.1
           ],
           [
             62.46222,
-            27.42,
+            36.96,
             89.55
           ]
         ]
@@ -1073,12 +1073,12 @@
         "vertices": 280,
         "bounds": [
           [
-            -44.95,
+            -22.81667,
             62.79993,
             19.1
           ],
           [
-            -28.95,
+            -6.81667,
             66.03975,
             34.55
           ]
@@ -1089,12 +1089,12 @@
         "vertices": 96,
         "bounds": [
           [
-            -45.25,
+            -23.11667,
             51.42,
             17.15
           ],
           [
-            -5.55625,
+            23.11667,
             64.42,
             19.4
           ]
@@ -1105,12 +1105,12 @@
         "vertices": 336,
         "bounds": [
           [
-            -44.31,
+            -22.17667,
             65.80823,
             21.8
           ],
           [
-            -5.74839,
+            22.92453,
             66.43177,
             31.58
           ]
@@ -1121,12 +1121,12 @@
         "vertices": 280,
         "bounds": [
           [
-            -21.85625,
+            6.81667,
             62.80777,
             19.1
           ],
           [
-            -5.85625,
+            22.81667,
             66.03555,
             34.55
           ]
@@ -1223,12 +1223,12 @@
       "hiladas_generadas": "[2.0, 8.11111111111111, 14.222222222222221, 20.333333333333332, 26.444444444444443, 32.55555555555556, 38.66666666666667, 44.777777777777786, 50.8888888888889, 57.0, 63.111111111111114, 69.22222222222223, 75.33333333333334, 81.44444444444446, 87.55555555555557, 93.66666666666669, 99.7777777777778, 105.88888888888891, 112.0]",
       "giros_generados": "[{\"id\": \"left\", \"start\": 7.92, \"end\": 50.0, \"origin\": [-54.35, 0], \"axis\": [0, 1], \"height\": 112.0}, {\"id\": \"right\", \"start\": 7.92, \"end\": 50.0, \"origin\": [54.35, 0], \"axis\": [0, 1], \"height\": 105.88888888888891}, {\"id\": \"back\", \"start\": -48.45, \"end\": 48.45, \"origin\": [0, 57.92], \"axis\": [1, 0], \"height\": 112.0}]",
       "paredes_generadas": "[{\"id\": \"front\", \"start\": -60.0, \"end\": 60.0, \"origin\": [0, 0], \"axis\": [1, 0], \"height\": 112.0}, {\"id\": \"left\", \"start\": 7.92, \"end\": 50.0, \"origin\": [-54.35, 0], \"axis\": [0, 1], \"height\": 112.0}, {\"id\": \"right\", \"start\": 7.92, \"end\": 50.0, \"origin\": [54.35, 0], \"axis\": [0, 1], \"height\": 105.88888888888891}, {\"id\": \"back\", \"start\": -48.45, \"end\": 48.45, \"origin\": [0, 57.92], \"axis\": [1, 0], \"height\": 112.0}]",
-      "ventanas_generadas": "[{\"wall\": \"front\", \"x\": -36.375, \"x0\": -43.875, \"x1\": -28.875, \"z0\": 18.0, \"z1\": 34.0, \"frame_y\": -6.5, \"balcony\": false}, {\"wall\": \"front\", \"x\": 30.3125, \"x0\": 22.8125, \"x1\": 37.8125, \"z0\": 18.0, \"z1\": 34.0, \"frame_y\": -6.5, \"balcony\": false}, {\"wall\": \"left\", \"x\": 19.42, \"x0\": 11.920000000000002, \"x1\": 26.92, \"z0\": 18.0, \"z1\": 34.0, \"frame_y\": 6.5, \"balcony\": false}, {\"wall\": \"left\", \"x\": 30.1525, \"x0\": 22.6525, \"x1\": 37.6525, \"z0\": 73.0, \"z1\": 89.0, \"frame_y\": 6.5, \"balcony\": false}, {\"wall\": \"right\", \"x\": 19.42, \"x0\": 11.920000000000002, \"x1\": 26.92, \"z0\": 18.0, \"z1\": 34.0, \"frame_y\": -6.5, \"balcony\": false}, {\"wall\": \"right\", \"x\": 19.42, \"x0\": 11.920000000000002, \"x1\": 26.92, \"z0\": 73.0, \"z1\": 89.0, \"frame_y\": -6.5, \"balcony\": false}, {\"wall\": \"back\", \"x\": -36.95, \"x0\": -44.45, \"x1\": -29.450000000000003, \"z0\": 18.0, \"z1\": 34.0, \"frame_y\": 6.5, \"balcony\": false}, {\"wall\": \"back\", \"x\": -13.856250000000003, \"x0\": -21.356250000000003, \"x1\": -6.356250000000003, \"z0\": 18.0, \"z1\": 34.0, \"frame_y\": 6.5, \"balcony\": false}]",
+      "ventanas_generadas": "[{\"wall\": \"front\", \"x\": -30.3125, \"x0\": -37.8125, \"x1\": -22.8125, \"z0\": 18, \"z1\": 34.0, \"frame_y\": -6.5, \"balcony\": false}, {\"wall\": \"front\", \"x\": 30.3125, \"x0\": 22.8125, \"x1\": 37.8125, \"z0\": 18, \"z1\": 34.0, \"frame_y\": -6.5, \"balcony\": false}, {\"wall\": \"left\", \"x\": 28.96, \"x0\": 21.46, \"x1\": 36.46, \"z0\": 18, \"z1\": 34.0, \"frame_y\": 6.5, \"balcony\": false}, {\"wall\": \"left\", \"x\": 30.1525, \"x0\": 22.6525, \"x1\": 37.6525, \"z0\": 73.0, \"z1\": 89.0, \"frame_y\": 6.5, \"balcony\": false}, {\"wall\": \"right\", \"x\": 28.96, \"x0\": 21.46, \"x1\": 36.46, \"z0\": 18, \"z1\": 34.0, \"frame_y\": -6.5, \"balcony\": false}, {\"wall\": \"right\", \"x\": 28.96, \"x0\": 21.46, \"x1\": 36.46, \"z0\": 73.0, \"z1\": 89.0, \"frame_y\": -6.5, \"balcony\": false}, {\"wall\": \"back\", \"x\": -14.816666666666666, \"x0\": -22.316666666666666, \"x1\": -7.316666666666666, \"z0\": 18, \"z1\": 34.0, \"frame_y\": 6.5, \"balcony\": false}, {\"wall\": \"back\", \"x\": 14.81666666666667, \"x0\": 7.31666666666667, \"x1\": 22.31666666666667, \"z0\": 18, \"z1\": 34.0, \"frame_y\": 6.5, \"balcony\": false}]",
       "vigas_generadas": "[{\"wall\": \"front\", \"x\": -40.0, \"z\": 53.4, \"span\": [-40.0, 66.42, 53.4]}, {\"wall\": \"front\", \"x\": -20.0, \"z\": 53.4, \"span\": [-20.0, 66.42, 53.4]}, {\"wall\": \"front\", \"x\": 0.0, \"z\": 53.4, \"span\": [0.0, 66.42, 53.4]}, {\"wall\": \"front\", \"x\": 20.0, \"z\": 53.4, \"span\": [20.0, 66.42, 53.4]}, {\"wall\": \"front\", \"x\": 40.0, \"z\": 53.4, \"span\": [40.0, 66.42, 53.4]}]",
       "derrumbe_global": "{\"front\": 7, \"left\": 25, \"right\": 12, \"back\": 28, \"sin_apoyo\": 2}",
       "suelos_generados": "[{\"level\": 0, \"boards\": 34, \"broken\": 8, \"top_mm\": 3.2, \"anchors\": [-50.45, -30.270000000000003, -10.090000000000003, 10.090000000000003, 30.269999999999996, 50.45], \"holes\": [[-20.180000000000003, 29.19444311483461, 6.5585, 5.262600000000001], [20.179999999999993, 22.129715904296443, 6.5585, 5.262600000000001], [26.40000343322754, 0, 0.9450000375509261, 0.7310952290511132], [17.67663369083951, 57.92, 0.907200036048889, 0.7975584316921234], [-54.35, 28.407555725630296, 0.6048000240325927, 0.75324962993145], [54.35, 32.34969352577865, 0.6048000240325927, 0.75324962993145]]}, {\"level\": 1, \"boards\": 37, \"broken\": 8, \"top_mm\": 57.0, \"anchors\": [-40.0, -20.0, 0.0, 20.0, 40.0], \"holes\": [[-20.180000000000003, 20.90841910958559, 6.5585, 5.262600000000001], [20.179999999999993, 27.26386359865444, 6.5585, 5.262600000000001], [26.40000343322754, 0, 3.7800001502037044, 2.924380916204453], [17.67663369083951, 57.92, 3.628800144195556, 3.1902337267684935], [-54.35, 28.407555725630296, 2.419200096130371, 3.0129985197258], [54.35, 32.34969352577865, 2.419200096130371, 3.0129985197258]]}]",
       "cubierta_generada": "[]",
-      "relaciones_estructura": "[{\"element\": \"front:Madera \u00b7 jamba 0:936\", \"role\": \"wood\", \"supported_by\": [\"front:Asiento de dintel:6\", \"front:Piedra dintel de puerta:8\", \"front:Piedra entera \u00b7 hilada 00.02:14\", \"front:Piedra entera \u00b7 hilada 01.03:28\", \"front:Piedra entera \u00b7 hilada 02.02:42\", \"front:Piedra entera \u00b7 hilada 03.03:54\", \"front:Piedra entera \u00b7 hilada 04.02:64\", \"front:Piedra entera \u00b7 hilada 05.03:76\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba 1:937\", \"role\": \"wood\", \"supported_by\": [\"front:Asiento de dintel:7\", \"front:Piedra dintel de puerta:8\", \"front:Piedra entera \u00b7 hilada 00.03:16\", \"front:Piedra entera \u00b7 hilada 01.04:30\", \"front:Piedra entera \u00b7 hilada 02.03:44\", \"front:Piedra entera \u00b7 hilada 03.04:56\", \"front:Piedra entera \u00b7 hilada 04.03:66\", \"front:Piedra entera \u00b7 hilada 05.04:78\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 cabezal:938\", \"role\": \"wood\", \"supported_by\": [\"front:Asiento de dintel:6\", \"front:Asiento de dintel:7\", \"front:Piedra dintel de puerta:8\", \"front:Mortero \u00b7 hilada 05.03:75\", \"front:Piedra entera \u00b7 hilada 05.03:76\", \"front:Mortero \u00b7 hilada 05.04:77\", \"front:Piedra entera \u00b7 hilada 05.04:78\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba ventana:959\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.00:38\", \"front:Piedra entera \u00b7 hilada 03.00:50\", \"front:Piedra entera \u00b7 hilada 04.00:62\", \"front:Piedra entera \u00b7 hilada 05.00:70\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba ventana:960\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.01:40\", \"front:Piedra entera \u00b7 hilada 03.02:52\", \"front:Piedra entera \u00b7 hilada 05.02:74\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 ventana travesa\u00f1o:961\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.00:38\", \"front:Piedra entera \u00b7 hilada 02.01:40\", \"front:Piedra entera \u00b7 hilada 03.00:50\", \"front:Piedra entera \u00b7 hilada 03.02:52\", \"front:Piedra \u00b7 alf\u00e9izar interior:963\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 ventana travesa\u00f1o:962\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 04.00:62\", \"front:Piedra entera \u00b7 hilada 05.00:70\", \"front:Piedra entera \u00b7 hilada 05.01:72\", \"front:Piedra entera \u00b7 hilada 05.02:74\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba ventana:973\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.03:44\", \"front:Piedra entera \u00b7 hilada 03.04:56\", \"front:Piedra entera \u00b7 hilada 04.03:66\", \"front:Piedra entera \u00b7 hilada 05.04:78\", \"front:Piedra entera \u00b7 hilada 05.05:80\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba ventana:974\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.05:48\", \"front:Piedra entera \u00b7 hilada 03.06:58\", \"front:Piedra entera \u00b7 hilada 04.05:68\", \"front:Piedra entera \u00b7 hilada 05.06:82\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 ventana travesa\u00f1o:975\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.03:44\", \"front:Piedra entera \u00b7 hilada 02.05:48\", \"front:Piedra entera \u00b7 hilada 03.06:58\", \"front:Piedra \u00b7 alf\u00e9izar interior:977\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 ventana travesa\u00f1o:976\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 04.03:66\", \"front:Piedra entera \u00b7 hilada 04.05:68\", \"front:Piedra entera \u00b7 hilada 05.05:80\", \"front:Piedra entera \u00b7 hilada 05.06:82\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 jamba ventana:987\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.2.0:338\", \"left:Piedra \u00b7 left.3.0:346\", \"left:Piedra \u00b7 left.4.0:354\", \"left:Piedra \u00b7 left.5.0:360\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 jamba ventana:988\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.2.1:340\", \"left:Piedra \u00b7 left.3.2:348\", \"left:Piedra \u00b7 left.5.2:364\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 ventana travesa\u00f1o:989\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.2.0:338\", \"left:Piedra \u00b7 left.2.1:340\", \"left:Piedra \u00b7 left.3.0:346\", \"left:Piedra \u00b7 left.3.2:348\", \"left:Piedra \u00b7 alf\u00e9izar interior:991\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 ventana travesa\u00f1o:990\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.4.0:354\", \"left:Piedra \u00b7 left.5.0:360\", \"left:Piedra \u00b7 left.5.1:362\", \"left:Piedra \u00b7 left.5.2:364\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 jamba ventana:1001\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.11.1:416\", \"left:Piedra \u00b7 left.12.1:426\", \"left:Piedra \u00b7 left.13.1:432\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 jamba ventana:1002\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.11.3:420\", \"left:Piedra \u00b7 left.13.3:434\", \"left:Piedra \u00b7 left.14.2:440\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 ventana travesa\u00f1o:1003\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.11.1:416\", \"left:Piedra \u00b7 left.11.3:420\", \"left:Piedra \u00b7 left.12.1:426\", \"left:Piedra \u00b7 alf\u00e9izar interior:1005\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 ventana travesa\u00f1o:1004\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.13.1:432\", \"left:Piedra \u00b7 left.13.3:434\", \"left:Piedra \u00b7 left.14.2:440\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 jamba ventana:1015\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.2.0:491\", \"right:Piedra \u00b7 right.3.0:499\", \"right:Piedra \u00b7 right.4.0:507\", \"right:Piedra \u00b7 right.5.0:513\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 jamba ventana:1016\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.2.1:493\", \"right:Piedra \u00b7 right.3.2:501\", \"right:Piedra \u00b7 right.5.2:517\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 ventana travesa\u00f1o:1017\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.2.0:491\", \"right:Piedra \u00b7 right.2.1:493\", \"right:Piedra \u00b7 right.3.0:499\", \"right:Piedra \u00b7 right.3.2:501\", \"right:Piedra \u00b7 alf\u00e9izar interior:1019\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 ventana travesa\u00f1o:1018\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.4.0:507\", \"right:Piedra \u00b7 right.5.0:513\", \"right:Piedra \u00b7 right.5.1:515\", \"right:Piedra \u00b7 right.5.2:517\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 jamba ventana:1029\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.11.0:567\", \"right:Piedra \u00b7 right.12.0:577\", \"right:Piedra \u00b7 right.13.0:583\", \"right:Piedra \u00b7 right.14.0:591\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 jamba ventana:1030\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.11.2:571\", \"right:Piedra \u00b7 right.13.2:585\", \"right:Piedra \u00b7 right.14.1:593\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 ventana travesa\u00f1o:1031\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.11.0:567\", \"right:Piedra \u00b7 right.11.2:571\", \"right:Piedra \u00b7 right.12.0:577\", \"right:Piedra \u00b7 alf\u00e9izar interior:1033\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 ventana travesa\u00f1o:1032\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.13.0:583\", \"right:Piedra \u00b7 right.13.2:585\", \"right:Piedra \u00b7 right.14.0:591\", \"right:Piedra \u00b7 right.14.1:593\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 jamba ventana:1043\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.2.0:668\", \"back:Piedra \u00b7 back.3.0:686\", \"back:Piedra \u00b7 back.4.0:702\", \"back:Piedra \u00b7 back.5.0:717\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 jamba ventana:1044\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.2.1:670\", \"back:Piedra \u00b7 back.3.2:688\", \"back:Piedra \u00b7 back.5.2:721\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 ventana travesa\u00f1o:1045\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.2.0:668\", \"back:Piedra \u00b7 back.2.1:670\", \"back:Piedra \u00b7 back.3.0:686\", \"back:Piedra \u00b7 back.3.2:688\", \"back:Piedra \u00b7 alf\u00e9izar interior:1047\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 ventana travesa\u00f1o:1046\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.4.0:702\", \"back:Piedra \u00b7 back.5.0:717\", \"back:Piedra \u00b7 back.5.1:719\", \"back:Piedra \u00b7 back.5.2:721\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 jamba ventana:1057\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.2.2:672\", \"back:Piedra \u00b7 back.3.2:688\", \"back:Piedra \u00b7 back.4.2:705\", \"back:Piedra \u00b7 back.5.2:721\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 jamba ventana:1058\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.2.3:674\", \"back:Piedra \u00b7 back.2.4:676\", \"back:Piedra \u00b7 back.3.4:690\", \"back:Piedra \u00b7 back.4.4:707\", \"back:Piedra \u00b7 back.5.4:725\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 ventana travesa\u00f1o:1059\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.2.2:672\", \"back:Piedra \u00b7 back.2.3:674\", \"back:Piedra \u00b7 back.3.2:688\", \"back:Piedra \u00b7 back.3.4:690\", \"back:Piedra \u00b7 alf\u00e9izar interior:1061\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 ventana travesa\u00f1o:1060\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.4.2:705\", \"back:Piedra \u00b7 back.5.2:721\", \"back:Piedra \u00b7 back.5.3:723\", \"back:Piedra \u00b7 back.5.4:725\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 viga de planta:1071\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 07.01:100\", \"front:Mortero \u00b7 hilada 08.00:117\", \"front:Piedra entera \u00b7 hilada 08.00:118\", \"front:Mortero \u00b7 hilada 08.01:119\", \"front:Piedra entera \u00b7 hilada 08.01:120\", \"front:Mortero \u00b7 hilada 09.01:137\", \"back:Piedra \u00b7 back.7.1:757\", \"back:Mortero \u00b7 back:774\", \"back:Piedra \u00b7 back.8.0:775\", \"back:Mortero \u00b7 back:776\", \"back:Piedra \u00b7 back.8.1:777\", \"back:Mortero \u00b7 back:792\", \"back:Mortero \u00b7 back:794\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 viga de planta:1073\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 07.02:102\", \"front:Piedra entera \u00b7 hilada 07.03:104\", \"front:Mortero \u00b7 hilada 08.02:121\", \"front:Piedra entera \u00b7 hilada 08.02:122\", \"front:Mortero \u00b7 hilada 09.02:139\", \"front:Mortero \u00b7 hilada 09.03:141\", \"back:Piedra \u00b7 back.7.2:759\", \"back:Piedra \u00b7 back.7.3:761\", \"back:Mortero \u00b7 back:778\", \"back:Piedra \u00b7 back.8.2:779\", \"back:Mortero \u00b7 back:796\", \"back:Mortero \u00b7 back:798\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 viga de planta:1075\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 07.04:106\", \"front:Piedra entera \u00b7 hilada 07.05:108\", \"front:Mortero \u00b7 hilada 08.04:125\", \"front:Piedra entera \u00b7 hilada 08.04:126\", \"front:Mortero \u00b7 hilada 09.04:143\", \"front:Mortero \u00b7 hilada 09.05:145\", \"back:Piedra \u00b7 back.7.4:763\", \"back:Piedra \u00b7 back.7.5:765\", \"back:Mortero \u00b7 back:782\", \"back:Piedra \u00b7 back.8.4:783\", \"back:Mortero \u00b7 back:800\", \"back:Mortero \u00b7 back:802\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 viga de planta:1077\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 07.06:110\", \"front:Piedra entera \u00b7 hilada 07.07:112\", \"front:Mortero \u00b7 hilada 08.06:129\", \"front:Piedra entera \u00b7 hilada 08.06:130\", \"front:Mortero \u00b7 hilada 09.06:147\", \"front:Mortero \u00b7 hilada 09.07:149\", \"back:Piedra \u00b7 back.7.6:767\", \"back:Piedra \u00b7 back.7.7:769\", \"back:Mortero \u00b7 back:786\", \"back:Piedra \u00b7 back.8.6:787\", \"back:Mortero \u00b7 back:804\", \"back:Mortero \u00b7 back:806\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 viga de planta:1079\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 07.08:114\", \"front:Mortero \u00b7 hilada 08.07:131\", \"front:Piedra entera \u00b7 hilada 08.07:132\", \"front:Mortero \u00b7 hilada 08.08:133\", \"front:Piedra entera \u00b7 hilada 08.08:134\", \"front:Mortero \u00b7 hilada 09.08:151\", \"back:Piedra \u00b7 back.7.8:771\", \"back:Mortero \u00b7 back:788\", \"back:Piedra \u00b7 back.8.7:789\", \"back:Mortero \u00b7 back:790\", \"back:Piedra \u00b7 back.8.8:791\", \"back:Mortero \u00b7 back:808\", \"back:Mortero \u00b7 back:810\"], \"policy\": \"reserve_contact\"}]",
+      "relaciones_estructura": "[{\"element\": \"front:Madera \u00b7 jamba 0:941\", \"role\": \"wood\", \"supported_by\": [\"front:Asiento de dintel:6\", \"front:Piedra dintel de puerta:8\", \"front:Piedra entera \u00b7 hilada 00.02:14\", \"front:Piedra entera \u00b7 hilada 01.03:28\", \"front:Piedra entera \u00b7 hilada 02.02:42\", \"front:Piedra entera \u00b7 hilada 03.03:54\", \"front:Piedra entera \u00b7 hilada 04.02:64\", \"front:Piedra entera \u00b7 hilada 05.03:76\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba 1:942\", \"role\": \"wood\", \"supported_by\": [\"front:Asiento de dintel:7\", \"front:Piedra dintel de puerta:8\", \"front:Piedra entera \u00b7 hilada 00.03:16\", \"front:Piedra entera \u00b7 hilada 01.04:30\", \"front:Piedra entera \u00b7 hilada 02.03:44\", \"front:Piedra entera \u00b7 hilada 03.04:56\", \"front:Piedra entera \u00b7 hilada 04.03:66\", \"front:Piedra entera \u00b7 hilada 05.04:78\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 cabezal:943\", \"role\": \"wood\", \"supported_by\": [\"front:Asiento de dintel:6\", \"front:Asiento de dintel:7\", \"front:Piedra dintel de puerta:8\", \"front:Mortero \u00b7 hilada 05.03:75\", \"front:Piedra entera \u00b7 hilada 05.03:76\", \"front:Mortero \u00b7 hilada 05.04:77\", \"front:Piedra entera \u00b7 hilada 05.04:78\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba ventana:964\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.00:38\", \"front:Piedra entera \u00b7 hilada 02.01:40\", \"front:Piedra entera \u00b7 hilada 03.01:52\", \"front:Piedra entera \u00b7 hilada 04.00:62\", \"front:Piedra entera \u00b7 hilada 05.01:72\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba ventana:965\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.02:42\", \"front:Piedra entera \u00b7 hilada 03.03:54\", \"front:Piedra entera \u00b7 hilada 04.02:64\", \"front:Piedra entera \u00b7 hilada 05.02:74\", \"front:Piedra entera \u00b7 hilada 05.03:76\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 ventana travesa\u00f1o:966\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.00:38\", \"front:Piedra entera \u00b7 hilada 02.01:40\", \"front:Piedra entera \u00b7 hilada 02.02:42\", \"front:Piedra entera \u00b7 hilada 03.01:52\", \"front:Piedra \u00b7 alf\u00e9izar interior:968\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 ventana travesa\u00f1o:967\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 04.00:62\", \"front:Piedra entera \u00b7 hilada 04.02:64\", \"front:Piedra entera \u00b7 hilada 05.01:72\", \"front:Piedra entera \u00b7 hilada 05.02:74\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba ventana:978\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.03:44\", \"front:Piedra entera \u00b7 hilada 03.04:56\", \"front:Piedra entera \u00b7 hilada 04.03:66\", \"front:Piedra entera \u00b7 hilada 05.04:78\", \"front:Piedra entera \u00b7 hilada 05.05:80\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 jamba ventana:979\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.05:48\", \"front:Piedra entera \u00b7 hilada 03.06:58\", \"front:Piedra entera \u00b7 hilada 04.05:68\", \"front:Piedra entera \u00b7 hilada 05.06:82\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 ventana travesa\u00f1o:980\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 02.03:44\", \"front:Piedra entera \u00b7 hilada 02.05:48\", \"front:Piedra entera \u00b7 hilada 03.06:58\", \"front:Piedra \u00b7 alf\u00e9izar interior:982\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 ventana travesa\u00f1o:981\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 04.03:66\", \"front:Piedra entera \u00b7 hilada 04.05:68\", \"front:Piedra entera \u00b7 hilada 05.05:80\", \"front:Piedra entera \u00b7 hilada 05.06:82\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 jamba ventana:992\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.2.1:340\", \"left:Piedra \u00b7 left.3.1:348\", \"left:Piedra \u00b7 left.4.1:356\", \"left:Piedra \u00b7 left.5.1:364\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 jamba ventana:993\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.2.2:342\", \"left:Piedra \u00b7 left.3.3:350\", \"left:Piedra \u00b7 left.4.2:358\", \"left:Piedra \u00b7 left.5.3:368\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 ventana travesa\u00f1o:994\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.2.1:340\", \"left:Piedra \u00b7 left.2.2:342\", \"left:Piedra \u00b7 left.3.1:348\", \"left:Piedra \u00b7 left.3.3:350\", \"left:Piedra \u00b7 alf\u00e9izar interior:996\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 ventana travesa\u00f1o:995\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.4.1:356\", \"left:Piedra \u00b7 left.4.2:358\", \"left:Piedra \u00b7 left.5.1:364\", \"left:Piedra \u00b7 left.5.2:366\", \"left:Piedra \u00b7 left.5.3:368\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 jamba ventana:1006\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.11.1:418\", \"left:Piedra \u00b7 left.12.1:428\", \"left:Piedra \u00b7 left.13.1:434\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 jamba ventana:1007\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.11.3:422\", \"left:Piedra \u00b7 left.13.3:436\", \"left:Piedra \u00b7 left.14.2:442\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 ventana travesa\u00f1o:1008\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.11.1:418\", \"left:Piedra \u00b7 left.11.3:422\", \"left:Piedra \u00b7 left.12.1:428\", \"left:Piedra \u00b7 alf\u00e9izar interior:1010\"], \"policy\": \"reserve_contact\"}, {\"element\": \"left:Madera \u00b7 ventana travesa\u00f1o:1009\", \"role\": \"wood\", \"supported_by\": [\"left:Piedra \u00b7 left.13.1:434\", \"left:Piedra \u00b7 left.13.3:436\", \"left:Piedra \u00b7 left.14.2:442\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 jamba ventana:1020\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.2.1:495\", \"right:Piedra \u00b7 right.3.1:503\", \"right:Piedra \u00b7 right.4.1:511\", \"right:Piedra \u00b7 right.5.1:519\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 jamba ventana:1021\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.2.2:497\", \"right:Piedra \u00b7 right.3.3:505\", \"right:Piedra \u00b7 right.4.2:513\", \"right:Piedra \u00b7 right.5.3:523\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 ventana travesa\u00f1o:1022\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.2.1:495\", \"right:Piedra \u00b7 right.2.2:497\", \"right:Piedra \u00b7 right.3.1:503\", \"right:Piedra \u00b7 right.3.3:505\", \"right:Piedra \u00b7 alf\u00e9izar interior:1024\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 ventana travesa\u00f1o:1023\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.4.1:511\", \"right:Piedra \u00b7 right.4.2:513\", \"right:Piedra \u00b7 right.5.1:519\", \"right:Piedra \u00b7 right.5.2:521\", \"right:Piedra \u00b7 right.5.3:523\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 jamba ventana:1034\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.11.1:573\", \"right:Piedra \u00b7 right.12.1:583\", \"right:Piedra \u00b7 right.13.1:591\", \"right:Piedra \u00b7 right.14.1:599\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 jamba ventana:1035\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.11.3:577\", \"right:Piedra \u00b7 right.12.2:585\", \"right:Piedra \u00b7 right.13.3:593\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 ventana travesa\u00f1o:1036\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.11.1:573\", \"right:Piedra \u00b7 right.11.3:577\", \"right:Piedra \u00b7 right.12.1:583\", \"right:Piedra \u00b7 right.12.2:585\", \"right:Piedra \u00b7 alf\u00e9izar interior:1038\"], \"policy\": \"reserve_contact\"}, {\"element\": \"right:Madera \u00b7 ventana travesa\u00f1o:1037\", \"role\": \"wood\", \"supported_by\": [\"right:Piedra \u00b7 right.13.1:591\", \"right:Piedra \u00b7 right.13.3:593\", \"right:Piedra \u00b7 right.14.1:599\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 jamba ventana:1048\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.2.2:678\", \"back:Piedra \u00b7 back.3.2:696\", \"back:Piedra \u00b7 back.4.2:712\", \"back:Piedra \u00b7 back.5.2:726\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 jamba ventana:1049\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.2.3:680\", \"back:Piedra \u00b7 back.3.4:698\", \"back:Piedra \u00b7 back.5.4:730\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 ventana travesa\u00f1o:1050\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.2.2:678\", \"back:Piedra \u00b7 back.2.3:680\", \"back:Piedra \u00b7 back.3.2:696\", \"back:Piedra \u00b7 back.3.4:698\", \"back:Piedra \u00b7 alf\u00e9izar interior:1052\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 ventana travesa\u00f1o:1051\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.4.2:712\", \"back:Piedra \u00b7 back.5.2:726\", \"back:Piedra \u00b7 back.5.3:728\", \"back:Piedra \u00b7 back.5.4:730\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 jamba ventana:1062\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.2.5:684\", \"back:Piedra \u00b7 back.3.5:700\", \"back:Piedra \u00b7 back.5.5:732\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 jamba ventana:1063\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.2.6:686\", \"back:Piedra \u00b7 back.3.7:702\", \"back:Piedra \u00b7 back.4.6:716\", \"back:Piedra \u00b7 back.5.7:736\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 ventana travesa\u00f1o:1064\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.2.5:684\", \"back:Piedra \u00b7 back.2.6:686\", \"back:Piedra \u00b7 back.3.5:700\", \"back:Piedra \u00b7 back.3.7:702\", \"back:Piedra \u00b7 alf\u00e9izar interior:1066\"], \"policy\": \"reserve_contact\"}, {\"element\": \"back:Madera \u00b7 ventana travesa\u00f1o:1065\", \"role\": \"wood\", \"supported_by\": [\"back:Piedra \u00b7 back.4.6:716\", \"back:Piedra \u00b7 back.5.5:732\", \"back:Piedra \u00b7 back.5.6:734\", \"back:Piedra \u00b7 back.5.7:736\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 viga de planta:1076\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 07.01:100\", \"front:Mortero \u00b7 hilada 08.00:117\", \"front:Piedra entera \u00b7 hilada 08.00:118\", \"front:Mortero \u00b7 hilada 08.01:119\", \"front:Piedra entera \u00b7 hilada 08.01:120\", \"front:Mortero \u00b7 hilada 09.01:137\", \"back:Piedra \u00b7 back.7.1:762\", \"back:Mortero \u00b7 back:779\", \"back:Piedra \u00b7 back.8.0:780\", \"back:Mortero \u00b7 back:781\", \"back:Piedra \u00b7 back.8.1:782\", \"back:Mortero \u00b7 back:797\", \"back:Mortero \u00b7 back:799\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 viga de planta:1078\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 07.02:102\", \"front:Piedra entera \u00b7 hilada 07.03:104\", \"front:Mortero \u00b7 hilada 08.02:121\", \"front:Piedra entera \u00b7 hilada 08.02:122\", \"front:Mortero \u00b7 hilada 09.02:139\", \"front:Mortero \u00b7 hilada 09.03:141\", \"back:Piedra \u00b7 back.7.2:764\", \"back:Piedra \u00b7 back.7.3:766\", \"back:Mortero \u00b7 back:783\", \"back:Piedra \u00b7 back.8.2:784\", \"back:Mortero \u00b7 back:801\", \"back:Mortero \u00b7 back:803\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 viga de planta:1080\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 07.04:106\", \"front:Piedra entera \u00b7 hilada 07.05:108\", \"front:Mortero \u00b7 hilada 08.04:125\", \"front:Piedra entera \u00b7 hilada 08.04:126\", \"front:Mortero \u00b7 hilada 09.04:143\", \"front:Mortero \u00b7 hilada 09.05:145\", \"back:Piedra \u00b7 back.7.4:768\", \"back:Piedra \u00b7 back.7.5:770\", \"back:Mortero \u00b7 back:787\", \"back:Piedra \u00b7 back.8.4:788\", \"back:Mortero \u00b7 back:805\", \"back:Mortero \u00b7 back:807\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 viga de planta:1082\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 07.06:110\", \"front:Piedra entera \u00b7 hilada 07.07:112\", \"front:Mortero \u00b7 hilada 08.06:129\", \"front:Piedra entera \u00b7 hilada 08.06:130\", \"front:Mortero \u00b7 hilada 09.06:147\", \"front:Mortero \u00b7 hilada 09.07:149\", \"back:Piedra \u00b7 back.7.6:772\", \"back:Piedra \u00b7 back.7.7:774\", \"back:Mortero \u00b7 back:791\", \"back:Piedra \u00b7 back.8.6:792\", \"back:Mortero \u00b7 back:809\", \"back:Mortero \u00b7 back:811\"], \"policy\": \"reserve_contact\"}, {\"element\": \"front:Madera \u00b7 viga de planta:1084\", \"role\": \"wood\", \"supported_by\": [\"front:Piedra entera \u00b7 hilada 07.08:114\", \"front:Mortero \u00b7 hilada 08.07:131\", \"front:Piedra entera \u00b7 hilada 08.07:132\", \"front:Mortero \u00b7 hilada 08.08:133\", \"front:Piedra entera \u00b7 hilada 08.08:134\", \"front:Mortero \u00b7 hilada 09.08:151\", \"back:Piedra \u00b7 back.7.8:776\", \"back:Mortero \u00b7 back:793\", \"back:Piedra \u00b7 back.8.7:794\", \"back:Mortero \u00b7 back:795\", \"back:Piedra \u00b7 back.8.8:796\", \"back:Mortero \u00b7 back:813\", \"back:Mortero \u00b7 back:815\"], \"policy\": \"reserve_contact\"}]",
       "escalera_generada": "{}",
       "cubierta_detalles": "{}",
       "plano_interior": "{}",
@@ -1252,16 +1252,16 @@
       "microdetail": true,
       "faces": 38603,
       "vertices": 45880,
-      "seconds": 2.1322073999908753,
+      "seconds": 3.7240531000425108,
       "stages": {
-        "biseles": 0.06251229991903529,
-        "desgaste": 0.9919033998739906,
-        "estructura_base": 0.015511700010392815,
-        "aberturas_y_vigas": 0.054754799988586456,
-        "integracion": 0.12072760000592098,
-        "preparacion": 0.14043329999549314,
-        "grietas": 0.9165343001368456,
-        "total": 2.1322073999908753
+        "biseles": 0.11770849989261478,
+        "desgaste": 1.5991507996805012,
+        "estructura_base": 0.03716149996034801,
+        "aberturas_y_vigas": 0.1291833000141196,
+        "integracion": 0.2730939000030048,
+        "preparacion": 0.3213977999985218,
+        "grietas": 1.6440304000861943,
+        "total": 3.7240531000425108
       },
       "cached": false,
       "solid": false,
@@ -2581,7 +2581,7 @@
       "hiladas_generadas": "[2.0, 8.11111111111111, 14.222222222222221, 20.333333333333332, 26.444444444444443, 32.55555555555556, 38.66666666666667, 44.777777777777786, 50.8888888888889, 57.0]",
       "giros_generados": "[]",
       "paredes_generadas": "[{\"id\": \"front\", \"start\": -40.0, \"end\": 40.0, \"origin\": [0, 0], \"axis\": [1, 0], \"height\": 57.0}]",
-      "ventanas_generadas": "[{\"wall\": \"front\", \"x\": -28.5, \"x0\": -36.0, \"x1\": -21.0, \"z0\": 18.0, \"z1\": 34.0, \"frame_y\": -6.5, \"balcony\": false}]",
+      "ventanas_generadas": "[{\"wall\": \"front\", \"x\": -28.5, \"x0\": -36.0, \"x1\": -21.0, \"z0\": 18, \"z1\": 34.0, \"frame_y\": -6.5, \"balcony\": false}]",
       "vigas_generadas": "[]",
       "derrumbe_global": "{\"front\": 8, \"sin_apoyo\": 1}",
       "suelos_generados": "[]",

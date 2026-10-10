@@ -3,7 +3,7 @@ import math
 import random
 from .. import meta,runtime,config
 from ..geometry import primitives,timber
-from . import openings,spatial
+from . import openings,spatial,layout
 
 
 def plank(coll,mat,name,a,b,y,width,top,seed,grain,broken=False,broken_left=False):
@@ -39,7 +39,7 @@ def plank(coll,mat,name,a,b,y,width,top,seed,grain,broken=False,broken_left=Fals
 
 
 def build(coll,p,scene):
-    'IA: Solo Habitación; planta baja sobre rastreles y entreplanta a config.UPPER_FLOOR sobre vigas reales; nunca cubre zonas sin anclajes.'
+    'IA: Solo Habitación; planta baja sobre rastreles y entreplanta a layout.upper_floor(p) sobre vigas reales; nunca cubre zonas sin anclajes.'
     meta.put(scene,'suelos_generados',[])
     meta.put(scene,'escalera_generada',{})
     if p.layout_mode!='ROOM':return
@@ -60,7 +60,7 @@ def build(coll,p,scene):
                     primitives.clip_closed(ob,(0,stair['y0']-2.4,0),(0,1,0))
     wood=primitives.material('Madera · suelo',(.30,.205,.115))
     records=[]
-    for level,enabled,top in ((0,p.ground_floor,3.2),(1,p.upper_floor and p.floor_beams and p.height_type=='TWO',config.UPPER_FLOOR)):
+    for level,enabled,top in ((0,p.ground_floor,3.2),(1,p.upper_floor and p.floor_beams and p.height_type=='TWO',layout.upper_floor(p))):
         if not enabled:continue
         if level==0:
             count=max(2,math.ceil((xmax-xmin)/24))
@@ -78,8 +78,8 @@ def build(coll,p,scene):
                 for j,x in enumerate(extra):
                     end=stair['y0']-2.4 if opening and min(opening[0]-2,stair['approach'][0])<x<max(opening[1]+2,stair['approach'][1]) else ymax-1
                     for y in (ymin+1,end):
-                        timber.timber_beam(coll,wood,'Madera · poste forjado',(x,y,.7),(x,y,config.BEAM_LEVEL),3.6,3.6,p.seed+29100+j)
-                    timber.timber_beam(coll,wood,'Madera · viga forjado',(x,ymin,config.BEAM_LEVEL),(x,end+.3,config.BEAM_LEVEL),4.2,4.7,p.seed+29200+j)
+                        timber.timber_beam(coll,wood,'Madera · poste forjado',(x,y,.7),(x,y,(layout.upper_floor(p)-3.6)),3.6,3.6,p.seed+29100+j)
+                    timber.timber_beam(coll,wood,'Madera · viga forjado',(x,ymin,(layout.upper_floor(p)-3.6)),(x,end+.3,(layout.upper_floor(p)-3.6)),4.2,4.7,p.seed+29200+j)
         rows=max(2,math.ceil((ymax-ymin)/5.5));pitch=(ymax-ymin)/rows
         left_tree=openings.wall_tree(coll,walls['left']);right_tree=openings.wall_tree(coll,walls['right'])
         made=0;broken_count=0

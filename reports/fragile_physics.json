@@ -1,0 +1,13 @@
+{
+  "fragments": 43,
+  "volumes_mm3": {
+    "Revoco \u00b7 prueba": 19119.85060203538,
+    "Hogar \u00b7 conducto interior": 17200.004578579228
+  },
+  "initial_max_motion_mm": 0.7054718672168013,
+  "moved_over_2mm": 21,
+  "max_motion_mm": 8.068866493480837,
+  "source_unchanged": true,
+  "flue_open": true,
+  "rest_without_impact_mm": 0.8704884975374393
+}

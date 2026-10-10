@@ -5,6 +5,7 @@ from .. import config
 from ..geometry import primitives
 from ..geometry import timber
 from ..services import profiling
+from . import layout
 from mathutils import Vector
 import bpy
 import numpy
@@ -181,12 +182,14 @@ def architectural_openings(coll,p,walls,door,edges):
         for floor in (reversed(range(floors)) if p.balconies else range(floors)):
             has_balcony=p.balconies and floor>0
             wh=p.window_height+(14 if has_balcony else 0)
-            z0=2+floor*config.FLOOR_PITCH+(0 if has_balcony else 16)
+            z0=(layout.upper_floor(p) if floor else 2)+(0 if has_balcony else 16)
             z1=z0+wh
             if z1+5>w['height']:
                 continue
             attempts=9+p.windows_per_wall*4
             candidates=[usable[0]+ww/2+i*(usable[1]-usable[0]-ww)/(attempts-1) for i in range(attempts)]
+            candidates+= [usable[0]+(usable[1]-usable[0])*(i+1)/(p.windows_per_wall+1) for i in range(p.windows_per_wall)]
+            feasible=[]
             for cx in candidates:
                 if made>=p.windows_per_wall:
                     break
@@ -212,6 +215,10 @@ def architectural_openings(coll,p,walls,door,edges):
                         break
                 if not supported:
                     continue
+                feasible.append(cx)
+            selected=layout.spread_positions(feasible,p.windows_per_wall-made,*usable,ww+(12 if has_balcony else 6))
+            for cx in selected:
+                x0=cx-ww/2;x1=cx+ww/2
                 carve_rectangle(coll,w,x0,x1,z0,z1,p.thickness+5,'Ventana')
                 # El eje local +Y apunta al exterior solo en izquierda y trasera.
                 direction=(1 if w['id'] in ('left','back') else -1)*(1 if p.window_facing=='OUTSIDE' else -1)
@@ -229,7 +236,7 @@ def architectural_openings(coll,p,walls,door,edges):
                 windows.append({'wall':w['id'],'x':cx,'x0':x0,'x1':x1,'z0':z0,'z1':z1,'frame_y':yy,'balcony':has_balcony})
                 made+=1
     if p.floor_beams and p.height_type=='TWO':
-        z=config.BEAM_LEVEL if p.layout_mode=='ROOM' else config.UPPER_FLOOR-2.5
+        z=layout.upper_floor(p)-(3.6 if p.layout_mode=='ROOM' else 2.5)
         size=4.5
         targets=[w for w in walls if w['id']=='front'] if p.layout_mode=='ROOM' else walls
         # Congelar apoyos antes del primer alojamiento: un recorte no cambia la decisión del siguiente.

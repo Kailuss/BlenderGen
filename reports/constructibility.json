@@ -1,0 +1,25 @@
+{
+  "front_windows": [
+    -51.0,
+    -9.450000000000003,
+    51.0
+  ],
+  "height_mm": 109.0,
+  "upper_floor_mm": 67.0,
+  "gates": [
+    {
+      "style": "WOOD_GATE",
+      "height_mm": 40.0
+    },
+    {
+      "style": "IRON_GATE",
+      "height_mm": 40.0
+    }
+  ],
+  "manual_pillars_mm": [
+    -60.0,
+    0.0,
+    60.00000000000001
+  ],
+  "invalid_preserves_source": true
+}

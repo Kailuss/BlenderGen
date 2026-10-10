@@ -73,6 +73,8 @@ BUILD_TYPES={'PARTITION':(6.0,4.5,.6,8.0),'WALL':(9.0,6.25,1.0,10.0),'FORTRESS':
 
 
 FLOOR_PITCH=55.0
+PHYSICS_FRAGILE_LIMIT=256
+PHYSICS_FRAGILE_STRENGTH={'plaster':.15,'chimney':.6}
 UPPER_FLOOR=2.0+FLOOR_PITCH
 BEAM_LEVEL=UPPER_FLOOR-3.6
 HEIGHT_TYPES={'RUIN':27.0,'ONE':UPPER_FLOOR,'TWO':2.0+2*FLOOR_PITCH}
@@ -118,6 +120,7 @@ FIELDS=FIELDS+('wood_damage','roof_frame')
 FIELDS=FIELDS+('roof_curve','roof_tiles','stair_type','stair_side')
 FIELDS=FIELDS+('roof_gables',)
 FIELDS=FIELDS+('hole_seed','roof_damage','chimneys','brass_pipes','damage_enabled','interior_layout')
+FIELDS=FIELDS+('ground_storey_height','upper_storey_height','low_wall_height','door_style','pillar_distribution','pillar_positions')
 CACHE_METADATA=CACHE_METADATA+('relaciones_estructura',)
 CACHE_METADATA=CACHE_METADATA+('escalera_generada','cubierta_detalles','plano_interior')
 
@@ -131,10 +134,10 @@ TURN_ITEMS=[('NONE','Recto','Sin tramo perpendicular'),('LEFT','Giro izq.','Giro
 # Subpaneles de la barra lateral, en orden. toggle: casilla en la cabecera que activa el bloque;
 # closed: empieza plegado. El botón de restablecer vuelve a los valores por defecto de fields (no del toggle).
 SECTIONS=(
- {'id':'build','title':'Construcción','fields':('build_type','height_type','length','floor_beams'),'closed':False},
+ {'id':'build','title':'Construcción','fields':('build_type','height_type','ground_storey_height','upper_storey_height','low_wall_height','length','floor_beams'),'closed':False},
  {'id':'layout','title':'Distribución','fields':('layout_mode','building_depth','extra_side','interior_layout'),'closed':False},
  {'id':'finish','title':'Acabado','fields':('damage_enabled','collapse','wear_level','wear','cracks','rubble_amount','ground_roughness'),'closed':False},
- {'id':'door','title':'Puerta','toggle':'door_enabled','fields':('door_leaf','door_position','door_width','door_height','wood_frame'),'closed':True},
+ {'id':'door','title':'Puerta','toggle':'door_enabled','fields':('door_style','door_leaf','door_position','door_width','door_height','wood_frame'),'closed':True},
  {'id':'windows','title':'Ventanas','toggle':'windows_enabled','fields':('window_facing','windows_per_wall','window_width','window_height','balconies','iron_mode','iron_damage'),'closed':False},
  {'id':'wood','title':'Madera y cubierta','fields':('wood_grain','wood_damage','roof_frame','roof_curve','roof_tiles','roof_gables','roof_damage','chimneys','brass_pipes'),'closed':False},
  {'id':'floors','title':'Suelos de madera','fields':('ground_floor','upper_floor','floor_damage'),'closed':False},
@@ -143,7 +146,7 @@ SECTIONS=(
  {'id':'bond','title':'Aparejo','fields':('stone_variation','bond_subdivisions','alternate_height','randomness'),'closed':True},
  {'id':'cracks','title':'Grietas','fields':('cracks_per_stone','crack_length_var','crack_width_var','crack_angle_var','crack_path_var'),'closed':True},
  {'id':'collapse','title':'Derrumbe y agujeros','fields':('break_position','hole_count','hole_size','hole_seed','hole_damage'),'closed':True},
- {'id':'pillars','title':'Pilares','fields':('pillar_count','connection_enabled','connection_side'),'closed':True})
+ {'id':'pillars','title':'Pilares','fields':('pillar_count','pillar_distribution','pillar_positions','connection_enabled','connection_side'),'closed':True})
 
 
 # Enums de 2-3 opciones que definen un modo: botones en fila. FULL_WIDTH: sin etiqueta y a todo lo
