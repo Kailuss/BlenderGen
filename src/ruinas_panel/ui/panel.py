@@ -33,7 +33,7 @@ def status_icon(status):
 
 
 class RUIN_PT_panel(bpy.types.Panel):
-    bl_label = 'Ruinas · v0.32.7'
+    bl_label = 'Ruinas · v0.32.8'
     bl_idname = 'RUIN_PT_panel'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -51,6 +51,11 @@ class RUIN_PT_panel(bpy.types.Panel):
             layout.label(text=context.scene.get('playback_instructions','Demostración calculada · pulsa Espacio'))
             layout.label(text='Reproducción calculada; edita en el laboratorio')
             if context.scene.get('lab_scene'):layout.operator('ruin.physics_edit')
+            if context.scene.get('physics_result_scene'):
+                if not context.scene.get('structural_physics'):layout.operator('ruin.physics_accept',icon='CHECKMARK')
+                layout.prop(context.scene.ruin_settings,'physics_export_voxel')
+                layout.operator('ruin.physics_export')
+                layout.label(text=context.scene.ruin_settings.status)
             layout.label(text='Cambia de etapa en el selector de escena')
             layout.operator('ruin.physics_return',icon='BACK')
             return
@@ -75,9 +80,13 @@ class RUIN_PT_panel(bpy.types.Panel):
                 layout.prop(p,'impact_radius');layout.prop(p,'impact_mass');layout.prop(p,'impact_mode')
                 layout.operator('ruin.masonry_impact',text='Añadir impacto dirigido')
                 layout.label(text='Apunta a la selección; sin selección, al edificio')
+            layout.prop(context.scene.ruin_settings,'physics_precision')
+            layout.prop(context.scene.ruin_settings,'physics_adaptive_collisions')
+            layout.prop(context.scene.ruin_settings,'physics_sparse_constraints')
             layout.operator('ruin.physics_simulate',icon='PLAY')
+            layout.label(text=context.scene.ruin_settings.status)
             if not structural:layout.operator('ruin.physics_accept',icon='CHECKMARK')
-            else:layout.label(text='Exportación con mortero aún no disponible')
+            else:layout.label(text='Tras simular: exporta el fotograma a STL')
             layout.operator('ruin.physics_return',icon='BACK')
             return
         p = context.scene.ruin_settings

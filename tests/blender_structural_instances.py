@@ -16,8 +16,15 @@ def run():
     p.damage_enabled=False;p.use_instances=True;p.batch_preview=True;p.roof_frame=False;p.door_enabled=False;p.windows_enabled=False
     coll=addon.generate(bpy.context,p,'WORK');assert any(o.get('ruin_instances') for o in coll.objects)
     initial=digest(coll);p.physics_target='MASONRY'
-    assert bpy.ops.ruin.physics_lab()=={'FINISHED'}
-    lab=bpy.context.scene;assert not lab.get('masonry_lab') and p.physics_target=='BUILDING';assert digest(coll)==initial
+    assert bpy.ops.ruin.physics_lab()=={'RUNNING_MODAL'}
+    import time
+    from ruinas_panel.services import physics_jobs
+    for attempt in range(120):
+        result=physics_jobs.poll()
+        if 'finished' in result:break
+        time.sleep(.25)
+    else:physics_jobs.cancel();raise AssertionError('Preparation timeout')
+    lab=result['finished'];assert not lab.get('masonry_lab') and p.physics_target=='BUILDING';assert digest(coll)==initial
     report=json.loads(lab['preparation_report']);assert report['roles']['stone']>20 and report['binder_excluded']>0
     assert all(o.get('source_piece') for o in lab.objects if o.rigid_body)
     print('STRUCTURAL_INSTANCES_PASSED',report,flush=True)

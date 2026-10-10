@@ -141,7 +141,7 @@ def snapshot(source,coll,report):
 
 
 def resolve(objects,report):
-    'IA: Diferencias booleanas solo sobre candidatos solapados, madera antes que piedra; valida cierre y conserva piezas de la fuente intactas.'
+    'IA: Recorta copias solapadas, prioriza escaleras de piedra, conserva cruces metálicos soldados y reintenta con tolerancia numérica; exige cierre y fuente intacta.'
     priority={'wood':0,'metal':1,'tile':2,'stone':3,'ground':4}
     removed=set()
     # Se procesan cajas iniciales: una diferencia solo reduce volumen.
@@ -149,7 +149,13 @@ def resolve(objects,report):
     for a,b,ba,bb in candidates:
         if a in removed or b in removed:continue
         if 'ground' in (a['physical_role'],b['physical_role']):continue
-        cutter,target=sorted((a,b),key=lambda o:(priority[o['physical_role']],o.name))
+        if a['physical_role']==b['physical_role']=='metal':
+            # Hierro forjado: cruces soldados, no diferencias sobre tubos finos.
+            # Las parejas intersectadas quedan unidas sin rotura ni colisión mutua.
+            if tree(a).overlap(tree(b)):
+                report.setdefault('metal_welds',[]).append(sorted((a['source_piece'],b['source_piece'])))
+            continue
+        cutter,target=sorted((a,b),key=lambda o:((-1 if o['physical_role']=='stone' and 'escalera' in o['source_piece'].lower() else priority[o['physical_role']]),o.name))
         ta,tb=tree(a),tree(b)
         if not ta.overlap(tb):
             # Detectar contención completa, que no cruza superficies.
@@ -172,7 +178,18 @@ def resolve(objects,report):
             if not target.data.polygons:
                 removed.add(target);report['covered_pieces_removed']+=1;bpy.data.meshes.remove(backup);continue
         if not after or after>before+max(.001,before*.0001):
-            print('INVALID_JOINT',target.name,cutter.name,before,after,flush=True)
+            for offset in ((.003,.002,.001),(-.007,.003,-.002),(.013,-.005,.004)):
+                failed=target.data;target.data=backup.copy();bpy.data.meshes.remove(failed)
+                original_cutter=cutter.data;cutter.data=original_cutter.copy();shifted=cutter.data
+                shifted.transform(Matrix.Translation(Vector(offset)))
+                try:
+                    mod=target.modifiers.new('Encaje con tolerancia física','BOOLEAN');mod.operation='DIFFERENCE';mod.solver='EXACT';mod.object=cutter
+                    primitives.apply_modifier(target,mod,cutter);primitives.repair_precision(target);after=valid(target.data)
+                finally:cutter.data=original_cutter;bpy.data.meshes.remove(shifted)
+                if after and after<=before+max(.001,before*.0001):
+                    report.setdefault('tolerant_joints',[]).append({'target':target['source_piece'],'cutter':cutter['source_piece'],'offset_mm':offset});break
+        if not after or after>before+max(.001,before*.0001):
+            print('INVALID_JOINT' ,target.name,cutter.name,before,after,flush=True)
             failed=target.data;target.data=backup;bpy.data.meshes.remove(failed)
             raise ValueError('Encaje no válido entre '+target['source_piece']+' y '+cutter['source_piece'])
         if after<config.PHYSICS_RESIDUE_MAX_VOLUME and before-after>max(1e-5,before*1e-7):
@@ -198,6 +215,7 @@ def rigid(scene,ob):
         with bpy.context.temp_override(scene=scene,view_layer=scene.view_layers[0],object=ob,active_object=ob,selected_objects=[ob],selected_editable_objects=[ob]):
             bpy.ops.rigidbody.object_add(type='ACTIVE')
     rb=ob.rigid_body;rb.type='PASSIVE' if static else 'ACTIVE';rb.collision_shape='MESH';rb.mesh_source='BASE';rb.use_margin=True;rb.collision_margin=0
+    ob['original_body_type']=rb.type
     rb.mass=max(.001,volume*1e-9*density*config.PHYSICS_MASS_SCALE);rb.friction=1;rb.restitution=0;rb.angular_damping=.5
     ob['initial_matrix']=json.dumps([list(r) for r in ob.matrix_world])
 
@@ -216,6 +234,84 @@ def joint(scene,a,b,point,strength,template=None):
     return ob
 
 
+def optimise_collisions(scene):
+    'IA: Envolvente convexa con incremento máximo del 5 %; en madera admite hasta 25 % y relleno medio menor de 0,1 mm. Conserva concavidades mayores y geometría visible.'
+    changed=0;retained=0
+    for ob in scene.objects:
+        rb=ob.rigid_body
+        if not rb or rb.type!='ACTIVE' or rb.collision_shape!='MESH':continue
+        if ob.get('physical_role') not in ('stone','wood'):retained+=1;continue
+        bm=bmesh.new();bm.from_mesh(ob.data)
+        try:
+            volume=abs(bm.calc_volume())
+            # Construye una piel convexa separada para medirla sin caras interiores.
+            hull=bmesh.new()
+            try:
+                vertices=[v.co.copy() for v in bm.verts]
+                for co in vertices:hull.verts.new(co)
+                result=bmesh.ops.convex_hull(hull,input=list(hull.verts),use_existing_faces=False)
+                unused=result.get('geom_interior',[])+result.get('geom_unused',[])
+                verts=list({v for v in unused if isinstance(v,bmesh.types.BMVert) and v.is_valid})
+                if verts:bmesh.ops.delete(hull,geom=verts,context='VERTS')
+                hull_volume=abs(hull.calc_volume());hull_area=sum(f.calc_area() for f in hull.faces)
+            finally:hull.free()
+            wood_allowance=ob.get('physical_role')=='wood' and hull_area>0 and (hull_volume-volume)/hull_area<=.0001
+            limit=1.25 if wood_allowance else 1.05
+            if volume>1e-15 and volume*.999<=hull_volume<=volume*limit:
+                rb.collision_shape='CONVEX_HULL';rb.collision_margin=0;changed+=1
+            else:retained+=1
+        finally:bm.free()
+    scene['collision_optimisation']=json.dumps({'convex':changed,'concave_retained':retained,'stone_max_added_volume_fraction':.05,'wood_max_added_volume_fraction':.25,'wood_mean_fill_mm':.1})
+    return {'convex':changed,'concave_retained':retained}
+
+
+def sparsify_constraints(scene):
+    'IA: Conserva conexiones soldadas, un bosque que mantiene la conectividad de los apoyos y un contacto adicional por cuerpo; reduce uniones redundantes, no cuerpos ni geometría.'
+    joints=[o for o in scene.objects if o.rigid_body_constraint and o.rigid_body_constraint.object1 and o.rigid_body_constraint.object2]
+    previous=json.loads(scene.get('sparse_constraints','{}'))
+    if previous.get('after')==len(joints):return previous
+    bodies={o for joint in joints for o in (joint.rigid_body_constraint.object1,joint.rigid_body_constraint.object2)}
+    parent={o:o for o in bodies}
+    def root(ob):
+        'IA: Representante con compresión de camino para conservar los componentes del grafo físico.'
+        while parent[ob]!=ob:parent[ob]=parent[parent[ob]];ob=parent[ob]
+        return ob
+    ranked=sorted(joints,key=lambda o:(o.rigid_body_constraint.use_breaking,(o.rigid_body_constraint.object1.location-o.rigid_body_constraint.object2.location).length,o.name))
+    keep=set();extra=set()
+    for joint in ranked:
+        c=joint.rigid_body_constraint;a=root(c.object1);b=root(c.object2)
+        if a!=b or not c.use_breaking or joint.animation_data:
+            keep.add(joint);parent[a]=b
+    for joint in ranked:
+        if joint in keep:continue
+        c=joint.rigid_body_constraint
+        if c.object1 not in extra or c.object2 not in extra:
+            keep.add(joint);extra.update((c.object1,c.object2))
+    bpy.data.batch_remove(ids=tuple(joint for joint in joints if joint not in keep))
+    report={'before':len(joints),'after':len(keep),'components':len({root(o) for o in bodies})}
+    scene['sparse_constraints']=json.dumps(report)
+    return report
+
+
+def merge_ground(scene):
+    'IA: Agrupa terreno y grava pasivos en un solo colisionador sin cambiar su superficie; reasigna sus apoyos antes de unir y conserva aparte el suelo de seguridad.'
+    ground=[o for o in scene.objects if o.rigid_body and o.rigid_body.type=='PASSIVE' and o.get('physical_role')=='ground' and not o.get('collision_floor')]
+    if len(ground)<2:return len(ground)
+    first=ground[0];members=set(ground);remove=[]
+    for ob in scene.objects:
+        c=ob.rigid_body_constraint
+        if not c:continue
+        if c.object1 in members:c.object1=first
+        if c.object2 in members:c.object2=first
+        if c.object1==c.object2:remove.append(ob)
+    if remove:bpy.data.batch_remove(ids=tuple(remove))
+    with bpy.context.temp_override(scene=scene,view_layer=scene.view_layers[0],object=first,active_object=first,selected_objects=ground,selected_editable_objects=ground):
+        bpy.ops.object.join()
+    first.name='Terreno físico agrupado';first['source_piece']='Terreno físico agrupado'
+    scene['ground_parts_merged']=len(ground)
+    return len(ground)
+
+
 def prepare(source_scene):
     'IA: Construye laboratorio de edificio completo sin mortero; valida sólidos, resuelve encajes, detecta contactos reales y crea uniones. Fallar limpia solo copias.'
     from . import physics
@@ -229,7 +325,7 @@ def prepare(source_scene):
         objects=snapshot(source,coll,report)
         print('STRUCTURAL_SNAPSHOT',len(objects),'piezas',flush=True)
         objects=resolve(objects,report)
-        print('STRUCTURAL_JOINTS',report,'CPU',round(time.process_time()-cpu_started,2),flush=True)
+        print('STRUCTURAL_JOINTS',{k:(len(v) if isinstance(v,list) else v) for k,v in report.items()},'CPU',round(time.process_time()-cpu_started,2),flush=True)
         # Una booleana puede desconectar una tabla o un sillar: separar otra vez.
         for ob in list(objects):
             groups=components(ob.data)
@@ -268,6 +364,7 @@ def prepare(source_scene):
         for a,b,point in contacts:
             if a.rigid_body.type==b.rigid_body.type=='PASSIVE':continue
             template=joint(scene,a,b,point,p.physics_strength,template)
+            if sorted((a.get('source_piece',''),b.get('source_piece',''))) in report.get('metal_welds',[]):template.rigid_body_constraint.use_breaking=False
         report.update(bodies=len(objects),constraints=sum(o.rigid_body_constraint is not None for o in scene.objects),roles={k:sum(o['physical_role']==k for o in objects) for k in ('wood','stone','tile','metal','ground')},seconds=round(time.perf_counter()-started,3),cpu_seconds=round(time.process_time()-cpu_started,3),faces=sum(len(o.data.polygons) for o in objects))
         connected={o for a,b,_ in contacts for o in (a,b)}
         report['unconnected']=[o.name for o in objects if o not in connected and o.rigid_body.type=='ACTIVE']
@@ -278,7 +375,7 @@ def prepare(source_scene):
         scene.unit_settings.system='METRIC';scene.unit_settings.scale_length=1;scene.unit_settings.length_unit='MILLIMETERS'
         scene.frame_end=p.physics_frames;scene.gravity=(0,0,-9.81)
         world=scene.rigidbody_world;world.substeps_per_frame=40;world.solver_iterations=60;world.point_cache.frame_end=scene.frame_end;world.time_scale=.2
-        print('STRUCTURAL_PREPARED',report,flush=True)
+        print('STRUCTURAL_PREPARED',{k:(len(v) if isinstance(v,list) else v) for k,v in report.items()},flush=True)
         return scene
     except Exception:
         primitives.remove_objects(list(scene.objects));bpy.data.scenes.remove(scene);bpy.data.collections.remove(coll)

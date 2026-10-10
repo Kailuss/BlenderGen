@@ -63,7 +63,7 @@ def blender_path(explicit):
 
 def probe(blender, output, legacy=None, case=None):
     """IA: conserva log completo y exige marcador además de exit code; Blender puede ocultar errores Python."""
-    cmd=[blender,'-b','-t','4','--python-exit-code','1','--python',str(ROOT/'tests/blender_probe.py'),'--','--output',str(output)]
+    cmd=[blender,'--factory-startup','-b','-t','4','--python-exit-code','1','--python',str(ROOT/'tests/blender_probe.py'),'--','--output',str(output)]
     if legacy:cmd+=['--legacy',str(Path(legacy).resolve())]
     if case:cmd+=['--case',case]
     output.parent.mkdir(parents=True,exist_ok=True)
@@ -108,7 +108,7 @@ def expected(actual,update=False):
 def calibrate(blender, output):
     """IA: genera en Blender la placa de prueba para resina (STL + leyenda .md); exige marcador además de exit code."""
     output=Path(output).resolve()
-    cmd=[blender,'-b','--factory-startup','--python-exit-code','1','--python',str(ROOT/'tools/print_test.py'),'--','--output',str(output)]
+    cmd=[blender,'--factory-startup','-b','--factory-startup','--python-exit-code','1','--python',str(ROOT/'tools/print_test.py'),'--','--output',str(output)]
     log=output.with_suffix('.log')
     output.parent.mkdir(parents=True,exist_ok=True)
     with log.open('w',encoding='utf-8') as stream:
@@ -122,13 +122,13 @@ def pack(project=False):
     """IA: empaqueta únicamente fuentes del addon; excluye cachés, renders y pruebas del ZIP instalable."""
     check()
     out=ROOT/'dist';out.mkdir(exist_ok=True)
-    target=out/'ruinas_panel_v0327.zip'
+    target=out/'ruinas_panel_v0328.zip'
     with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED) as archive:
         for file in sorted(SOURCE.rglob('*.py')):archive.write(file,file.relative_to(SOURCE.parent))
     with zipfile.ZipFile(target) as archive:assert archive.testzip() is None
     print('PACKAGED',target)
     if project:
-        bundle=out/'ruinas_desarrollo_v0327.zip'
+        bundle=out/'ruinas_desarrollo_v0328.zip'
         files=[ROOT/'README.md',ROOT/'AGENTS.md',ROOT/'dev.py',ROOT/'.gitignore',target]
         for folder in ('src','tools','tests','docs','agent'):
             files.extend(p for p in (ROOT/folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix!='.pyc')

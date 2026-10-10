@@ -3,7 +3,7 @@
 from .. import config
 from .. import runtime
 from ..ui import preview
-from bpy.props import IntProperty
+from bpy.props import IntProperty,StringProperty
 import bpy
 
 
@@ -111,18 +111,21 @@ class RUIN_OT_physics(bpy.types.Operator):
     bl_options={'REGISTER','UNDO'}
     poll=classmethod(ready)
     def execute(self,context):
-        'IA: Prepara un ensayo independiente y abre su escena; conserva la casa, escala y animación originales.'
-        from ..services import physics
+        'IA: Actualiza la casa si hace falta y prepara sus colisiones en un proceso aislado, conservando la sesión original.'
+        from ..services import physics_jobs
         preview.cancel_pending()
         try:
             if context.scene.ruin_settings.physics_target=='MASONRY':context.scene.ruin_settings.physics_target='BUILDING'
             if preview.stale_preview(context.scene):preview.update_preview(context)
-            scene=physics.prepare(context.scene)
+            physics_jobs.start(context.scene,'PREPARE')
         except Exception as exc:return fail(self,context,exc)
-        context.window.scene=scene
-        frame_view(context)
-        self.report({'INFO'},'Laboratorio preparado. La casa permanece en su escena original; consulta los límites en el panel.')
-        return {'FINISHED'}
+        self._timer=context.window_manager.event_timer_add(.5,window=context.window)
+        context.window_manager.modal_handler_add(self)
+        return {'RUNNING_MODAL'}
+    def modal(self,context,event):
+        'IA: Comparte vigilancia, cancelación y entrega con la simulación aislada.'
+        return RUIN_OT_physics_simulate.modal(self,context,event)
+
 
 
 class RUIN_OT_physics_release(bpy.types.Operator):
@@ -141,13 +144,34 @@ class RUIN_OT_physics_release(bpy.types.Operator):
 class RUIN_OT_physics_simulate(bpy.types.Operator):
     bl_idname='ruin.physics_simulate'
     bl_label='Simular derrumbe'
-    bl_options={'REGISTER','UNDO'}
     def execute(self,context):
-        'IA: Calcula el ensayo hasta el último fotograma sin aceptar ni modificar la casa.'
-        from ..services import physics
-        try:physics.simulate(context.scene)
+        'IA: Ejecuta Bullet en un proceso separado con límite de recursos; la interfaz solo consulta progreso.'
+        from ..services import physics_jobs
+        try:physics_jobs.start(context.scene)
         except Exception as exc:return fail(self,context,exc)
-        return {'FINISHED'}
+        self._timer=context.window_manager.event_timer_add(.5,window=context.window)
+        context.window_manager.modal_handler_add(self)
+        return {'RUNNING_MODAL'}
+    def modal(self,context,event):
+        'IA: ESC cancela el hijo; TIMER recoge resultado o error sin evaluar física en el Blender del usuario.'
+        from ..services import physics_jobs
+        if event.type=='ESC':
+            physics_jobs.cancel();context.window_manager.event_timer_remove(self._timer)
+            return {'CANCELLED'}
+        if event.type!='TIMER':return {'RUNNING_MODAL'}
+        try:
+            status=physics_jobs.poll()
+            if 'finished' in status:
+                context.window.scene=status['finished'];frame_view(context)
+                context.window_manager.event_timer_remove(self._timer)
+                return {'FINISHED'}
+            context.scene.ruin_settings.status='%s · %s / %s'%(status.get('stage',''),status.get('frame',status.get('objects','')),status.get('total',''))
+            if context.area:context.area.tag_redraw()
+        except Exception as exc:
+            context.window_manager.event_timer_remove(self._timer)
+            return fail(self,context,exc)
+        return {'RUNNING_MODAL'}
+
 
 
 class RUIN_OT_physics_accept(bpy.types.Operator):
@@ -309,3 +333,22 @@ class RUIN_OT_physics_limit(bpy.types.Operator):
         try:impact_physics.limit_to_selection(context.scene,context.selected_objects)
         except Exception as exc:return fail(self,context,exc)
         return {'FINISHED'}
+
+
+class RUIN_OT_physics_export(bpy.types.Operator):
+    bl_idname='ruin.physics_export'
+    bl_label='Exportar fotograma físico a STL'
+    filepath: StringProperty(subtype='FILE_PATH',default='ruinas_fisica.stl')
+    def invoke(self,context,event):
+        'IA: Permite elegir destino del STL; la fusión se ejecutará en otro Blender.'
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+    def execute(self,context):
+        'IA: Exporta la reproducción calculada en proceso aislado conservando escena, laboratorio y fuente.'
+        from ..services import physics_jobs
+        try:physics_jobs.start(context.scene,'EXPORT',self.filepath)
+        except Exception as exc:return fail(self,context,exc)
+        self._timer=context.window_manager.event_timer_add(.5,window=context.window)
+        context.window_manager.modal_handler_add(self)
+        return {'RUNNING_MODAL'}
+    modal=RUIN_OT_physics_simulate.modal

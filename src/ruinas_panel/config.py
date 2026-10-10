@@ -156,3 +156,6 @@ CACHE_METADATA=CACHE_METADATA+('cubierta_roturas','chimeneas_generadas','bajante
 # Solo residuos posteriores a recortes físicos: no filtra piezas originales.
 PHYSICS_RESIDUE_MAX_VOLUME=1.0
 PHYSICS_RESIDUE_MAX_THICKNESS=.01
+
+PHYSICS_JOB_MEMORY_MB=4096
+PHYSICS_JOB_SECONDS=1200

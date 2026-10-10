@@ -1,0 +1,22 @@
+{
+  "convex": 2688,
+  "concave_retained": 1414,
+  "stone_max_added_volume_fraction": 0.05,
+  "wood_max_added_volume_fraction": 0.25,
+  "wood_mean_fill_mm": 0.1,
+  "ground_merged": 1,
+  "active_cap": 2048,
+  "constraints": {
+    "before": 3705,
+    "after": 3705,
+    "components": 7
+  },
+  "active": 2048,
+  "total": 4110,
+  "objects": 4110,
+  "moving": 2036,
+  "seconds": 1036.9610626000213,
+  "sample_step": 4,
+  "peak_worker_mb": 3020.08203125,
+  "total_seconds": 1101.8728135000565
+}

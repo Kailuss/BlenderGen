@@ -20,13 +20,15 @@ for _field in config.FIELDS:
 
 CLASSES=(preferences.RuinPreferences,settings.RuinSettings,operators.RUIN_OT_generate,operators.RUIN_OT_solid,operators.RUIN_OT_seed,
          operators.RUIN_OT_holes,operators.RUIN_OT_reset,operators.RUIN_OT_physics,operators.RUIN_OT_physics_return,
-         operators.RUIN_OT_physics_simulate,operators.RUIN_OT_physics_accept,operators.RUIN_OT_physics_clear,operators.RUIN_OT_physics_release,operators.RUIN_OT_masonry_remove,operators.RUIN_OT_masonry_impact,operators.RUIN_OT_physics_edit,operators.RUIN_OT_physics_demo,operators.RUIN_OT_physics_fracture,operators.RUIN_OT_physics_limit,panel.RUIN_PT_panel)+panel.SUBPANELS
+         operators.RUIN_OT_physics_simulate,operators.RUIN_OT_physics_accept,operators.RUIN_OT_physics_clear,operators.RUIN_OT_physics_release,operators.RUIN_OT_masonry_remove,operators.RUIN_OT_masonry_impact,operators.RUIN_OT_physics_edit,operators.RUIN_OT_physics_demo,operators.RUIN_OT_physics_fracture,operators.RUIN_OT_physics_limit,operators.RUIN_OT_physics_export,panel.RUIN_PT_panel)+panel.SUBPANELS
 
 
 @persistent
 def before_data_reload(*args):
     'IA: Antes de undo, redo o carga de archivo suelta referencias a ID guardadas en runtime; no accede a datos Blender.'
     preview.cancel_pending()
+    from .services import physics_jobs
+    physics_jobs.cancel()
     cache.forget_cache()
     runtime.settings=None
     runtime.physics_simulations.clear()
@@ -98,6 +100,8 @@ def unregister():
     remove_handlers()
     bpy.types.VIEW3D_MT_mesh_add.remove(panel.menu_add)
     preview.cancel_pending()
+    from .services import physics_jobs
+    physics_jobs.cancel()
     cache.clear_cache()
     if hasattr(bpy.types.Scene,'ruin_settings'):
         del bpy.types.Scene.ruin_settings

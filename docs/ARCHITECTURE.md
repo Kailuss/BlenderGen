@@ -37,6 +37,8 @@ La base 0.31 integra el edificio completo aportado en `dist/ruinas_v031_completo
 | Fusión/exportación | `services/export.py` | Fuente intacta; valida componentes del sólido |
 | Ensayo físico de tabique | `services/physics.py` | Cajas en metros por estancia; poses aceptadas se aplican fuera de caché antes de agrupar/exportar; firma bloquea resultados obsoletos |
 | Ensayo de edificio completo | `services/structural_physics.py` | Copias sin aglutinante, componentes separados, encajes booleanos y uniones por proximidad; colisiones de malla en metros, sin aceptación para impresión |
+| Cálculo físico aislado | `services/physics_jobs.py`, `services/physics_worker.py` | Preparación, simulación y exportación en otro Blender; vigilancia de recursos y reproducción sin cuerpos rígidos |
+| Exportación tras física | `services/physical_export.py` | Copias del fotograma en mm; unión vóxel explícita, cierre y STL binario; permite escombros desconectados |
 | Revisión previa a física | `services/geometry_audit.py` | Auditoría de mallas y variantes; no valida contactos ni construye colisionadores |
 | Medición | `services/profiling.py` | Decorador acumulativo por etapa |
 | Propiedades guardadas | `ui/settings.py` | Mantener identificadores RNA compatibles; los nombres visibles son cortos y el detalle va en `description` |

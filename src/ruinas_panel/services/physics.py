@@ -159,12 +159,13 @@ def release_support(scene,ob):
 
 
 def accept(scene):
-    'IA: Guarda transformaciones en mm para aplicar a piezas detalladas al regenerar y exportar; exige simulación, firma e IDs vigentes.'
+    'IA: Guarda transformaciones en mm de laboratorio calculado o reproducción aislada de tabiques; exige firma e IDs vigentes antes de regenerar.'
     if scene.get('structural_physics'):
         raise ValueError('Ensayo estructural: todavía no se reconstruye mortero imprimible. Conserva el laboratorio; no se puede aplicar al exportador antiguo.')
     source=bpy.data.scenes.get(scene.get('source_scene',''))
     if source is None or signature(source.ruin_settings)!=scene.get('source_signature'):raise ValueError('La casa ha cambiado; prepara de nuevo la física.')
-    if scene.as_pointer() not in runtime.physics_simulations or scene.get('physics_simulated')!=scene.frame_current:
+    baked=scene.get('physics_result_scene') and scene.get('simulation_report')
+    if not baked and (scene.as_pointer() not in runtime.physics_simulations or scene.get('physics_simulated')!=scene.frame_current):
         raise ValueError('Pulsa Simular antes de aceptar el resultado; al reabrir hay que recalcular el laboratorio.')
     dg=bpy.context.evaluated_depsgraph_get();poses={}
     for ob in scene.objects:

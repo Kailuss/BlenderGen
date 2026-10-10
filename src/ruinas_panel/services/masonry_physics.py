@@ -6,7 +6,7 @@ from . import physics
 
 
 def prepare(source):
-    'IA: Crea hasta el límite solicitado ladrillos individuales activos, aparejados sobre suelo pasivo; no modifica la casa.'
+    'IA: Crea hasta 256 ladrillos individuales según el límite solicitado, aparejados sobre suelo pasivo; no modifica la casa.'
     p=source.ruin_settings
     scene=bpy.data.scenes.new('LAB · ladrillos '+p.physics_masonry_shape)
     scene['ruinas_physics_lab']=True;scene['structural_physics']=True;scene['masonry_lab']=True
@@ -14,12 +14,12 @@ def prepare(source):
     scene.unit_settings.system='METRIC';scene.unit_settings.length_unit='MILLIMETERS'
     scene.frame_end=p.physics_frames
     mat=bpy.data.materials.new('Piedra · ensayo');mat.diffuse_color=(.48,.32,.20,1)
-    poses=[]
+    poses=[];limit=min(256,p.physics_brick_limit)
     if p.physics_masonry_shape=='WALL':
-        for row in range(p.physics_brick_limit//8):
+        for row in range(limit//8):
             for col in range(8):poses.append(((col-3.5)*12+(3 if row%2 else 0),0,3+row*6,False))
     else:
-        for row in range(p.physics_brick_limit//14):
+        for row in range(limit//14):
             course=[(x,y,False) for y in (-21,21) for x in (-18,-6,6,18)]
             course += [(x,y,True) for x in (-21,21) for y in (-12,0,12)]
             for x,y,turned in course:

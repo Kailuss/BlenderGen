@@ -46,3 +46,6 @@ progress = None
 instance_build = False
 detail_limited = False
 physics_simulations = set()
+
+# Proceso aislado de simulación: solo la sesión que lo creó puede cancelarlo.
+physics_job=None
