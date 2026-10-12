@@ -1,0 +1,1 @@
+{"binder_excluded": 425, "joints_cut": 2502, "covered_pieces_removed": 0, "numeric_fragments_removed": 87, "fragile_fragments": 0, "bodies": 2205, "constraints": 9156, "roles": {"wood": 629, "stone": 468, "tile": 1099, "metal": 0, "ground": 9}, "seconds": 43.738, "cpu_seconds": 50.719, "faces": 366672, "unconnected": []}

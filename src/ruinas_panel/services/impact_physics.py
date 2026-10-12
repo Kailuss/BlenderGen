@@ -54,6 +54,13 @@ def launch(scene,selected):
     ob.location=start+direction*step*(end-1);ob.keyframe_insert(data_path='location',frame=end)
     rb.kinematic=True;rb.keyframe_insert(data_path='kinematic',frame=1);rb.keyframe_insert(data_path='kinematic',frame=end)
     if p.impact_mode=='THROW':rb.kinematic=False;rb.keyframe_insert(data_path='kinematic',frame=end+1)
+    if p.impact_lifetime:
+        expires=1+p.impact_lifetime;ob['impact_expire_frame']=expires
+        rb.keyframe_insert(data_path='collision_collections',frame=1)
+        rb.collision_collections=(False,)*20;rb.keyframe_insert(data_path='collision_collections',frame=expires)
+        for key in ('hide_viewport','hide_render'):
+            setattr(ob,key,False);ob.keyframe_insert(data_path=key,frame=1)
+            setattr(ob,key,True);ob.keyframe_insert(data_path=key,frame=expires)
     action=ob.animation_data.action
     for layer in action.layers:
         for strip in layer.strips:

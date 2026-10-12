@@ -33,7 +33,7 @@ def status_icon(status):
 
 
 class RUIN_PT_panel(bpy.types.Panel):
-    bl_label = 'Ruinas · v0.32.9'
+    bl_label = 'Ruinas · v0.32.10'
     bl_idname = 'RUIN_PT_panel'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -77,7 +77,7 @@ class RUIN_PT_panel(bpy.types.Panel):
                 layout.prop(p,'physics_brick_limit');layout.operator('ruin.physics_limit')
                 layout.prop(p,'fracture_strength');layout.operator('ruin.physics_fracture')
                 layout.prop(p,'impact_direction');layout.prop(p,'impact_speed')
-                layout.prop(p,'impact_radius');layout.prop(p,'impact_mass');layout.prop(p,'impact_mode')
+                layout.prop(p,'impact_radius');layout.prop(p,'impact_mass');layout.prop(p,'impact_mode');layout.prop(p,'impact_lifetime')
                 layout.operator('ruin.masonry_impact',text='Añadir impacto dirigido')
                 layout.label(text='Apunta a la selección; sin selección, al edificio')
             layout.prop(context.scene.ruin_settings,'physics_precision')

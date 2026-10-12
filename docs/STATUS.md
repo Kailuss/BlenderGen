@@ -1,5 +1,12 @@
 # Estado del proyecto
 
+## v0.32.10 — 2026-10-12
+
+Corregida la triangulación del ladrillo que impedía preparar la casa y el
+encaje de cerámica contra chimenea. Caso real preparado: 2.204 cuerpos,
+6.317 uniones. Proyectiles con vencimiento reversible y cubierta con
+hundimiento previo al desprendimiento. [Uso, pruebas y límites](V03210.md).
+
 ## v0.32.9 — 2026-10-10
 
 Alturas independientes, ventanas/balcones repartidos, pilares equidistantes o

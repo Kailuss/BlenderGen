@@ -65,7 +65,11 @@ def poll():
         try:return json.loads(job['progress'].read_text(encoding='utf8'))
         except (OSError,ValueError):return {'stage':'Arrancando proceso separado'}
     runtime.physics_job=None
-    if code or not job['output'].exists():raise ValueError('El proceso físico falló (código %s); la sesión se conserva. Log: %s'%(code,job['folder']/'worker.log'))
+    if code or not job['output'].exists():
+        log=job['folder']/'worker.log'
+        details=log.read_text(encoding='utf8',errors='replace')[-20000:] if log.exists() else ''
+        reason=next((line.split(': ',1)[-1] for line in reversed(details.splitlines()) if line.startswith(('ValueError:','RuntimeError:','MemoryError:','PermissionError:'))),'código %s'%code)
+        raise ValueError('Preparación/cálculo fallido: %s. Fuente intacta. Log: %s'%(reason,log))
     with bpy.data.libraries.load(str(job['output']),link=False) as (data,loaded):loaded.scenes=data.scenes
     result=loaded.scenes[0]
     if job['mode']=='SIMULATE':result['lab_scene']=job['scene']

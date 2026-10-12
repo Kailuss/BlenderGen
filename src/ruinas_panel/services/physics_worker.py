@@ -9,8 +9,13 @@ from mathutils import Quaternion
 
 
 def progress(path,**values):
-    'IA: Sustituye atómicamente el progreso para que la interfaz nunca lea un JSON incompleto.'
-    temporary=path.with_suffix('.tmp');temporary.write_text(json.dumps(values),encoding='utf8');temporary.replace(path)
+    'IA: Sustituye atómicamente el progreso; reintenta bloqueos breves de lectores Windows sin abortar la simulación por una actualización de estado.'
+    temporary=path.with_suffix('.tmp');temporary.write_text(json.dumps(values),encoding='utf8')
+    for attempt in range(8):
+        try:temporary.replace(path);return
+        except PermissionError:time.sleep(.01)
+    # El siguiente fotograma vuelve a publicar; el resultado final se detecta por el proceso y el .blend.
+    return
 
 
 def run(output,path,name):
@@ -51,6 +56,11 @@ def run(output,path,name):
         mesh=bpy.data.meshes.new_from_object(original.evaluated_get(deps),depsgraph=deps) if original.modifiers else original.data
         ob=bpy.data.objects.new(original.name,mesh);result.collection.objects.link(ob)
         for key in original.keys():ob[key]=original[key]
+        expiry=original.get('impact_expire_frame',0)
+        if expiry:
+            for key in ('hide_viewport','hide_render'):
+                setattr(ob,key,False);ob.keyframe_insert(data_path=key,frame=1)
+                setattr(ob,key,True);ob.keyframe_insert(data_path=key,frame=expiry)
         ob.rotation_mode='QUATERNION'
         track=poses[:,index];ob.location=track[0,:3];ob.rotation_quaternion=Quaternion(track[0,3:7]);ob.scale=track[0,7:]
         changed=np.max(np.linalg.norm(track[:,:3]-track[0,:3],axis=1))>.00002 or np.min(np.abs(track[:,3:7]@track[0,3:7]))<.99999 or np.max(np.abs(track[:,7:]-track[0,7:]))>1e-6
@@ -64,7 +74,7 @@ def run(output,path,name):
                 for strip in layer.strips:
                     for bag in strip.channelbags:
                         for curve in bag.fcurves:
-                            for key in curve.keyframe_points:key.interpolation='LINEAR'
+                            for key in curve.keyframe_points:key.interpolation='CONSTANT' if curve.data_path in ('hide_viewport','hide_render') else 'LINEAR'
         if index%100==0:progress(path,stage='Guardando reproducción',objects=index,total=len(objects))
     result['simulation_report']=json.dumps({'objects':len(objects),'moving':moving,'seconds':time.perf_counter()-started,'sample_step':4})
     result.frame_set(1);bpy.data.libraries.write(str(output),{result},fake_user=True)

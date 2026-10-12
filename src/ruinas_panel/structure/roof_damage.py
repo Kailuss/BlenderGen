@@ -5,11 +5,43 @@ from ..geometry import primitives,timber,terrain
 
 
 def plan(p,bounds):
-    'IA: Dos elipses reproducibles en faldones opuestos; tamaño continuo según daño, fuera de la cumbrera.'
+    'IA: Dos regiones reproducibles en faldones opuestos; incluyen intensidad y límites para compartir hundimiento, anclajes y rotura.'
     xa,xb,ya,yb=bounds['cover'];span=xb-xa;depth=yb-ya;rng=random.Random(p.seed+46301)
     amount=p.roof_damage
     if amount<=0:return []
-    return [{'x':xa+span*f,'y':ya+depth*(.28+.42*rng.random()),'rx':span*(.045+.13*amount),'ry':depth*(.045+.17*amount)} for f in (.23,.76)]
+    return [{'x':xa+span*f,'y':ya+depth*(.28+.42*rng.random()),'rx':span*(.045+.13*amount),'ry':depth*(.045+.17*amount),'severity':amount,'bounds':bounds['cover']} for f in (.23,.76)]
+
+
+def broken(x,y,patches):
+    'IA: El núcleo pierde piezas solo después del 45% de daño; antes conserva los apoyos deformados, con transición continua en área.'
+    return any(((x-h['x'])/h['rx'])**2+((y-h['y'])/h['ry'])**2<max(0,(h.get('severity',1)-.45)/.55)**2 for h in patches)
+
+
+def sag(x,y,patches):
+    'IA: Hundimiento compartido en mm para madera y tejas; campo continuo bidimensional, acotado y nulo en los bordes de cubierta.'
+    result=0
+    for h in patches:
+        radius=math.sqrt(((x-h['x'])/h['rx'])**2+((y-h['y'])/h['ry'])**2)
+        if radius>=1.6:continue
+        envelope=(1-(radius/1.6)**2)**2
+        bounds=h.get('bounds')
+        anchor=min(1,max(0,min(x-bounds[0],bounds[1]-x,y-bounds[2],bounds[3]-y)/6)) if bounds else 1
+        result=max(result,min(16,min(h['rx'],h['ry'])*.75)*h.get('severity',1)*envelope*anchor)
+    return result
+
+
+def deform_timber(coll,patches):
+    'IA: Deforma las fibras existentes sin añadir densidad; mantiene sección cerrada y apoyos periféricos, y registra el daño previo a física.'
+    maximum=0;affected=0
+    for ob in coll.objects:
+        if not ob.get('roof_timber') or ob.get('roof_gable_frame'):continue
+        co=primitives.coords(ob);offsets=[sag(x,y,patches) for x,y,z in co]
+        amount=max(offsets,default=0)
+        if amount<1e-6:continue
+        co[:,2]-=offsets;primitives.set_coords(ob,co)
+        ob['roof_sag_mm']=amount;ob['roof_damage_stage']=2 if any(h.get('severity',1)>.45 for h in patches) else 1
+        maximum=max(maximum,amount);affected+=1
+    return {'sag_mm':maximum,'deformed_timbers':affected}
 
 
 def distance(x,y,patches):
@@ -22,9 +54,9 @@ def segments(a,b,fixed,patches,axis):
     ranges=[(min(a,b),max(a,b))]
     for h in patches:
         pos=h['x'] if axis=='y' else h['y'];rad=h['rx'] if axis=='y' else h['ry']
-        d=(fixed-pos)/rad
-        if abs(d)>=1:continue
-        center=h[axis];radius=h['ry'] if axis=='y' else h['rx'];half=radius*math.sqrt(1-d*d)*.76
+        d=(fixed-pos)/rad;core=max(0,(h.get('severity',1)-.45)/.55)
+        if abs(d)>=core:continue
+        center=h[axis];radius=h['ry'] if axis=='y' else h['rx'];half=radius*math.sqrt(core*core-d*d)*.76
         lo,hi=center-half,center+half;next_ranges=[]
         for x,y in ranges:
             if hi<=x or lo>=y:next_ranges.append((x,y));continue

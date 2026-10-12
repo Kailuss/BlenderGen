@@ -156,7 +156,7 @@ def curved_rafter(coll,wood,p,x0,x1,y,z,rise,seed,ta=0,tb=1):
 
 
 def tile_bay(coll,mat,p,xa,xm,y0,y1,z,rise,rows,seed,patches=(),missing=None,chimney=None):
-    'IA: Filas alineadas con 30% de solape longitudinal; sección ortogonal, boca elevada y cola estrecha que encaja debajo de la fila superior.'
+    'IA: Solape longitudinal del 30% en reposo; tejas rígidas orientadas al hundimiento común de los apoyos, ausentes solo en el núcleo de rotura.'
     verts=[];faces=[];rng=random.Random(seed);count=0
     columns=max(2,math.ceil((y1-y0)/5.5));pitch=(y1-y0)/columns
     for row in range(rows):
@@ -165,7 +165,7 @@ def tile_bay(coll,mat,p,xa,xm,y0,y1,z,rise,rows,seed,patches=(),missing=None,chi
         for a,b in zip(joints,joints[1:]):
             cx=xa+(xm-xa)*(t0+t1)/2;cy=(a+b)/2
             q=roof_damage.distance(cx,cy,patches)
-            if q<1:
+            if roof_damage.broken(cx,cy,patches):
                 if missing is not None:missing.append((cx,cy))
                 continue
             if chimney and abs(cx-chimney['x'])<chimney['radius']+.2+abs(xm-xa)*(t1-t0)/2 and abs(cy-chimney['y'])<chimney['radius']+.2+(b-a)/2:continue
@@ -175,6 +175,8 @@ def tile_bay(coll,mat,p,xa,xm,y0,y1,z,rise,rows,seed,patches=(),missing=None,chi
             width=max(1.5,b-a+.12);crown=min(2.3,width*.45)
             start=(xa+(xm-xa)*t0,cy,spatial.roof_height(t0,z,rise,p.roof_curve)+3.35+1.15+lip)
             end=(xa+(xm-xa)*t1,cy,spatial.roof_height(t1,z,rise,p.roof_curve)+3.35+lip+tilt)
+            start=(*start[:2],start[2]-roof_damage.sag(*start[:2],patches))
+            end=(*end[:2],end[2]-roof_damage.sag(*end[:2],patches))
             curved_tile(verts,faces,start,end,width,crown,thickness=min(.58,width*.25),taper=.72,chip=chip)
             count+=1
     ceramic_mesh(coll,mat,'Tejas · paño curvo',verts,faces,count)
@@ -252,8 +254,9 @@ def build(coll,p,scene):
             for edge in (xa,xb):
                 for t in (.18,.4,.65,.85):
                     missing.append((edge+(xm-edge)*t,y0+(y1-y0)*(i+.5)/count))
+    deformation=roof_damage.deform_timber(coll,patches)
     roof_accessories.chimney(coll,p,scene,chimney)
     roof_accessories.drains(coll,p,scene,walls,bounds,bays,z,patches)
     roof_damage.debris(coll,p,scene,bounds,missing)
     meta.put(scene,'cubierta_generada',records)
-    meta.put(scene,'cubierta_detalles',{'curve':p.roof_curve,'tiles':tiles,'courses':rows,'supported_trusses':len(records),'profile':'concave' if p.roof_curve else 'straight','bounds':bounds,'eave_height':z,'overhang_mm':4,'missing_tiles':len(missing)})
+    meta.put(scene,'cubierta_detalles',{**deformation,'curve':p.roof_curve,'tiles':tiles,'courses':rows,'supported_trusses':len(records),'profile':'concave' if p.roof_curve else 'straight','bounds':bounds,'eave_height':z,'overhang_mm':4,'missing_tiles':len(missing)})

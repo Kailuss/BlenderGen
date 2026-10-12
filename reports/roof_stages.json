@@ -1,0 +1,83 @@
+[
+  {
+    "sag_mm": 0,
+    "deformed_timbers": 0,
+    "curve": 0.6000000238418579,
+    "tiles": 1209,
+    "courses": 19,
+    "supported_trusses": 10,
+    "profile": "concave",
+    "bounds": {
+      "walls": [
+        -80.0,
+        80.0,
+        -7.670626163482666,
+        135.52000427246094
+      ],
+      "cover": [
+        -84.0,
+        84.0,
+        -11.670626163482666,
+        139.52000427246094
+      ]
+    },
+    "eave_height": 59.2,
+    "overhang_mm": 4,
+    "missing_tiles": 0,
+    "damage": 0
+  },
+  {
+    "sag_mm": 3.9907498171607108,
+    "deformed_timbers": 103,
+    "curve": 0.6000000238418579,
+    "tiles": 1209,
+    "courses": 19,
+    "supported_trusses": 10,
+    "profile": "concave",
+    "bounds": {
+      "walls": [
+        -80.0,
+        80.0,
+        -7.670626163482666,
+        135.52000427246094
+      ],
+      "cover": [
+        -84.0,
+        84.0,
+        -11.670626163482666,
+        139.52000427246094
+      ]
+    },
+    "eave_height": 59.2,
+    "overhang_mm": 4,
+    "missing_tiles": 0,
+    "damage": 0.35
+  },
+  {
+    "sag_mm": 10.59334094168605,
+    "deformed_timbers": 272,
+    "curve": 0.6000000238418579,
+    "tiles": 1099,
+    "courses": 19,
+    "supported_trusses": 10,
+    "profile": "concave",
+    "bounds": {
+      "walls": [
+        -80.0,
+        80.0,
+        -7.670626163482666,
+        135.52000427246094
+      ],
+      "cover": [
+        -84.0,
+        84.0,
+        -11.670626163482666,
+        139.52000427246094
+      ]
+    },
+    "eave_height": 59.2,
+    "overhang_mm": 4,
+    "missing_tiles": 110,
+    "damage": 0.85
+  }
+]

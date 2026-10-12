@@ -61,8 +61,23 @@ def valid(mesh):
 
 
 def triangulate(mesh):
-    'IA: Triangula caras no planas antes de booleanas y colisión; no rellena agujeros ni cambia coordenadas.'
-    bm=bmesh.new();bm.from_mesh(mesh);bmesh.ops.triangulate(bm,faces=list(bm.faces));bm.to_mesh(mesh);bm.free()
+    'IA: Triangula sin desplazar vértices; cancela pares de triángulos coincidentes opuestos creados por n-gonos de recortes, solo si conserva cierre y volumen.'
+    bm=bmesh.new();bm.from_mesh(mesh)
+    try:
+        bmesh.ops.triangulate(bm,faces=list(bm.faces));before=bm.calc_volume()
+        groups={}
+        for face in bm.faces:groups.setdefault(frozenset(face.verts),[]).append(face)
+        pairs=[faces for faces in groups.values() if len(faces)==2 and faces[0].normal.dot(faces[1].normal)<-.99999]
+        if pairs:
+            candidate=bm.copy();candidate.faces.ensure_lookup_table();bm.faces.index_update()
+            bmesh.ops.delete(candidate,geom=[candidate.faces[f.index] for pair in pairs for f in pair],context='FACES_ONLY')
+            loose=[e for e in candidate.edges if not e.link_faces]
+            if loose:bmesh.ops.delete(candidate,geom=loose,context='EDGES')
+            if all(e.is_manifold for e in candidate.edges) and abs(candidate.calc_volume()-before)<=max(1e-7,abs(before)*1e-6):
+                bm.free();bm=candidate
+            else:candidate.free()
+        bm.to_mesh(mesh)
+    finally:bm.free()
 
 
 def bounds(ob):
@@ -107,9 +122,12 @@ def contact(a,b,box_a,box_b,tolerance):
 
 def snapshot(source,coll,report):
     'IA: Materializa instancias y desagrupa rangos conservados en copias; excluye aglutinante y separa componentes sin tocar datos originales.'
-    temporary=[];records=[]
+    temporary=[];records=[];roof_metadata={}
     for original in source.objects:
         if original.type!='MESH':continue
+        if original.get('ruin_batch'):
+            roof_metadata.update({r['name']:r.get('roof_damage',{}) for r in json.loads(original['ruin_parts'])})
+        else:roof_metadata[original.name]={k:original[k] for k in ('roof_sag_mm','roof_damage_stage') if k in original}
         if original.get('ruin_instances'):
             clones=instances.export_copies(original,coll);temporary.extend(clones)
             keys=json.loads(original['ruin_keys'])
@@ -134,6 +152,7 @@ def snapshot(source,coll,report):
                     raise ValueError('Pieza no cerrada antes de física: '+name)
                 ob=bpy.data.objects.new(name,piece);coll.objects.link(ob)
                 ob['physical_role']=kind;ob['source_piece']=name;ob['source_component']=part
+                for key,value in roof_metadata.get(name,{}).items():ob[key]=value
                 result.append(ob)
             bpy.data.meshes.remove(mesh)
     finally:primitives.remove_objects(temporary)
@@ -141,7 +160,7 @@ def snapshot(source,coll,report):
 
 
 def resolve(objects,report):
-    'IA: Recorta copias solapadas, prioriza escaleras de piedra, conserva cruces metálicos soldados y reintenta con tolerancia numérica; exige cierre y fuente intacta.'
+    'IA: Recorta copias solapadas, prioriza escaleras y chimenea sobre cerámica, conserva cruces metálicos soldados y reintenta con tolerancia numérica; exige cierre y fuente intacta.'
     priority={'wood':0,'metal':1,'tile':2,'stone':3,'ground':4}
     removed=set()
     # Se procesan cajas iniciales: una diferencia solo reduce volumen.
@@ -155,7 +174,7 @@ def resolve(objects,report):
             if tree(a).overlap(tree(b)):
                 report.setdefault('metal_welds',[]).append(sorted((a['source_piece'],b['source_piece'])))
             continue
-        cutter,target=sorted((a,b),key=lambda o:((-1 if o['physical_role']=='stone' and 'escalera' in o['source_piece'].lower() else priority[o['physical_role']]),o.name))
+        cutter,target=sorted((a,b),key=lambda o:((-1 if o['physical_role']=='stone' and 'escalera' in o['source_piece'].lower() else 1.5 if o['physical_role']=='stone' and any(tag in o['source_piece'].lower() for tag in ('chimenea','hogar')) else priority[o['physical_role']]),o.name))
         ta,tb=tree(a),tree(b)
         if not ta.overlap(tb):
             # Detectar contención completa, que no cruza superficies.
@@ -233,6 +252,7 @@ def joint(scene,a,b,point,strength,template=None):
     c=ob.rigid_body_constraint;c.type='FIXED';c.object1=a;c.object2=b;c.disable_collisions=True
     c.use_breaking=True;c.breaking_threshold=max(.00001,(a.rigid_body.mass+b.rigid_body.mass)*9.81/24*strength)
     c.breaking_threshold*=min(config.PHYSICS_FRAGILE_STRENGTH.get(a.get('fragile_material'),1),config.PHYSICS_FRAGILE_STRENGTH.get(b.get('fragile_material'),1))
+    c.breaking_threshold*=1-(1-config.PHYSICS_ROOF_MIN_STRENGTH)*min(1,max(a.get('roof_sag_mm',0),b.get('roof_sag_mm',0))/10)
     return ob
 
 

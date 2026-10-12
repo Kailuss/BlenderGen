@@ -90,3 +90,7 @@ El laboratorio acotado vive en `services/masonry_physics.py`: piezas activas ind
 `services/impact_physics.py` controla lanzamiento, empuje y prefractura del laboratorio en metros. No modifica geometría fuente ni depende de UI. `ui/operators.configure_view` y `frame_view` ajustan recorte y encuadre según cotas de la escena, excluyendo el suelo de seguridad.
 
 `services/fragile_physics.py` prefractura revocos y chimenea sobre copias en mm, después de resolver encajes y antes de detectar contactos. Exige cierre y conservación de volumen; abre primero los anillos verticalmente para conservar el conducto. IDs derivados de pieza, componente, recorte y linaje. Máximo 256 fragmentos nuevos; falla explícitamente al superar el límite.
+
+La cubierta comparte `roof_damage.sag` entre madera y ejes de tejas. `broken` y `segments` abren el núcleo a partir del 45% de daño; antes se conserva la estructura deformada. `roof_sag_mm` y `roof_damage_stage` sobreviven a la agrupación y se copian al laboratorio para graduar uniones.
+
+El proyectil guarda `impact_expire_frame`: claves constantes de visibilidad y grupos de colisión lo desactivan reversiblemente. El worker conserva el vencimiento en la reproducción. No borra el objeto de la fuente ni de la historia.
