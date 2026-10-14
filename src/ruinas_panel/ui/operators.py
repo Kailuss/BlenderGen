@@ -128,6 +128,19 @@ class RUIN_OT_physics(bpy.types.Operator):
 
 
 
+class RUIN_OT_physics_height_selection(bpy.types.Operator):
+    bl_idname='ruin.physics_height_selection'
+    bl_label='Seleccionar por porcentaje y altura'
+    bl_options={'REGISTER','UNDO'}
+    def execute(self,context):
+        'IA: Hace revisable la selección por gradiente; el botón existente de soltar confirma la liberación conjunta.'
+        from ..services import height_selection
+        try:chosen=height_selection.choose(context.scene)
+        except Exception as exc:return fail(self,context,exc)
+        self.report({'INFO'},'%s piezas seleccionadas; pulsa Soltar uniones para liberarlas'%len(chosen))
+        return {'FINISHED'}
+
+
 class RUIN_OT_physics_release(bpy.types.Operator):
     bl_idname='ruin.physics_release'
     bl_label='Retirar apoyo seleccionado (ensayo)'

@@ -19,8 +19,8 @@ def decay_relief(u,t,phase,amount):
     return amount*(.75*split+.6*pocket)
 
 
-def timber_beam(coll,mat,name,a,b,width,depth,seed,coarse=False):
-    'Fibra alargada desviada por nudos; surcos interrumpidos en una malla cerrada.\n\nIA: Viga entre puntos 3D con sección cerrada; conserva el marco ortogonal para ejes X/Y/Z.'
+def timber_beam(coll,mat,name,a,b,width,depth,seed,coarse=False,broken=(False,False)):
+    'Fibra alargada desviada por nudos; surcos interrumpidos en una malla cerrada.\n\nIA: Viga recta entre puntos 3D con sección cerrada; extremos rotos pierden fibras axialmente sin doblar el eje. Conserva marco y trayectoria para fractura de cubierta.'
     rr=random.Random(seed)
     axis=Vector(b)-Vector(a)
     length=axis.length
@@ -67,7 +67,8 @@ def timber_beam(coll,mat,name,a,b,width,depth,seed,coarse=False):
                 y=(depth/2+max(-depth*.36,relief))*(1 if back else -1)
                 # Extremos astillados, con pérdida acotada que conserva el encaje estructural.
                 splinter=damage*min(.55,length/(stations-1)*.3)*( .5+.5*math.sin(u*39+phase))
-                axial=length*t+splinter*((1-t)**10-t**10)
+                fracture=min(1.25,length*.12)*(.15+.85*(.5+.5*math.sin(u*41+phase+back*.8)))
+                axial=length*t+splinter*((1-t)**10-t**10)+fracture*((1-t)**12*broken[0]-t**12*broken[1])
                 verts.append(tuple(Vector(a)+axis*axial+side*transverse+front*y))
                 uvs.append((u+.5+warp*.35,t*length/8))
     for station in range(stations-1):
@@ -94,6 +95,8 @@ def timber_beam(coll,mat,name,a,b,width,depth,seed,coarse=False):
         face.use_smooth=True
     ob['madera']=True
     ob['wood_damage']=damage
+    ob['timber_path']=[list(a),list(b)];ob['timber_width']=width;ob['timber_depth']=depth;ob['timber_seed']=seed
+    ob['timber_broken_start']=broken[0];ob['timber_broken_end']=broken[1]
     return ob
 
 

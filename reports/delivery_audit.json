@@ -1,0 +1,15 @@
+{
+  "scenes": [
+    "01 \u00b7 Casa editable",
+    "02 \u00b7 Laboratorio editable",
+    "03 \u00b7 Reproducci\u00f3n",
+    "04 \u00b7 S\u00f3lido exportado"
+  ],
+  "source_matches": true,
+  "build": "0.32.11-r2",
+  "lab_bodies": 5896,
+  "moved": 1990,
+  "stl_triangles": 8131350,
+  "stl_bytes": 406567584,
+  "blend_sha256": "22dfbcef2f9448effcdb0dfafb7a82f19cb8d08dea09a1c6f624ebe77146c702"
+}

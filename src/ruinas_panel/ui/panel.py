@@ -33,7 +33,7 @@ def status_icon(status):
 
 
 class RUIN_PT_panel(bpy.types.Panel):
-    bl_label = 'Ruinas · v0.32.10'
+    bl_label = 'Ruinas · v'+config.BUILD_ID
     bl_idname = 'RUIN_PT_panel'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -61,12 +61,22 @@ class RUIN_PT_panel(bpy.types.Panel):
             return
         if context.scene.get('ruinas_physics_lab'):
             layout.label(text='Física · '+context.scene.get('physics_room','tabique'))
+            from ..services import physics
+            if physics.source_matches(context.scene) is False:
+                box=layout.box();box.alert=True
+                box.label(text='La fuente ha cambiado',icon='ERROR')
+                box.label(text='Prepara de nuevo su laboratorio')
             structural=context.scene.get('structural_physics',False)
             layout.label(text='Edificio sin mortero · experimental' if structural else 'Ensayo antiguo: solo tabiques')
             if structural:
                 report=parsed(context.scene.get('preparation_report','{}'),{})
                 layout.label(text='%s cuerpos móviles · %s uniones'%(sum(bool(o.rigid_body and o.rigid_body.type=='ACTIVE') for o in context.scene.objects),sum(o.rigid_body_constraint is not None for o in context.scene.objects)))
                 if report.get('unconnected'):layout.label(text='%s piezas sin unión inicial'%len(report['unconnected']),icon='ERROR')
+            if structural:
+                p=context.scene.ruin_settings
+                box=layout.box();box.label(text='Preparar selección de desprendimiento')
+                for field in ('physics_selection_material','physics_selection_percent','physics_selection_gradient','physics_selection_seed'):box.prop(p,field)
+                box.operator('ruin.physics_height_selection')
             if context.scene.get('masonry_lab'):
                 layout.label(text='Ladrillos activos · juntas rompibles')
                 layout.operator('ruin.masonry_remove')
@@ -83,6 +93,8 @@ class RUIN_PT_panel(bpy.types.Panel):
             layout.prop(context.scene.ruin_settings,'physics_precision')
             layout.prop(context.scene.ruin_settings,'physics_adaptive_collisions')
             layout.prop(context.scene.ruin_settings,'physics_sparse_constraints')
+            layout.prop(context.scene.ruin_settings,'physics_memory_mb')
+            layout.prop(context.scene.ruin_settings,'physics_timeout_seconds')
             layout.operator('ruin.physics_simulate',icon='PLAY')
             layout.label(text=context.scene.ruin_settings.status)
             if not structural:layout.operator('ruin.physics_accept',icon='CHECKMARK')
@@ -131,7 +143,7 @@ def enabled(p, field):
     if field=='floor_damage':return p.layout_mode=='ROOM' and (p.ground_floor or (p.upper_floor and p.floor_beams and p.height_type=='TWO'))
     if field=='ground_floor':return p.layout_mode=='ROOM'
     if field=='balconies':return p.height_type=='TWO'
-    if field in ('iron_mode','iron_damage'):return p.balconies and p.height_type=='TWO'
+    if field in ('iron_mode','iron_damage','balcony_width','balcony_height','balcony_depth'):return p.balconies and p.height_type=='TWO'
     if field == 'building_depth':
         return p.layout_mode != 'NONE'
     if field == 'extra_side':
@@ -185,6 +197,8 @@ def section_panel(index, section):
         if section['id']=='layout':
             col.prop(p,'physics_target')
             col.prop(p,'physics_frames')
+            col.prop(p,'physics_memory_mb')
+            col.prop(p,'physics_timeout_seconds')
             if p.physics_target=='MASONRY':
                 col.prop(p,'physics_brick_limit');col.prop(p,'physics_masonry_shape')
             if p.physics_target=='BUILDING':

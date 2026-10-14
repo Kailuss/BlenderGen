@@ -1,0 +1,9 @@
+{
+  "objects": 3,
+  "moving": 2,
+  "seconds": 0.5405438000016147,
+  "sample_step": 4,
+  "static_constraints_omitted": 0,
+  "solver_scale": 100.0,
+  "final_height_mm": 4.999999888241291
+}

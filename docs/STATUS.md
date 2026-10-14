@@ -1,5 +1,18 @@
 # Estado del proyecto
 
+## v0.32.11-r2 — 2026-10-14
+
+Escala interna de colisión para evitar el pico de memoria de las miniaturas,
+sin cambiar dimensiones del generador o de la reproducción. Caso de arranque
+con 5.192 cuerpos / 4.121 activos: 1.533 MB medidos, frente a más de 4 GB antes.
+Madera dañada en tramos rectos, selección por porcentaje y altura, vanos de
+balcón independientes, vigas sobre juntas y hastial con daño Perlin.
+La revisión r2 reconstruye la entrega con fuente y laboratorio coincidentes,
+comprueba medidas de puertas y ventanas y distingue la compilación en el panel.
+El trabajador omite residuos de piedra recortada menores de 0,2 mm en todos
+los ejes: uno de ellos atravesaba el suelo pese a completar el cálculo.
+Validaciones y límites: [v0.32.11](V03211.md).
+
 ## v0.32.10 — 2026-10-12
 
 Corregida la triangulación del ladrillo que impedía preparar la casa y el

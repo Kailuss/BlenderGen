@@ -57,6 +57,9 @@ La base 0.31 integra el edificio completo aportado en `dist/ruinas_v031_completo
 `generation → cache` almacena geometría antes de `fracture.apply_damage` o `instances.build`. La agrupación de vista previa se hace al final y nunca se guarda como plantilla.
 `export.make_solid` reconstruye la fuente si estaba agrupada, materializa las instancias y fusiona copias. Valida la triangulación imprimible; puede normalizar por vóxel si la unión exacta no triangula cerrada.
 Todos los módulos consultan `runtime` para calidad, parámetros activos y temporizadores.
+El trabajador físico amplía las mallas de colisión y posiciones por `PHYSICS_SOLVER_SCALE`, junto con gravedad, trayectorias e impulsos de rotura. La reproducción vuelve a metros originales. No escala el generador ni depende del escalado de objetos para actualizar colisionadores pasivos. Libera las uniones antes de los cuerpos al terminar para evitar referencias nativas inválidas durante el cierre.
+La entrada ejecutable del trabajador termina el proceso aislado después del guardado síncrono, evitando bloqueos de destructores nativos; esa salida no se ejecuta si hubo una excepción. El proceso padre conserva la comprobación de código de salida y carga efectiva del archivo de resultado.
+`geometry.primitives.triangulate_safe` comparte la triangulación del generador y del laboratorio: reintenta polígonos cerrados con EAR_CLIP solo si conserva cierre y volumen dentro del 0,1 %. No rellena una malla abierta arbitrariamente.
 Los imports explícitos de módulos hacen visibles las dependencias. El ciclo entre generación y exportación solo referencia funciones en ejecución, no genera objetos al importar.
 
 La API de `__init__.py` carga servicios de Blender al llamarlos. Por eso `config`, `runtime` y `structure/layout` se pueden importar desde Python normal para ejecutar pruebas rápidas.
@@ -91,6 +94,8 @@ El laboratorio acotado vive en `services/masonry_physics.py`: piezas activas ind
 
 `services/fragile_physics.py` prefractura revocos y chimenea sobre copias en mm, después de resolver encajes y antes de detectar contactos. Exige cierre y conservación de volumen; abre primero los anillos verticalmente para conservar el conducto. IDs derivados de pieza, componente, recorte y linaje. Máximo 256 fragmentos nuevos; falla explícitamente al superar el límite.
 
-La cubierta comparte `roof_damage.sag` entre madera y ejes de tejas. `broken` y `segments` abren el núcleo a partir del 45% de daño; antes se conserva la estructura deformada. `roof_sag_mm` y `roof_damage_stage` sobreviven a la agrupación y se copian al laboratorio para graduar uniones.
+La cubierta comparte `roof_damage.sag` entre madera y ejes de tejas. `broken` y `segments` abren el núcleo a partir del 45% de daño; antes conserva las tejas. La madera afectada se reconstruye en tramos rectos con extremos astillados a partir de `timber_path`; no se deforman sus fibras para producir una curva. `roof_sag_mm`, `roof_damage_stage`, `roof_fracture_parent` y `roof_member_segment` sobreviven a la agrupación y se copian al laboratorio.
+
+`services/height_selection.py` separa muestreo puro ponderado y selección Blender. El número elegido es el porcentaje redondeado de los cuerpos elegibles; gradiente cero equivale a muestreo uniforme. Excluye cuerpos originalmente pasivos y proyectiles, conserva semillas locales y no libera uniones. Los controles solo afectan el laboratorio, por eso no forman parte de la firma de generación.
 
 El proyectil guarda `impact_expire_frame`: claves constantes de visibilidad y grupos de colisión lo desactivan reversiblemente. El worker conserva el vencimiento en la reproducción. No borra el objeto de la fuente ni de la historia.

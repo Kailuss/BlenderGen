@@ -34,13 +34,13 @@ def roof_segments(a,b,fixed,patches,axis,chimney=None,clearance=2):
 
 
 def gable(coll,p,wood,xa,xb,xm,y,z,rise,index,chimney=None):
-    'IA: Hastial de cal rugosa con relieve real de .28 mm, retranqueado tras entramado; contorno de pares y reserva de chimenea cerrados sin booleanos.'
+    'IA: Hastial con relieve y rotura Perlin, capas de madera escalonadas en profundidad y contorno cerrado; no añade booleanas para destruir revoco.'
     mat=primitives.material('Revoco · cal',(.66,.60,.47))
     # Paño retranqueado respecto a la cara de madera, siguiendo exactamente su curva.
     left,right=xa+4,xb-4
     outward=-1 if index==0 else 1
     thickness=max(3.2,min(5,p.thickness*.6))
-    outer=y-outward*.45;inner=outer-outward*thickness
+    outer=y-outward*.8;inner=outer-outward*thickness
     # Si el conducto toca cualquier profundidad del relleno, se reserva el tramo
     # completo; las dos piezas resultantes siguen teniendo tapas y espesor real.
     cuts=chimney if chimney and min(outer,inner)-chimney['radius']<chimney['y']<max(outer,inner)+chimney['radius'] else None
@@ -53,11 +53,12 @@ def gable(coll,p,wood,xa,xb,xm,y,z,rise,index,chimney=None):
         for x in samples:
             t=(x-xa)/(xm-xa) if x<=xm else (xb-x)/(xb-xm)
             tops.append(spatial.roof_height(t,z,rise,p.roof_curve)-1.85)
-        vv,ff=plaster.panel(samples,p.height-.3,tops,min(outer,inner),max(outer,inner),p.seed+9400+index)
+        vv,ff=plaster.panel(samples,p.height-.3,tops,min(outer,inner),max(outer,inner),p.seed+9400+index,p.roof_damage)
         start=len(verts);verts.extend(vv);faces.extend(tuple(start+i for i in face) for face in ff)
     ob=primitives.mesh_obj('Revoco · hastial %s'%index,verts,faces,coll,mat)
     bm=bmesh.new();bm.from_mesh(ob.data);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(ob.data);bm.free()
     ob['roof_gable']=True;ob['gable_depth_mm']=thickness
+    for face in ob.data.polygons:face.use_smooth=abs(face.normal.y)>.85
     # La cercha existente proporciona solera, pendolón y pares. Los rellenos quedan
     # detrás de su cara exterior; montantes y tornapuntas tienen apoyos reales.
     spans=max(2,math.ceil((right-left)/18));xs=[left+(right-left)*i/spans for i in range(spans+1)]
@@ -77,7 +78,8 @@ def gable(coll,p,wood,xa,xb,xm,y,z,rise,index,chimney=None):
         if top-base<5:continue
         for lo,hi in roof_segments(low,high,y,(),'x',chimney):
             za=base+(top-base)*(lo-low)/(high-low);zb=base+(top-base)*(hi-low)/(high-low)
-            beam=timber.timber_beam(coll,wood,'Madera · riostra hastial',(lo,y,za),(hi,y,zb),1.9,2.4,p.seed+9710+index*41+i,coarse=True)
+            brace_y=y-outward*.25
+            beam=timber.timber_beam(coll,wood,'Madera · riostra hastial',(lo,brace_y,za),(hi,brace_y,zb),1.9,2.4,p.seed+9710+index*41+i,coarse=True)
             beam['roof_timber']=True;beam['roof_gable_frame']=True
     return ob
 
@@ -152,6 +154,8 @@ def curved_rafter(coll,wood,p,x0,x1,y,z,rise,seed,ta=0,tb=1):
     primitives.set_coords(ob,co)
     bm=bmesh.new();bm.from_mesh(ob.data);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(ob.data);bm.free()
     ob['roof_timber']=True
+    steps=max(2,math.ceil(length/16))
+    ob['timber_path']=[[x0+(x1-x0)*(ta+(tb-ta)*i/steps),y,spatial.roof_height(ta+(tb-ta)*i/steps,z,rise,p.roof_curve)] for i in range(steps+1)]
     return ob
 
 

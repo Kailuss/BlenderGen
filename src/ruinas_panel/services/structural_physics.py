@@ -61,23 +61,8 @@ def valid(mesh):
 
 
 def triangulate(mesh):
-    'IA: Triangula sin desplazar vértices; cancela pares de triángulos coincidentes opuestos creados por n-gonos de recortes, solo si conserva cierre y volumen.'
-    bm=bmesh.new();bm.from_mesh(mesh)
-    try:
-        bmesh.ops.triangulate(bm,faces=list(bm.faces));before=bm.calc_volume()
-        groups={}
-        for face in bm.faces:groups.setdefault(frozenset(face.verts),[]).append(face)
-        pairs=[faces for faces in groups.values() if len(faces)==2 and faces[0].normal.dot(faces[1].normal)<-.99999]
-        if pairs:
-            candidate=bm.copy();candidate.faces.ensure_lookup_table();bm.faces.index_update()
-            bmesh.ops.delete(candidate,geom=[candidate.faces[f.index] for pair in pairs for f in pair],context='FACES_ONLY')
-            loose=[e for e in candidate.edges if not e.link_faces]
-            if loose:bmesh.ops.delete(candidate,geom=loose,context='EDGES')
-            if all(e.is_manifold for e in candidate.edges) and abs(candidate.calc_volume()-before)<=max(1e-7,abs(before)*1e-6):
-                bm.free();bm=candidate
-            else:candidate.free()
-        bm.to_mesh(mesh)
-    finally:bm.free()
+    'IA: Comparte triangulación validada con los recortes del generador para evitar discrepancias entre vista y física.'
+    primitives.triangulate_safe(mesh)
 
 
 def bounds(ob):
@@ -127,7 +112,7 @@ def snapshot(source,coll,report):
         if original.type!='MESH':continue
         if original.get('ruin_batch'):
             roof_metadata.update({r['name']:r.get('roof_damage',{}) for r in json.loads(original['ruin_parts'])})
-        else:roof_metadata[original.name]={k:original[k] for k in ('roof_sag_mm','roof_damage_stage') if k in original}
+        else:roof_metadata[original.name]={k:original[k] for k in ('roof_sag_mm','roof_damage_stage','roof_fracture_parent','roof_member_segment') if k in original}
         if original.get('ruin_instances'):
             clones=instances.export_copies(original,coll);temporary.extend(clones)
             keys=json.loads(original['ruin_keys'])
@@ -256,6 +241,55 @@ def joint(scene,a,b,point,strength,template=None):
     return ob
 
 
+def connect_timber_fragments(scene,strength=None):
+    'IA: Conserva unión rompible entre segmentos consecutivos de una viga en etapa 1, con hueco real máximo de 3 mm; no une vigas distintas ni atraviesa tramos perdidos.'
+    groups={};geometry={};existing=set();template=None
+    if strength is None:strength=scene.ruin_settings.physics_strength
+    for ob in scene.objects:
+        c=ob.rigid_body_constraint
+        if c and c.object1 and c.object2:
+            existing.add(frozenset((c.object1,c.object2)));template=ob
+        if ob.rigid_body and ob.get('roof_fracture_parent') and ob.get('roof_damage_stage')==1:
+            groups.setdefault(ob['roof_fracture_parent'],{}).setdefault(int(ob['roof_member_segment']),[]).append(ob)
+            points=[ob.matrix_world@v.co*1000 for v in ob.data.vertices]
+            box=tuple(Vector([fn(v[k] for v in points) for k in range(3)]) for fn in (min,max))
+            geometry[ob]=(BVHTree.FromPolygons(points,[list(p.vertices) for p in ob.data.polygons]),box)
+    added=0
+    for segments in groups.values():
+        for index,left in segments.items():
+            for a in left:
+                for b in segments.get(index+1,[]):
+                    pair=frozenset((a,b))
+                    if pair in existing:continue
+                    ta,ba=geometry[a];tb,bb=geometry[b]
+                    point=contact(ta,tb,ba,bb,config.PHYSICS_TIMBER_FRACTURE_GAP_MM)
+                    if point is None:continue
+                    template=joint(scene,a,b,point,strength,template)
+                    template['timber_fracture_joint']=True;existing.add(pair);added+=1
+    return added
+
+
+def discard_collision_dust(scene):
+    'IA: En un laboratorio en metros elimina residuos de piedra recortada menores de 0,2 mm en todos los ejes y sus uniones; conserva piezas diseñadas y fragmentos mayores.'
+    dust=[]
+    for ob in scene.objects:
+        if ob.type!='MESH' or ob.get('physical_role')!='stone' or 'cut_component' not in ob:continue
+        points=[ob.matrix_basis@v.co for v in ob.data.vertices]
+        if points and max(max(p[k] for p in points)-min(p[k] for p in points) for k in range(3))<config.PHYSICS_MIN_CUT_FRAGMENT_MM/1000:dust.append(ob)
+    members=set(dust);names=[o.name for o in dust]
+    joints=[o for o in scene.objects if o.rigid_body_constraint and (o.rigid_body_constraint.object1 in members or o.rigid_body_constraint.object2 in members)]
+    bpy.data.batch_remove(ids=tuple(joints))
+    bpy.data.batch_remove(ids=tuple(dust))
+    return names
+
+
+def prune_static_constraints(scene):
+    'IA: Elimina solo uniones entre dos cuerpos pasivos en la copia de cálculo; no afectan movimiento y el laboratorio editable conserva sus uniones.'
+    unused=[o for o in scene.objects if o.rigid_body_constraint and o.rigid_body_constraint.object1 and o.rigid_body_constraint.object2 and o.rigid_body_constraint.object1.rigid_body.type==o.rigid_body_constraint.object2.rigid_body.type=='PASSIVE']
+    if unused:bpy.data.batch_remove(ids=tuple(unused))
+    return len(unused)
+
+
 def optimise_collisions(scene):
     'IA: Envolvente convexa con incremento máximo del 5 %; en madera admite hasta 25 % y relleno medio menor de 0,1 mm. Conserva concavidades mayores y geometría visible.'
     changed=0;retained=0
@@ -317,7 +351,7 @@ def sparsify_constraints(scene):
 
 
 def merge_ground(scene):
-    'IA: Agrupa terreno y grava pasivos en un solo colisionador sin cambiar su superficie; reasigna sus apoyos antes de unir y conserva aparte el suelo de seguridad.'
+    'IA: Agrupa terreno pasivo en su marco local sin evaluar el grafo físico mediante operadores; conserva superficie, materiales, apoyos y suelo de seguridad separado.'
     ground=[o for o in scene.objects if o.rigid_body and o.rigid_body.type=='PASSIVE' and o.get('physical_role')=='ground' and not o.get('collision_floor')]
     if len(ground)<2:return len(ground)
     first=ground[0];members=set(ground);remove=[]
@@ -328,8 +362,21 @@ def merge_ground(scene):
         if c.object2 in members:c.object2=first
         if c.object1==c.object2:remove.append(ob)
     if remove:bpy.data.batch_remove(ids=tuple(remove))
-    with bpy.context.temp_override(scene=scene,view_layer=scene.view_layers[0],object=first,active_object=first,selected_objects=ground,selected_editable_objects=ground):
-        bpy.ops.object.join()
+    verts=[];faces=[];material_indices=[];materials=[];inverse=first.matrix_world.inverted()
+    for ob in ground:
+        transform=inverse@ob.matrix_world;offset=len(verts)
+        verts.extend(transform@v.co for v in ob.data.vertices)
+        lookup={}
+        for index,mat in enumerate(ob.data.materials):
+            if mat not in materials:materials.append(mat)
+            lookup[index]=materials.index(mat)
+        for face in ob.data.polygons:
+            faces.append(tuple(offset+i for i in face.vertices));material_indices.append(lookup.get(face.material_index,0))
+    mesh=bpy.data.meshes.new('Terreno físico agrupado');mesh.from_pydata(verts,[],faces)
+    for mat in materials:mesh.materials.append(mat)
+    for face,index in zip(mesh.polygons,material_indices):face.material_index=index
+    mesh.update();first.data=mesh
+    bpy.data.batch_remove(ids=tuple(o for o in ground if o!=first))
     first.name='Terreno físico agrupado';first['source_piece']='Terreno físico agrupado'
     scene['ground_parts_merged']=len(ground)
     return len(ground)
@@ -390,15 +437,16 @@ def prepare(source_scene):
             if a.rigid_body.type==b.rigid_body.type=='PASSIVE':continue
             template=joint(scene,a,b,point,p.physics_strength,template)
             if sorted((a.get('source_piece',''),b.get('source_piece',''))) in report.get('metal_welds',[]):template.rigid_body_constraint.use_breaking=False
+        report['timber_fracture_joints']=connect_timber_fragments(scene,p.physics_strength)
         report.update(bodies=len(objects),constraints=sum(o.rigid_body_constraint is not None for o in scene.objects),roles={k:sum(o['physical_role']==k for o in objects) for k in ('wood','stone','tile','metal','ground')},seconds=round(time.perf_counter()-started,3),cpu_seconds=round(time.process_time()-cpu_started,3),faces=sum(len(o.data.polygons) for o in objects))
-        connected={o for a,b,_ in contacts for o in (a,b)}
+        connected={o for ob in scene.objects if ob.rigid_body_constraint for o in (ob.rigid_body_constraint.object1,ob.rigid_body_constraint.object2)}
         report['unconnected']=[o.name for o in objects if o not in connected and o.rigid_body.type=='ACTIVE']
         scene['ruinas_physics_lab']=True;scene['structural_physics']=True;scene['source_scene']=source_scene.name
         scene['source_signature']=physics.signature(p);scene['physics_room']='edificio completo';scene['preparation_report']=json.dumps(report,ensure_ascii=False)
         scene['limitations']='Experimental: uniones rígidas rompibles y prefractura de revocos/chimenea; sin flexión ni fractura adaptativa. Sin reconstrucción de mortero para exportar.'
         scene['mass_scale']=config.PHYSICS_MASS_SCALE
         scene.unit_settings.system='METRIC';scene.unit_settings.scale_length=1;scene.unit_settings.length_unit='MILLIMETERS'
-        for key in ('physics_strength','physics_fragile_size','physics_frames','physics_precision','physics_adaptive_collisions','physics_sparse_constraints'):
+        for key in ('physics_strength','physics_fragile_size','physics_frames','physics_precision','physics_adaptive_collisions','physics_sparse_constraints','physics_memory_mb','physics_timeout_seconds'):
             setattr(scene.ruin_settings,key,getattr(p,key))
         scene.frame_end=p.physics_frames;scene.gravity=(0,0,-9.81)
         world=scene.rigidbody_world;world.substeps_per_frame=40;world.solver_iterations=60;world.point_cache.frame_end=scene.frame_end;world.time_scale=.2

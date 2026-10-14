@@ -24,7 +24,9 @@ def run():
         first=digest(coll);coll=addon.generate(bpy.context,p,'WORK');assert digest(coll)==first
         copies=bpy.data.collections.new('Auditoría física');scene.collection.children.link(copies)
         objects=structural_physics.snapshot(coll,copies,{'binder_excluded':0})
-        if damage:assert max(o.get('roof_sag_mm',0) for o in objects)>1
+        if damage:
+            assert max(o.get('roof_sag_mm',0) for o in objects)>1
+            assert any(o.get('roof_fracture_parent') and 'roof_member_segment' in o for o in objects)
         primitives.remove_objects(objects);bpy.data.collections.remove(copies)
         render(scene,ROOT/('reports/roof_stage_%s.png'%round(damage*100)),focus=(0,55,65),location=(220,-260,260),scale=285)
         reports.append(record)
@@ -32,7 +34,7 @@ def run():
     assert reports[1]['sag_mm']>1 and reports[1]['deformed_timbers']>0
     assert reports[2]['tiles']<reports[1]['tiles'] and reports[2]['missing_tiles']>0
     assert reports[2]['sag_mm']>reports[1]['sag_mm']
-    bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'dist/ruinas_v03210_tejado.blend'))
+    bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'dist/ruinas_v03211_tejado.blend'))
     (ROOT/'reports/roof_stages.json').write_text(json.dumps(reports,indent=2),encoding='utf8')
     print('ROOF_STAGES_PASSED',[(r['damage'],r['tiles'],r['sag_mm']) for r in reports],flush=True)
 

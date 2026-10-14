@@ -32,6 +32,33 @@ def mesh_obj(name, verts, faces, coll, mat):
     return obj
 
 
+def triangulate_safe(mesh):
+    'IA: Triangula sin mover vértices; cancela caras opuestas duplicadas y usa EAR_CLIP si BEAUTY rompe el cierre, con variación máxima del 0,1 % de volumen.'
+    import bmesh
+    bm=bmesh.new();bm.from_mesh(mesh)
+    try:
+        bmesh.ops.triangulate(bm,faces=list(bm.faces));before=bm.calc_volume();groups={}
+        for face in bm.faces:groups.setdefault(frozenset(face.verts),[]).append(face)
+        pairs=[faces for faces in groups.values() if len(faces)==2 and faces[0].normal.dot(faces[1].normal)<-.99999]
+        if pairs:
+            candidate=bm.copy();candidate.faces.ensure_lookup_table();bm.faces.index_update()
+            bmesh.ops.delete(candidate,geom=[candidate.faces[f.index] for pair in pairs for f in pair],context='FACES_ONLY')
+            loose=[e for e in candidate.edges if not e.link_faces]
+            if loose:bmesh.ops.delete(candidate,geom=loose,context='EDGES')
+            if all(e.is_manifold for e in candidate.edges) and abs(candidate.calc_volume()-before)<=max(1e-7,abs(before)*1e-6):
+                bm.free();bm=candidate
+            else:candidate.free()
+        if not all(e.is_manifold for e in bm.edges):
+            candidate=bmesh.new();candidate.from_mesh(mesh);original_volume=candidate.calc_volume()
+            closed=bool(candidate.faces) and all(e.is_manifold for e in candidate.edges)
+            bmesh.ops.triangulate(candidate,faces=list(candidate.faces),ngon_method='EAR_CLIP')
+            if closed and all(e.is_manifold for e in candidate.edges) and abs(candidate.calc_volume()-original_volume)<=max(1e-7,abs(original_volume)*.001):
+                bm.free();bm=candidate
+            else:candidate.free()
+        bm.to_mesh(mesh)
+    finally:bm.free()
+
+
 def coords(obj):
     'IA: Coordenadas de los vértices como matriz numpy (n, 3) en float64; lee en float32, el tipo nativo, para copiar en bloque.'
     import numpy

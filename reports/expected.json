@@ -7,18 +7,18 @@
       "degenerate_faces": []
     },
     "door_windows_work": {
-      "digest": "5a2e59a72ebcb9568c398691174e4072bb93b5f73f6a8bd7772668e7b295651c",
-      "faces": 17350,
+      "digest": "16e4623a0f491de4950a7ad7ebd5180b18822872c3abe690272a7e4d39fa244c",
+      "faces": 18482,
       "degenerate_faces": []
     },
     "room_beams_draft": {
-      "digest": "b412349e3b74236bf3bc28abe4413e3cb8b6ac2ac0f6f59268a9eb48443af02d",
-      "faces": 26548,
+      "digest": "7ff9dc3c6caa74403adb47a917bc415eca123cc7633bab47b0b6cc9226f4baf2",
+      "faces": 30951,
       "degenerate_faces": []
     },
     "window_detail": {
-      "digest": "0b3db75571ddfe53fd3f47ff09332057ac4880f398873a10480c034c663ba5ee",
-      "faces": 38603,
+      "digest": "3abea9edf0bce4f29094e35faa4e9f5e818012f0e54eb614e8f98fa6894fe1f2",
+      "faces": 38347,
       "degenerate_faces": []
     }
   }

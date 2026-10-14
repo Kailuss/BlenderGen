@@ -17,6 +17,14 @@ def run():
     assert coordinates==[tuple(v.co) for v in mesh.vertices]
     bm=bmesh.new();bm.from_mesh(mesh);bm.faces.ensure_lookup_table();bmesh.ops.delete(bm,geom=[bm.faces[0]],context='FACES_ONLY');bm.to_mesh(mesh);bm.free()
     structural_physics.triangulate(mesh);assert not structural_physics.valid(mesh)
+    data=json.loads((ROOT/'tests/fixtures/triangulation_beam_stone.json').read_text(encoding='utf8'))
+    mesh=bpy.data.meshes.new('Alojamiento de viga');mesh.from_pydata(data['vertices'],[],data['faces'])
+    bm=bmesh.new();bm.from_mesh(mesh);original_volume=bm.calc_volume();assert all(e.is_manifold for e in bm.edges)
+    bmesh.ops.triangulate(bm,faces=list(bm.faces));assert any(not e.is_manifold for e in bm.edges);bm.free()
+    coordinates=[tuple(v.co) for v in mesh.vertices]
+    structural_physics.triangulate(mesh);volume=structural_physics.valid(mesh)
+    assert volume>0 and abs(volume-original_volume)<original_volume*.001
+    assert coordinates==[tuple(v.co) for v in mesh.vertices]
     print('PREPARATION_REGRESSION_PASSED',before,after,flush=True)
 
 

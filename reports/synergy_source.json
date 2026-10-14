@@ -1,0 +1,246 @@
+{
+  "settings": {
+    "length": 220,
+    "building_depth": 190,
+    "height_type": "TWO",
+    "layout_mode": "ROOM",
+    "seed": 47,
+    "lock_distribution": false,
+    "interior_layout": "THREE",
+    "pillar_count": 2,
+    "pillar_distribution": "EVEN",
+    "door_enabled": true,
+    "door_width": 35,
+    "door_height": 48,
+    "windows_enabled": true,
+    "balconies": true,
+    "roof_frame": true,
+    "roof_tiles": true,
+    "roof_gables": true,
+    "chimneys": true,
+    "brass_pipes": true,
+    "ground_floor": true,
+    "upper_floor": true,
+    "floor_beams": true,
+    "stair_type": "STONE",
+    "damage_enabled": true,
+    "collapse": 0,
+    "hole_count": 0,
+    "cracks": 0,
+    "rubble_amount": 0.15,
+    "ground_roughness": 0.15,
+    "wear_level": "CUSTOM",
+    "wear": 0.12,
+    "wood_grain": 0.35,
+    "wood_damage": 0.45,
+    "roof_damage": 0.35,
+    "floor_damage": 0.1,
+    "batch_preview": false
+  },
+  "seconds": 12.901940299998387,
+  "closure": {
+    "open_edges": {},
+    "degenerate_faces": {}
+  },
+  "chimeneas_generadas": [
+    {
+      "x": 52.80000000000001,
+      "y": 13.5,
+      "bottom": 0.5,
+      "top": 165.66208425114795,
+      "radius": 7.8500000000000005,
+      "half_width": 12.5,
+      "half_depth": 9.5,
+      "normal": [
+        0,
+        1
+      ],
+      "wall": "front",
+      "floor": 3.2,
+      "mouth_top": 21.95,
+      "hood_top": 34.45,
+      "roof": [
+        -114.0,
+        114.0,
+        114.2,
+        68,
+        0.6000000238418579
+      ]
+    }
+  ],
+  "bajantes_generadas": [
+    {
+      "wall": "left",
+      "y": 15.92,
+      "sections": 6,
+      "surviving": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "wall": "right",
+      "y": 15.92,
+      "sections": 6,
+      "surviving": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  ],
+  "ventanas_generadas": [
+    {
+      "wall": "front",
+      "x": 0.0,
+      "x0": -12.0,
+      "x1": 12.0,
+      "z0": 57.0,
+      "z1": 99.0,
+      "frame_y": -6.5,
+      "balcony": true
+    },
+    {
+      "wall": "left",
+      "x": 98.96000000000001,
+      "x0": 86.96000000000001,
+      "x1": 110.96000000000001,
+      "z0": 57.0,
+      "z1": 99.0,
+      "frame_y": 6.5,
+      "balcony": true
+    },
+    {
+      "wall": "right",
+      "x": 98.96000000000001,
+      "x0": 86.96000000000001,
+      "x1": 110.96000000000001,
+      "z0": 57.0,
+      "z1": 99.0,
+      "frame_y": -6.5,
+      "balcony": true
+    },
+    {
+      "wall": "back",
+      "x": -78.44999999999999,
+      "x0": -90.44999999999999,
+      "x1": -66.44999999999999,
+      "z0": 57.0,
+      "z1": 99.0,
+      "frame_y": 6.5,
+      "balcony": true
+    }
+  ],
+  "plano_interior": {
+    "rooms": [
+      {
+        "id": "left",
+        "bounds": [
+          -100.44999999999999,
+          -24.3,
+          3.9,
+          127.61999999999998
+        ],
+        "kind": "room"
+      },
+      {
+        "id": "right",
+        "bounds": [
+          -21.3,
+          100.44999999999999,
+          3.9,
+          127.61999999999998
+        ],
+        "kind": "room"
+      },
+      {
+        "id": "rear",
+        "bounds": [
+          -100.44999999999999,
+          100.44999999999999,
+          130.61999999999998,
+          165.61999999999998
+        ],
+        "kind": "corridor"
+      }
+    ],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 129.11999999999998,
+        "start": -100.44999999999999,
+        "end": 100.44999999999999,
+        "doors": [
+          -62.37499999999999,
+          39.574999999999996
+        ]
+      },
+      {
+        "axis": "y",
+        "fixed": -22.8,
+        "start": 3.9,
+        "end": 129.11999999999998,
+        "doors": []
+      }
+    ],
+    "connections": [
+      [
+        "left",
+        "rear"
+      ],
+      [
+        "right",
+        "rear"
+      ]
+    ],
+    "entry_room": "right",
+    "door_width": 35.0,
+    "floor": 0,
+    "stair_room": "rear",
+    "minimum_room_mm": 60.0
+  },
+  "cubierta_detalles": {
+    "sag_mm": 5.369723478351919,
+    "deformed_timbers": 128,
+    "fractured_timbers": 128,
+    "timber_fragments": 250,
+    "curve": 0.6000000238418579,
+    "tiles": 2005,
+    "courses": 23,
+    "supported_trusses": 14,
+    "profile": "concave",
+    "bounds": {
+      "walls": [
+        -110.0,
+        110.0,
+        -7.712587833404541,
+        205.52000427246094
+      ],
+      "cover": [
+        -114.0,
+        114.0,
+        -11.712587833404541,
+        209.52000427246094
+      ]
+    },
+    "eave_height": 114.2,
+    "overhang_mm": 4,
+    "missing_tiles": 0
+  },
+  "timber_fragments": 250,
+  "piece_flags": {
+    "interior_partition": 71,
+    "pipe_section": 28,
+    "chimney": 250,
+    "roof_tiles": 46,
+    "stair": 16
+  },
+  "balconies": 4
+}

@@ -4,6 +4,7 @@
 
 
 COLLECTION = 'MURO · fuente procedural'
+BUILD_ID = '0.32.11-r2'
 
 
 SOLID_NAME = 'MURO · sólido exportable'
@@ -74,6 +75,7 @@ BUILD_TYPES={'PARTITION':(6.0,4.5,.6,8.0),'WALL':(9.0,6.25,1.0,10.0),'FORTRESS':
 
 FLOOR_PITCH=55.0
 PHYSICS_ROOF_MIN_STRENGTH=.65
+PHYSICS_TIMBER_FRACTURE_GAP_MM=3.0
 PHYSICS_FRAGILE_LIMIT=256
 PHYSICS_FRAGILE_STRENGTH={'plaster':.15,'chimney':.6}
 UPPER_FLOOR=2.0+FLOOR_PITCH
@@ -116,6 +118,7 @@ FIELDS=('build_type','height_type','layout_mode','building_depth','extra_side','
 
 
 FIELDS=FIELDS+('batch_preview','microdetail_preview','use_instances','export_density','window_width','window_height','balconies','iron_mode','iron_damage')
+FIELDS=FIELDS+('balcony_width','balcony_height','balcony_depth')
 FIELDS=FIELDS+('window_facing','ground_floor','upper_floor','floor_damage')
 FIELDS=FIELDS+('wood_damage','roof_frame')
 FIELDS=FIELDS+('roof_curve','roof_tiles','stair_type','stair_side')
@@ -139,7 +142,7 @@ SECTIONS=(
  {'id':'layout','title':'Distribución','fields':('layout_mode','building_depth','extra_side','interior_layout'),'closed':False},
  {'id':'finish','title':'Acabado','fields':('damage_enabled','collapse','wear_level','wear','cracks','rubble_amount','ground_roughness'),'closed':False},
  {'id':'door','title':'Puerta','toggle':'door_enabled','fields':('door_style','door_leaf','door_position','door_width','door_height','wood_frame'),'closed':True},
- {'id':'windows','title':'Ventanas','toggle':'windows_enabled','fields':('window_facing','windows_per_wall','window_width','window_height','balconies','iron_mode','iron_damage'),'closed':False},
+ {'id':'windows','title':'Ventanas','toggle':'windows_enabled','fields':('window_facing','windows_per_wall','window_width','window_height','balconies','balcony_width','balcony_height','balcony_depth','iron_mode','iron_damage'),'closed':False},
  {'id':'wood','title':'Madera y cubierta','fields':('wood_grain','wood_damage','roof_frame','roof_curve','roof_tiles','roof_gables','roof_damage','chimneys','brass_pipes'),'closed':False},
  {'id':'floors','title':'Suelos de madera','fields':('ground_floor','upper_floor','floor_damage'),'closed':False},
  {'id':'stairs','title':'Escaleras','fields':('stair_type','stair_side'),'closed':False},
@@ -163,3 +166,5 @@ PHYSICS_RESIDUE_MAX_THICKNESS=.01
 
 PHYSICS_JOB_MEMORY_MB=4096
 PHYSICS_JOB_SECONDS=1200
+PHYSICS_SOLVER_SCALE=100.0
+PHYSICS_MIN_CUT_FRAGMENT_MM=.2

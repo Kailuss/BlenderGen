@@ -28,12 +28,15 @@ def sill(coll,p,w,x0,x1,z):
 
 
 def rod(coll,mat,w,name,points,radius=.45):
-    'IA: Tubo hexagonal cerrado sobre una polilínea; une anillos, nunca segmentos sueltos o puntas infinitas.'
-    points=[Vector(v) for v in points];verts=[];faces=[]
+    'IA: Tubo hexagonal cerrado; transporta el marco entre anillos para evitar giros de sección y caras degeneradas al cambiar de dirección.'
+    points=[Vector(v) for v in points];verts=[];faces=[];previous=None;u=None
     for i,point in enumerate(points):
         tangent=(points[min(len(points)-1,i+1)]-points[max(0,i-1)]).normalized()
-        reference=Vector((0,1,0)) if abs(tangent.y)<.9 else Vector((1,0,0))
-        u=tangent.cross(reference).normalized();v=tangent.cross(u)
+        if previous is None:
+            reference=Vector((0,1,0)) if abs(tangent.y)<.9 else Vector((1,0,0))
+            u=tangent.cross(reference).normalized()
+        else:u=previous.rotation_difference(tangent)@u
+        u=(u-tangent*u.dot(tangent)).normalized();v=tangent.cross(u);previous=tangent
         for j in range(6):
             q=point+radius*(math.cos(j*math.tau/6)*u+math.sin(j*math.tau/6)*v)
             verts.append(tuple(q))
@@ -59,11 +62,11 @@ def arrow(coll,mat,w,x,y,z):
 
 
 def balcony(coll,p,w,x0,x1,z,seed):
-    'IA: Plataforma apoyada en el muro; barandilla en U, travesaños y motivos repetidos con tres grados de torsión o rotura.'
+    'IA: Plataforma con vuelo configurable y vano propio; barandilla en U, travesaños y motivos repetidos con torsión o rotura.'
     stone=primitives.material('Piedra · neutro',(.52,.52,.52))
     iron=primitives.material('Hierro · forjado',(.10,.105,.11))
     side=1 if w['id'] in ('left','back') else -1
-    rear=side*(p.thickness/2-1.2);front=side*(p.thickness/2+14)
+    rear=side*(p.thickness/2-1.2);front=side*(p.thickness/2+p.balcony_depth)
     left,right=x0-2,x1+2
     ob=primitives.block('Piedra · plataforma balcón',left,right,min(rear,front)-.6,max(rear,front)+.6,z-2.3,z+.1,coll,stone)
     place(ob,w)

@@ -1,5 +1,6 @@
 """Simulación aislada: un fallo nativo no debe cerrar la sesión de edición."""
 import json
+import hashlib
 import os
 import subprocess
 import tempfile
@@ -16,10 +17,12 @@ def start(scene,mode='SIMULATE',export_path=''):
     folder=Path(tempfile.mkdtemp(prefix='ruinas_physics_'))
     source=folder/'input.blend';output=folder/'result.blend';progress=folder/'progress.json'
     bpy.data.libraries.write(str(source),{scene},fake_user=True)
+    worker=Path(__file__).with_name('physics_worker.py')
+    (folder/'job.json').write_text(json.dumps({'build':config.BUILD_ID,'mode':mode,'worker':str(worker),'worker_sha256':hashlib.sha256(worker.read_bytes()).hexdigest(),'memory_limit_mb':scene.ruin_settings.physics_memory_mb,'time_limit_seconds':scene.ruin_settings.physics_timeout_seconds},indent=2),encoding='utf8')
     command=[bpy.app.binary_path,'--factory-startup','--threads','2','-b',str(source),'--python-exit-code','1','--python',str(Path(__file__).with_name('physics_worker.py')),'--',str(output),str(progress),scene.name,mode,str(export_path)]
     with (folder/'worker.log').open('w',encoding='utf8') as log:
         process=subprocess.Popen(command,stdout=log,stderr=subprocess.STDOUT,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
-    runtime.physics_job={'process':process,'folder':folder,'output':output,'progress':progress,'started':time.monotonic(),'scene':scene.name,'mode':mode}
+    runtime.physics_job={'process':process,'folder':folder,'output':output,'progress':progress,'started':time.monotonic(),'scene':scene.name,'mode':mode,'memory_limit_mb':scene.ruin_settings.physics_memory_mb,'time_limit_seconds':scene.ruin_settings.physics_timeout_seconds}
     return runtime.physics_job
 
 
@@ -56,12 +59,13 @@ def poll():
     process=job['process'];code=process.poll()
     if code is None:
         elapsed=time.monotonic()-job['started'];memory=memory_mb(process.pid)
-        if elapsed>config.PHYSICS_JOB_SECONDS or memory>config.PHYSICS_JOB_MEMORY_MB:
+        memory_limit=job.get('memory_limit_mb',config.PHYSICS_JOB_MEMORY_MB);time_limit=job.get('time_limit_seconds',config.PHYSICS_JOB_SECONDS)
+        if elapsed>time_limit or memory>memory_limit:
             folder=job['folder']
-            details={'mode':job['mode'],'seconds':elapsed,'resident_mb':memory,'limit_seconds':config.PHYSICS_JOB_SECONDS,'limit_mb':config.PHYSICS_JOB_MEMORY_MB}
+            details={'mode':job['mode'],'seconds':elapsed,'resident_mb':memory,'limit_seconds':time_limit,'limit_mb':memory_limit}
             cancel()
             (folder/'resource_limit.json').write_text(json.dumps(details,indent=2),encoding='utf8')
-            raise ValueError('Proceso detenido por límite de recursos (%.0f MB, %.0f s). Fuente intacta. Diagnóstico: %s'%(memory,elapsed,folder))
+            raise ValueError('Límite configurado de Ruinas: %.0f/%.0f MB, %.0f/%.0f s. Fuente intacta. Diagnóstico: %s'%(memory,memory_limit,elapsed,time_limit,folder))
         try:return json.loads(job['progress'].read_text(encoding='utf8'))
         except (OSError,ValueError):return {'stage':'Arrancando proceso separado'}
     runtime.physics_job=None

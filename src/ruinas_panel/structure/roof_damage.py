@@ -31,17 +31,39 @@ def sag(x,y,patches):
 
 
 def deform_timber(coll,patches):
-    'IA: Deforma las fibras existentes sin añadir densidad; mantiene sección cerrada y apoyos periféricos, y registra el daño previo a física.'
-    maximum=0;affected=0
-    for ob in coll.objects:
-        if not ob.get('roof_timber') or ob.get('roof_gable_frame'):continue
-        co=primitives.coords(ob);offsets=[sag(x,y,patches) for x,y,z in co]
-        amount=max(offsets,default=0)
-        if amount<1e-6:continue
-        co[:,2]-=offsets;primitives.set_coords(ob,co)
-        ob['roof_sag_mm']=amount;ob['roof_damage_stage']=2 if any(h.get('severity',1)>.45 for h in patches) else 1
+    'IA: Sustituye madera afectada por tramos rectos cerrados con extremos astillados; cambia poses y rompe juntas, nunca curva las fibras de un tramo.'
+    from mathutils import Vector
+    import bpy
+    maximum=0;affected=0;fragments=0
+    for ob in list(coll.objects):
+        if not ob.get('roof_timber') or ob.get('roof_gable_frame') or 'timber_path' not in ob:continue
+        path=[Vector(v) for v in ob['timber_path']];points=[path[0]]
+        for a,b in zip(path,path[1:]):
+            steps=max(1,math.ceil((b-a).length/16))
+            points.extend(a.lerp(b,i/steps) for i in range(1,steps+1))
+        offsets=[sag(v.x,v.y,patches) for v in points];amount=max(offsets,default=0)
+        if amount<.15:continue
+        displaced=[Vector((v.x,v.y,v.z-drop)) for v,drop in zip(points,offsets)]
+        # Fusionar intervalos intactos colineales evita trocear madera sana sin necesidad.
+        knots=[displaced[0]]
+        for i in range(1,len(displaced)-1):
+            before=(displaced[i]-knots[-1]).normalized();after=(displaced[i+1]-displaced[i]).normalized()
+            if before.dot(after)<.9998 or offsets[i]>.15:knots.append(displaced[i])
+        knots.append(displaced[-1])
+        name=ob.name;props={k:ob[k] for k in ob.keys()};width=ob['timber_width'];depth=ob['timber_depth'];seed=ob['timber_seed']
+        material=bpy.data.materials.get('Madera · cubierta') or ob.data.materials[0]
+        primitives.remove_objects([ob])
+        for index,(a,b) in enumerate(zip(knots,knots[1:])):
+            direction=(b-a).normalized();broken=(index>0,index<len(knots)-2)
+            start=a+direction*(.08 if broken[0] else 0);finish=b-direction*(.08 if broken[1] else 0)
+            part=timber.timber_beam(coll,material,name if index==0 else name+' · astilla %02d'%index,start,finish,width,depth,seed+index*31,coarse=True,broken=broken)
+            for key in ('roof_timber','roof_gable_frame'):
+                if key in props:part[key]=props[key]
+            part['roof_fracture_parent']=name;part['roof_member_segment']=index
+            part['roof_sag_mm']=amount;part['roof_damage_stage']=2 if any(h.get('severity',1)>.45 for h in patches) else 1
+            fragments+=1
         maximum=max(maximum,amount);affected+=1
-    return {'sag_mm':maximum,'deformed_timbers':affected}
+    return {'sag_mm':maximum,'deformed_timbers':affected,'fractured_timbers':affected,'timber_fragments':fragments}
 
 
 def distance(x,y,patches):

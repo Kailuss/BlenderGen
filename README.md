@@ -17,7 +17,9 @@ La v0.32.8 corrige los cruces físicos de balcones y aísla los cálculos en otr
 
 ## Usarlo en Blender
 
-**Uso normal:** guía completa en [USERGUIDE.md](USERGUIDE.md). En resumen: instala `dist/ruinas_panel_v03210.zip` desde Preferencias → Complementos → Instalar desde disco, actívalo y abre Vista 3D → N → Ruinas. Puedes abrir un .blend de v0.20: conserva los campos guardados. No ejecutes su antiguo `generador_muro.py`, porque volvería a registrar la versión anterior.
+**Uso normal:** guía completa en [USERGUIDE.md](USERGUIDE.md). En resumen: instala `dist/ruinas_panel_v03211_r2.zip` desde Preferencias → Complementos → Instalar desde disco, actívalo y abre Vista 3D → N → Ruinas. Guarda tu trabajo y reinicia Blender tras sustituir una compilación anterior; el panel debe indicar **v0.32.11-r2**. Abrir un `.blend` no actualiza el complemento. Puedes abrir un .blend de v0.20: conserva los campos guardados. No ejecutes su antiguo `generador_muro.py`, porque volvería a registrar la versión anterior.
+
+La v0.32.11 reconstruye madera dañada en tramos rectos astillados y añade selección de desprendimiento por porcentaje, altura y material. Uso y prueba integrada en [el manual de selección](docs/MANUAL_SELECCION_ALTURA.md).
 
 **Desarrollo:** abre `tools/load_in_blender.py` como archivo en el editor de texto de Blender y pulsa Ejecutar script. Repite tras editar un módulo: limpia callbacks y caché, recarga el paquete y mantiene los parámetros guardados. No es necesario volver a empaquetar ni reiniciar Blender. Usa solo una copia del addon activa.
 

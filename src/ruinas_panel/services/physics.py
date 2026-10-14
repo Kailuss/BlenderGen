@@ -15,6 +15,13 @@ def signature(p):
     return hashlib.sha256(json.dumps(values,sort_keys=True).encode()).hexdigest()
 
 
+def source_matches(scene):
+    'IA: Compara la configuración actual de la fuente con la firma guardada del laboratorio; devuelve None cuando falta la fuente o su firma, sin evaluar geometría.'
+    source=bpy.data.scenes.get(scene.get('source_scene',''))
+    saved=scene.get('source_signature')
+    return signature(source.ruin_settings)==saved if source and saved else None
+
+
 def sections(coll):
     'IA: Recupera identidad y cotas mundiales de tabiques únicos o agrupados; nunca modifica la fuente.'
     result=[]

@@ -1,0 +1,21 @@
+{
+  "variant": "NO_CONTACTS",
+  "bodies": 5192,
+  "active": 4121,
+  "constraints": 17850,
+  "roles": {
+    "wood": 1382,
+    "stone": 1149,
+    "tile": 1482,
+    "metal": 111,
+    "ground": 1067
+  },
+  "last_stage": {
+    "stage": "Terminado",
+    "moving": 4117,
+    "seconds": 4.451413299990236
+  },
+  "error": "Preparaci\u00f3n/c\u00e1lculo fallido: c\u00f3digo 3221225477. Fuente intacta. Log: C:\\Users\\yhora\\AppData\\Local\\Temp\\ruinas_physics_pm8f42kt\\worker.log",
+  "peak_mb": 1431.37890625,
+  "seconds": 10.780317299999297
+}

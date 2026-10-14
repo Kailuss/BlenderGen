@@ -1,0 +1,21 @@
+{
+  "variant": "FIXED",
+  "bodies": 5192,
+  "active": 4121,
+  "constraints": 17850,
+  "roles": {
+    "wood": 1382,
+    "stone": 1149,
+    "tile": 1482,
+    "metal": 111,
+    "ground": 1067
+  },
+  "last_stage": {
+    "stage": "Terminado",
+    "moving": 4120,
+    "seconds": 12.69116080000822
+  },
+  "completed": true,
+  "peak_mb": 1532.9921875,
+  "seconds": 128.7046038999979
+}

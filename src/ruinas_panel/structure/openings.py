@@ -88,6 +88,7 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
         mod.solver=config.BOOLEAN_SOLVER
         mod.object=cutter
         primitives.apply_modifier(ob,mod,cutter)
+        primitives.triangulate_safe(ob.data)
         if ob.data.vertices and before-primitives.mesh_volume(ob.data)>limit:
             # Booleano fallido: devolvió menos pieza de la que el hueco puede quitar. Se conserva sin recortar.
             failed=ob.data
@@ -158,9 +159,45 @@ def window_timber(coll,wood,w,name,a,b,width,depth,seed):
     return ob
 
 
+def beam_joints(coll,w,z):
+    'IA: Juntas reales de dos sillares en la cota de viga; exige anchura residual imprimible a ambos lados del alojamiento de 5 mm.'
+    stones=[]
+    for ob in coll.objects:
+        if not ob.name.startswith('Piedra') or ob.get('wall_id','front')!=w['id'] or ob.get('protected_sill'):continue
+        co=primitives.coords(ob)
+        if not len(co) or not co[:,2].min()<z<co[:,2].max():continue
+        a,o=w['axis'],w['origin'];x=(co[:,0]-o[0])*a[0]+(co[:,1]-o[1])*a[1]
+        stones.append((float(x.min()),float(x.max())))
+    stones.sort();result=[]
+    for left,right in zip(stones,stones[1:]):
+        gap=right[0]-left[1]
+        if -.05<=gap<=1.5 and min(left[1]-left[0],right[1]-right[0])>=5.3:
+            result.append(((left[1]+right[0])/2,(left[1]-left[0]+right[1]-right[0])/2))
+    return result
+
+
+def beam_positions(coll,w,z,rear=None):
+    'IA: Reparte vigas sobre juntas con paso objetivo de dos módulos y al menos 24 mm, tolerando un 15 % al ajustar; coordina ambas paredes sin búsquedas combinatorias.'
+    joints=beam_joints(coll,w,z)
+    if rear:
+        rear_joints=beam_joints(coll,rear,z);aligned=[]
+        for x,width in joints:
+            other=min(rear_joints,key=lambda q:abs(q[0]-x),default=None)
+            if other and abs(other[0]-x)<=1.5:aligned.append(((x+other[0])/2,width))
+        joints=aligned
+    if not joints:return []
+    widths=sorted(q[1] for q in joints);spacing=max(24,2*widths[len(widths)//2])
+    count=max(1,int((w['end']-w['start'])/spacing));chosen=[]
+    for index in range(count):
+        target=w['start']+(w['end']-w['start'])*(index+1)/(count+1)
+        candidates=[x for x,width in joints if w['start']+5<x<w['end']-5 and all(abs(x-v)>=spacing*.85 for v in chosen)]
+        if candidates:chosen.append(min(candidates,key=lambda x:(abs(x-target),x)))
+    return sorted(chosen)
+
+
 @profiling.timed('aberturas_y_vigas')
 def architectural_openings(coll,p,walls,door,edges):
-    'IA: Distribuye huecos con jambas/dinteles apoyados; aloja vigas quitando ladrillos antes de añadir madera.'
+    'IA: Distribuye ventanas y accesos de balcón con medidas independientes; aloja vigas en juntas reales entre dos ladrillos antes de añadir madera.'
     windows=[]
     from . import placement,floor_plan
     stair=placement.stair_reservation(p,walls)
@@ -171,7 +208,6 @@ def architectural_openings(coll,p,walls,door,edges):
     for w in walls:
         if not p.windows_enabled:
             break
-        ww=p.window_width
         margin=8 if p.balconies else 4
         usable=(w['start']+margin,w['end']-margin)
         # Reservar columnas y puerta en la fachada.
@@ -181,7 +217,8 @@ def architectural_openings(coll,p,walls,door,edges):
         tree=wall_tree(coll,w)
         for floor in (reversed(range(floors)) if p.balconies else range(floors)):
             has_balcony=p.balconies and floor>0
-            wh=p.window_height+(14 if has_balcony else 0)
+            ww=p.balcony_width if has_balcony else p.window_width
+            wh=p.balcony_height if has_balcony else p.window_height
             z0=(layout.upper_floor(p) if floor else 2)+(0 if has_balcony else 16)
             z1=z0+wh
             if z1+5>w['height']:
@@ -243,10 +280,8 @@ def architectural_openings(coll,p,walls,door,edges):
         support_trees={w['id']:wall_tree(coll,w) for w in walls}
         for w in targets:
             support_tree=support_trees[w['id']]
-            count=max(1,int((w['end']-w['start'])/24))
-            span=(w['end']-w['start'])/(count+1)
-            for i in range(count):
-                x=w['start']+(i+1)*span
+            rear_wall=next((q for q in walls if q['id']=='back'),None) if p.layout_mode=='ROOM' else None
+            for i,x in enumerate(beam_positions(coll,w,z,rear_wall)):
                 if sum(wall_hit(support_tree,w,p,sx,z-2.7) for sx in (x-1.5,x,x+1.5))<2:
                     continue
                 if any(h['wall']==w['id'] and h['x0']-3<x<h['x1']+3 and h['z0']<z+size/2 and h['z1']>z-size/2 for h in windows):

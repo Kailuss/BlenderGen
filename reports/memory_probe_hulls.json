@@ -1,0 +1,22 @@
+{
+  "variant": "HULLS",
+  "bodies": 5192,
+  "active": 4121,
+  "constraints": 17850,
+  "roles": {
+    "wood": 1382,
+    "stone": 1149,
+    "tile": 1482,
+    "metal": 111,
+    "ground": 1067
+  },
+  "last_stage": {
+    "stage": "Simulando",
+    "frame": 1,
+    "total": 2,
+    "seconds": 0.7422181000001729
+  },
+  "error": "Proceso detenido por l\u00edmite de recursos (4394 MB, 9 s). Fuente intacta. Diagn\u00f3stico: C:\\Users\\yhora\\AppData\\Local\\Temp\\ruinas_physics_b2lgg3dx",
+  "peak_mb": 4393.96484375,
+  "seconds": 9.27805019999505
+}
