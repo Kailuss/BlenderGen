@@ -48,6 +48,7 @@ class RUIN_PT_panel(bpy.types.Panel):
         'IA: Acciones, estado y semilla arriba; no generes ni modifiques geometría desde el panel.'
         layout = self.layout
         if context.scene.get('ruinas_replay'):
+            layout.prop(context.scene,'camera',text='Cámara de render')
             layout.label(text=context.scene.get('playback_instructions','Demostración calculada · pulsa Espacio'))
             layout.label(text='Reproducción calculada; edita en el laboratorio')
             if context.scene.get('lab_scene'):layout.operator('ruin.physics_edit')
@@ -60,6 +61,7 @@ class RUIN_PT_panel(bpy.types.Panel):
             layout.operator('ruin.physics_return',icon='BACK')
             return
         if context.scene.get('ruinas_physics_lab'):
+            layout.prop(context.scene,'camera',text='Cámara de render')
             layout.label(text='Física · '+context.scene.get('physics_room','tabique'))
             from ..services import physics
             if physics.source_matches(context.scene) is False:
@@ -77,6 +79,9 @@ class RUIN_PT_panel(bpy.types.Panel):
                 box=layout.box();box.label(text='Preparar selección de desprendimiento')
                 for field in ('physics_selection_material','physics_selection_percent','physics_selection_gradient','physics_selection_seed'):box.prop(p,field)
                 box.operator('ruin.physics_height_selection')
+                from ..services import material_strength
+                box=layout.box();box.label(text='Resistencia por familia · multiplicador')
+                for field in material_strength.FIELDS:box.prop(p,field)
             if context.scene.get('masonry_lab'):
                 layout.label(text='Ladrillos activos · juntas rompibles')
                 layout.operator('ruin.masonry_remove')
@@ -88,8 +93,11 @@ class RUIN_PT_panel(bpy.types.Panel):
                 layout.prop(p,'fracture_strength');layout.operator('ruin.physics_fracture')
                 layout.prop(p,'impact_direction');layout.prop(p,'impact_speed')
                 layout.prop(p,'impact_radius');layout.prop(p,'impact_mass');layout.prop(p,'impact_mode');layout.prop(p,'impact_lifetime')
+                layout.prop(p,'impact_render_visible')
                 layout.operator('ruin.masonry_impact',text='Añadir impacto dirigido')
                 layout.label(text='Apunta a la selección; sin selección, al edificio')
+                layout.prop(p,'physics_shake_strength')
+                layout.operator('ruin.physics_shake',icon='PLAY')
             layout.prop(context.scene.ruin_settings,'physics_precision')
             layout.prop(context.scene.ruin_settings,'physics_adaptive_collisions')
             layout.prop(context.scene.ruin_settings,'physics_sparse_constraints')
@@ -129,27 +137,32 @@ class RUIN_PT_panel(bpy.types.Panel):
 def enabled(p, field):
     'IA: Controles que no aplican se atenúan en lugar de ocultarse.'
     if field=='ground_storey_height':return p.height_type!='RUIN'
-    if field=='upper_storey_height':return p.height_type=='TWO'
+    if field=='upper_storey_height':return p.height_type in ('TWO','THREE')
     if field=='low_wall_height':return p.height_type=='RUIN'
     if field=='pillar_positions':return p.pillar_distribution=='CUSTOM' and p.pillar_count>0
     if field=='interior_layout':return p.layout_mode=='ROOM' and p.height_type!='RUIN'
     if not p.damage_enabled and field in set(damage.DISABLED_VALUES)|{'wear_level','hole_size','hole_seed','break_position'}:return False
     if field=='wear':return p.wear_level=='CUSTOM'
-    if field in ('roof_curve','roof_tiles','roof_gables','chimneys','brass_pipes','roof_damage'):return p.layout_mode=='ROOM' and p.roof_frame
+    if field in ('roof_curve','roof_tiles','roof_gables','chimneys','brass_pipes','roof_damage','roof_damage_seed'):return p.layout_mode=='ROOM' and p.roof_frame and p.roof_type=='PITCHED'
+    if field=='roof_type':return p.layout_mode=='ROOM' and p.roof_frame
+    if field in ('foundation_enabled','patio_enabled'):return p.layout_mode=='ROOM'
+    if field in ('foundation_height','entrance_tread'):return p.layout_mode=='ROOM' and p.foundation_enabled
+    if field in ('patio_margin','patio_fence'):return p.layout_mode=='ROOM' and p.patio_enabled
+    if field=='fence_height':return p.layout_mode=='ROOM' and p.patio_enabled and p.patio_fence
     if field=='stair_side' and p.stair_type=='NONE':return False
-    if field in ('stair_type','stair_side'):return p.layout_mode=='ROOM' and p.height_type=='TWO' and p.upper_floor and p.floor_beams
+    if field in ('stair_type','stair_side'):return p.layout_mode=='ROOM' and p.height_type in ('TWO','THREE') and p.upper_floor and p.floor_beams
     if field=='roof_frame':return p.layout_mode=='ROOM'
-    if field=='upper_floor':return p.layout_mode=='ROOM' and p.height_type=='TWO' and p.floor_beams
-    if field=='floor_damage':return p.layout_mode=='ROOM' and (p.ground_floor or (p.upper_floor and p.floor_beams and p.height_type=='TWO'))
+    if field=='upper_floor':return p.layout_mode=='ROOM' and p.height_type in ('TWO','THREE') and p.floor_beams
+    if field=='floor_damage':return p.layout_mode=='ROOM' and (p.ground_floor or (p.upper_floor and p.floor_beams and p.height_type in ('TWO','THREE')))
     if field=='ground_floor':return p.layout_mode=='ROOM'
-    if field=='balconies':return p.height_type=='TWO'
-    if field in ('iron_mode','iron_damage','balcony_width','balcony_height','balcony_depth'):return p.balconies and p.height_type=='TWO'
+    if field=='balconies':return p.height_type in ('TWO','THREE')
+    if field in ('balconies_per_wall','balcony_width','balcony_height','balcony_depth'):return p.balconies and p.height_type in ('TWO','THREE')
     if field == 'building_depth':
         return p.layout_mode != 'NONE'
     if field == 'extra_side':
         return p.layout_mode == 'ONE'
     if field == 'floor_beams':
-        return p.height_type == 'TWO'
+        return p.height_type in ('TWO','THREE')
     if field == 'connection_side':
         return p.connection_enabled
     return True
@@ -216,19 +229,28 @@ def section_panel(index, section):
         if section['id']=='floors':
             col.label(text='Requiere Habitación; entreplanta sobre vigas')
         if section['id']=='stairs':
-            col.label(text='Habitación · 2 plantas · entreplanta y vigas')
+            col.label(text='Habitación · plantas superiores y vigas')
             stair=parsed(meta.raw(context.scene,'escalera_generada') or '{}',{})
             if stair.get('error'):col.label(text=stair['error'],icon='INFO')
             elif stair:
                 col.label(text='%s peldaños · huella útil 20 × 20 mm'%stair['steps'])
                 col.label(text='Acceso libre: 35 mm')
+                if p.roof_type=='TOWER':
+                    roof=parsed(meta.raw(context.scene,'cubierta_detalles') or '{}',{})
+                    if roof.get('access_opening'):col.label(text='Conexión hasta terraza abierta',icon='CHECKMARK')
+                    elif roof.get('access_error'):col.label(text=roof['access_error'],icon='INFO')
         if section['id']=='collapse':
             col.operator('ruin.next_holes',icon='FILE_REFRESH')
             holes=parsed(meta.raw(context.scene,'huecos_generados') or '[]',[])
             col.label(text='Huecos generados: %s · respetan anclajes'%len(holes))
-        if section['id'] == 'windows' and p.windows_enabled:
+        if section['id'] in ('windows','balconies'):
             windows = parsed(meta.raw(context.scene, 'ventanas_generadas') or '[]', [])
-            col.label(text='Generadas: %s · limitadas por apoyos y espacio' % len(windows))
+            balcony=section['id']=='balconies'
+            col.label(text='Generados: %s · limitados por apoyos y espacio' % sum(bool(w.get('balcony'))==balcony for w in windows))
+            warnings=parsed(meta.raw(context.scene,'vanos_limitaciones') or '[]',[])
+            family='balcony' if balcony else 'window'
+            if any(w['family']==family and w['reason']=='dimensions' for w in warnings):col.label(text='Algún vano no cabe: reduce ancho/alto',icon='INFO')
+            if balcony and p.height_type not in ('TWO','THREE'):col.label(text='Requiere planta superior',icon='INFO')
 
     attrs = {
         'bl_label': section['title'],

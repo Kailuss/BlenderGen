@@ -1,0 +1,52 @@
+{
+  "profile": "tower",
+  "deck_slabs": 35,
+  "parapet_blocks": 90,
+  "tiles": 0,
+  "bounds": {
+    "walls": [
+      -38.85,
+      38.85,
+      -4.5,
+      92.42
+    ],
+    "cover": [
+      -38.85,
+      38.85,
+      -4.5,
+      92.42
+    ]
+  },
+  "eave_height": 119.0,
+  "preparation": {
+    "binder_excluded": 451,
+    "joints_cut": 590,
+    "covered_pieces_removed": 0,
+    "numeric_fragments_removed": 31,
+    "metal_welds": [
+      [
+        "Hierro \u00b7 anclaje de anilla",
+        "Hierro \u00b7 anilla del picaporte"
+      ],
+      [
+        "Hierro \u00b7 anclaje de anilla",
+        "Hierro \u00b7 placa del picaporte"
+      ]
+    ],
+    "fragile_fragments": 0,
+    "timber_fracture_joints": 0,
+    "bodies": 826,
+    "constraints": 2906,
+    "roles": {
+      "wood": 155,
+      "stone": 652,
+      "tile": 0,
+      "metal": 9,
+      "ground": 10
+    },
+    "seconds": 12.635,
+    "cpu_seconds": 15.141,
+    "faces": 200276,
+    "unconnected": []
+  }
+}

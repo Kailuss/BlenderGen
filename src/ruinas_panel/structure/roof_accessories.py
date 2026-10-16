@@ -166,10 +166,10 @@ def reserve_floors(coll,p,plan):
             primitives.apply_modifier(ob,mod,cutter)
             if not ob.data.vertices:primitives.remove_objects([ob])
         primitives.remove_objects([cutter])
-    if p.height_type=='TWO' and p.upper_floor:
+    for base in (layout.floor_bases(p)[1:] if p.upper_floor else []):
         wood=primitives.material('Madera · cabecero chimenea',(.27,.18,.1))
         for side in (-1,1):
-            chimney_block(coll,wood,plan,'Madera · cabecero chimenea',-r-2,r+2,side*r-1,side*r+1,layout.upper_floor(p)-4.5,layout.upper_floor(p)-1.6)
+            chimney_block(coll,wood,plan,'Madera · cabecero chimenea',-r-2,r+2,side*r-1,side*r+1,base-4.5,base-1.6)
 
 
 def flashing(coll,plan):

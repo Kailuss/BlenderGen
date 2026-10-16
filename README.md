@@ -17,7 +17,9 @@ La v0.32.8 corrige los cruces físicos de balcones y aísla los cálculos en otr
 
 ## Usarlo en Blender
 
-**Uso normal:** guía completa en [USERGUIDE.md](USERGUIDE.md). En resumen: instala `dist/ruinas_panel_v03211_r2.zip` desde Preferencias → Complementos → Instalar desde disco, actívalo y abre Vista 3D → N → Ruinas. Guarda tu trabajo y reinicia Blender tras sustituir una compilación anterior; el panel debe indicar **v0.32.11-r2**. Abrir un `.blend` no actualiza el complemento. Puedes abrir un .blend de v0.20: conserva los campos guardados. No ejecutes su antiguo `generador_muro.py`, porque volvería a registrar la versión anterior.
+**Uso normal:** instala `dist/ruinas_panel_v03212.zip` desde Preferencias → Complementos → Instalar desde disco, actívalo y abre Vista 3D → N → Ruinas. Guarda tu trabajo y reinicia Blender tras sustituir una compilación anterior; el panel debe indicar **v0.32.12**. Abrir un `.blend` no actualiza el complemento. Los archivos anteriores conservan sus campos guardados; no ejecutes su antiguo `generador_muro.py`, que volvería a registrar otra versión.
+
+La 0.32.12 incorpora torreón, tres plantas, cimientos/patio, cuotas independientes de balcones, daño asimétrico, cámaras y zarandeo aislado. [Manual y escenas entregadas](docs/MANUAL_V03212.md), [mediciones y límites](docs/V03212.md), [reestructuración incremental](docs/REESTRUCTURACION_03212.md).
 
 La v0.32.11 reconstruye madera dañada en tramos rectos astillados y añade selección de desprendimiento por porcentaje, altura y material. Uso y prueba integrada en [el manual de selección](docs/MANUAL_SELECCION_ALTURA.md).
 

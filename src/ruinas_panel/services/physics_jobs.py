@@ -10,15 +10,18 @@ import bpy
 from .. import runtime,config
 
 
-def start(scene,mode='SIMULATE',export_path=''):
+def start(scene,mode='SIMULATE',export_path='',selection=None):
     'IA: Guarda una copia del laboratorio y arranca otro Blender sin ventana; no evalúa Bullet en la sesión del usuario.'
     if runtime.physics_job:raise ValueError('Ya hay una simulación en curso.')
+    if mode=='SHAKE':
+        from . import shake_physics
+        shake_physics.selected(scene,selection or [])
     if not (mode=='PREPARE' or scene.get('ruinas_physics_lab') or (mode=='EXPORT' and scene.get('physics_result_scene'))):raise ValueError('Abre un laboratorio físico.')
     folder=Path(tempfile.mkdtemp(prefix='ruinas_physics_'))
     source=folder/'input.blend';output=folder/'result.blend';progress=folder/'progress.json'
     bpy.data.libraries.write(str(source),{scene},fake_user=True)
     worker=Path(__file__).with_name('physics_worker.py')
-    (folder/'job.json').write_text(json.dumps({'build':config.BUILD_ID,'mode':mode,'worker':str(worker),'worker_sha256':hashlib.sha256(worker.read_bytes()).hexdigest(),'memory_limit_mb':scene.ruin_settings.physics_memory_mb,'time_limit_seconds':scene.ruin_settings.physics_timeout_seconds},indent=2),encoding='utf8')
+    (folder/'job.json').write_text(json.dumps({'build':config.BUILD_ID,'mode':mode,'selection':selection or [],'worker':str(worker),'worker_sha256':hashlib.sha256(worker.read_bytes()).hexdigest(),'memory_limit_mb':scene.ruin_settings.physics_memory_mb,'time_limit_seconds':scene.ruin_settings.physics_timeout_seconds},indent=2),encoding='utf8')
     command=[bpy.app.binary_path,'--factory-startup','--threads','2','-b',str(source),'--python-exit-code','1','--python',str(Path(__file__).with_name('physics_worker.py')),'--',str(output),str(progress),scene.name,mode,str(export_path)]
     with (folder/'worker.log').open('w',encoding='utf8') as log:
         process=subprocess.Popen(command,stdout=log,stderr=subprocess.STDOUT,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
@@ -76,5 +79,5 @@ def poll():
         raise ValueError('Preparación/cálculo fallido: %s. Fuente intacta. Log: %s'%(reason,log))
     with bpy.data.libraries.load(str(job['output']),link=False) as (data,loaded):loaded.scenes=data.scenes
     result=loaded.scenes[0]
-    if job['mode']=='SIMULATE':result['lab_scene']=job['scene']
+    if job['mode'] in ('SIMULATE','SHAKE'):result['lab_scene']=job['scene']
     return {'finished':result}

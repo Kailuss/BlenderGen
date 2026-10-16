@@ -1,0 +1,18 @@
+{
+  "selected": 2,
+  "frames": 10,
+  "release_frame": 2,
+  "expire_frame": 5,
+  "stroke_mm": 3.0,
+  "impactors": 4,
+  "peak_mb": 204.109375,
+  "simulation": {
+    "objects": 9,
+    "moving": 6,
+    "seconds": 0.011840500010293908,
+    "sample_step": 4,
+    "static_constraints_omitted": 2,
+    "solver_scale": 100.0,
+    "collision_dust_omitted": []
+  }
+}

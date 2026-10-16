@@ -60,6 +60,15 @@ def valid(mesh):
     bm.free();return volume if okay else 0
 
 
+def component_measure(mesh):
+    'IA: Mide cierre y volumen absoluto tras la misma normalización de caras de valid; evita clasificar residuos usando las normales antiguas del booleano.'
+    bm=bmesh.new();bm.from_mesh(mesh)
+    try:
+        bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces))
+        return all(e.is_manifold for e in bm.edges),abs(bm.calc_volume())
+    finally:bm.free()
+
+
 def triangulate(mesh):
     'IA: Comparte triangulación validada con los recortes del generador para evitar discrepancias entre vista y física.'
     primitives.triangulate_safe(mesh)
@@ -144,36 +153,57 @@ def snapshot(source,coll,report):
     return result
 
 
+def centered_difference(target,cutter):
+    'IA: Reintenta Manifold cerca del origen sobre copias físicas, restaura coordenadas y cortador incluso ante error; evita pérdida de precisión en piezas delgadas alejadas.'
+    lo,hi=bounds(target);center=(lo+hi)/2
+    original=cutter.data;cutter.data=original.copy();temporary=cutter.data
+    target.data.transform(Matrix.Translation(-center));temporary.transform(Matrix.Translation(-center))
+    try:
+        mod=target.modifiers.new('Encaje local para física','BOOLEAN');mod.operation='DIFFERENCE';mod.solver='MANIFOLD';mod.object=cutter
+        primitives.apply_modifier(target,mod,cutter)
+    finally:
+        target.data.transform(Matrix.Translation(center));cutter.data=original;bpy.data.meshes.remove(temporary)
+
+
 def resolve(objects,report):
-    'IA: Recorta copias solapadas, prioriza escaleras y chimenea sobre cerámica, conserva cruces metálicos soldados y reintenta con tolerancia numérica; exige cierre y fuente intacta.'
+    'IA: Recorta copias solapadas con BVH reutilizados hasta cambiar la pieza; reintenta en coordenadas locales antes de tolerancias y exige cierre, volumen y fuente intacta.'
     priority={'wood':0,'metal':1,'tile':2,'stone':3,'ground':4}
-    removed=set()
+    removed=set();trees={}
     # Se procesan cajas iniciales: una diferencia solo reduce volumen.
     candidates=list(pairs(objects,-.001))
     for a,b,ba,bb in candidates:
         if a in removed or b in removed:continue
         if 'ground' in (a['physical_role'],b['physical_role']):continue
+        for ob in (a,b):
+            if ob not in trees:trees[ob]=tree(ob)
+        ta,tb=trees[a],trees[b]
         if a['physical_role']==b['physical_role']=='metal':
             # Hierro forjado: cruces soldados, no diferencias sobre tubos finos.
             # Las parejas intersectadas quedan unidas sin rotura ni colisión mutua.
-            if tree(a).overlap(tree(b)):
+            if ta.overlap(tb):
                 report.setdefault('metal_welds',[]).append(sorted((a['source_piece'],b['source_piece'])))
             continue
         cutter,target=sorted((a,b),key=lambda o:((-1 if o['physical_role']=='stone' and 'escalera' in o['source_piece'].lower() else 1.5 if o['physical_role']=='stone' and any(tag in o['source_piece'].lower() for tag in ('chimenea','hogar')) else priority[o['physical_role']]),o.name))
-        ta,tb=tree(a),tree(b)
         if not ta.overlap(tb):
             # Detectar contención completa, que no cruza superficies.
             center=(bb[0]+bb[1])/2;near,normal,_,distance=ta.find_nearest(center)
-            inside=near is not None and (center-near).dot(normal)<-1e-4
+            inside=all(ba[0][k]<=bb[0][k] and ba[1][k]>=bb[1][k] for k in range(3)) and near is not None and (center-near).dot(normal)<-1e-4
             center2=(ba[0]+ba[1])/2;near2,normal2,_,_=tb.find_nearest(center2)
-            inside2=near2 is not None and (center2-near2).dot(normal2)<-1e-4
+            inside2=all(bb[0][k]<=ba[0][k] and bb[1][k]>=ba[1][k] for k in range(3)) and near2 is not None and (center2-near2).dot(normal2)<-1e-4
             if not inside and not inside2:continue
         backup=target.data.copy();before=valid(backup)
+        trees.pop(target,None)
         mod=target.modifiers.new('Encaje para física','BOOLEAN');mod.operation='DIFFERENCE';mod.solver='MANIFOLD';mod.object=cutter
         primitives.apply_modifier(target,mod,cutter)
         if not target.data.polygons:
             removed.add(target);report['covered_pieces_removed']+=1;bpy.data.meshes.remove(backup);continue
         after=valid(target.data)
+        if not after or after>before+max(.001,before*.0001):
+            failed=target.data;target.data=backup.copy();bpy.data.meshes.remove(failed)
+            centered_difference(target,cutter);after=valid(target.data)
+            if not target.data.polygons:
+                removed.add(target);report['covered_pieces_removed']+=1;bpy.data.meshes.remove(backup);continue
+            if after and after<=before+max(.001,before*.0001):report['local_joints']=report.get('local_joints',0)+1
         if not after or after>before+max(.001,before*.0001):
             failed=target.data;target.data=backup.copy();bpy.data.meshes.remove(failed)
             mod=target.modifiers.new('Encaje exacto para física','BOOLEAN');mod.operation='DIFFERENCE';mod.solver='EXACT';mod.object=cutter
@@ -194,6 +224,11 @@ def resolve(objects,report):
                     report.setdefault('tolerant_joints',[]).append({'target':target['source_piece'],'cutter':cutter['source_piece'],'offset_mm':offset});break
         if not after or after>before+max(.001,before*.0001):
             print('INVALID_JOINT' ,target.name,cutter.name,before,after,flush=True)
+            import tempfile
+            from pathlib import Path
+            diagnostic=Path(tempfile.mkdtemp(prefix='ruinas_joint_'))/'geometry.json'
+            diagnostic.write_text(json.dumps({'target':{'name':target['source_piece'],'vertices':[list(v.co) for v in backup.vertices],'faces':[list(p.vertices) for p in backup.polygons]},'cutter':{'name':cutter['source_piece'],'vertices':[list(v.co) for v in cutter.data.vertices],'faces':[list(p.vertices) for p in cutter.data.polygons]}}),encoding='utf8')
+            print('JOINT_DIAGNOSTIC',diagnostic,flush=True)
             failed=target.data;target.data=backup;bpy.data.meshes.remove(failed)
             raise ValueError('Encaje no válido entre '+target['source_piece']+' y '+cutter['source_piece'])
         if after<config.PHYSICS_RESIDUE_MAX_VOLUME and before-after>max(1e-5,before*1e-7):
@@ -405,10 +440,16 @@ def prepare(source_scene):
                 if not mesh.polygons:
                     bpy.data.meshes.remove(mesh);continue
                 if not valid(mesh):
-                    bm=bmesh.new();bm.from_mesh(mesh);volume=abs(bm.calc_volume());closed=all(e.is_manifold for e in bm.edges);bm.free()
+                    closed,volume=component_measure(mesh)
                     if closed and volume<1e-6:
+                        report['numeric_component_volume_mm3']=report.get('numeric_component_volume_mm3',0)+volume
                         report['numeric_fragments_removed']+=1;bpy.data.meshes.remove(mesh);continue
                     print('INVALID_FRAGMENT',ob.name,len(mesh.vertices),len(mesh.polygons),flush=True)
+                    from pathlib import Path
+                    import tempfile
+                    diagnostic=Path(tempfile.mkdtemp(prefix='ruinas_fragment_'))/'geometry.json'
+                    diagnostic.write_text(json.dumps({'name':ob.name,'volume':volume,'closed':closed,'vertices':[list(v.co) for v in mesh.vertices],'faces':[list(p.vertices) for p in mesh.polygons]}),encoding='utf8')
+                    print('FRAGMENT_DIAGNOSTIC',diagnostic,volume,closed,flush=True)
                     raise ValueError('Fragmento degenerado después de recortar: '+ob.name)
                 clone=bpy.data.objects.new(ob.name+' · fragmento',mesh);coll.objects.link(clone)
                 for key in ob.keys():clone[key]=ob[key]
@@ -446,10 +487,17 @@ def prepare(source_scene):
         scene['limitations']='Experimental: uniones rígidas rompibles y prefractura de revocos/chimenea; sin flexión ni fractura adaptativa. Sin reconstrucción de mortero para exportar.'
         scene['mass_scale']=config.PHYSICS_MASS_SCALE
         scene.unit_settings.system='METRIC';scene.unit_settings.scale_length=1;scene.unit_settings.length_unit='MILLIMETERS'
-        for key in ('physics_strength','physics_fragile_size','physics_frames','physics_precision','physics_adaptive_collisions','physics_sparse_constraints','physics_memory_mb','physics_timeout_seconds'):
+        for key in ('physics_strength','physics_fragile_size','physics_frames','physics_precision','physics_adaptive_collisions','physics_sparse_constraints','physics_memory_mb','physics_timeout_seconds','physics_shake_strength'):
             setattr(scene.ruin_settings,key,getattr(p,key))
         scene.frame_end=p.physics_frames;scene.gravity=(0,0,-9.81)
         world=scene.rigidbody_world;world.substeps_per_frame=40;world.solver_iterations=60;world.point_cache.frame_end=scene.frame_end;world.time_scale=.2
+        from . import lab_cameras
+        from .. import meta
+        walls=meta.get(source_scene,'paredes_generadas',[]);lookup={w['id']:w for w in walls}
+        if all(k in lookup for k in ('left','right','back')):
+            elevation=p.foundation_height if p.foundation_enabled else 0
+            scene['structural_bounds_mm']=[lookup['left']['origin'][0]-p.thickness/2,lookup['right']['origin'][0]+p.thickness/2,-p.thickness/2,lookup['back']['origin'][1]+p.thickness/2,elevation+2,elevation+p.height]
+        lab_cameras.create(scene,meta.get(source_scene,'puerta_generada'))
         print('STRUCTURAL_PREPARED',{k:(len(v) if isinstance(v,list) else v) for k,v in report.items()},flush=True)
         return scene
     except Exception:
@@ -457,8 +505,8 @@ def prepare(source_scene):
         raise
 
 
-def release(scene,ob):
-    'IA: Suelta a partir del fotograma 13 las uniones de todas las piezas elegidas; no prescribe desplazamientos ni elimina su colisionador.'
+def release(scene,ob,frame=13):
+    'IA: Suelta conjuntamente las uniones elegidas en frame (13 por defecto); crea acción propia y conserva cuerpos y trayectorias.'
     chosen=[ob] if isinstance(ob,bpy.types.Object) else list(ob or [])
     chosen={o for o in chosen if o.name in scene.objects and o.rigid_body and o.rigid_body.type=='ACTIVE'}
     if not chosen:raise ValueError('Selecciona piezas móviles del edificio.')
@@ -468,13 +516,13 @@ def release(scene,ob):
         c=other.rigid_body_constraint
         if c and chosen.intersection((c.object1,c.object2)):affected.append(other)
     if not affected:raise ValueError('La pieza no tiene uniones; ya está libre.')
-    first=affected[0];c=first.rigid_body_constraint
-    c.enabled=True;c.keyframe_insert(data_path='enabled',frame=1);c.keyframe_insert(data_path='enabled',frame=12)
-    c.enabled=False;c.keyframe_insert(data_path='enabled',frame=13)
+    first=affected[0];first.animation_data_clear();c=first.rigid_body_constraint
+    c.enabled=True;c.keyframe_insert(data_path='enabled',frame=1);c.keyframe_insert(data_path='enabled',frame=frame-1)
+    c.enabled=False;c.keyframe_insert(data_path='enabled',frame=frame)
     # La misma curva booleana sirve para todas las uniones seleccionadas.
     # Evita evaluar miles de cuerpos al insertar cada fotograma por separado.
     for other in affected[1:]:
         animation=other.animation_data_create();animation.action=first.animation_data.action
         animation.action_slot=first.animation_data.action_slot
     scene['support_release']=json.dumps(sorted(o.name for o in chosen));scene['physics_simulated']=0;runtime.physics_simulations.discard(scene.as_pointer())
-    scene.timeline_markers.new('Soltar uniones; caída sin trayectoria impuesta',frame=13);scene.frame_set(1)
+    scene.timeline_markers.new('Soltar uniones; caída sin trayectoria impuesta',frame=frame);scene.frame_set(1)

@@ -20,7 +20,12 @@ def finish(coll,p,scene):
     relations.register(coll,scene)
     holes.apply(coll,p,scene,walls)
     floors.build(coll,p,scene);interiors.build(coll,p,scene);roof.build(coll,p,scene)
+    from . import building_definition
+    definition=meta.get(scene,'building_definition') or building_definition.define(p)
+    meta.put(scene,'architectural_graph',building_definition.graph(definition,walls,plan,meta.get(scene,'ventanas_generadas',[]),meta.get(scene,'cubierta_roturas',[]),bool(meta.get(scene,'cubierta_generada',[])),door,meta.get(scene,'escaleras_generadas',[])))
     terrain.pier_ground(coll,p,centers)
     if runtime.quality in config.DAMAGE_QUALITIES and getattr(p,'damage_enabled',True):
         stone=primitives.material('Piedra · neutro',(.52,.52,.52));mortar=primitives.material('Núcleo · neutro',(.44,.44,.44))
         rubble.build_rubble(coll,stone,mortar,p,door,rh)
+    from . import foundations
+    foundations.build(coll,p,scene)

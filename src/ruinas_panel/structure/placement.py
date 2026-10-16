@@ -11,7 +11,9 @@ def stair_reservation(p,walls):
 
 def blocks_stair(w,a,b,z,stair,p):
     'IA: Rechaza vanos bajos cuyo espacio interior inmediato cruza la escalera o el desembarco; no modifica la escalera.'
-    if not stair or 'error' in stair or z>=stair['top']+2:return False
+    if not stair or 'error' in stair:return False
+    top=stair['top']+(p.upper_storey_height if p.height_type=='THREE' else 0)
+    if z>=top+2:return False
     from .openings import wall_point
     outward=1 if w['id'] in ('left','back') else -1
     pts=[wall_point(w,x,-outward*y,z) for x in (a-1,b+1) for y in (0,p.thickness/2+27)]

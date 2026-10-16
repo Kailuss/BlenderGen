@@ -187,6 +187,21 @@ class RUIN_OT_physics_simulate(bpy.types.Operator):
 
 
 
+class RUIN_OT_physics_shake(bpy.types.Operator):
+    bl_idname='ruin.physics_shake'
+    bl_label='Zarandear selección · 10 fotogramas'
+    bl_description='Calcula una copia con cuatro empujes de esquina; conserva el laboratorio y hace móviles solo las piezas seleccionadas'
+    def execute(self,context):
+        'IA: Envía selección explícita al trabajador SHAKE; usa la vigilancia habitual y nunca modifica el laboratorio original.'
+        from ..services import physics_jobs
+        try:physics_jobs.start(context.scene,'SHAKE',selection=[o.name for o in context.selected_objects])
+        except Exception as exc:return fail(self,context,exc)
+        self._timer=context.window_manager.event_timer_add(.5,window=context.window)
+        context.window_manager.modal_handler_add(self)
+        return {'RUNNING_MODAL'}
+    modal=RUIN_OT_physics_simulate.modal
+
+
 class RUIN_OT_physics_accept(bpy.types.Operator):
     bl_idname='ruin.physics_accept'
     bl_label='Aceptar para exportación'

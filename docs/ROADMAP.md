@@ -30,4 +30,8 @@ Estas correcciones siguen pendientes. Integrarlas con el modelo y el daño compa
 
 Por entrega de geometría, comparar cierre y aspecto, tiempo, caras y memoria con los mismos parámetros y semillas. Verificar caché, instancias, guardado/reapertura y exportación/reimportación. Piezas cerradas no garantizan una casa fusionada imprimible. La prueba física de resina sigue pendiente.
 
-Solicitar a RafaYafa revisión de exportación y barrido de controles (mínimo, intermedio y máximo), registrando parámetros, semilla y efecto observado. Mantener Trello actualizado separando entregado, validación y pendiente. Publicar cambios validados en `origin/develop` y distinguir futuras entregas con una versión inequívoca; no reutilizar 0.31 para paquetes diferentes.
+Solicitar a RafaYafa revisión de exportación y barrido de controles (mínimo, intermedio y máximo), registrando parámetros, semilla y efecto observado. Actualizar Trello esporádicamente con grandes avances o ideas de alcance, por preferencia del usuario; las correcciones y pruebas rutinarias quedan en el repositorio. Publicar cambios validados en `origin/develop` y distinguir futuras entregas con una versión inequívoca; no reutilizar 0.31 para paquetes diferentes.
+
+## Fachadas y cubiertas — siguientes iteraciones
+
+Referencias recibidas el 15 de octubre: hojas de ventana con bisagras y apertura; tejadillos cerámicos en puertas/ventanas con el perfil de la cubierta; miradores de saliente editable que puedan agrupar ventanas próximas y reservar su espacio interior. Resolver apoyos externos tras revisar el primer resultado. Cubierta variable también a lo largo de la cumbrera, extremos elevados y pendientes asimétricas, conservando madera recta ensamblada. Son propuestas pendientes, registradas conjuntamente en Trello; no forman parte de las prestaciones entregadas en 0.32.12.

@@ -1,0 +1,1159 @@
+{
+  "settings": {
+    "length": 180,
+    "building_depth": 120,
+    "height_type": "THREE",
+    "layout_mode": "ROOM",
+    "pillar_count": 0,
+    "door_enabled": true,
+    "windows_enabled": true,
+    "windows_per_wall": 2,
+    "balconies": true,
+    "balconies_per_wall": 1,
+    "balcony_width": 24,
+    "balcony_height": 42,
+    "balcony_depth": 20,
+    "roof_frame": true,
+    "roof_type": "TOWER",
+    "ground_floor": true,
+    "upper_floor": true,
+    "floor_beams": true,
+    "stair_type": "WOOD",
+    "damage_enabled": false,
+    "foundation_enabled": true,
+    "foundation_height": 8,
+    "patio_enabled": true,
+    "patio_margin": 20,
+    "ground_roughness": 0,
+    "rubble_amount": 0,
+    "physics_strength": 5,
+    "physics_frames": 24,
+    "batch_preview": true,
+    "use_instances": true
+  },
+  "source": {
+    "quality": "WORK",
+    "objects": 61,
+    "microdetail": false,
+    "faces": 181808,
+    "vertices": 181440,
+    "seconds": 3.1466339999897173,
+    "stages": {
+      "preparacion": 1.2064084999874467,
+      "biseles": 0.1940492001886014,
+      "desgaste": 0.00029919987719040364,
+      "agrupacion": 0.842634700005874,
+      "total": 3.1466339999897173
+    },
+    "cached": true,
+    "solid": false,
+    "expanded_faces": 272708,
+    "instances": 2662,
+    "variants": 39,
+    "detail_limited": false
+  },
+  "floors": [
+    {
+      "level": 0,
+      "boards": 88,
+      "broken": 0,
+      "top_mm": 11.2,
+      "anchors": [
+        -80.44999999999999,
+        -57.46428571428571,
+        -34.47857142857142,
+        -11.492857142857147,
+        11.492857142857147,
+        34.47857142857143,
+        57.464285714285694,
+        80.44999999999996
+      ],
+      "holes": []
+    },
+    {
+      "level": 1,
+      "boards": 66,
+      "broken": 10,
+      "top_mm": 65.0,
+      "anchors": [
+        -67.27230262756348,
+        -44.912452697753906,
+        33.79355430603027,
+        56.24638748168945
+      ],
+      "holes": []
+    },
+    {
+      "level": 2,
+      "boards": 119,
+      "broken": 10,
+      "top_mm": 120.0,
+      "anchors": [
+        -78.44999999999999,
+        -50.650245666503906,
+        -39.224999999999994,
+        -27.961764812469482,
+        0.0,
+        5.388260722160339,
+        28.10844612121582,
+        39.224999999999994,
+        50.50910472869873,
+        78.44999999999999
+      ],
+      "holes": []
+    }
+  ],
+  "stairs": [
+    {
+      "x0": -41.44999999999999,
+      "x1": 48.150000000000006,
+      "y0": 97.62,
+      "y1": 120.02,
+      "bottom": 11.2,
+      "top": 65.0,
+      "steps": 4,
+      "reverse": false,
+      "opening": [
+        -41.94999999999999,
+        48.650000000000006,
+        96.82000000000001,
+        120.82
+      ],
+      "landing": [
+        48.150000000000006,
+        70.55000000000001
+      ],
+      "type": "WOOD",
+      "usable_tread_mm": 20,
+      "pitch_mm": 22.4,
+      "riser_mm": 13.45,
+      "width_mm": 22.39999999999999,
+      "approach_mm": 35.0,
+      "approach": [
+        -77.94999999999999,
+        -42.94999999999999,
+        97.62,
+        120.02
+      ]
+    },
+    {
+      "x0": -41.44999999999999,
+      "x1": 48.150000000000006,
+      "y0": 97.62,
+      "y1": 120.02,
+      "bottom": 65.0,
+      "top": 120.0,
+      "steps": 4,
+      "reverse": false,
+      "opening": [
+        -41.94999999999999,
+        48.650000000000006,
+        96.82000000000001,
+        120.82
+      ],
+      "landing": [
+        48.150000000000006,
+        70.55000000000001
+      ],
+      "type": "WOOD",
+      "usable_tread_mm": 20,
+      "pitch_mm": 22.4,
+      "riser_mm": 13.75,
+      "width_mm": 22.39999999999999,
+      "approach_mm": 35.0,
+      "approach": [
+        -77.94999999999999,
+        -42.94999999999999,
+        97.62,
+        120.02
+      ]
+    },
+    {
+      "x0": -41.44999999999999,
+      "x1": 48.150000000000006,
+      "y0": 97.62,
+      "y1": 120.02000000000001,
+      "bottom": 120.0,
+      "top": 182.0,
+      "steps": 4,
+      "reverse": false,
+      "opening": [
+        -41.94999999999999,
+        48.650000000000006,
+        96.82000000000001,
+        120.82000000000001
+      ],
+      "landing": [
+        48.150000000000006,
+        70.55000000000001
+      ],
+      "type": "WOOD",
+      "usable_tread_mm": 20,
+      "pitch_mm": 22.4,
+      "riser_mm": 15.5,
+      "width_mm": 22.400000000000006,
+      "approach_mm": 35.0,
+      "approach": [
+        -77.94999999999999,
+        -42.94999999999999,
+        97.62,
+        120.02000000000001
+      ],
+      "destination": "terrace"
+    }
+  ],
+  "openings": [
+    {
+      "wall": "front",
+      "floor": 2,
+      "x": 0.0,
+      "x0": -12.0,
+      "x1": 12.0,
+      "z0": 120.0,
+      "z1": 162.0,
+      "frame_y": -6.5,
+      "balcony": true
+    },
+    {
+      "wall": "front",
+      "floor": 0,
+      "x": -37.5,
+      "x0": -44.5,
+      "x1": -30.5,
+      "z0": 26.0,
+      "z1": 48.0,
+      "frame_y": -6.5,
+      "balcony": false
+    },
+    {
+      "wall": "front",
+      "floor": 0,
+      "x": 37.5,
+      "x0": 30.5,
+      "x1": 44.5,
+      "z0": 26.0,
+      "z1": 48.0,
+      "frame_y": -6.5,
+      "balcony": false
+    },
+    {
+      "wall": "left",
+      "floor": 2,
+      "x": 63.96,
+      "x0": 51.96,
+      "x1": 75.96000000000001,
+      "z0": 120.0,
+      "z1": 162.0,
+      "frame_y": 6.5,
+      "balcony": true
+    },
+    {
+      "wall": "left",
+      "floor": 0,
+      "x": 47.946666666666665,
+      "x0": 40.946666666666665,
+      "x1": 54.946666666666665,
+      "z0": 26.0,
+      "z1": 48.0,
+      "frame_y": 6.5,
+      "balcony": false
+    },
+    {
+      "wall": "left",
+      "floor": 0,
+      "x": 79.97333333333333,
+      "x0": 72.97333333333333,
+      "x1": 86.97333333333333,
+      "z0": 26.0,
+      "z1": 48.0,
+      "frame_y": 6.5,
+      "balcony": false
+    },
+    {
+      "wall": "right",
+      "floor": 2,
+      "x": 63.96,
+      "x0": 51.96,
+      "x1": 75.96000000000001,
+      "z0": 120.0,
+      "z1": 162.0,
+      "frame_y": -6.5,
+      "balcony": true
+    },
+    {
+      "wall": "right",
+      "floor": 0,
+      "x": 47.946666666666665,
+      "x0": 40.946666666666665,
+      "x1": 54.946666666666665,
+      "z0": 26.0,
+      "z1": 48.0,
+      "frame_y": -6.5,
+      "balcony": false
+    },
+    {
+      "wall": "right",
+      "floor": 0,
+      "x": 79.97333333333333,
+      "x0": 72.97333333333333,
+      "x1": 86.97333333333333,
+      "z0": 26.0,
+      "z1": 48.0,
+      "frame_y": -6.5,
+      "balcony": false
+    },
+    {
+      "wall": "back",
+      "floor": 2,
+      "x": -58.44999999999999,
+      "x0": -70.44999999999999,
+      "x1": -46.44999999999999,
+      "z0": 120.0,
+      "z1": 162.0,
+      "frame_y": 6.5,
+      "balcony": true
+    },
+    {
+      "wall": "back",
+      "floor": 0,
+      "x": -55.51874999999999,
+      "x0": -62.51874999999999,
+      "x1": -48.51874999999999,
+      "z0": 26.0,
+      "z1": 48.0,
+      "frame_y": 6.5,
+      "balcony": false
+    },
+    {
+      "wall": "back",
+      "floor": 1,
+      "x": -55.51874999999999,
+      "x0": -62.51874999999999,
+      "x1": -48.51874999999999,
+      "z0": 81.0,
+      "z1": 103.0,
+      "frame_y": 6.5,
+      "balcony": false
+    }
+  ],
+  "closure": {
+    "open_edges": {},
+    "degenerate_faces": {}
+  },
+  "prepare_job": {
+    "peak_mb": 968.19921875,
+    "seconds": 146.4999286000093
+  },
+  "preparation": {
+    "binder_excluded": 1274,
+    "joints_cut": 2102,
+    "covered_pieces_removed": 1,
+    "numeric_fragments_removed": 51,
+    "metal_welds": [
+      [
+        "Hierro \u00b7 barrote torcido.008",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.008",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.003"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.008",
+        "Hierro \u00b7 flecha roma.008"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.009",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.009",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.003"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.009",
+        "Hierro \u00b7 flecha roma.009"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.010",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.010",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.003"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.010",
+        "Hierro \u00b7 flecha roma.010"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.011",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.011",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.003"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.011",
+        "Hierro \u00b7 flecha roma.011"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.012",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.012",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.003"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.012",
+        "Hierro \u00b7 flecha roma.012"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.013",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.013",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.003"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.013",
+        "Hierro \u00b7 flecha roma.013"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.014",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.014",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.003"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.014",
+        "Hierro \u00b7 flecha roma.014"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.015",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.015",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.003"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.015",
+        "Hierro \u00b7 flecha roma.015"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.007",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.008",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.009",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.010",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.011",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.012",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.013",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado.002",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado.003",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.002"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado.002",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.003"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado.003",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.003"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.012",
+        "Hierro \u00b7 voluta ventana.012"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.013",
+        "Hierro \u00b7 voluta ventana.013"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.014",
+        "Hierro \u00b7 voluta ventana.014"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.015",
+        "Hierro \u00b7 voluta ventana.015"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.016",
+        "Hierro \u00b7 voluta ventana.016"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.017",
+        "Hierro \u00b7 voluta ventana.017"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.018",
+        "Hierro \u00b7 voluta ventana.018"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.019",
+        "Hierro \u00b7 voluta ventana.019"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.020",
+        "Hierro \u00b7 voluta ventana.020"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.021",
+        "Hierro \u00b7 voluta ventana.021"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.022",
+        "Hierro \u00b7 voluta ventana.022"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.023",
+        "Hierro \u00b7 voluta ventana.023"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.024",
+        "Hierro \u00b7 flecha roma.024"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado.006",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado.006",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.007"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.024",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.021",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.025",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.022",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.026",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.023",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.027",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.024",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.028",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.025",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.029",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.026",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.030",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.027",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado.007",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.031",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.006"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.024",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.007"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.025",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.007"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.026",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.007"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.027",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.007"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.028",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.007"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.029",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.007"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.030",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.007"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado.007",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.007"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.031",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.007"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.036",
+        "Hierro \u00b7 voluta ventana.036"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.037",
+        "Hierro \u00b7 voluta ventana.037"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.025",
+        "Hierro \u00b7 flecha roma.025"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.026",
+        "Hierro \u00b7 flecha roma.026"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.040",
+        "Hierro \u00b7 voluta ventana.040"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.041",
+        "Hierro \u00b7 voluta ventana.041"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.044",
+        "Hierro \u00b7 voluta ventana.044"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.045",
+        "Hierro \u00b7 voluta ventana.045"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.027",
+        "Hierro \u00b7 flecha roma.027"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.028",
+        "Hierro \u00b7 flecha roma.028"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.029",
+        "Hierro \u00b7 flecha roma.029"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.030",
+        "Hierro \u00b7 flecha roma.030"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.042",
+        "Hierro \u00b7 voluta ventana.042"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.043",
+        "Hierro \u00b7 voluta ventana.043"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.046",
+        "Hierro \u00b7 voluta ventana.046"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.047",
+        "Hierro \u00b7 voluta ventana.047"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.038",
+        "Hierro \u00b7 voluta ventana.038"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.039",
+        "Hierro \u00b7 voluta ventana.039"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.031",
+        "Hierro \u00b7 flecha roma.031"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.004",
+        "Hierro \u00b7 voluta ventana.004"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.005",
+        "Hierro \u00b7 voluta ventana.005"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.006",
+        "Hierro \u00b7 voluta ventana.006"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.007",
+        "Hierro \u00b7 voluta ventana.007"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido",
+        "Hierro \u00b7 flecha roma"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.001"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.001",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.001",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.002",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.002",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.003",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.003",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.004",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.004",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.005",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.005",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.006",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.006",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado.001",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.007",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.001"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.001",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.001"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.002",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.001"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.003",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.001"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.004",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.001"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.005",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.001"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.006",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.001"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado.001",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.001"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.007",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.001"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana",
+        "Hierro \u00b7 voluta ventana"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.001",
+        "Hierro \u00b7 voluta ventana.001"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.001",
+        "Hierro \u00b7 flecha roma.001"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.002",
+        "Hierro \u00b7 flecha roma.002"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.003",
+        "Hierro \u00b7 flecha roma.003"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.004",
+        "Hierro \u00b7 flecha roma.004"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.005",
+        "Hierro \u00b7 flecha roma.005"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.006",
+        "Hierro \u00b7 flecha roma.006"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.002",
+        "Hierro \u00b7 voluta ventana.002"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.003",
+        "Hierro \u00b7 voluta ventana.003"
+      ],
+      [
+        "Hierro \u00b7 anclaje de anilla",
+        "Hierro \u00b7 anilla del picaporte"
+      ],
+      [
+        "Hierro \u00b7 anclaje de anilla",
+        "Hierro \u00b7 placa del picaporte"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.007",
+        "Hierro \u00b7 flecha roma.007"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.008",
+        "Hierro \u00b7 voluta ventana.008"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.009",
+        "Hierro \u00b7 voluta ventana.009"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.010",
+        "Hierro \u00b7 voluta ventana.010"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.011",
+        "Hierro \u00b7 voluta ventana.011"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado.004",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado.004",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.005"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado.005",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 retorno anclado.005",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.005"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.016",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.017",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.018",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.019",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.020",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.021",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.022",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.023",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.014",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.015",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.016",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.017",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.018",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.019",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 filigrana rombo.020",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.004"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.016",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.005"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.017",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.005"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.018",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.005"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.019",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.005"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.020",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.005"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.021",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.005"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.022",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.005"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.023",
+        "Hierro \u00b7 travesa\u00f1o balc\u00f3n.005"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.024",
+        "Hierro \u00b7 voluta ventana.024"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.025",
+        "Hierro \u00b7 voluta ventana.025"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.026",
+        "Hierro \u00b7 voluta ventana.026"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.027",
+        "Hierro \u00b7 voluta ventana.027"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.028",
+        "Hierro \u00b7 voluta ventana.028"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.029",
+        "Hierro \u00b7 voluta ventana.029"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.030",
+        "Hierro \u00b7 voluta ventana.030"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.031",
+        "Hierro \u00b7 voluta ventana.031"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.032",
+        "Hierro \u00b7 voluta ventana.032"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.033",
+        "Hierro \u00b7 voluta ventana.033"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.034",
+        "Hierro \u00b7 voluta ventana.034"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.035",
+        "Hierro \u00b7 voluta ventana.035"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.016",
+        "Hierro \u00b7 flecha roma.016"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.017",
+        "Hierro \u00b7 flecha roma.017"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.018",
+        "Hierro \u00b7 flecha roma.018"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.019",
+        "Hierro \u00b7 flecha roma.019"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.020",
+        "Hierro \u00b7 flecha roma.020"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.021",
+        "Hierro \u00b7 flecha roma.021"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.022",
+        "Hierro \u00b7 flecha roma.022"
+      ],
+      [
+        "Hierro \u00b7 barrote torcido.023",
+        "Hierro \u00b7 flecha roma.023"
+      ]
+    ],
+    "numeric_component_volume_mm3": 5.243462378280875e-07,
+    "fragile_fragments": 0,
+    "timber_fracture_joints": 0,
+    "bodies": 2741,
+    "constraints": 9483,
+    "roles": {
+      "wood": 703,
+      "stone": 1805,
+      "tile": 0,
+      "metal": 222,
+      "ground": 11
+    },
+    "seconds": 50.681,
+    "cpu_seconds": 58.766,
+    "faces": 577883,
+    "unconnected": []
+  },
+  "eligible": 2730,
+  "selected": 2048,
+  "shake_job": {
+    "peak_mb": 1083.85546875,
+    "seconds": 87.23427610000363
+  },
+  "simulation": {
+    "objects": 2736,
+    "moving": 2052,
+    "seconds": 6.553031800009194,
+    "sample_step": 4,
+    "static_constraints_omitted": 2198,
+    "solver_scale": 100.0,
+    "collision_dust_omitted": []
+  },
+  "export_job": {
+    "peak_mb": 2358.3203125,
+    "seconds": 32.591687500011176
+  },
+  "export": {
+    "pieces": 2731,
+    "triangles": 4986076,
+    "voxel_mm": 0.5,
+    "volume_mm3": 1202841.2421167002,
+    "closed": true,
+    "path": "G:\\Alma zen\\Personal\\Tres Dimensiones\\Impresora\\Trabajos\\Yho\\IA\\BlenderGen\\dist\\ruinas_v03212_torre.stl",
+    "frame": 10
+  }
+}

@@ -2,26 +2,24 @@
 import math,random
 from .. import meta
 from ..geometry import primitives,timber,terrain
+from . import damage_regions
 
 
 def plan(p,bounds):
     'IA: Dos regiones reproducibles en faldones opuestos; incluyen intensidad y límites para compartir hundimiento, anclajes y rotura.'
-    xa,xb,ya,yb=bounds['cover'];span=xb-xa;depth=yb-ya;rng=random.Random(p.seed+46301)
-    amount=p.roof_damage
-    if amount<=0:return []
-    return [{'x':xa+span*f,'y':ya+depth*(.28+.42*rng.random()),'rx':span*(.045+.13*amount),'ry':depth*(.045+.17*amount),'severity':amount,'bounds':bounds['cover']} for f in (.23,.76)]
+    return damage_regions.roof_events(p.seed,getattr(p,'roof_damage_seed',0),p.roof_damage,bounds['cover'])
 
 
 def broken(x,y,patches):
     'IA: El núcleo pierde piezas solo después del 45% de daño; antes conserva los apoyos deformados, con transición continua en área.'
-    return any(((x-h['x'])/h['rx'])**2+((y-h['y'])/h['ry'])**2<max(0,(h.get('severity',1)-.45)/.55)**2 for h in patches)
+    return damage_regions.broken(x,y,patches)
 
 
 def sag(x,y,patches):
     'IA: Hundimiento compartido en mm para madera y tejas; campo continuo bidimensional, acotado y nulo en los bordes de cubierta.'
     result=0
     for h in patches:
-        radius=math.sqrt(((x-h['x'])/h['rx'])**2+((y-h['y'])/h['ry'])**2)
+        radius=damage_regions.radius(x,y,h)
         if radius>=1.6:continue
         envelope=(1-(radius/1.6)**2)**2
         bounds=h.get('bounds')
@@ -67,25 +65,13 @@ def deform_timber(coll,patches):
 
 
 def distance(x,y,patches):
-    'IA: Distancia elíptica mínima; infinito sin daño para conservar cubierta íntegra.'
-    return min((((x-h['x'])/h['rx'])**2+((y-h['y'])/h['ry'])**2 for h in patches),default=1000)
+    'IA: Distancia normalizada cuadrática al evento común; conserva el umbral existente de detalle en los bordes.'
+    return min((damage_regions.radius(x,y,h)**2 for h in patches),default=1000)
 
 
 def segments(a,b,fixed,patches,axis):
-    'IA: Resta intervalos elípticos de un rastrel/par; devuelve tramos anclados al extremo original, con longitud mínima.'
-    ranges=[(min(a,b),max(a,b))]
-    for h in patches:
-        pos=h['x'] if axis=='y' else h['y'];rad=h['rx'] if axis=='y' else h['ry']
-        d=(fixed-pos)/rad;core=max(0,(h.get('severity',1)-.45)/.55)
-        if abs(d)>=core:continue
-        center=h[axis];radius=h['ry'] if axis=='y' else h['rx'];half=radius*math.sqrt(core*core-d*d)*.76
-        lo,hi=center-half,center+half;next_ranges=[]
-        for x,y in ranges:
-            if hi<=x or lo>=y:next_ranges.append((x,y));continue
-            if lo-x>2:next_ranges.append((x,lo))
-            if y-hi>2:next_ranges.append((hi,y))
-        ranges=next_ranges
-    return [(x,y) for x,y in ranges if abs(x-min(a,b))<.001 or abs(y-max(a,b))<.001]
+    'IA: Corta apoyos con el mismo contorno irregular utilizado por las tejas; conserva únicamente extremos anclados.'
+    return damage_regions.segments(a,b,fixed,patches,axis)
 
 
 def debris(coll,p,scene,bounds,missing):

@@ -44,6 +44,7 @@ def launch(scene,selected):
         bpy.ops.mesh.primitive_uv_sphere_add(segments=20,ring_count=12,radius=radius,location=start)
         ob=bpy.context.object;bpy.ops.rigidbody.object_add(type='ACTIVE')
     ob.name='Piedra · '+p.impact_mode;ob['impactor']=True;ob['impact_mode']=p.impact_mode;ob['launch_start']=list(start)
+    ob['impact_render_visible']=p.impact_render_visible;ob.hide_render=not p.impact_render_visible
     rb=ob.rigid_body;rb.collision_shape='SPHERE';rb.mass=4/3*math.pi*radius**3*2200*config.PHYSICS_MASS_SCALE*p.impact_mass
     rb.friction=1;rb.restitution=0;rb.use_margin=True;rb.collision_margin=.00001
     # El tramo de lanzamiento recorre el espacio vacío hasta cerca del blanco.
@@ -59,7 +60,7 @@ def launch(scene,selected):
         rb.keyframe_insert(data_path='collision_collections',frame=1)
         rb.collision_collections=(False,)*20;rb.keyframe_insert(data_path='collision_collections',frame=expires)
         for key in ('hide_viewport','hide_render'):
-            setattr(ob,key,False);ob.keyframe_insert(data_path=key,frame=1)
+            setattr(ob,key,key=='hide_render' and not p.impact_render_visible);ob.keyframe_insert(data_path=key,frame=1)
             setattr(ob,key,True);ob.keyframe_insert(data_path=key,frame=expires)
     action=ob.animation_data.action
     for layer in action.layers:

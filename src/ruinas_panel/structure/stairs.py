@@ -9,7 +9,7 @@ from . import floors,layout
 
 def plan(p,bounds):
     'IA: Reserva una escalera junto al muro trasero para dos plantas; reserva 35 mm libres antes del primer peldaño sin reducir su huella.'
-    if p.stair_type=='NONE' or p.height_type!='TWO' or not p.upper_floor or not p.floor_beams:return None
+    if p.stair_type=='NONE' or p.height_type not in ('TWO','THREE') or not p.upper_floor or not p.floor_beams:return None
     xmin,xmax,ymin,ymax=bounds
     approach=35.0
     available=xmax-xmin-8-approach
@@ -26,6 +26,48 @@ def plan(p,bounds):
     return {'x0':left,'x1':right,'y0':ya,'y1':yb,'bottom':bottom,'top':layout.upper_floor(p),'steps':steps,'reverse':reverse,
             'opening':[left-.5,right+.5,ya-.8,yb+.8],'landing':[x0,left] if reverse else [right,x1],'type':p.stair_type,
             'usable_tread_mm':20,'pitch_mm':pitch,'riser_mm':(layout.upper_floor(p)-bottom)/steps,'width_mm':yb-ya,'approach_mm':approach,'approach':[right+1.5,right+approach+1.5,ya,yb] if reverse else [left-approach-1.5,left-1.5,ya,yb]}
+
+
+def build_upper(coll,p,scene,bounds,first):
+    'IA: En tres plantas construye el segundo tramo en un marco local y lo eleva a la primera entreplanta; conserva el plano del primer tramo y registra ambos.'
+    from types import SimpleNamespace
+    from mathutils import Matrix
+    values={key:getattr(p,key) for key in config.FIELDS}
+    values.update(height_type='TWO',ground_storey_height=p.upper_storey_height,ground_floor=True)
+    settings=SimpleNamespace(**values);upper=plan(settings,bounds)
+    if upper and 'error' not in upper:
+        upper['bottom']=2.0;upper['riser_mm']=(upper['top']-upper['bottom'])/upper['steps']
+    before=set(coll.objects);build(coll,settings,scene,upper)
+    shift=p.ground_storey_height
+    for ob in set(coll.objects)-before:ob.data.transform(Matrix.Translation((0,0,shift)))
+    if upper and 'error' not in upper:
+        upper=dict(upper,bottom=upper['bottom']+shift,top=upper['top']+shift)
+    meta.put(scene,'escalera_generada',first)
+    meta.put(scene,'escaleras_generadas',[first,upper])
+
+
+def terrace_plan(p,bounds):
+    'IA: Planifica acceso a terraza desde la última planta, con huella común y desembarco en la cara superior de las losas; no crea acceso si se desactivan escaleras.'
+    from types import SimpleNamespace
+    values={key:getattr(p,key) for key in config.FIELDS}
+    values.update(height_type='TWO',ground_storey_height=layout.level_spans(p)[-1]+7,ground_floor=True)
+    settings=SimpleNamespace(**values);access=plan(settings,bounds)
+    if access and 'error' not in access:
+        access['bottom']=2.0;access['riser_mm']=(access['top']-2)/access['steps']
+    return settings,access
+
+
+def build_terrace(coll,p,scene,settings,access):
+    'IA: Construye el último tramo en coordenadas locales y lo eleva a la última planta; conserva el primer tramo y registra la conexión con la terraza.'
+    from mathutils import Matrix
+    first=meta.get(scene,'escalera_generada',{});records=meta.get(scene,'escaleras_generadas',[])
+    if not records and first and 'error' not in first:records=[first]
+    before=set(coll.objects);build(coll,settings,scene,access)
+    shift=layout.floor_bases(p)[-1]-2
+    for ob in set(coll.objects)-before:ob.data.transform(Matrix.Translation((0,0,shift)))
+    if access and 'error' not in access:
+        records.append(dict(access,bottom=access['bottom']+shift,top=access['top']+shift,destination='terrace'))
+    meta.put(scene,'escalera_generada',first);meta.put(scene,'escaleras_generadas',records)
 
 
 def stone_skin(coll,p,s,stone,xx):

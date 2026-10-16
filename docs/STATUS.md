@@ -1,5 +1,11 @@
 # Estado del proyecto
 
+## v0.32.12 — 2026-10-16
+
+Torreón de terraza/parapeto/almenas, tres plantas y forjados por cota, cuotas independientes de balcones y ventanas, cimientos/patio, daño asimétrico compartido de cubierta y corrección de falsos encajes. Zarandeo de diez fotogramas sobre selección, cámaras conservadas y resistencia por familias. Prueba integrada hasta STL con 2.048 piezas seleccionadas; límites y mediciones en `V03212.md`, uso en `MANUAL_V03212.md`.
+
+La torre conecta las tres plantas y la terraza mediante tres tramos, huecos y desembarcos; acceso a terraza abierto, sin tapa. Corregido el límite interno de altura y los refuerzos que cruzaban vanos. El descriptor arquitectónico inicia la migración del briefing. Aún no hay reconstrucción local por regiones sucias, materialización física parcial ni genealogía semántica de todos los fragmentos. Preparar sigue procesando la casa completa. Habitaciones solo en planta baja, terrazas sin drenaje propio, sin mortero reconstruido ni fractura adaptativa. Diez fotogramas no validan un derrumbe asentado ni la impresión del STL.
+
 ## v0.32.11-r2 — 2026-10-14
 
 Escala interna de colisión para evitar el pico de memoria de las miniaturas,

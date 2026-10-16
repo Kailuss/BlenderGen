@@ -43,7 +43,7 @@ class LayoutTests(unittest.TestCase):
         self.assertEqual(config.FLOOR_PITCH,55.)
         self.assertEqual(config.UPPER_FLOOR,57.)
         self.assertAlmostEqual(config.BEAM_LEVEL+3.6,config.UPPER_FLOOR)
-        self.assertEqual(config.HEIGHT_TYPES,{'RUIN':27.,'ONE':57.,'TWO':112.})
+        self.assertEqual(config.HEIGHT_TYPES,{'RUIN':27.,'ONE':57.,'TWO':112.,'THREE':167.})
         self.assertEqual({kind:profile[0] for kind,profile in config.BUILD_TYPES.items()},
                          {'PARTITION':6.,'WALL':9.,'FORTRESS':15.})
 

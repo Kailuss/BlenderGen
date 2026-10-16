@@ -12,16 +12,24 @@ def distribution_seed(p):
 
 
 def level_spans(p):
-    'IA: Alturas entre cotas de planta en mm; valores por defecto preservan 27/57/112 mm de las casas guardadas.'
+    'IA: Alturas entre cotas en mm: conserva 27/57/112 históricos; THREE añade una segunda planta superior de igual altura.'
     if p.height_type=='RUIN':return [getattr(p,'low_wall_height',27.0)-2]
     spans=[getattr(p,'ground_storey_height',config.FLOOR_PITCH)]
-    if p.height_type=='TWO':spans.append(getattr(p,'upper_storey_height',config.FLOOR_PITCH))
+    if p.height_type in ('TWO','THREE'):spans.append(getattr(p,'upper_storey_height',config.FLOOR_PITCH))
+    if p.height_type=='THREE':spans.append(getattr(p,'upper_storey_height',config.FLOOR_PITCH))
     return spans
 
 
 def upper_floor(p):
     'IA: Cota común de entreplanta y desembarco, independiente de la altura de la planta superior.'
     return 2+getattr(p,'ground_storey_height',config.FLOOR_PITCH)
+
+
+def floor_bases(p):
+    'IA: Cotas base de todas las plantas, conservando 2 mm iniciales y alturas superiores compartidas en la torre de tres niveles.'
+    result=[2.0]
+    for height in level_spans(p)[:-1]:result.append(result[-1]+height)
+    return result
 
 
 def building_height(p):

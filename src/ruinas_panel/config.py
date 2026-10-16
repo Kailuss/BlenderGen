@@ -4,7 +4,11 @@
 
 
 COLLECTION = 'MURO · fuente procedural'
-BUILD_ID = '0.32.11-r2'
+BUILD_ID = '0.32.12'
+ROOF_DAMAGE_SAMPLE_MM = 1.0
+SHAKE_FRAMES = 10
+SHAKE_EXPIRE_FRAME = 5
+SHAKE_RADIUS_MM = 12.0
 
 
 SOLID_NAME = 'MURO · sólido exportable'
@@ -80,7 +84,7 @@ PHYSICS_FRAGILE_LIMIT=256
 PHYSICS_FRAGILE_STRENGTH={'plaster':.15,'chimney':.6}
 UPPER_FLOOR=2.0+FLOOR_PITCH
 BEAM_LEVEL=UPPER_FLOOR-3.6
-HEIGHT_TYPES={'RUIN':27.0,'ONE':UPPER_FLOOR,'TWO':2.0+2*FLOOR_PITCH}
+HEIGHT_TYPES={'RUIN':27.0,'ONE':UPPER_FLOOR,'TWO':2.0+2*FLOOR_PITCH,'THREE':2.0+3*FLOOR_PITCH}
 
 
 CACHE_METADATA=('aparejo_escalonado','mortero_retranqueado','pilares_generados','huecos_generados','huecos_solicitados','puerta_generada','escombros_generados','hiladas_generadas','giros_generados','paredes_generadas','ventanas_generadas','vigas_generadas')
@@ -118,14 +122,17 @@ FIELDS=('build_type','height_type','layout_mode','building_depth','extra_side','
 
 
 FIELDS=FIELDS+('batch_preview','microdetail_preview','use_instances','export_density','window_width','window_height','balconies','iron_mode','iron_damage')
-FIELDS=FIELDS+('balcony_width','balcony_height','balcony_depth')
+FIELDS=FIELDS+('balcony_width','balcony_height','balcony_depth','balconies_per_wall')
+CACHE_METADATA=CACHE_METADATA+('vanos_limitaciones','escaleras_generadas')
 FIELDS=FIELDS+('window_facing','ground_floor','upper_floor','floor_damage')
 FIELDS=FIELDS+('wood_damage','roof_frame')
 FIELDS=FIELDS+('roof_curve','roof_tiles','stair_type','stair_side')
-FIELDS=FIELDS+('roof_gables',)
-FIELDS=FIELDS+('hole_seed','roof_damage','chimneys','brass_pipes','damage_enabled','interior_layout')
+FIELDS=FIELDS+('roof_gables','roof_type')
+FIELDS=FIELDS+('hole_seed','roof_damage','roof_damage_seed','chimneys','brass_pipes','damage_enabled','interior_layout')
 FIELDS=FIELDS+('ground_storey_height','upper_storey_height','low_wall_height','door_style','pillar_distribution','pillar_positions')
-CACHE_METADATA=CACHE_METADATA+('relaciones_estructura',)
+FIELDS=FIELDS+('foundation_enabled','foundation_height','entrance_tread','patio_enabled','patio_margin','patio_fence','fence_height')
+CACHE_METADATA=CACHE_METADATA+('cimiento_generado',)
+CACHE_METADATA=CACHE_METADATA+('relaciones_estructura','architectural_graph')
 CACHE_METADATA=CACHE_METADATA+('escalera_generada','cubierta_detalles','plano_interior')
 
 # Límites previos a operaciones costosas, no garantía de RAM en cualquier equipo.
@@ -142,8 +149,10 @@ SECTIONS=(
  {'id':'layout','title':'Distribución','fields':('layout_mode','building_depth','extra_side','interior_layout'),'closed':False},
  {'id':'finish','title':'Acabado','fields':('damage_enabled','collapse','wear_level','wear','cracks','rubble_amount','ground_roughness'),'closed':False},
  {'id':'door','title':'Puerta','toggle':'door_enabled','fields':('door_style','door_leaf','door_position','door_width','door_height','wood_frame'),'closed':True},
- {'id':'windows','title':'Ventanas','toggle':'windows_enabled','fields':('window_facing','windows_per_wall','window_width','window_height','balconies','balcony_width','balcony_height','balcony_depth','iron_mode','iron_damage'),'closed':False},
- {'id':'wood','title':'Madera y cubierta','fields':('wood_grain','wood_damage','roof_frame','roof_curve','roof_tiles','roof_gables','roof_damage','chimneys','brass_pipes'),'closed':False},
+ {'id':'windows','title':'Ventanas','toggle':'windows_enabled','fields':('window_facing','windows_per_wall','window_width','window_height','iron_mode','iron_damage'),'closed':False},
+ {'id':'balconies','title':'Balcones','toggle':'balconies','fields':('balconies_per_wall','balcony_width','balcony_height','balcony_depth'),'closed':False},
+ {'id':'wood','title':'Madera y cubierta','fields':('wood_grain','wood_damage','roof_frame','roof_type','roof_curve','roof_tiles','roof_gables','roof_damage','roof_damage_seed','chimneys','brass_pipes'),'closed':False},
+ {'id':'foundation','title':'Cimientos y patio','fields':('foundation_enabled','foundation_height','entrance_tread','patio_enabled','patio_margin','patio_fence','fence_height'),'closed':True},
  {'id':'floors','title':'Suelos de madera','fields':('ground_floor','upper_floor','floor_damage'),'closed':False},
  {'id':'stairs','title':'Escaleras','fields':('stair_type','stair_side'),'closed':False},
  {'id':'quality','title':'Calidad','fields':('preview_quality','export_quality','export_density','use_instances','quick_edit','batch_preview','microdetail_preview'),'closed':True},

@@ -29,10 +29,10 @@
     "damage": 0
   },
   {
-    "sag_mm": 3.933578359295235,
-    "deformed_timbers": 84,
-    "fractured_timbers": 84,
-    "timber_fragments": 154,
+    "sag_mm": 3.9665008996264977,
+    "deformed_timbers": 100,
+    "fractured_timbers": 100,
+    "timber_fragments": 179,
     "curve": 0.6000000238418579,
     "tiles": 1209,
     "courses": 19,
@@ -58,12 +58,12 @@
     "damage": 0.35
   },
   {
-    "sag_mm": 10.546042463750398,
-    "deformed_timbers": 232,
-    "fractured_timbers": 232,
-    "timber_fragments": 340,
+    "sag_mm": 8.560738234214519,
+    "deformed_timbers": 268,
+    "fractured_timbers": 268,
+    "timber_fragments": 391,
     "curve": 0.6000000238418579,
-    "tiles": 1099,
+    "tiles": 1067,
     "courses": 19,
     "supported_trusses": 10,
     "profile": "concave",
@@ -83,7 +83,7 @@
     },
     "eave_height": 59.2,
     "overhang_mm": 4,
-    "missing_tiles": 110,
+    "missing_tiles": 142,
     "damage": 0.85
   }
 ]

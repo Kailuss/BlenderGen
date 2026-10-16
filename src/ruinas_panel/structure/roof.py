@@ -20,7 +20,7 @@ def envelope(coll,p,walls):
 
 
 def roof_segments(a,b,fixed,patches,axis,chimney=None,clearance=2):
-    'IA: Conserva el daño elíptico, pero reserva el paso rectangular de chimenea con holgura para la sección de las vigas.'
+    'IA: Comparte el contorno de daño con apoyos y tejas; reserva por separado el paso rectangular de chimenea con holgura para las vigas.'
     ranges=roof_damage.segments(a,b,fixed,patches,axis)
     if not chimney:return ranges
     center=chimney[axis];cross=chimney['x' if axis=='y' else 'y'];radius=chimney['radius']+clearance
@@ -194,6 +194,10 @@ def build(coll,p,scene):
     meta.put(scene,'escombros_cubierta',{})
     if not p.roof_frame or p.layout_mode!='ROOM':return
     walls={w['id']:w for w in meta.get(scene,'paredes_generadas',[])}
+    if getattr(p,'roof_type','PITCHED')=='TOWER':
+        from . import tower_roof
+        tower_roof.build(coll,p,scene,walls)
+        return
     left,right=walls['left'],walls['right'];x0,x1=left['origin'][0],right['origin'][0]
     bounds=envelope(coll,p,walls);xa,xb,ya,yb=bounds['cover']
     y0=-p.thickness/2;y1=walls['back']['origin'][1]+p.thickness/2

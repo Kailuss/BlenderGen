@@ -197,8 +197,8 @@ def beam_positions(coll,w,z,rear=None):
 
 @profiling.timed('aberturas_y_vigas')
 def architectural_openings(coll,p,walls,door,edges):
-    'IA: Distribuye ventanas y accesos de balcón con medidas independientes; aloja vigas en juntas reales entre dos ladrillos antes de añadir madera.'
-    windows=[]
+    'IA: Distribuye cuotas independientes de ventanas y balcones por pared dentro de cada planta, informa lo que no cabe y aloja vigas en juntas reales antes de añadir madera.'
+    windows=[];warnings=[]
     from . import placement,floor_plan
     stair=placement.stair_reservation(p,walls)
     from ..geometry import balconies
@@ -206,30 +206,33 @@ def architectural_openings(coll,p,walls,door,edges):
     wood=primitives.material('Madera · envejecida',(.29,.21,.13))
     iron=primitives.material('Hierro · forjado',(.10,.105,.11))
     for w in walls:
-        if not p.windows_enabled:
+        if not p.windows_enabled and not p.balconies:
             break
         margin=8 if p.balconies else 4
         usable=(w['start']+margin,w['end']-margin)
         # Reservar columnas y puerta en la fachada.
         centers=meta.get(bpy.context.scene,'pilares_generados',[]) if w['id']=='front' else []
-        floors=2 if p.height_type=='TWO' else 1
-        made=0
+        bases=layout.floor_bases(p);floors=len(bases)
+        made=0;totals={False:0,True:0}
         tree=wall_tree(coll,w)
-        for floor in (reversed(range(floors)) if p.balconies else range(floors)):
-            has_balcony=p.balconies and floor>0
+        requests=[(floor,True) for floor in reversed(range(1,floors)) if p.balconies]+[(floor,False) for floor in range(floors) if p.windows_enabled]
+        for floor,has_balcony in requests:
+            quota=p.balconies_per_wall if has_balcony else p.windows_per_wall
+            remaining=quota-totals[has_balcony]
+            if remaining<=0:continue
             ww=p.balcony_width if has_balcony else p.window_width
             wh=p.balcony_height if has_balcony else p.window_height
-            z0=(layout.upper_floor(p) if floor else 2)+(0 if has_balcony else 16)
+            z0=bases[floor]+(0 if has_balcony else 16)
             z1=z0+wh
-            if z1+5>w['height']:
+            ceiling=bases[floor+1] if floor+1<len(bases) else w['height']
+            if z1+5>ceiling or ww>usable[1]-usable[0]:
+                warnings.append({'wall':w['id'],'family':'balcony' if has_balcony else 'window','floor':floor,'reason':'dimensions','requested':remaining})
                 continue
-            attempts=9+p.windows_per_wall*4
+            attempts=9+quota*4
             candidates=[usable[0]+ww/2+i*(usable[1]-usable[0]-ww)/(attempts-1) for i in range(attempts)]
-            candidates+= [usable[0]+(usable[1]-usable[0])*(i+1)/(p.windows_per_wall+1) for i in range(p.windows_per_wall)]
+            candidates+= [usable[0]+(usable[1]-usable[0])*(i+1)/(quota+1) for i in range(quota)]
             feasible=[]
             for cx in candidates:
-                if made>=p.windows_per_wall:
-                    break
                 x0=cx-ww/2
                 x1=cx+ww/2
                 if placement.blocks_stair(w,x0,x1,z0,stair,p):continue
@@ -240,7 +243,7 @@ def architectural_openings(coll,p,walls,door,edges):
                     continue
                 if w['id']=='front' and door and x0<door['right']+4 and x1>door['left']-4 and z0<door['top']+6:
                     continue
-                if any(h['wall']==w['id'] and abs(cx-h['x'])<ww+6 and abs(z0-h['z0'])<wh+5 for h in windows):
+                if any(h['wall']==w['id'] and x0<h['x1']+6 and x1>h['x0']-6 and z0<h['z1']+5 and z1>h['z0']-5 for h in windows):
                     continue
                 # No crear marcos flotando sobre zonas derrumbadas: requieren jambas y dintel.
                 supported=True
@@ -253,7 +256,7 @@ def architectural_openings(coll,p,walls,door,edges):
                 if not supported:
                     continue
                 feasible.append(cx)
-            selected=layout.spread_positions(feasible,p.windows_per_wall-made,*usable,ww+(12 if has_balcony else 6))
+            selected=layout.spread_positions(feasible,remaining,*usable,ww+(12 if has_balcony else 6))
             for cx in selected:
                 x0=cx-ww/2;x1=cx+ww/2
                 carve_rectangle(coll,w,x0,x1,z0,z1,p.thickness+5,'Ventana')
@@ -270,10 +273,14 @@ def architectural_openings(coll,p,walls,door,edges):
                 balconies.window_iron(coll,p,w,x0,x1,z0,z1,yy)
                 if has_balcony:
                     balconies.balcony(coll,p,w,x0,x1,z0,p.seed+made+len(w['id'])*337)
-                windows.append({'wall':w['id'],'x':cx,'x0':x0,'x1':x1,'z0':z0,'z1':z1,'frame_y':yy,'balcony':has_balcony})
+                windows.append({'wall':w['id'],'floor':floor,'x':cx,'x0':x0,'x1':x1,'z0':z0,'z1':z1,'frame_y':yy,'balcony':has_balcony})
                 made+=1
-    if p.floor_beams and p.height_type=='TWO':
-        z=layout.upper_floor(p)-(3.6 if p.layout_mode=='ROOM' else 2.5)
+                totals[has_balcony]+=1
+        for family,quota in ((False,p.windows_per_wall if p.windows_enabled else 0),(True,p.balconies_per_wall if p.balconies and floors>1 else 0)):
+            if totals[family]<quota:warnings.append({'wall':w['id'],'family':'balcony' if family else 'window','reason':'capacity_or_support','requested':quota,'generated':totals[family]})
+    meta.put(bpy.context.scene,'vanos_limitaciones',warnings)
+    for base in (layout.floor_bases(p)[1:] if p.floor_beams else []):
+        z=base-(3.6 if p.layout_mode=='ROOM' else 2.5)
         size=4.5
         targets=[w for w in walls if w['id']=='front'] if p.layout_mode=='ROOM' else walls
         # Congelar apoyos antes del primer alojamiento: un recorte no cambia la decisión del siguiente.

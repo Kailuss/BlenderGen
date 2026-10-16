@@ -30,6 +30,8 @@ def run(output,path,name):
         progress(path,stage='Optimizando colisiones')
         structural_physics.optimise_collisions(scene)
     if scene.ruin_settings.physics_sparse_constraints:structural_physics.sparsify_constraints(scene)
+    from ruinas_panel.services import material_strength
+    material_strength.apply(scene)
     world=scene.rigidbody_world
     if scene.ruin_settings.physics_precision=='BALANCED':world.substeps_per_frame=12;world.solver_iterations=30
     else:world.substeps_per_frame=40;world.solver_iterations=60
@@ -54,7 +56,7 @@ def run(output,path,name):
         progress(path,stage='Simulando',frame=frame,total=scene.frame_end,seconds=time.perf_counter()-started)
     result=bpy.data.scenes.new('RESULTADO · '+scene.name)
     result['ruinas_replay']=True;result['physics_result_scene']=True;result['source_scene']=scene.get('source_scene','');result['lab_scene']=name
-    for key in ('source_signature','physics_room','structural_physics','masonry_lab'):
+    for key in ('source_signature','physics_room','structural_physics','masonry_lab','shake_report'):
         if key in scene:result[key]=scene[key]
     result['playback_instructions']='Simulación aislada calculada · Espacio';result.frame_end=scene.frame_end
     result.render.fps=scene.render.fps;result.render.fps_base=scene.render.fps_base
@@ -74,9 +76,10 @@ def run(output,path,name):
         for key in original.keys():ob[key]=original[key]
         ob['replay_source_object']=original.name
         expiry=original.get('impact_expire_frame',0)
+        ob.hide_render=original.hide_render
         if expiry:
             for key in ('hide_viewport','hide_render'):
-                setattr(ob,key,False);ob.keyframe_insert(data_path=key,frame=1)
+                setattr(ob,key,key=='hide_render' and not original.get('impact_render_visible',True));ob.keyframe_insert(data_path=key,frame=1)
                 setattr(ob,key,True);ob.keyframe_insert(data_path=key,frame=expiry)
         ob.rotation_mode='QUATERNION'
         track=poses[:,index];ob.location=track[0,:3];ob.rotation_quaternion=Quaternion(track[0,3:7]);ob.scale=track[0,7:]
@@ -94,6 +97,8 @@ def run(output,path,name):
                             for key in curve.keyframe_points:key.interpolation='CONSTANT' if curve.data_path in ('hide_viewport','hide_render') else 'LINEAR'
         if index%100==0:progress(path,stage='Guardando reproducción',objects=index,total=len(objects))
     result['simulation_report']=json.dumps({'objects':len(objects),'moving':moving,'seconds':time.perf_counter()-started,'sample_step':4,'static_constraints_omitted':pruned,'solver_scale':factor,'collision_dust_omitted':dust})
+    from ruinas_panel.services import lab_cameras
+    lab_cameras.copy_to_replay(scene,result)
     result.frame_set(1);bpy.data.libraries.write(str(output),{result},fake_user=True)
     # Bullet debe liberar las referencias de uniones mientras sus cuerpos siguen vivos.
     bpy.data.batch_remove(ids=tuple(ob for ob in scene.objects if ob.rigid_body_constraint))
@@ -147,7 +152,13 @@ if __name__=='__main__':
         progress(Path(args[1]),stage='Fusionando para STL')
         result=physical_export.export(scene,args[4],scene.ruin_settings.physics_export_voxel)
         bpy.data.libraries.write(args[0],{result},fake_user=True)
-    else:run(Path(args[0]),Path(args[1]),args[2])
+    else:
+        if len(args)>3 and args[3]=='SHAKE':
+            from ruinas_panel.services import shake_physics
+            request=json.loads((Path(args[0]).parent/'job.json').read_text(encoding='utf8'))
+            scene=bpy.data.scenes[args[2]];bpy.context.window.scene=scene
+            shake_physics.prepare(scene,request['selection'])
+        run(Path(args[0]),Path(args[1]),args[2])
     # libraries.write es síncrono. Solo tras guardar con éxito se devuelve cero;
     # el SO libera el proceso aislado sin recorrer destructores nativos de Bullet.
     # Las excepciones anteriores conservan --python-exit-code 1 y no pasan por aquí.

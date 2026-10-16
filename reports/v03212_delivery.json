@@ -1,0 +1,46 @@
+{
+  "ruinas_panel_v03212.zip": {
+    "bytes": 170368,
+    "sha256": "8453083608a69dd3f6d8457b7dfb62078b3320f33180c7d5aa96151166aa2851"
+  },
+  "ruinas_v03212_torre_integrada.blend": {
+    "bytes": 121783636,
+    "sha256": "2251d2f7f8b04c95e2b445ec63d8d3e46b7c3aadaf6a9d227dc7080dc3b48e79"
+  },
+  "ruinas_v03212_torre.stl": {
+    "bytes": 249303884,
+    "sha256": "95384c1a8b94f1a6020fe23f56d94d8c852f91a1134737d5dd7f59b685f0bd2c"
+  },
+  "Manual_Ruinas_v03212.html": {
+    "bytes": 6134,
+    "sha256": "9eae184ec9ae82fdb730ef0071aabe405664b9832a1ec02cdebf7d12d6307ab8"
+  },
+  "MANUAL_V03212.md": {
+    "bytes": 5322,
+    "sha256": "1ce2bf357064a084e549703be76340c190cd853969cae76b5dd31a2469aa4245"
+  },
+  "V03212.md": {
+    "bytes": 5786,
+    "sha256": "cafda5f73623bf92b2edcb1835ff0ba511eca3c4abd4ca4520a19456da68524c"
+  },
+  "REESTRUCTURACION_03212.md": {
+    "bytes": 4407,
+    "sha256": "e2348ff38619a69308c98df0985c5877dcb0ee94ec459a6ec1e92f1d2bb16d53"
+  },
+  "v03212_integration.json": {
+    "bytes": 30735,
+    "sha256": "f4f52f5cc2eee590bc5d91e0c1d586e0ecce28ab1b71d33974dd68a8e8cd6294"
+  },
+  "v03212_tower_source.png": {
+    "bytes": 1347907,
+    "sha256": "dec92058da8d9cbc953d8383a4d84d7c59c3ca826b6ef1913e50db7a13bdcae9"
+  },
+  "v03212_tower_shake.png": {
+    "bytes": 1338618,
+    "sha256": "3acac7e4ede82ee7df49591b9b918ff387c8a7d401ec32e8c61b5c2749424a22"
+  },
+  "v03212_tower_interior.png": {
+    "bytes": 1238848,
+    "sha256": "c36c76c9ab2c4bdf0178100b6901bfe26bd8fccbeae0a42fd12140815cbd7192"
+  }
+}

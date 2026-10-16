@@ -34,7 +34,7 @@ def run():
     assert reports[1]['sag_mm']>1 and reports[1]['deformed_timbers']>0
     assert reports[2]['tiles']<reports[1]['tiles'] and reports[2]['missing_tiles']>0
     assert reports[2]['sag_mm']>reports[1]['sag_mm']
-    bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'dist/ruinas_v03211_tejado.blend'))
+    bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'dist/ruinas_v03212_tejado.blend'))
     (ROOT/'reports/roof_stages.json').write_text(json.dumps(reports,indent=2),encoding='utf8')
     print('ROOF_STAGES_PASSED',[(r['damage'],r['tiles'],r['sag_mm']) for r in reports],flush=True)
 
