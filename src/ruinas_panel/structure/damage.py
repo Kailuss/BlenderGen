@@ -2,7 +2,7 @@
 
 DISABLED_VALUES = {
     'collapse': 0, 'hole_count': 0, 'hole_damage': 0,
-    'floor_damage': 0, 'roof_damage': 0, 'wood_damage': 0,
+    'floor_damage': 0, 'roof_damage': 0, 'wood_damage': 0, 'facade_damage': 0,
     'wear': 0, 'cracks': 0, 'rubble_amount': 0, 'iron_mode': 'TWIST', 'iron_damage': '0',
 }
 

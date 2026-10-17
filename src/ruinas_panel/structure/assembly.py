@@ -19,6 +19,8 @@ def finish(coll,p,scene):
     openings.architectural_openings(coll,p,walls,door,edges)
     relations.register(coll,scene)
     holes.apply(coll,p,scene,walls)
+    from . import facade_details
+    facade_details.build(coll,p,scene,walls,door)
     floors.build(coll,p,scene);interiors.build(coll,p,scene);roof.build(coll,p,scene)
     from . import building_definition
     definition=meta.get(scene,'building_definition') or building_definition.define(p)

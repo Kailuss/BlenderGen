@@ -8,7 +8,7 @@ from . import openings,spatial,layout
 
 def support_positions(targets,anchors,bounds,windows,door,z0,z1):
     'IA: Reubica juntos viga y postes fuera de vanos frontales/traseros que cruzan su altura; reserva 5 mm para medio poste y marco, sin duplicar apoyos.'
-    blocked=[(h['x0']-5,h['x1']+5) for h in windows if h['wall'] in ('front','back') and h['z0']-3<z1 and h['z1']+3>z0]
+    blocked=[(h.get('bay_x0',h['x0'])-5,h.get('bay_x1',h['x1'])+5) for h in windows if h['wall'] in ('front','back') and h['z0']-3<z1 and h['z1']+3>z0]
     if door and z0<door['top']+3:blocked.append((door['left']-5,door['right']+5))
     candidates=list(targets)+[v for interval in blocked for v in interval]+list(bounds)
     result=[]

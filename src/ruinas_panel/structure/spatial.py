@@ -64,3 +64,14 @@ def roof_height(t,base,rise,curve):
     'IA: Perfil alero→cumbrera creciente y convexo en sección; curve=0 recto, hasta 1 cóncavo de fantasía sin valle que retenga agua.'
     t=max(0,min(1,t))
     return base+rise*((1-curve*.7)*t+curve*.7*t*t)
+
+
+def roof_offset(y,ya,yb,sweep=0,bias=0):
+    'IA: Elevación longitudinal suave no negativa en mm, con extremos independientes mediante sesgo; cero conserva exactamente la cubierta histórica.'
+    u=max(-1,min(1,2*(y-ya)/max(.001,yb-ya)-1))
+    return sweep*min(14,(yb-ya)*.1)*u*u*(1+bias*u*.6)
+
+
+def ridge_x(xa,xb,asymmetry=0):
+    'IA: Desplaza la cumbrera hasta el 12 % del ancho sin invertir los faldones; cero conserva el eje histórico.'
+    return (xa+xb)/2+(xb-xa)*.12*asymmetry

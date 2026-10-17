@@ -260,6 +260,7 @@ def architectural_openings(coll,p,walls,door,edges):
             for cx in selected:
                 x0=cx-ww/2;x1=cx+ww/2
                 carve_rectangle(coll,w,x0,x1,z0,z1,p.thickness+5,'Ventana')
+                before_window=set(coll.objects)
                 # El eje local +Y apunta al exterior solo en izquierda y trasera.
                 direction=(1 if w['id'] in ('left','back') else -1)*(1 if p.window_facing=='OUTSIDE' else -1)
                 # Cara posterior del marco a 0,35 mm dentro de la cara terminada de la piedra.
@@ -273,6 +274,7 @@ def architectural_openings(coll,p,walls,door,edges):
                 balconies.window_iron(coll,p,w,x0,x1,z0,z1,yy)
                 if has_balcony:
                     balconies.balcony(coll,p,w,x0,x1,z0,p.seed+made+len(w['id'])*337)
+                for ob in set(coll.objects)-before_window:ob['facade_window']=len(windows)
                 windows.append({'wall':w['id'],'floor':floor,'x':cx,'x0':x0,'x1':x1,'z0':z0,'z1':z1,'frame_y':yy,'balcony':has_balcony})
                 made+=1
                 totals[has_balcony]+=1

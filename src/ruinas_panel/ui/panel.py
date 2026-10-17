@@ -143,7 +143,9 @@ def enabled(p, field):
     if field=='interior_layout':return p.layout_mode=='ROOM' and p.height_type!='RUIN'
     if not p.damage_enabled and field in set(damage.DISABLED_VALUES)|{'wear_level','hole_size','hole_seed','break_position'}:return False
     if field=='wear':return p.wear_level=='CUSTOM'
-    if field in ('roof_curve','roof_tiles','roof_gables','chimneys','brass_pipes','roof_damage','roof_damage_seed'):return p.layout_mode=='ROOM' and p.roof_frame and p.roof_type=='PITCHED'
+    if field=='window_open_angle':return p.windows_enabled and p.window_leaves
+    if field in ('window_projection','window_bay_join','window_bay_gap'):return p.windows_enabled and p.window_facing=='OUTSIDE' and (field=='window_projection' or p.window_projection>0)
+    if field in ('roof_curve','roof_sweep','roof_sweep_bias','roof_asymmetry','roof_tiles','roof_gables','chimneys','brass_pipes','roof_damage','roof_damage_seed'):return p.layout_mode=='ROOM' and p.roof_frame and p.roof_type=='PITCHED'
     if field=='roof_type':return p.layout_mode=='ROOM' and p.roof_frame
     if field in ('foundation_enabled','patio_enabled'):return p.layout_mode=='ROOM'
     if field in ('foundation_height','entrance_tread'):return p.layout_mode=='ROOM' and p.foundation_enabled

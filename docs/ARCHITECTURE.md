@@ -1,5 +1,7 @@
 # Mapa de edición
 
+0.32.13: `structure/facade_details.py` agrupa miradores, construye hojas y tejadillos y reutiliza `geometry/plaster.py` para revoco Perlin. Los detalles se añaden después de reservar apoyos y aplicar agujeros estructurales. `spatial.roof_offset` y `ridge_x` comparten el perfil longitudinal/asimétrico con los accesorios. Alcance y uso en `V03213.md` y `MANUAL_V03213.md`.
+
 0.32.12: `structure/building_definition.py` mantiene el descriptor/grafo nominal; `structure/damage_regions.py` el daño puro compartido; `structure/tower_roof.py` la terraza almenada; `structure/foundations.py` la colocación elevada y acceso/patio. `services/lab_cameras.py` conserva cámaras fuera del escalado Bullet; `services/shake_physics.py` prepara el zarandeo aislado y `services/material_strength.py` aplica factores de familia sin acumularlos. Alcance en `REESTRUCTURACION_03212.md`.
 
 La base 0.31 integra el edificio completo aportado en `dist/ruinas_v031_completo.zip`. El código editable vive únicamente en `src/ruinas_panel/`; el ZIP es una referencia de entrada, no una segunda fuente.

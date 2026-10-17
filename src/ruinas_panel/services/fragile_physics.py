@@ -8,18 +8,21 @@ from .. import config
 
 
 def split(mesh,axis,seed):
-    'IA: Bisección oblicua reproducible de un sólido; exige cierre y conservación de volumen, incluidas las tapas interiores de conductos.'
+    'IA: Bisección oblicua reproducible de un sólido triangulado antes del corte para preservar el relieve; exige cierre y conservación de volumen, incluidas las tapas interiores de conductos.'
     rng=random.Random(seed);points=[v.co for v in mesh.vertices]
     lo=Vector([min(v[k] for v in points) for k in range(3)]);hi=Vector([max(v[k] for v in points) for k in range(3)])
     center=(lo+hi)/2;center[axis]+=(hi[axis]-lo[axis])*rng.uniform(-.08,.08)
     normal=Vector((0,0,0));normal[axis]=1
     other=max((k for k in range(3) if k!=axis),key=lambda k:hi[k]-lo[k]);normal[other]=rng.uniform(-.09,.09)
     results=[];volumes=[]
-    original=bmesh.new();original.from_mesh(mesh);before=abs(original.calc_volume());original.free()
+    original=bmesh.new();original.from_mesh(mesh)
+    bmesh.ops.triangulate(original,faces=list(original.faces))
+    before=abs(original.calc_volume());original.free()
     try:
         for side in (False,True):
             bm=bmesh.new();bm.from_mesh(mesh)
             try:
+                bmesh.ops.triangulate(bm,faces=list(bm.faces))
                 bmesh.ops.bisect_plane(bm,geom=list(bm.verts)+list(bm.edges)+list(bm.faces),dist=1e-6,plane_co=center,plane_no=normal,clear_inner=side,clear_outer=not side)
                 boundary=[e for e in bm.edges if e.is_boundary]
                 if boundary:bmesh.ops.holes_fill(bm,edges=boundary,sides=0)

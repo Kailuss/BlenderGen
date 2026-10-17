@@ -1,0 +1,116 @@
+{
+  "settings": {
+    "layout_mode": "ROOM",
+    "height_type": "ONE",
+    "ground_storey_height": 75,
+    "length": 160,
+    "building_depth": 100,
+    "pillar_count": 0,
+    "damage_enabled": false,
+    "windows_enabled": true,
+    "windows_per_wall": 3,
+    "window_width": 20,
+    "window_leaves": true,
+    "window_canopies": true,
+    "door_canopy": true,
+    "window_projection": 8,
+    "window_bay_join": true,
+    "window_bay_gap": 40,
+    "window_open_angle": 65,
+    "roof_frame": true,
+    "roof_tiles": true,
+    "roof_damage": 0,
+    "ground_roughness": 0,
+    "batch_preview": false
+  },
+  "closure": {
+    "open_edges": {},
+    "degenerate_faces": {}
+  },
+  "details": [
+    {
+      "wall": "back",
+      "windows": [
+        9,
+        10,
+        11
+      ],
+      "projection_mm": 8.0,
+      "bounds": [
+        -42.224999999999994,
+        42.224999999999994,
+        18.0,
+        40.0
+      ],
+      "canopy": true
+    },
+    {
+      "wall": "front",
+      "windows": [
+        0,
+        1,
+        2
+      ],
+      "projection_mm": 8.0,
+      "bounds": [
+        -48.0,
+        48.0,
+        18.0,
+        40.0
+      ],
+      "canopy": true
+    },
+    {
+      "wall": "left",
+      "windows": [
+        3,
+        4,
+        5
+      ],
+      "projection_mm": 8.0,
+      "bounds": [
+        15.124000000000002,
+        92.79599999999999,
+        18.0,
+        40.0
+      ],
+      "canopy": true
+    },
+    {
+      "wall": "right",
+      "windows": [
+        6,
+        7,
+        8
+      ],
+      "projection_mm": 8.0,
+      "bounds": [
+        15.124000000000002,
+        92.79599999999999,
+        18.0,
+        40.0
+      ],
+      "canopy": true
+    }
+  ],
+  "metrics": {
+    "quality": "WORK",
+    "objects": 1414,
+    "microdetail": false,
+    "faces": 223760,
+    "vertices": 225902,
+    "seconds": 1.0148922999796923,
+    "stages": {
+      "preparacion": 0.6859943000017665,
+      "biseles": 0.09165899967774749,
+      "desgaste": 0.00015140001778490841,
+      "total": 1.0148922999796923
+    },
+    "cached": true,
+    "solid": false,
+    "expanded_faces": 246872,
+    "instances": 732,
+    "variants": 16,
+    "detail_limited": false
+  }
+}

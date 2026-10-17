@@ -1,0 +1,705 @@
+{
+  "settings": {
+    "layout_mode": "ROOM",
+    "height_type": "ONE",
+    "ground_storey_height": 75,
+    "length": 160,
+    "building_depth": 100,
+    "pillar_count": 0,
+    "damage_enabled": false,
+    "door_enabled": true,
+    "windows_enabled": true,
+    "windows_per_wall": 1,
+    "window_width": 22,
+    "window_leaves": true,
+    "window_canopies": true,
+    "door_canopy": true,
+    "window_projection": 8,
+    "window_bay_join": true,
+    "window_bay_gap": 40,
+    "window_open_angle": 60,
+    "roof_frame": true,
+    "roof_tiles": true,
+    "roof_sweep": 0.8,
+    "roof_sweep_bias": 0.5,
+    "roof_asymmetry": 0.5,
+    "chimneys": true,
+    "brass_pipes": true,
+    "ground_roughness": 0,
+    "batch_preview": true,
+    "physics_export_voxel": 0.5
+  },
+  "closure": {
+    "open_edges": {},
+    "degenerate_faces": {}
+  },
+  "source": {
+    "quality": "WORK",
+    "objects": 111,
+    "microdetail": false,
+    "faces": 216549,
+    "vertices": 219676,
+    "seconds": 1.7383345999987796,
+    "stages": {
+      "preparacion": 0.4653892999922391,
+      "biseles": 0.15678180003305897,
+      "desgaste": 7.270005880855024e-05,
+      "agrupacion": 0.8575639999762643,
+      "total": 1.7383345999987796
+    },
+    "cached": true,
+    "solid": false,
+    "expanded_faces": 245187,
+    "instances": 917,
+    "variants": 16,
+    "detail_limited": false
+  },
+  "facades": [
+    {
+      "wall": "back",
+      "windows": [
+        3
+      ],
+      "projection_mm": 8.0,
+      "bounds": [
+        -11.0,
+        11.0,
+        18.0,
+        40.0
+      ],
+      "canopy": true
+    },
+    {
+      "wall": "front",
+      "windows": [
+        0
+      ],
+      "projection_mm": 8.0,
+      "bounds": [
+        -43.5,
+        -21.5,
+        18.0,
+        40.0
+      ],
+      "canopy": true
+    },
+    {
+      "wall": "left",
+      "windows": [
+        1
+      ],
+      "projection_mm": 8.0,
+      "bounds": [
+        42.96,
+        64.96000000000001,
+        18.0,
+        40.0
+      ],
+      "canopy": true
+    },
+    {
+      "wall": "right",
+      "windows": [
+        2
+      ],
+      "projection_mm": 8.0,
+      "bounds": [
+        42.96,
+        64.96000000000001,
+        18.0,
+        40.0
+      ],
+      "canopy": true
+    }
+  ],
+  "roof": {
+    "sag_mm": 0,
+    "deformed_timbers": 0,
+    "fractured_timbers": 0,
+    "timber_fragments": 0,
+    "curve": 0.6000000238418579,
+    "sweep": 0.800000011920929,
+    "sweep_bias": 0.5,
+    "ridge_x": 10.08,
+    "tiles": 1072,
+    "courses": 19,
+    "supported_trusses": 9,
+    "profile": "concave",
+    "bounds": {
+      "walls": [
+        -80.0,
+        80.0,
+        -7.670626163482666,
+        115.5199966430664
+      ],
+      "cover": [
+        -84.0,
+        84.0,
+        -11.670626163482666,
+        119.5199966430664
+      ]
+    },
+    "eave_height": 79.2,
+    "overhang_mm": 4,
+    "missing_tiles": 0
+  },
+  "prepare_job": {
+    "peak_mb": 1155.03125,
+    "seconds": 205.54797629997483
+  },
+  "preparation": {
+    "binder_excluded": 467,
+    "joints_cut": 4797,
+    "covered_pieces_removed": 0,
+    "numeric_fragments_removed": 141,
+    "metal_welds": [
+      [
+        "Hierro \u00b7 pernio ventana.008",
+        "Hierro \u00b7 pletina hoja ventana.008"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.009",
+        "Hierro \u00b7 pletina hoja ventana.009"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.010",
+        "Hierro \u00b7 pletina hoja ventana.010"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.011",
+        "Hierro \u00b7 pletina hoja ventana.011"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.008",
+        "Hierro \u00b7 pletina fija ventana.008"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.009",
+        "Hierro \u00b7 pletina fija ventana.009"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.010",
+        "Hierro \u00b7 pletina fija ventana.010"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.011",
+        "Hierro \u00b7 pletina fija ventana.011"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.008",
+        "Hierro \u00b7 pletina ventana.004"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.008",
+        "Hierro \u00b7 voluta ventana.004"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.009",
+        "Hierro \u00b7 pletina ventana.005"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.009",
+        "Hierro \u00b7 voluta ventana.005"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.010",
+        "Hierro \u00b7 pletina ventana.006"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.010",
+        "Hierro \u00b7 voluta ventana.006"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.011",
+        "Hierro \u00b7 pletina ventana.007"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.011",
+        "Hierro \u00b7 voluta ventana.007"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.004",
+        "Hierro \u00b7 voluta ventana.004"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.005",
+        "Hierro \u00b7 voluta ventana.005"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.006",
+        "Hierro \u00b7 voluta ventana.006"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.007",
+        "Hierro \u00b7 voluta ventana.007"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.006",
+        "Lat\u00f3n \u00b7 canal\u00f3n.002"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada",
+        "Lat\u00f3n \u00b7 bajante abollada.005"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.006",
+        "Lat\u00f3n \u00b7 manguito.004"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.004",
+        "Lat\u00f3n \u00b7 bajante abollada.006"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada",
+        "Lat\u00f3n \u00b7 manguito"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.001",
+        "Lat\u00f3n \u00b7 manguito"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.001",
+        "Lat\u00f3n \u00b7 manguito.001"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.002",
+        "Lat\u00f3n \u00b7 manguito.001"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.002",
+        "Lat\u00f3n \u00b7 manguito.002"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.003",
+        "Lat\u00f3n \u00b7 manguito.002"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.003",
+        "Lat\u00f3n \u00b7 manguito.003"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.004",
+        "Lat\u00f3n \u00b7 manguito.003"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.004",
+        "Lat\u00f3n \u00b7 manguito.004"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada",
+        "Lat\u00f3n \u00b7 bajante abollada.001"
+      ],
+      [
+        "Lat\u00f3n \u00b7 abrazadera",
+        "Lat\u00f3n \u00b7 bajante abollada"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.001",
+        "Lat\u00f3n \u00b7 bajante abollada.002"
+      ],
+      [
+        "Lat\u00f3n \u00b7 abrazadera.001",
+        "Lat\u00f3n \u00b7 bajante abollada.001"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.002",
+        "Lat\u00f3n \u00b7 bajante abollada.003"
+      ],
+      [
+        "Lat\u00f3n \u00b7 abrazadera.002",
+        "Lat\u00f3n \u00b7 bajante abollada.002"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.003",
+        "Lat\u00f3n \u00b7 bajante abollada.004"
+      ],
+      [
+        "Lat\u00f3n \u00b7 abrazadera.003",
+        "Lat\u00f3n \u00b7 bajante abollada.003"
+      ],
+      [
+        "Lat\u00f3n \u00b7 abrazadera.004",
+        "Lat\u00f3n \u00b7 bajante abollada.004"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana",
+        "Hierro \u00b7 voluta ventana"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.004",
+        "Hierro \u00b7 pletina ventana"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.001",
+        "Hierro \u00b7 voluta ventana.001"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.005",
+        "Hierro \u00b7 pletina ventana.001"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.004",
+        "Hierro \u00b7 voluta ventana"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.005",
+        "Hierro \u00b7 voluta ventana.001"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.005",
+        "Hierro \u00b7 pletina fija ventana.005"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.004",
+        "Hierro \u00b7 pletina hoja ventana.004"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.006",
+        "Hierro \u00b7 pletina hoja ventana.006"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.007",
+        "Hierro \u00b7 pletina hoja ventana.007"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.006",
+        "Hierro \u00b7 pletina fija ventana.006"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.007",
+        "Hierro \u00b7 pletina fija ventana.007"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.006",
+        "Hierro \u00b7 pletina ventana.002"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.007",
+        "Hierro \u00b7 pletina ventana.003"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.002",
+        "Hierro \u00b7 voluta ventana.002"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.003",
+        "Hierro \u00b7 voluta ventana.003"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.012",
+        "Hierro \u00b7 voluta ventana.012"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana",
+        "Hierro \u00b7 pletina ventana.012"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.013",
+        "Hierro \u00b7 voluta ventana.013"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.001",
+        "Hierro \u00b7 pletina ventana.013"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana",
+        "Hierro \u00b7 voluta ventana.012"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.001",
+        "Hierro \u00b7 voluta ventana.013"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana",
+        "Hierro \u00b7 pletina hoja ventana"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.001",
+        "Hierro \u00b7 pletina hoja ventana.001"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.002",
+        "Hierro \u00b7 pletina hoja ventana.002"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.003",
+        "Hierro \u00b7 pletina hoja ventana.003"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.002",
+        "Hierro \u00b7 pletina fija ventana.002"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.003",
+        "Hierro \u00b7 pletina fija ventana.003"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.002",
+        "Hierro \u00b7 pletina ventana.014"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.003",
+        "Hierro \u00b7 pletina ventana.015"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.003",
+        "Hierro \u00b7 voluta ventana.015"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.014",
+        "Hierro \u00b7 voluta ventana.014"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.015",
+        "Hierro \u00b7 voluta ventana.015"
+      ],
+      [
+        "Hierro \u00b7 anclaje de anilla",
+        "Hierro \u00b7 anilla del picaporte"
+      ],
+      [
+        "Hierro \u00b7 anclaje de anilla",
+        "Hierro \u00b7 placa del picaporte"
+      ],
+      [
+        "Lat\u00f3n \u00b7 abrazadera.005",
+        "Lat\u00f3n \u00b7 bajante abollada.007"
+      ],
+      [
+        "Lat\u00f3n \u00b7 abrazadera.006",
+        "Lat\u00f3n \u00b7 bajante abollada.008"
+      ],
+      [
+        "Lat\u00f3n \u00b7 abrazadera.007",
+        "Lat\u00f3n \u00b7 bajante abollada.009"
+      ],
+      [
+        "Lat\u00f3n \u00b7 abrazadera.008",
+        "Lat\u00f3n \u00b7 bajante abollada.010"
+      ],
+      [
+        "Lat\u00f3n \u00b7 abrazadera.009",
+        "Lat\u00f3n \u00b7 bajante abollada.011"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.007",
+        "Lat\u00f3n \u00b7 manguito.005"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.008",
+        "Lat\u00f3n \u00b7 manguito.005"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.008",
+        "Lat\u00f3n \u00b7 manguito.006"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.009",
+        "Lat\u00f3n \u00b7 manguito.006"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.009",
+        "Lat\u00f3n \u00b7 manguito.007"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.010",
+        "Lat\u00f3n \u00b7 manguito.007"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.010",
+        "Lat\u00f3n \u00b7 manguito.008"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.011",
+        "Lat\u00f3n \u00b7 manguito.008"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.011",
+        "Lat\u00f3n \u00b7 manguito.009"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.013",
+        "Lat\u00f3n \u00b7 manguito.009"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.007",
+        "Lat\u00f3n \u00b7 bajante abollada.008"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.007",
+        "Lat\u00f3n \u00b7 bajante abollada.012"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.008",
+        "Lat\u00f3n \u00b7 bajante abollada.009"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.009",
+        "Lat\u00f3n \u00b7 bajante abollada.010"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.010",
+        "Lat\u00f3n \u00b7 bajante abollada.011"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.011",
+        "Lat\u00f3n \u00b7 bajante abollada.013"
+      ],
+      [
+        "Lat\u00f3n \u00b7 bajante abollada.013",
+        "Lat\u00f3n \u00b7 canal\u00f3n.012"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.012",
+        "Hierro \u00b7 pletina ventana.008"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.012",
+        "Hierro \u00b7 voluta ventana.008"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.013",
+        "Hierro \u00b7 pletina ventana.009"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.013",
+        "Hierro \u00b7 voluta ventana.009"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.014",
+        "Hierro \u00b7 pletina ventana.010"
+      ],
+      [
+        "Hierro \u00b7 pletina fija ventana.015",
+        "Hierro \u00b7 pletina ventana.011"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.013",
+        "Hierro \u00b7 pletina hoja ventana.013"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.014",
+        "Hierro \u00b7 pletina hoja ventana.014"
+      ],
+      [
+        "Hierro \u00b7 pernio ventana.015",
+        "Hierro \u00b7 pletina hoja ventana.015"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.008",
+        "Hierro \u00b7 voluta ventana.008"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.009",
+        "Hierro \u00b7 voluta ventana.009"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.010",
+        "Hierro \u00b7 voluta ventana.010"
+      ],
+      [
+        "Hierro \u00b7 pletina ventana.011",
+        "Hierro \u00b7 voluta ventana.011"
+      ]
+    ],
+    "thin_residues_removed": [
+      {
+        "piece": "Hierro \u00b7 pernio ventana.008",
+        "volume_mm3": 0.0017315333460672377,
+        "effective_thickness_mm": 0.006743240704555827
+      },
+      {
+        "piece": "Hierro \u00b7 pernio ventana.009",
+        "volume_mm3": 0.0017315482178255626,
+        "effective_thickness_mm": 0.0074665221189050964
+      },
+      {
+        "piece": "Hierro \u00b7 pernio ventana.010",
+        "volume_mm3": 0.0017316633006316529,
+        "effective_thickness_mm": 0.007233353621734568
+      },
+      {
+        "piece": "Hierro \u00b7 pernio ventana.011",
+        "volume_mm3": 0.001731673581495674,
+        "effective_thickness_mm": 0.007652311161930992
+      },
+      {
+        "piece": "Hierro \u00b7 pernio ventana.005",
+        "volume_mm3": 0.0017558452162793753,
+        "effective_thickness_mm": 0.006396041399612751
+      },
+      {
+        "piece": "Hierro \u00b7 pernio ventana.007",
+        "volume_mm3": 0.0017320309199224254,
+        "effective_thickness_mm": 0.007305200834509189
+      },
+      {
+        "piece": "Hierro \u00b7 pernio ventana.002",
+        "volume_mm3": 0.0017312650612942293,
+        "effective_thickness_mm": 0.00932023404396938
+      },
+      {
+        "piece": "Hierro \u00b7 pernio ventana.003",
+        "volume_mm3": 0.0017312679740685288,
+        "effective_thickness_mm": 0.009838238456502281
+      },
+      {
+        "piece": "Hierro \u00b7 pernio ventana.012",
+        "volume_mm3": 0.0017313039952133735,
+        "effective_thickness_mm": 0.009297475737503044
+      }
+    ],
+    "numeric_component_volume_mm3": 1.0950333396281436e-06,
+    "fragile_fragments": 81,
+    "timber_fracture_joints": 0,
+    "bodies": 3101,
+    "constraints": 13497,
+    "roles": {
+      "wood": 861,
+      "stone": 855,
+      "tile": 1213,
+      "metal": 162,
+      "ground": 10
+    },
+    "seconds": 77.472,
+    "cpu_seconds": 89.938,
+    "faces": 575292,
+    "unconnected": []
+  },
+  "shake_job": {
+    "peak_mb": 976.96875,
+    "seconds": 94.47032680001575
+  },
+  "simulation": {
+    "objects": 3088,
+    "moving": 516,
+    "seconds": 14.12037920000148,
+    "sample_step": 4,
+    "static_constraints_omitted": 10842,
+    "solver_scale": 100.0,
+    "collision_dust_omitted": [
+      "Revoco \u00b7 lateral mirador.001 \u00b7 fragmento.001",
+      "Revoco \u00b7 lateral mirador.003 \u00b7 fragmento.001",
+      "Revoco \u00b7 lateral mirador.003 \u00b7 fragmento.002",
+      "Piedra \u00b7 hogar jamba.019 \u00b7 fragmento.001",
+      "Piedra \u00b7 hogar jamba.019 \u00b7 fragmento.002",
+      "Piedra \u00b7 chimenea sillar.024 \u00b7 fragmento.001",
+      "Piedra \u00b7 chimenea sillar.047 \u00b7 fragmento.001",
+      "Piedra \u00b7 chimenea sillar.074 \u00b7 fragmento.002",
+      "Piedra \u00b7 chimenea sillar.086 \u00b7 fragmento.001"
+    ]
+  },
+  "export_job": {
+    "peak_mb": 2935.16015625,
+    "seconds": 49.794897199986735
+  },
+  "export": {
+    "pieces": 3083,
+    "triangles": 7468524,
+    "voxel_mm": 0.3499999940395355,
+    "volume_mm3": 595829.4250108285,
+    "closed": true,
+    "path": "G:\\Alma zen\\Personal\\Tres Dimensiones\\Impresora\\Trabajos\\Yho\\IA\\BlenderGen\\dist\\ruinas_v03213_prueba.stl",
+    "frame": 10
+  }
+}

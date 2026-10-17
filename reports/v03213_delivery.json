@@ -1,0 +1,54 @@
+{
+  "ruinas_panel_v03213.zip": {
+    "bytes": 175612,
+    "sha256": "65f1f0c89e035e7a84d5071e242b5a640c6eb93c2a40621ed7277831e26f041e"
+  },
+  "ruinas_v03213_integrada.blend": {
+    "bytes": 190009359,
+    "sha256": "24971b455805ea0430845fca86e73c8b18ecdbb7f099b727d31c4d564ab9c5f4"
+  },
+  "ruinas_v03213_prueba.stl": {
+    "bytes": 373426284,
+    "sha256": "d174d085164423c9201c8e65a83fe367e288cb56ca6292155a691ac2f3f715ef"
+  },
+  "Manual_Ruinas_v03213.html": {
+    "bytes": 3533,
+    "sha256": "cf7077a4bee055a38f4e7e62f7cefb0ae5c5f331b218e1526897db738adcb6a6"
+  },
+  "ruinas_v03213_fachadas.blend": {
+    "bytes": 6136270,
+    "sha256": "9a209dbeae2add9b6e75a32fde7c35e07d02827f7df48d412207fc94ad4b448d"
+  },
+  "ruinas_v03213_fachadas_revoco.blend": {
+    "bytes": 6120143,
+    "sha256": "f5bc37c0eaaee3ffb598959a26c014d29e478fdc2c5c4263ecb04dfb0a4111a7"
+  },
+  "MANUAL_V03213.md": {
+    "bytes": 2829,
+    "sha256": "ce977be5f9255a77a0b383a79933d395b5460a86d538d6baedbb730bff08a3e6"
+  },
+  "V03213.md": {
+    "bytes": 2585,
+    "sha256": "45746480c694141a54f062169f2c9dd7aea6a5e99f7c60b917af15ccc0299583"
+  },
+  "ARCHITECTURE.md": {
+    "bytes": 13302,
+    "sha256": "5227193936977861fa816a4856ba86cf49de72eba1c021ae693e244df4d926c7"
+  },
+  "v03213_integration.json": {
+    "bytes": 19250,
+    "sha256": "f1df8a6d9aa11b28697ba2eeaa32a9cb3d9542738ff4e4414f89c9565d5ad934"
+  },
+  "v03213_source.png": {
+    "bytes": 1100389,
+    "sha256": "7254d051a68780bc218e3e30317a9f81b6c189cc0314a4699d7952ef3599b59f"
+  },
+  "facade_v03213.png": {
+    "bytes": 1215661,
+    "sha256": "afc0f412429dcb337fef57590c9ee1a66a27c003c0029459dbf85b39d59b4d20"
+  },
+  "facade_plaster_damage_v03213.png": {
+    "bytes": 1215880,
+    "sha256": "7e91dcf643f3d5b8d3906bb83407600670925e1bf4467c52c5ec979484828188"
+  }
+}

@@ -12,7 +12,7 @@ def envelope(coll,p,walls):
     lo=[-p.length/2,-p.thickness/2];hi=[p.length/2,walls['back']['origin'][1]+p.thickness/2]
     for ob in coll.objects:
         key=primitives.piece_key(ob)
-        if not key.startswith(('Piedra','Pilar')) or ob.get('escombro') or ob.get('stair') or ob.get('protected_sill') or 'balcón' in key or 'pie' in key:continue
+        if not key.startswith(('Piedra','Pilar')) or ob.get('facade_detail') or ob.get('escombro') or ob.get('stair') or ob.get('protected_sill') or 'balcón' in key or 'pie' in key:continue
         co=primitives.coords(ob)
         if not len(co):continue
         for axis in (0,1):lo[axis]=min(lo[axis],float(co[:,axis].min()));hi[axis]=max(hi[axis],float(co[:,axis].max()))
@@ -132,13 +132,14 @@ def ceramic_mesh(coll,mat,name,verts,faces,count):
     return ob
 
 
-def ridge_cap(coll,mat,x,y0,y1,z,chimney=None):
+def ridge_cap(coll,mat,x,y0,y1,z,chimney=None,profile=None):
     'IA: Cumbrera de medias cañas huecas con pared de .58 mm y solape; cubre ambos faldones con la misma cerámica curva.'
     verts=[];faces=[];courses=max(1,math.ceil((y1-y0)/6));count=0
     for k in range(courses):
         a=y0+(y1-y0)*k/courses;b=y0+(y1-y0)*(k+1)/courses+.6
         if chimney and abs(x-chimney['x'])<chimney['radius']+3.2 and a<chimney['y']+chimney['radius'] and b>chimney['y']-chimney['radius']:continue
-        curved_tile(verts,faces,(x,a,z+4.7),(x,b,z+3.9),6.4,2.9,taper=.78)
+        da=spatial.roof_offset(a,*profile) if profile else 0;db=spatial.roof_offset(b,*profile) if profile else 0
+        curved_tile(verts,faces,(x,a,z+4.7+da),(x,b,z+3.9+db),6.4,2.9,taper=.78)
         count+=1
     ceramic_mesh(coll,mat,'Tejas · cumbrera',verts,faces,count)
     return count
@@ -159,7 +160,7 @@ def curved_rafter(coll,wood,p,x0,x1,y,z,rise,seed,ta=0,tb=1):
     return ob
 
 
-def tile_bay(coll,mat,p,xa,xm,y0,y1,z,rise,rows,seed,patches=(),missing=None,chimney=None):
+def tile_bay(coll,mat,p,xa,xm,y0,y1,z,rise,rows,seed,patches=(),missing=None,chimney=None,profile=None):
     'IA: Solape longitudinal del 30% en reposo; tejas rígidas orientadas al hundimiento común de los apoyos, ausentes solo en el núcleo de rotura.'
     verts=[];faces=[];rng=random.Random(seed);count=0
     columns=max(2,math.ceil((y1-y0)/5.5));pitch=(y1-y0)/columns
@@ -177,8 +178,9 @@ def tile_bay(coll,mat,p,xa,xm,y0,y1,z,rise,rows,seed,patches=(),missing=None,chi
             tilt=0
             chip=rng.uniform(.12,.36) if q<1.7 else rng.uniform(0,.055)*p.wear
             width=max(1.5,b-a+.12);crown=min(2.3,width*.45)
-            start=(xa+(xm-xa)*t0,cy,spatial.roof_height(t0,z,rise,p.roof_curve)+3.35+1.15+lip)
-            end=(xa+(xm-xa)*t1,cy,spatial.roof_height(t1,z,rise,p.roof_curve)+3.35+lip+tilt)
+            base=z+(spatial.roof_offset(cy,*profile) if profile else 0)
+            start=(xa+(xm-xa)*t0,cy,spatial.roof_height(t0,base,rise,p.roof_curve)+3.35+1.15+lip)
+            end=(xa+(xm-xa)*t1,cy,spatial.roof_height(t1,base,rise,p.roof_curve)+3.35+lip+tilt)
             start=(*start[:2],start[2]-roof_damage.sag(*start[:2],patches))
             end=(*end[:2],end[2]-roof_damage.sag(*end[:2],patches))
             curved_tile(verts,faces,start,end,width,crown,thickness=min(.58,width*.25),taper=.72,chip=chip)
@@ -201,7 +203,11 @@ def build(coll,p,scene):
     left,right=walls['left'],walls['right'];x0,x1=left['origin'][0],right['origin'][0]
     bounds=envelope(coll,p,walls);xa,xb,ya,yb=bounds['cover']
     y0=-p.thickness/2;y1=walls['back']['origin'][1]+p.thickness/2
-    z=p.height+2.2;rise=min(68,(xb-xa)*.52);xm=(xa+xb)/2
+    z=p.height+2.2;rise=min(68,(xb-xa)*.52);xm=spatial.ridge_x(xa,xb,p.roof_asymmetry)
+    profile=(ya,yb,p.roof_sweep,p.roof_sweep_bias)
+    def lift(y):
+        'IA: Comparte elevación longitudinal entre apoyos, correas, cerchas y cerámica.'
+        return spatial.roof_offset(y,*profile)
     patches=roof_damage.plan(p,bounds);missing=[]
     chimney=roof_accessories.chimney_plan(coll,p,walls,bounds,z,rise,patches)
     meta.put(scene,'cubierta_roturas',patches)
@@ -214,13 +220,13 @@ def build(coll,p,scene):
         for lo,hi in roof_segments(x0,x1,y,patches,'x',chimney):
             ob=timber.timber_beam(coll,wood,'Madera · cercha cubierta',(lo,y,p.height+.4),(hi,y,p.height+.4),3.6,3.6,p.seed+8100+i*31);ob['roof_timber']=True
         if not chimney or abs(xm-chimney['x'])>chimney['radius']+2 or abs(y-chimney['y'])>chimney['radius']+2:
-            ob=timber.timber_beam(coll,wood,'Madera · cercha cubierta',(xm,y,p.height+.4),(xm,y,z+rise),2.8,2.8,p.seed+8101+i*31);ob['roof_timber']=True
+            ob=timber.timber_beam(coll,wood,'Madera · cercha cubierta',(xm,y,p.height+.4),(xm,y,z+rise+lift(y)),2.8,2.8,p.seed+8101+i*31);ob['roof_timber']=True
         for j,x in enumerate((xa,xb)):
             for lo,hi in roof_segments(x,xm,y,patches,'x',chimney):
                 ta,tb=sorted(((lo-x)/(xm-x),(hi-x)/(xm-x)))
-                curved_rafter(coll,wood,p,x,xm,y,z,rise,p.seed+8300+i*31+j,ta,tb)
-        if p.roof_gables and i in (0,count):gable(coll,p,wood,xa,xb,xm,y,z,rise,i,chimney)
-        records.append({'index':i,'y':y,'z':z,'ridge':z+rise})
+                curved_rafter(coll,wood,p,x,xm,y,z+lift(y),rise,p.seed+8300+i*31+j,ta,tb)
+        if p.roof_gables and i in (0,count):gable(coll,p,wood,xa,xb,xm,y,z+lift(y),rise,i,chimney)
+        records.append({'index':i,'y':y,'z':z+lift(y),'ridge':z+rise+lift(y)})
     # Extremos en vuelo solo cuando hay dos cerchas contiguas para anclar las correas.
     bays=list(records)
     if len(records)>1 and records[0]['index']==0 and records[1]['index']==1:
@@ -228,13 +234,13 @@ def build(coll,p,scene):
         for j,x in enumerate((xa,xb)):
             for lo,hi in roof_segments(x,xm,ya,(),'x',chimney):
                 ta,tb=sorted(((lo-x)/(xm-x),(hi-x)/(xm-x)))
-                curved_rafter(coll,wood,p,x,xm,ya,z,rise,p.seed+9210+j,ta,tb)
+                curved_rafter(coll,wood,p,x,xm,ya,z+lift(ya),rise,p.seed+9210+j,ta,tb)
     if len(records)>1 and records[-1]['index']==count and records[-2]['index']==count-1:
         bays.append(dict(records[-1],index=count+1,y=yb))
         for j,x in enumerate((xa,xb)):
             for lo,hi in roof_segments(x,xm,yb,(),'x',chimney):
                 ta,tb=sorted(((lo-x)/(xm-x),(hi-x)/(xm-x)))
-                curved_rafter(coll,wood,p,x,xm,yb,z,rise,p.seed+9220+j,ta,tb)
+                curved_rafter(coll,wood,p,x,xm,yb,z+lift(yb),rise,p.seed+9220+j,ta,tb)
     rows=max(4,math.ceil(math.hypot((xb-xa)/2,rise)/6))
     for a,b in zip(bays,bays[1:]):
         if b['index']!=a['index']+1:continue
@@ -245,16 +251,22 @@ def build(coll,p,scene):
             if 0<=a['index'] and b['index']<=count:
                 for lo,hi in roof_segments(a['y'],b['y'],support_x,(),'y',chimney,2.2):
                     ob=timber.timber_beam(coll,wood,'Madera · durmiente de alero',(support_x,lo,(p.height+underside)/2),(support_x,hi,(p.height+underside)/2),underside-p.height+.7,4.2,p.seed+9290+a['index'],coarse=True);ob['roof_timber']=True
+                    co=primitives.coords(ob)
+                    for v in co:
+                        weight=max(0,min(1,(v[2]-(p.height-.35))/(underside-p.height+.7)))
+                        v[2]+=weight*(lift(lo)+(lift(hi)-lift(lo))*(v[1]-lo)/max(.001,hi-lo))
+                    primitives.set_coords(ob,co)
             for j in range(rows+1):
+                if side==1 and j==rows:continue  # La cumbrera comparte un único rastrel entre faldones.
                 t=j/rows;x=edge+(xm-edge)*t;top=spatial.roof_height(t,z,rise,p.roof_curve)+2.1
                 for lo,hi in roof_segments(a['y'],b['y'],x,patches,'y',chimney):
-                    ob=timber.timber_beam(coll,wood,'Madera · rastrel cubierta',(x,lo,top),(x,hi,top),1.7,1.8,p.seed+8400+a['index']*71+j+side*300,coarse=True);ob['roof_timber']=True
+                    ob=timber.timber_beam(coll,wood,'Madera · rastrel cubierta',(x,lo,top+lift(lo)),(x,hi,top+lift(hi)),1.7,1.8,p.seed+8400+a['index']*71+j+side*300,coarse=True);ob['roof_timber']=True
             for j,t in enumerate((.08,.5,.93)):
                 x=edge+(xm-edge)*t;top=spatial.roof_height(t,z,rise,p.roof_curve)-1.7
                 for lo,hi in roof_segments(a['y'],b['y'],x,patches,'y',chimney):
-                    ob=timber.timber_beam(coll,wood,'Madera · correa cubierta',(x,lo,top),(x,hi,top),3.0,3.2,p.seed+8700+a['index']*71+j,coarse=True);ob['roof_timber']=True
-            if p.roof_tiles:tiles+=tile_bay(coll,clay,p,edge,xm,a['y'],b['y'],z,rise,rows,p.seed+9100+a['index']*73+side*19,patches,missing,chimney)
-        if p.roof_tiles:tiles+=ridge_cap(coll,clay,xm,a['y'],b['y'],z+rise,chimney)
+                    ob=timber.timber_beam(coll,wood,'Madera · correa cubierta',(x,lo,top+lift(lo)),(x,hi,top+lift(hi)),3.0,3.2,p.seed+8700+a['index']*71+j,coarse=True);ob['roof_timber']=True
+            if p.roof_tiles:tiles+=tile_bay(coll,clay,p,edge,xm,a['y'],b['y'],z,rise,rows,p.seed+9100+a['index']*73+side*19,patches,missing,chimney,profile)
+        if p.roof_tiles:tiles+=ridge_cap(coll,clay,xm,a['y'],b['y'],z+rise,chimney,profile)
     if p.roof_tiles:
         supported={r['index'] for r in records}
         for i in range(count):
@@ -267,4 +279,4 @@ def build(coll,p,scene):
     roof_accessories.drains(coll,p,scene,walls,bounds,bays,z,patches)
     roof_damage.debris(coll,p,scene,bounds,missing)
     meta.put(scene,'cubierta_generada',records)
-    meta.put(scene,'cubierta_detalles',{**deformation,'curve':p.roof_curve,'tiles':tiles,'courses':rows,'supported_trusses':len(records),'profile':'concave' if p.roof_curve else 'straight','bounds':bounds,'eave_height':z,'overhang_mm':4,'missing_tiles':len(missing)})
+    meta.put(scene,'cubierta_detalles',{**deformation,'curve':p.roof_curve,'sweep':p.roof_sweep,'sweep_bias':p.roof_sweep_bias,'ridge_x':xm,'tiles':tiles,'courses':rows,'supported_trusses':len(records),'profile':'concave' if p.roof_curve else 'straight','bounds':bounds,'eave_height':z,'overhang_mm':4,'missing_tiles':len(missing)})
