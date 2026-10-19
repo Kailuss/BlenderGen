@@ -130,7 +130,7 @@ class RUIN_OT_physics(bpy.types.Operator):
 
 class RUIN_OT_physics_height_selection(bpy.types.Operator):
     bl_idname='ruin.physics_height_selection'
-    bl_label='Seleccionar por porcentaje y altura'
+    bl_label='Preparar selección de daño'
     bl_options={'REGISTER','UNDO'}
     def execute(self,context):
         'IA: Hace revisable la selección por gradiente; el botón existente de soltar confirma la liberación conjunta.'

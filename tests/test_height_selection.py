@@ -1,9 +1,20 @@
 """Porcentaje exacto y gradiente reproducible sin depender de Blender."""
 import unittest
-from ruinas_panel.services.height_selection import ranked
+from ruinas_panel.services.height_selection import ranked,regional
 
 
 class HeightSelectionTests(unittest.TestCase):
+    def test_local_zone(self):
+        'IA: La zona excluye piezas exteriores, selecciona primero las cercanas y mantiene selecciones anidadas al subir el porcentaje.'
+        records=[(str(i),(i,0,0)) for i in range(10)]
+        small,count=regional(records,(0,0,0),(4,1,1),40)
+        large,_=regional(list(reversed(records)),(0,0,0),(4,1,1),100)
+        self.assertEqual(count,5);self.assertEqual(small,['0','1'])
+        self.assertEqual(large,['0','1','2','3','4'])
+        self.assertTrue(set(small)<=set(large))
+        self.assertEqual(regional(records,(0,9,0),(4,1,1),100),([],0))
+        with self.assertRaises(ValueError):regional(records,(0,0,0),(0,1,1),100)
+
     def test_count_and_seed(self):
         'IA: Cumple extremos, porcentaje redondeado y semilla sin depender del orden de entrada.'
         records=[(str(i),i) for i in range(100)]

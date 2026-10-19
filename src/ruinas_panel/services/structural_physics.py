@@ -506,7 +506,7 @@ def prepare(source_scene):
 
 
 def release(scene,ob,frame=13):
-    'IA: Suelta conjuntamente las uniones elegidas en frame (13 por defecto); crea acción propia y conserva cuerpos y trayectorias.'
+    'IA: Suelta uniones en frame y reactiva colisiones entre sus cuerpos; comparte acción booleana y conserva cuerpos y trayectorias.'
     chosen=[ob] if isinstance(ob,bpy.types.Object) else list(ob or [])
     chosen={o for o in chosen if o.name in scene.objects and o.rigid_body and o.rigid_body.type=='ACTIVE'}
     if not chosen:raise ValueError('Selecciona piezas móviles del edificio.')
@@ -519,6 +519,8 @@ def release(scene,ob,frame=13):
     first=affected[0];first.animation_data_clear();c=first.rigid_body_constraint
     c.enabled=True;c.keyframe_insert(data_path='enabled',frame=1);c.keyframe_insert(data_path='enabled',frame=frame-1)
     c.enabled=False;c.keyframe_insert(data_path='enabled',frame=frame)
+    c.disable_collisions=True;c.keyframe_insert(data_path='disable_collisions',frame=1);c.keyframe_insert(data_path='disable_collisions',frame=frame-1)
+    c.disable_collisions=False;c.keyframe_insert(data_path='disable_collisions',frame=frame)
     # La misma curva booleana sirve para todas las uniones seleccionadas.
     # Evita evaluar miles de cuerpos al insertar cada fotograma por separado.
     for other in affected[1:]:

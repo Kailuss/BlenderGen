@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.15 — 2026-10-19
+
+Selección elipsoidal por pieza maestra o cursor, porcentaje del centro hacia fuera y acumulación de focos. Liberar uniones reactiva explícitamente las colisiones de las parejas afectadas. Ensayo de caja sobre apoyo pasivo durante 120 fotogramas y pruebas de selección. No certifica todavía el caso completo del usuario ni propagación por pérdida de apoyo. Uso y límites en `V03215.md`.
+
 ## v0.32.14 — 2026-10-18
 
 Distribución de vanos por planta y reservas para tejadillos; derrumbe inicial suavizado, cubierta asentada sobre apoyos medidos y pérdida de tejas por regiones. Revoco de miradores con variación local y refinamiento limitado. Cinco intensidades verificadas visualmente y con mallas cerradas. Flujo integrado con 3.180 cuerpos, 512 piezas seleccionadas y diez fotogramas hasta STL cerrado: preparación 1.134 MB, simulación 1.001 MB y exportación 3.044 MB de pico del trabajador. El asentamiento del generador es procedural; no certifica estabilidad estructural ni todas las semillas. Medidas y límites en `V03214.md`, uso en `MANUAL_V03214.md`.

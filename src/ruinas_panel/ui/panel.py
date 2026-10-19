@@ -77,7 +77,13 @@ class RUIN_PT_panel(bpy.types.Panel):
             if structural:
                 p=context.scene.ruin_settings
                 box=layout.box();box.label(text='Preparar selección de desprendimiento')
-                for field in ('physics_selection_material','physics_selection_percent','physics_selection_gradient','physics_selection_seed'):box.prop(p,field)
+                for field in ('physics_selection_mode','physics_selection_material','physics_selection_percent'):box.prop(p,field)
+                if p.physics_selection_mode=='HEIGHT':
+                    for field in ('physics_selection_gradient','physics_selection_seed'):box.prop(p,field)
+                else:
+                    box.prop(p,'physics_selection_radii')
+                    box.label(text='Del centro hacia fuera · sin azar')
+                box.prop(p,'physics_selection_add')
                 box.operator('ruin.physics_height_selection')
                 from ..services import material_strength
                 box=layout.box();box.label(text='Resistencia por familia · multiplicador')
