@@ -17,12 +17,12 @@ def impacts(p):
 
 
 def collapse_height(p,x,y):
-    'IA: Pérdida monótona con Derrumbe, acotada al pie de 4 mm; cero fuera de los impactos compactos.'
+    'IA: Pérdida monótona progresiva con Derrumbe, acotada al pie de 4 mm; el arranque suave evita perder hiladas completas con valores próximos a cero.'
     strength=0
     for cx,cy,rx,ry in impacts(p):
         d=((x-cx)/rx)**2+((y-cy)/ry)**2
         strength=max(strength,max(0,1-d)**.65)
-    return p.height-min(1,p.collapse*1.15)*(p.height-4)*strength
+    return p.height-min(1,p.collapse**1.6*1.15)*(p.height-4)*strength
 
 
 def floor_holes(p,bounds,level):

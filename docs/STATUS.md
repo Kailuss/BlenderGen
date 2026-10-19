@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.14 — 2026-10-18
+
+Distribución de vanos por planta y reservas para tejadillos; derrumbe inicial suavizado, cubierta asentada sobre apoyos medidos y pérdida de tejas por regiones. Revoco de miradores con variación local y refinamiento limitado. Cinco intensidades verificadas visualmente y con mallas cerradas. Flujo integrado con 3.180 cuerpos, 512 piezas seleccionadas y diez fotogramas hasta STL cerrado: preparación 1.134 MB, simulación 1.001 MB y exportación 3.044 MB de pico del trabajador. El asentamiento del generador es procedural; no certifica estabilidad estructural ni todas las semillas. Medidas y límites en `V03214.md`, uso en `MANUAL_V03214.md`.
+
 ## v0.32.13 — 2026-10-17
 
 Miradores agrupables con revoco claro y daño Perlin independiente, hojas con postura editable y tejadillos cerámicos. Perfil longitudinal/asimétrico compartido con accesorios. Prefractura del relieve triangulada antes del corte para conservar volumen. Regresión de cuatro casos, cierre/caché de fachadas y flujo completo de 3.101 cuerpos hasta STL cerrado verificados. Medidas y límites en `V03213.md`; uso en `MANUAL_V03213.md`. Las hojas no son bisagras Bullet; la fractura no es adaptativa durante el impacto. El ejemplo selecciona 512 piezas y calcula diez fotogramas, sin certificar un derrumbe completo asentado.

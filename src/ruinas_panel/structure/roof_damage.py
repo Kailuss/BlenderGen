@@ -6,8 +6,8 @@ from . import damage_regions
 
 
 def plan(p,bounds):
-    'IA: Dos regiones reproducibles en faldones opuestos; incluyen intensidad y límites para compartir hundimiento, anclajes y rotura.'
-    return damage_regions.roof_events(p.seed,getattr(p,'roof_damage_seed',0),p.roof_damage,bounds['cover'])
+    'IA: Dos regiones reproducibles en faldones opuestos, con intensidad máxima entre daño de cubierta y derrumbe general; comparten hundimiento, anclajes y rotura.'
+    return damage_regions.roof_events(p.seed,getattr(p,'roof_damage_seed',0),max(p.roof_damage,p.collapse),bounds['cover'])
 
 
 def broken(x,y,patches):

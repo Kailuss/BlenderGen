@@ -2,23 +2,23 @@
   "blender": "5.2.2 LTS",
   "cases": {
     "basic_draft": {
-      "digest": "d4772d90351f122642b28b0bdaa56549d40906f6e8787e54c2a4e59aa43f20c3",
-      "faces": 2296,
+      "digest": "6decbb3f67eed414ecc1ad64a9ed9596f5d9c9465e10069c2b762242c6635f47",
+      "faces": 2267,
       "degenerate_faces": []
     },
     "door_windows_work": {
-      "digest": "672b3fc433dae5f53fc209f2971f8d89d076f25820646ea58df963e67f08bd88",
-      "faces": 25396,
+      "digest": "46b64b37c3cf345cc82f3a8485e21a2abcc5df89918557d4bebd840895c3608c",
+      "faces": 19592,
       "degenerate_faces": []
     },
     "room_beams_draft": {
-      "digest": "2a00c4ed0df1d5e96de7731b04ed675251e3d72fba064d8755d8e87962891646",
-      "faces": 47985,
+      "digest": "318ad953e4204b597045a2329b3a7a13c20d1ab3f51205101502cba108b687e8",
+      "faces": 48336,
       "degenerate_faces": []
     },
     "window_detail": {
-      "digest": "dda37b0298fd7ab9cf4d71dbcf79217c20122f21a798221f471a40573785c5fb",
-      "faces": 41567,
+      "digest": "d08324e5bc9823dc03fd8441b5641e737de911d130098f729093c09a9555c81a",
+      "faces": 42757,
       "degenerate_faces": []
     }
   }

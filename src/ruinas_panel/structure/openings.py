@@ -77,6 +77,7 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
         bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces))
         bm.to_mesh(ob.data)
         bm.free()
+        primitives.triangulate_safe(ob.data)
         ob.data.update()
         # El recorte no puede quitar más que el cruce de la caja de la pieza con el cortador.
         reach=[max(0,min(local[:,i].max(),hi)-max(local[:,i].min(),lo)) for i,(lo,hi) in enumerate(((x0,x1),(-T,T),(z0,z1)))]
@@ -89,6 +90,11 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
         mod.object=cutter
         primitives.apply_modifier(ob,mod,cutter)
         primitives.triangulate_safe(ob.data)
+        if ob.data.vertices and before-primitives.mesh_volume(ob.data)>limit:
+            failed=ob.data;ob.data=backup.copy();bpy.data.meshes.remove(failed)
+            retry=ob.modifiers.new('Hueco arquitectónico exacto','BOOLEAN')
+            retry.operation='DIFFERENCE';retry.solver='EXACT';retry.object=cutter
+            primitives.apply_modifier(ob,retry,cutter);primitives.triangulate_safe(ob.data)
         if ob.data.vertices and before-primitives.mesh_volume(ob.data)>limit:
             # Booleano fallido: devolvió menos pieza de la que el hueco puede quitar. Se conserva sin recortar.
             failed=ob.data
@@ -197,7 +203,7 @@ def beam_positions(coll,w,z,rear=None):
 
 @profiling.timed('aberturas_y_vigas')
 def architectural_openings(coll,p,walls,door,edges):
-    'IA: Distribuye cuotas independientes de ventanas y balcones por pared dentro de cada planta, informa lo que no cabe y aloja vigas en juntas reales antes de añadir madera.'
+    'IA: Reparte cuotas por planta y alinea ejes con ventanas inferiores o entrada; reserva altura de tejadillos, informa vanos que no caben y aloja vigas en juntas reales.'
     windows=[];warnings=[]
     from . import placement,floor_plan
     stair=placement.stair_reservation(p,walls)
@@ -215,17 +221,23 @@ def architectural_openings(coll,p,walls,door,edges):
         bases=layout.floor_bases(p);floors=len(bases)
         made=0;totals={False:0,True:0}
         tree=wall_tree(coll,w)
-        requests=[(floor,True) for floor in reversed(range(1,floors)) if p.balconies]+[(floor,False) for floor in range(floors) if p.windows_enabled]
-        for floor,has_balcony in requests:
+        requests=[]
+        for floor in range(floors):
+            for balcony,quota,levels in ((True,p.balconies_per_wall,list(range(1,floors))),(False,p.windows_per_wall,list(range(floors)))):
+                if floor not in levels or not (p.balconies if balcony else p.windows_enabled):continue
+                rank=levels.index(floor);count=quota//len(levels)+(rank<quota%len(levels))
+                if count:requests.append((floor,balcony,count))
+        for floor,has_balcony,floor_quota in requests:
             quota=p.balconies_per_wall if has_balcony else p.windows_per_wall
-            remaining=quota-totals[has_balcony]
+            remaining=min(floor_quota,quota-totals[has_balcony])
             if remaining<=0:continue
             ww=p.balcony_width if has_balcony else p.window_width
             wh=p.balcony_height if has_balcony else p.window_height
-            z0=bases[floor]+(0 if has_balcony else 16)
-            z1=z0+wh
             ceiling=bases[floor+1] if floor+1<len(bases) else w['height']
-            if z1+5>ceiling or ww>usable[1]-usable[0]:
+            headroom=5 if has_balcony or not p.window_canopies else 11+min(12,(p.window_projection+7.3)*.52)
+            z0=bases[floor]+(0 if has_balcony else max(10,min((ceiling-bases[floor]-wh)*.45,ceiling-bases[floor]-wh-headroom)))
+            z1=z0+wh
+            if z1+headroom>ceiling or ww>usable[1]-usable[0]:
                 warnings.append({'wall':w['id'],'family':'balcony' if has_balcony else 'window','floor':floor,'reason':'dimensions','requested':remaining})
                 continue
             attempts=9+quota*4
@@ -256,7 +268,18 @@ def architectural_openings(coll,p,walls,door,edges):
                 if not supported:
                     continue
                 feasible.append(cx)
-            selected=layout.spread_positions(feasible,remaining,*usable,ww+(12 if has_balcony else 6))
+            distribution=usable
+            if floor==0 and w['id']=='front' and door:
+                spans=[(usable[0],min(usable[1],door['left']-4)),(max(usable[0],door['right']+4),usable[1])]
+                best=max(spans,key=lambda s:s[1]-s[0])
+                if best[1]-best[0]>=remaining*ww+max(0,remaining-1)*6:
+                    distribution=best;feasible=[x for x in feasible if best[0]+ww/2<=x<=best[1]-ww/2]
+            selected=layout.spread_positions(feasible,remaining,*distribution,ww+(12 if has_balcony else 6))
+            anchors=sorted(h['x'] for h in windows if h['wall']==w['id'] and h['floor']==0)
+            if has_balcony and w['id']=='front' and door and remaining==1:anchors=[(door['left']+door['right'])/2]
+            if floor>0 and len(anchors)==remaining and feasible:
+                aligned=[min(feasible,key=lambda x:(abs(x-a),x)) for a in anchors]
+                if all(b-a>=ww+(12 if has_balcony else 6) for a,b in zip(aligned,aligned[1:])):selected=aligned
             for cx in selected:
                 x0=cx-ww/2;x1=cx+ww/2
                 carve_rectangle(coll,w,x0,x1,z0,z1,p.thickness+5,'Ventana')

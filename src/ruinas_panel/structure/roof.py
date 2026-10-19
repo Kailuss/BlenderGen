@@ -2,6 +2,7 @@
 import math
 import random
 import bmesh
+from mathutils import Vector
 from .. import meta
 from ..geometry import primitives,timber,plaster
 from . import openings,spatial,roof_damage,roof_accessories
@@ -53,7 +54,7 @@ def gable(coll,p,wood,xa,xb,xm,y,z,rise,index,chimney=None):
         for x in samples:
             t=(x-xa)/(xm-xa) if x<=xm else (xb-x)/(xb-xm)
             tops.append(spatial.roof_height(t,z,rise,p.roof_curve)-1.85)
-        vv,ff=plaster.panel(samples,p.height-.3,tops,min(outer,inner),max(outer,inner),p.seed+9400+index,p.roof_damage)
+        vv,ff=plaster.panel(samples,p.height-.3,tops,min(outer,inner),max(outer,inner),p.seed+9400+index,max(p.roof_damage,p.collapse))
         start=len(verts);verts.extend(vv);faces.extend(tuple(start+i for i in face) for face in ff)
     ob=primitives.mesh_obj('Revoco · hastial %s'%index,verts,faces,coll,mat)
     bm=bmesh.new();bm.from_mesh(ob.data);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(ob.data);bm.free()
@@ -190,7 +191,7 @@ def tile_bay(coll,mat,p,xa,xm,y0,y1,z,rise,rows,seed,patches=(),missing=None,chi
 
 
 def build(coll,p,scene):
-    'IA: Cerchas con dos apoyos; enlaza únicamente vecinas supervivientes. Una zona sin cerchas no recibe tejas flotantes.'
+    'IA: Cerchas sobre cotas reales de dos paredes, con descenso máximo de 32 mm o 55% de planta; excluye apoyos aislados y recorta madera y tejas individuales mediante regiones compartidas.'
     meta.put(scene,'cubierta_generada',[]);meta.put(scene,'cubierta_detalles',{})
     for key in ('cubierta_roturas','chimeneas_generadas','bajantes_generadas'):meta.put(scene,key,[])
     meta.put(scene,'escombros_cubierta',{})
@@ -213,10 +214,29 @@ def build(coll,p,scene):
     meta.put(scene,'cubierta_roturas',patches)
     trees={k:openings.wall_tree(coll,walls[k]) for k in ('left','right')}
     count=max(2,math.ceil((y1-y0)/16));records=[];wood=primitives.material('Madera · cubierta',(.31,.22,.13))
+    valid=set();drops=[];maximum_drop=min(32,p.upper_storey_height*.55)
+    for i in range(count+1):
+        y=y0+(y1-y0)*i/count
+        heights=[]
+        for k in ('left','right'):
+            local=openings.wall_local(walls[k],(walls[k]['origin'][0],y,p.height))[0]
+            hits=[trees[k].ray_cast(Vector(openings.wall_point(walls[k],local,offset,p.height+2)),Vector((0,0,-1)),p.height+2)[0] for offset in (-p.thickness*.25,0,p.thickness*.25)]
+            heights.append(max((hit.z for hit in hits if hit is not None),default=0))
+        pair=[max(0,p.height-height) for height in heights]
+        drops.append([min(maximum_drop,d) for d in pair])
+        if all(d<=maximum_drop for d in pair):valid.add(i)
+    valid={i for i in valid if i-1 in valid or i+1 in valid}
+    spacing=(y1-y0)/count
+    for i in range(count+1):
+        if i in valid:continue
+        patches.append({'id':'roof.support.%s'%i,'type':'ROOF_SUPPORT_LOSS','x':(xa+xb)/2,'y':y0+spacing*i,
+                        'rx':(xb-xa)*.8,'ry':spacing*.8,'severity':1,'bounds':list(bounds['cover']),
+                        'shape':'rounded_trapezoid','angle':0,'taper':.17,'shear':.08,'phase':p.seed+i*1.71})
+    meta.put(scene,'cubierta_roturas',patches)
     clay=primitives.material('Tejas · arcilla',(.40,.20,.115));tiles=0
     for i in range(count+1):
         y=y0+(y1-y0)*i/count
-        if not all(openings.wall_hit(trees[k],walls[k],p,openings.wall_local(walls[k],(walls[k]['origin'][0],y,p.height))[0],p.height-4) for k in trees):continue
+        if i not in valid:continue
         for lo,hi in roof_segments(x0,x1,y,patches,'x',chimney):
             ob=timber.timber_beam(coll,wood,'Madera · cercha cubierta',(lo,y,p.height+.4),(hi,y,p.height+.4),3.6,3.6,p.seed+8100+i*31);ob['roof_timber']=True
         if not chimney or abs(xm-chimney['x'])>chimney['radius']+2 or abs(y-chimney['y'])>chimney['radius']+2:
@@ -225,10 +245,15 @@ def build(coll,p,scene):
             for lo,hi in roof_segments(x,xm,y,patches,'x',chimney):
                 ta,tb=sorted(((lo-x)/(xm-x),(hi-x)/(xm-x)))
                 curved_rafter(coll,wood,p,x,xm,y,z+lift(y),rise,p.seed+8300+i*31+j,ta,tb)
-        if p.roof_gables and i in (0,count):gable(coll,p,wood,xa,xb,xm,y,z+lift(y),rise,i,chimney)
         records.append({'index':i,'y':y,'z':z+lift(y),'ridge':z+rise+lift(y)})
+    supported={r['index'] for r in records}
+    if p.roof_gables:
+        for i,neighbor in ((0,1),(count,count-1)):
+            if i in supported and neighbor in supported:
+                y=y0+(y1-y0)*i/count
+                gable(coll,p,wood,xa,xb,xm,y,z+lift(y),rise,i,chimney)
     # Extremos en vuelo solo cuando hay dos cerchas contiguas para anclar las correas.
-    bays=list(records)
+    bays=[{'index':i,'y':y0+spacing*i} for i in range(count+1)]
     if len(records)>1 and records[0]['index']==0 and records[1]['index']==1:
         bays.insert(0,dict(records[0],index=-1,y=ya))
         for j,x in enumerate((xa,xb)):
@@ -244,12 +269,13 @@ def build(coll,p,scene):
     rows=max(4,math.ceil(math.hypot((xb-xa)/2,rise)/6))
     for a,b in zip(bays,bays[1:]):
         if b['index']!=a['index']+1:continue
+        if a['index'] not in valid and b['index'] not in valid:continue
         for side,edge in enumerate((xa,xb)):
             support_x=x0 if side==0 else x1
             support_t=(support_x-edge)/(xm-edge)
             underside=spatial.roof_height(support_t,z,rise,p.roof_curve)-1.5
             if 0<=a['index'] and b['index']<=count:
-                for lo,hi in roof_segments(a['y'],b['y'],support_x,(),'y',chimney,2.2):
+                for lo,hi in roof_segments(a['y'],b['y'],support_x,patches,'y',chimney,2.2):
                     ob=timber.timber_beam(coll,wood,'Madera · durmiente de alero',(support_x,lo,(p.height+underside)/2),(support_x,hi,(p.height+underside)/2),underside-p.height+.7,4.2,p.seed+9290+a['index'],coarse=True);ob['roof_timber']=True
                     co=primitives.coords(ob)
                     for v in co:
@@ -266,7 +292,9 @@ def build(coll,p,scene):
                 for lo,hi in roof_segments(a['y'],b['y'],x,patches,'y',chimney):
                     ob=timber.timber_beam(coll,wood,'Madera · correa cubierta',(x,lo,top+lift(lo)),(x,hi,top+lift(hi)),3.0,3.2,p.seed+8700+a['index']*71+j,coarse=True);ob['roof_timber']=True
             if p.roof_tiles:tiles+=tile_bay(coll,clay,p,edge,xm,a['y'],b['y'],z,rise,rows,p.seed+9100+a['index']*73+side*19,patches,missing,chimney,profile)
-        if p.roof_tiles:tiles+=ridge_cap(coll,clay,xm,a['y'],b['y'],z+rise,chimney,profile)
+        if p.roof_tiles:
+            for lo,hi in roof_segments(a['y'],b['y'],xm,patches,'y',chimney):
+                tiles+=ridge_cap(coll,clay,xm,lo,hi,z+rise,chimney,profile)
     if p.roof_tiles:
         supported={r['index'] for r in records}
         for i in range(count):
@@ -277,6 +305,23 @@ def build(coll,p,scene):
     deformation=roof_damage.deform_timber(coll,patches)
     roof_accessories.chimney(coll,p,scene,chimney)
     roof_accessories.drains(coll,p,scene,walls,bounds,bays,z,patches)
+    if p.collapse>0:
+        def settlement(x,y):
+            'IA: Interpola cotas reales de las dos paredes entre cerchas; baja la cubierta a sus apoyos conservando ejes rectos dentro de cada vano.'
+            q=max(0,min(count,(y-y0)/spacing));i=min(count-1,int(q));f=q-i
+            pair=[drops[i][side]*(1-f)+drops[i+1][side]*f for side in (0,1)]
+            t=max(0,min(1,(x-x0)/max(.001,x1-x0)))
+            return pair[0]*(1-t)+pair[1]*t
+        for ob in coll.objects:
+            if ob.get('facade_detail') or not any(ob.get(k) for k in ('roof_timber','roof_tiles','roof_gable','drain')):continue
+            co=primitives.coords(ob)
+            for v in co:
+                weight=max(0,min(1,(float(v[2])-(p.height-24))/24)) if ob.get('drain') else 1
+                v[2]-=weight*settlement(float(v[0]),float(v[1]))
+            primitives.set_coords(ob,co)
+            if 'timber_path' in ob:ob['timber_path']=[[x,y,h-settlement(x,y)] for x,y,h in ob['timber_path']]
+        for record in records:
+            drop=sum(drops[record['index']])/2;record['z']-=drop;record['ridge']-=drop
     roof_damage.debris(coll,p,scene,bounds,missing)
     meta.put(scene,'cubierta_generada',records)
     meta.put(scene,'cubierta_detalles',{**deformation,'curve':p.roof_curve,'sweep':p.roof_sweep,'sweep_bias':p.roof_sweep_bias,'ridge_x':xm,'tiles':tiles,'courses':rows,'supported_trusses':len(records),'profile':'concave' if p.roof_curve else 'straight','bounds':bounds,'eave_height':z,'overhang_mm':4,'missing_tiles':len(missing)})

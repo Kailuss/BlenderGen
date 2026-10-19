@@ -1,0 +1,82 @@
+{
+  "ruinas_panel_v03214.zip": {
+    "bytes": 177657,
+    "sha256": "60ca3ac9c1f5b0dd200eed2f702c214fd4a1a4c2a15db80fe5b852060a0dda27"
+  },
+  "ruinas_v03214_integrada.blend": {
+    "bytes": 192344542,
+    "sha256": "f96240b6c9842b017458e1d118485a0961b7811c6e3f9f467f681a46c49c001d"
+  },
+  "ruinas_v03214_prueba.stl": {
+    "bytes": 374770184,
+    "sha256": "e72000bf908d18bd14665058f88a3187027db686efc9123c1cd22e2f99dff635"
+  },
+  "Manual_Ruinas_v03214.html": {
+    "bytes": 4253,
+    "sha256": "019caf856cea04b0f5486153ffb8a7a3aed5fec24e859721e66e2a136e2b732a"
+  },
+  "ruinas_fachada_derrumbe_000.blend": {
+    "bytes": 8959544,
+    "sha256": "52b35b401ba6b286cc4477a16a8673889976a7af8d63a1d53a01864c33ab5199"
+  },
+  "ruinas_fachada_derrumbe_003.blend": {
+    "bytes": 8884818,
+    "sha256": "a4cc993b7fbc149e0d6f172061cdfc6f3b5763091273a7c6ab4ed9f300556890"
+  },
+  "ruinas_fachada_derrumbe_020.blend": {
+    "bytes": 8759604,
+    "sha256": "cccc7f20e756abd488a87b698e34dccda128e7b5af20954d292e2e5c35017d84"
+  },
+  "ruinas_fachada_derrumbe_055.blend": {
+    "bytes": 7074428,
+    "sha256": "7e8f8da9776f248887f4dcb51eeafed1d50e7915bde98bd9c85f37371884aa79"
+  },
+  "ruinas_fachada_derrumbe_085.blend": {
+    "bytes": 3932575,
+    "sha256": "d4b8b91560356eaa663b3b4c0019867a624f78079ef7bd929c67dc492c288983"
+  },
+  "MANUAL_V03214.md": {
+    "bytes": 3548,
+    "sha256": "1ad2a98a43519fc5a4a9fd3ff1d412612e0437981d36240ba92bdfa174ec23df"
+  },
+  "V03214.md": {
+    "bytes": 2407,
+    "sha256": "8d464a39044c2767e0829ea9d022ac4e32b95a90b9063b0220e39b00608f7492"
+  },
+  "ARCHITECTURE.md": {
+    "bytes": 13696,
+    "sha256": "9f2ae0563ccc2d210aab6ee5c522fdab7e0916f1e93700b0844efbb1f0602d15"
+  },
+  "v03214_integration.json": {
+    "bytes": 19529,
+    "sha256": "01ea914c9d081c98e6ec1b375e3d92ba0008c3bb585c7804c194d2cbf1f5e321"
+  },
+  "v03214_source.png": {
+    "bytes": 1107613,
+    "sha256": "c04d47766325fbf97b643a1624bf3e43e4f95809c8b719aae30b5e28f8e1f652"
+  },
+  "facade_collapse_000.png": {
+    "bytes": 1156588,
+    "sha256": "d3fda5223f8542cb8741880d6297db0576db0d60e284ee18961b006ab93a870b"
+  },
+  "facade_collapse_003.png": {
+    "bytes": 1155621,
+    "sha256": "a0d9d3bfa7dc0cf95597d796ff2aa1ec6592681424240ff1f0c9a9b6b115773d"
+  },
+  "facade_collapse_020.png": {
+    "bytes": 1139562,
+    "sha256": "bab483d21c55135c1b01e69ab193bf04d7f0af2d5520f0c69dbf1e824d9f2860"
+  },
+  "facade_collapse_055.png": {
+    "bytes": 1116272,
+    "sha256": "16bae5f9bf79fb3711b1750e081a8d562794aa92fc3652660013ef0ffca32cf5"
+  },
+  "facade_collapse_085.png": {
+    "bytes": 926036,
+    "sha256": "77008790274b5099ef83fc3e31be37e37b5f2f59bf7aca26512b43e9b7b560a7"
+  },
+  "facade_collapse.json": {
+    "bytes": 31826,
+    "sha256": "7176ccab974d512ee87904ba0293e616124963171baec84a4e22619a6fc6b1c7"
+  }
+}

@@ -15,13 +15,13 @@ def perlin(x,z,seed):
     return a*(1-fv)+b*fv
 
 
-def panel(xs,bottom,tops,y0,y1,seed,damage=0):
-    'IA: Revoco cerrado con relieve Perlin acotado y pérdida interior por contorno interpolado; conserva perímetro estructural y tapa agujeros sin booleanas ni más densidad base.'
+def panel(xs,bottom,tops,y0,y1,seed,damage=0,step=4,border_width=4):
+    'IA: Revoco cerrado con relieve y dos escalas Perlin desfasadas por semilla; step y border_width permiten refinar solo paños dañados, conservando perímetro y tapas sin booleanas.'
     points=[];indices={};polys=[];border=set();amount=max(0,(damage-.45)/.55)
     for column,(a,b) in enumerate(zip(xs,xs[1:])):
         za,zb=tops[column:column+2];slope=(zb-za)/(b-a)
-        for row in range(math.ceil((max(za,zb)-bottom)/4)):
-            low=bottom+row*4;high=low+4
+        for row in range(math.ceil((max(za,zb)-bottom)/step)):
+            low=bottom+row*step;high=low+step
             square=[(a,low),(b,low),(b,high),(a,high)];clipped=[]
             for previous,current in zip(square[-1:]+square[:-1],square):
                 dp=previous[1]-(za+slope*(previous[0]-a));dc=current[1]-(za+slope*(current[0]-a))
@@ -32,7 +32,9 @@ def panel(xs,bottom,tops,y0,y1,seed,damage=0):
                 values=[]
                 for x,z in clipped:
                     edge=min(x-xs[0],xs[-1]-x,z-bottom,za+slope*(x-a)-z)
-                    values.append(max((4-edge)*.25,perlin(x*.085,z*.085,seed)+.55-.9*amount))
+                    ox=(seed%997)*.137;oz=(seed%431)*.193
+                    field=perlin(x*.11+ox,z*.11+oz,seed)+.32*perlin(x*.29-oz,z*.29+ox,seed+391)
+                    values.append(max((border_width-edge)*.4,field+.55-.9*amount))
                 cut=[]
                 for j,current in enumerate(clipped):
                     previous=clipped[j-1];dp=values[j-1];dc=values[j]

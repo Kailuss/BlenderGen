@@ -77,7 +77,9 @@ def chimney(coll,p,scene,plan):
             cuts=[-depth,-depth/3,depth/3,depth] if row%2 else [-depth,0,depth]
             for part,(a,b) in enumerate(zip(cuts,cuts[1:])):
                 lo,hi=sorted((side*(half-2.6),side*(half+.2)))
-                chimney_block(coll,mat,plan,'Piedra · hogar jamba',lo,hi,a+.06,b-.06,z0,z1)
+                # La pieza frontal ocupa el último tramo: la jamba termina antes,
+                # sin superponer dos cajas casi coplanares en la esquina.
+                chimney_block(coll,mat,plan,'Piedra · hogar jamba',lo,hi,a+.06,min(b-.06,depth-.9),z0,z1)
     ring(coll,mat,plan,'Piedra · campana hogar',(half,depth),(r,r),mouth+3,hood,3.0)
     ring(coll,soot,plan,'Hogar · conducto interior',(r-.5,r-.5),(r-.5,r-.5),hood-.1,plan['top'],2.0)
     rows=max(2,math.ceil((plan['top']-hood)/p.stone_size));pitch=(plan['top']-hood)/rows

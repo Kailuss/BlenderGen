@@ -153,7 +153,7 @@ def _build_wall(context, p):
         'IA: Perfil continuo del derrumbe (sin irregularidad), entre la altura de los extremos y 12 mm.'
         u=max(0,min(1,(x/L+.5-edge)/(1-2*edge)))
         baseline=left*(1-u)+right*u
-        return baseline,max(12,baseline-p.collapse*(baseline-12)*collapse_loss(x))
+        return baseline,max(12,baseline-p.collapse**1.6*(baseline-12)*collapse_loss(x))
     # Silueta: paseo aleatorio gaussiano cada media piedra que vuelve hacia el perfil (reversión 0,25);
     # el ruido crece con la pérdida local, y caídas bruscas ocasionales dejan cortes casi verticales.
     step=max(2.0,L/max(3,round(L/(rh*1.8)))/2)
@@ -164,8 +164,8 @@ def _build_wall(context, p):
         x=-L/2+i*step
         baseline,target=smooth_height(x)
         loss=collapse_loss(x)
-        level+=.25*(target-level)+cr.gauss(0,1)*rh*(.5+1.3*loss)*p.collapse
-        if cr.random()<.12*loss*p.collapse:
+        level+=.25*(target-level)+cr.gauss(0,1)*rh*(.5+1.3*loss)*p.collapse**1.6
+        if cr.random()<.12*loss*p.collapse**1.6:
             level-=rh*cr.uniform(1.5,3)
         level=max(12,min(baseline,level))
         outline.append(level)

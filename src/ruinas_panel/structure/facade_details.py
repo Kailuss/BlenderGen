@@ -4,7 +4,7 @@ import bmesh
 from mathutils import Matrix,Vector
 from .. import meta
 from ..geometry import primitives,timber,balconies,plaster
-from . import openings,roof,spatial
+from . import openings,roof,spatial,layout
 
 
 def groups(windows,p,pillars,door=None):
@@ -53,16 +53,18 @@ def leaves(coll,p,w,h,index):
                 ob=balconies.rod(coll,iron,w,name,points,.35);ob['facade_detail']=True
 
 
-def canopy(coll,p,w,a,b,top,depth):
+def canopy(coll,p,w,a,b,top,depth,ceiling=None):
     'IA: Tejadillo de media caña con perfil compartido, solape del 30%, pares rectos por tramos y rastreles; todo queda sobre el dintel.'
     side=1 if w['id'] in ('left','back') else -1
     rear=side*(p.thickness/2-.3);front=side*(p.thickness/2+depth+7)
     wood=primitives.material('Madera · tejadillo',(.31,.22,.13));clay=primitives.material('Tejas · arcilla',(.40,.20,.115))
-    a-=2.5;b+=2.5;run=abs(front-rear);rise=min(8,run*.35);base=top+2.8
+    a-=2.5;b+=2.5;run=abs(front-rear);rise=min(12,run*.52);base=top+2.8
+    if ceiling is not None:rise=max(.5,min(rise,ceiling-base-5.5))
     rows=max(2,math.ceil(run/5));columns=max(2,math.ceil((b-a)/5));pitch=(b-a)/columns
     def point(x,t,extra=0):
         'IA: Coordenada local alero→muro; comparte perfil con la cubierta y mantiene las tejas por encima del bastidor.'
-        return (x,front+(rear-front)*t,spatial.roof_height(t,base,rise,p.roof_curve)+extra)
+        longitudinal=.3*spatial.roof_offset(x,a,b,p.roof_sweep,p.roof_sweep_bias)
+        return (x,front+(rear-front)*t,spatial.roof_height(t,base,rise,p.roof_curve)+longitudinal+extra)
     for x in (a+1,b-1):
         for row in range(rows):beam(coll,wood,w,'Madera · par tejadillo',point(x,row/rows),point(x,(row+1)/rows),1.7,1.8,p.seed+52000+row)
         beam(coll,wood,w,'Madera · ménsula tejadillo',(x,rear,top-3),point(x,.08),1.7,1.7,p.seed+52020)
@@ -80,9 +82,14 @@ def canopy(coll,p,w,a,b,top,depth):
 def infill(coll,p,w,a,b,bottom,top,plane,seed,lateral=False):
     'IA: Paño de cal cerrado con relieve y pérdida Perlin independientes; el lateral intercambia ejes antes de orientar normales, y Revoco identifica su prefractura física.'
     if b-a<.1 or top-bottom<.1:return None
-    count=max(1,math.ceil((b-a)/4))
+    step=2 if p.facade_damage>.45 or p.collapse>.35 else 4
+    count=max(1,math.ceil((b-a)/step))
     xs=[a+(b-a)*i/count for i in range(count+1)]
-    verts,faces=plaster.panel(xs,bottom,[top]*len(xs),plane-1,plane+1,seed,p.facade_damage)
+    local=(plane,(a+b)/2,top) if lateral else ((a+b)/2,plane,top)
+    world=openings.wall_point(w,*local)
+    loss=max(0,p.height-spatial.collapse_height(p,world[0],world[1]))/max(1,p.height-4)
+    severity=max(p.facade_damage,min(1,loss*(top/max(1,p.height))*2))
+    verts,faces=plaster.panel(xs,bottom,[top]*len(xs),plane-1,plane+1,seed,severity,step=step,border_width=2)
     if lateral:verts=[(y,x,z) for x,y,z in verts]
     material=primitives.material('Revoco · cal',(.66,.60,.47))
     ob=primitives.mesh_obj('Revoco · lateral mirador' if lateral else 'Revoco · entreventana mirador',verts,faces,coll,material)
@@ -127,8 +134,24 @@ def build(coll,p,scene,walls,door):
                     infill(coll,p,w,a0,b0,z0+.4,z1,front,p.seed+53600+int(a0*100))
         for index,window in group:
             if p.window_leaves:leaves(coll,p,w,window,index)
-        if p.window_canopies:canopy(coll,p,w,a,b,z1,depth)
+        bases=layout.floor_bases(p);ceiling=bases[h['floor']+1]-3 if h['floor']+1<len(bases) else p.height
+        if p.window_canopies:canopy(coll,p,w,a,b,z1,depth,ceiling)
         records.append({'wall':h['wall'],'windows':[i for i,_ in group],'projection_mm':depth,'bounds':[a,b,z0,z1],'canopy':p.window_canopies})
     if p.door_canopy and door and not door.get('gate'):
-        canopy(coll,p,lookup['front'],door['left'],door['right'],door['lintel_top']+2,0)
+        bases=layout.floor_bases(p)
+        ceiling=bases[1]-4 if len(bases)>1 else p.height
+        canopy(coll,p,lookup['front'],door['left'],door['right'],door['lintel_top']+2,0,ceiling)
+    if p.collapse>0:
+        discard=[]
+        for ob in list(coll.objects):
+            if not ob.get('facade_detail') and 'facade_window' not in ob:continue
+            co=primitives.coords(ob)
+            if not len(co):continue
+            low=co.min(axis=0);high=co.max(axis=0);center=(low+high)/2
+            ceiling=spatial.collapse_height(p,float(center[0]),float(center[1]))
+            if low[2]>=ceiling:discard.append(ob)
+            elif high[2]>ceiling:
+                primitives.clip_closed(ob,(0,0,ceiling),(0,0,1))
+                ob['facade_collapse_trimmed']=True
+        primitives.remove_objects(discard)
     meta.put(scene,'ventanas_generadas',windows);meta.put(scene,'fachadas_detalles',records)
