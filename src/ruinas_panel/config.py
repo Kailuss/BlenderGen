@@ -4,7 +4,7 @@
 
 
 COLLECTION = 'MURO · fuente procedural'
-BUILD_ID = '0.32.15'
+BUILD_ID = '0.32.16'
 ROOF_DAMAGE_SAMPLE_MM = 1.0
 SHAKE_FRAMES = 10
 SHAKE_EXPIRE_FRAME = 5
@@ -122,13 +122,13 @@ FIELDS=('build_type','height_type','layout_mode','building_depth','extra_side','
 
 
 FIELDS=FIELDS+('batch_preview','microdetail_preview','use_instances','export_density','window_width','window_height','balconies','iron_mode','iron_damage')
-FIELDS=FIELDS+('balcony_width','balcony_height','balcony_depth','balconies_per_wall')
+FIELDS=FIELDS+('balcony_width','balcony_height','balcony_depth','balconies_per_wall','balcony_gate','balcony_open_angle','balcony_canopy')
 FIELDS=FIELDS+('window_leaves','window_open_angle','window_canopies','door_canopy','window_projection','window_bay_join','window_bay_gap','facade_damage')
 CACHE_METADATA=CACHE_METADATA+('fachadas_detalles',)
 CACHE_METADATA=CACHE_METADATA+('vanos_limitaciones','escaleras_generadas')
 FIELDS=FIELDS+('window_facing','ground_floor','upper_floor','floor_damage')
 FIELDS=FIELDS+('wood_damage','roof_frame')
-FIELDS=FIELDS+('roof_curve','roof_tiles','stair_type','stair_side')
+FIELDS=FIELDS+('roof_curve','roof_tiles','stair_type','stair_side','stair_tread','stair_riser')
 FIELDS=FIELDS+('roof_sweep','roof_sweep_bias','roof_asymmetry')
 FIELDS=FIELDS+('roof_gables','roof_type')
 FIELDS=FIELDS+('hole_seed','roof_damage','roof_damage_seed','chimneys','brass_pipes','damage_enabled','interior_layout')
@@ -153,11 +153,11 @@ SECTIONS=(
  {'id':'finish','title':'Acabado','fields':('damage_enabled','collapse','wear_level','wear','cracks','rubble_amount','ground_roughness'),'closed':False},
  {'id':'door','title':'Puerta','toggle':'door_enabled','fields':('door_style','door_leaf','door_position','door_width','door_height','wood_frame','door_canopy'),'closed':True},
  {'id':'windows','title':'Ventanas','toggle':'windows_enabled','fields':('window_facing','windows_per_wall','window_width','window_height','window_leaves','window_open_angle','window_canopies','window_projection','window_bay_join','window_bay_gap','facade_damage','iron_mode','iron_damage'),'closed':False},
- {'id':'balconies','title':'Balcones','toggle':'balconies','fields':('balconies_per_wall','balcony_width','balcony_height','balcony_depth'),'closed':False},
+ {'id':'balconies','title':'Balcones','toggle':'balconies','fields':('balconies_per_wall','balcony_width','balcony_height','balcony_depth','balcony_gate','balcony_open_angle','balcony_canopy'),'closed':False},
  {'id':'wood','title':'Madera y cubierta','fields':('wood_grain','wood_damage','roof_frame','roof_type','roof_curve','roof_sweep','roof_sweep_bias','roof_asymmetry','roof_tiles','roof_gables','roof_damage','roof_damage_seed','chimneys','brass_pipes'),'closed':False},
  {'id':'foundation','title':'Cimientos y patio','fields':('foundation_enabled','foundation_height','entrance_tread','patio_enabled','patio_margin','patio_fence','fence_height'),'closed':True},
  {'id':'floors','title':'Suelos de madera','fields':('ground_floor','upper_floor','floor_damage'),'closed':False},
- {'id':'stairs','title':'Escaleras','fields':('stair_type','stair_side'),'closed':False},
+ {'id':'stairs','title':'Escaleras','fields':('stair_type','stair_side','stair_tread','stair_riser'),'closed':False},
  {'id':'quality','title':'Calidad','fields':('preview_quality','export_quality','export_density','use_instances','quick_edit','batch_preview','microdetail_preview'),'closed':True},
  {'id':'bond','title':'Aparejo','fields':('stone_variation','bond_subdivisions','alternate_height','randomness'),'closed':True},
  {'id':'cracks','title':'Grietas','fields':('cracks_per_stone','crack_length_var','crack_width_var','crack_angle_var','crack_path_var'),'closed':True},

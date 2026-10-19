@@ -1,0 +1,74 @@
+[
+  {
+    "collapse": 0.55,
+    "roof_damage": 0,
+    "roof": {
+      "profile": "tower",
+      "deck_slabs": 9,
+      "parapet_blocks": 21,
+      "tiles": 0,
+      "access_opening": [
+        -46.94999999999999,
+        39.95000000000001,
+        61.82,
+        85.82
+      ],
+      "access_error": null,
+      "bounds": {
+        "walls": [
+          -93.85,
+          93.85,
+          -4.5,
+          97.42
+        ],
+        "cover": [
+          -93.85,
+          93.85,
+          -4.5,
+          97.42
+        ]
+      },
+      "eave_height": 139.0
+    },
+    "closure": {
+      "open_edges": {},
+      "degenerate_faces": {}
+    }
+  },
+  {
+    "collapse": 0,
+    "roof_damage": 0.7,
+    "roof": {
+      "profile": "tower",
+      "deck_slabs": 25,
+      "parapet_blocks": 69,
+      "tiles": 0,
+      "access_opening": [
+        -46.94999999999999,
+        39.95000000000001,
+        61.82,
+        85.82
+      ],
+      "access_error": null,
+      "bounds": {
+        "walls": [
+          -93.85,
+          93.85,
+          -4.5,
+          97.42
+        ],
+        "cover": [
+          -93.85,
+          93.85,
+          -4.5,
+          97.42
+        ]
+      },
+      "eave_height": 139.0
+    },
+    "closure": {
+      "open_edges": {},
+      "degenerate_faces": {}
+    }
+  }
+]

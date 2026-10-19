@@ -6,7 +6,7 @@ from ..geometry import primitives,timber
 
 
 def build(coll,p,scene):
-    'IA: Eleva la construcción sin mover terreno, añade fábrica perimetral bajo muros/pilares, escalones hasta la entrada y patio vallado con paso libre; cero altura conserva la casa histórica.'
+    'IA: Eleva construcción, añade cimientos y entrada; valla con postes únicos y travesaños por vano sin interpenetración, conservando paso libre.'
     height=p.foundation_height if p.foundation_enabled else 0
     meta.put(scene,'cimiento_generado',{})
     if not height and not p.patio_enabled:return
@@ -62,11 +62,20 @@ def build(coll,p,scene):
         if p.patio_fence:
             wood=primitives.material('Madera · valla',(.31,.22,.13));gate=width+4
             spans=[((left,front),(cx-gate/2,front)),((cx+gate/2,front),(right,front)),((left,back),(right,back)),((left,front),(left,back)),((right,front),(right,back))]
+            placed=set()
             for index,(a,b) in enumerate(spans):
                 length=math.dist(a,b);count=max(1,math.ceil(length/20))
                 for i in range(count+1):
                     x=a[0]+(b[0]-a[0])*i/count;y=a[1]+(b[1]-a[1])*i/count
-                    timber.timber_beam(coll,wood,'Madera · poste valla',(x,y,0),(x,y,p.fence_height),2.4,2.4,p.seed+43000+index*100+i,coarse=True)
+                    key=(round(x,5),round(y,5))
+                    if key not in placed:
+                        timber.timber_beam(coll,wood,'Madera · poste valla',(x,y,0),(x,y,p.fence_height),2.4,2.4,p.seed+43000+index*100+i,coarse=True)
+                        placed.add(key)
                 for z in (p.fence_height*.35,p.fence_height*.8):
-                    timber.timber_beam(coll,wood,'Madera · travesaño valla',(*a,z),(*b,z),2,2,p.seed+44000+index,coarse=True)
+                    for i in range(count):
+                        lo=(i/count)+1.3/length;hi=((i+1)/count)-1.3/length
+                        if hi<=lo:continue
+                        start=(a[0]+(b[0]-a[0])*lo,a[1]+(b[1]-a[1])*lo,z)
+                        end=(a[0]+(b[0]-a[0])*hi,a[1]+(b[1]-a[1])*hi,z)
+                        timber.timber_beam(coll,wood,'Madera · travesaño valla',start,end,2,2,p.seed+44000+index*100+i,coarse=True)
     meta.put(scene,'cimiento_generado',{'height_mm':height,'entrance_run_mm':run,'patio':p.patio_enabled,'bounds':[x0,x1,y0,y1]})

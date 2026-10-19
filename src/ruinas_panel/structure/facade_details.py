@@ -53,6 +53,27 @@ def leaves(coll,p,w,h,index):
                 ob=balconies.rod(coll,iron,w,name,points,.35);ob['facade_detail']=True
 
 
+def balcony_gate(coll,p,w,h):
+    'IA: Dos hojas de hierro giran hacia el interior alrededor de pernios verticales; postura inicial, con marco interior pasante y sin automatismo de bisagra Bullet.'
+    iron=primitives.material('Hierro · cancela',(.10,.105,.11))
+    side=1 if w['id'] in ('left','back') else -1
+    y=-side*(p.thickness/2+1);bottom=h['z0']+2;top=h['z1']-2;mid=(h['x0']+h['x1'])/2
+    for pivot,end,sign in ((h['x0']+1.5,mid-.3,1),(h['x1']-1.5,mid+.3,-1)):
+        transform=Matrix.Translation((pivot,y,0))@Matrix.Rotation(-math.radians(p.balcony_open_angle)*side*sign,4,'Z')@Matrix.Translation((-pivot,-y,0))
+        a,b=sorted((pivot,end));segments=[((x,y,bottom),(x,y,top)) for x in (a,b)]
+        segments += [((a,y,z),(b,y,z)) for z in (bottom,top)]
+        n=max(1,math.ceil((b-a)/4))
+        segments += [((a+(b-a)*i/n,y,bottom),(a+(b-a)*i/n,y,top)) for i in range(1,n)]
+        for start,finish in segments:
+            ob=balconies.rod(coll,iron,w,'Hierro · hoja cancela balcón',[tuple(transform@Vector(start)),tuple(transform@Vector(finish))],.5)
+            ob['facade_detail']=True;ob['balcony_leaf']=True
+        for z in (bottom+2,top-2):
+            ob=balconies.rod(coll,iron,w,'Hierro · pernio cancela balcón',[(pivot,y,z-.8),(pivot,y,z+.8)],.65);ob['facade_detail']=True
+    wood=primitives.material('Madera · marco interior',(.29,.21,.13))
+    for x in (h['x0']+.5,h['x1']-.5):beam(coll,wood,w,'Madera · jamba interior balcón',(x,y,bottom),(x,y,top),2,2,p.seed+57000)
+    beam(coll,wood,w,'Madera · dintel interior balcón',(h['x0'],y,top+1),(h['x1'],y,top+1),2,2,p.seed+57001)
+
+
 def canopy(coll,p,w,a,b,top,depth,ceiling=None):
     'IA: Tejadillo de media caña con perfil compartido, solape del 30%, pares rectos por tramos y rastreles; todo queda sobre el dintel.'
     side=1 if w['id'] in ('left','back') else -1
@@ -103,7 +124,7 @@ def infill(coll,p,w,a,b,bottom,top,plane,seed,lateral=False):
 def build(coll,p,scene,walls,door):
     'IA: Proyecta carpinterías existentes, abre el espacio común de miradores y añade hojas/tejadillos optativos; conserva vanos de balcón y geometría histórica con controles a cero.'
     meta.put(scene,'fachadas_detalles',[])
-    if not any((p.window_leaves,p.window_canopies,p.door_canopy,p.window_projection)):return
+    if not any((p.window_leaves,p.window_canopies,p.door_canopy,p.window_projection,p.balcony_gate,p.balcony_canopy)):return
     lookup={w['id']:w for w in walls};windows=meta.get(scene,'ventanas_generadas',[]);records=[]
     wood=primitives.material('Madera · mirador',(.31,.22,.13))
     for group in groups(windows,p,meta.get(scene,'pilares_generados',[]),door):
@@ -137,6 +158,13 @@ def build(coll,p,scene,walls,door):
         bases=layout.floor_bases(p);ceiling=bases[h['floor']+1]-3 if h['floor']+1<len(bases) else p.height
         if p.window_canopies:canopy(coll,p,w,a,b,z1,depth,ceiling)
         records.append({'wall':h['wall'],'windows':[i for i,_ in group],'projection_mm':depth,'bounds':[a,b,z0,z1],'canopy':p.window_canopies})
+    for h in windows:
+        if not h['balcony']:continue
+        w=lookup[h['wall']];bases=layout.floor_bases(p)
+        if p.balcony_gate:balcony_gate(coll,p,w,h)
+        if p.balcony_canopy:
+            ceiling=bases[h['floor']+1]-3 if h['floor']+1<len(bases) else p.height
+            canopy(coll,p,w,h['x0'],h['x1'],h['z1'],0,ceiling)
     if p.door_canopy and door and not door.get('gate'):
         bases=layout.floor_bases(p)
         ceiling=bases[1]-4 if len(bases)>1 else p.height

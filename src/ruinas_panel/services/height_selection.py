@@ -27,7 +27,7 @@ def regional(records,center,radii,percent):
 
 
 def choose(scene):
-    'IA: Selecciona móviles por altura o zona centrada en la pieza activa/cursor; permite acumular solo elegibles y conserva uniones, simulación y pieza maestra.'
+    'IA: Selecciona móviles por altura o zona centrada en pieza/cursor; convierte alcances mm a metros del laboratorio y conserva uniones, simulación y pieza maestra.'
     if not scene.get('structural_physics') or scene.get('ruinas_replay'):raise ValueError('Abre el laboratorio estructural editable.')
     p=scene.ruin_settings;roles={'ALL':{'stone','tile','wood','metal'},'STONE':{'stone'},'TILE':{'tile'},'WOOD':{'wood'},'METAL':{'metal'}}[p.physics_selection_material]
     eligible=[o for o in scene.objects if o.rigid_body and o.get('original_body_type',o.rigid_body.type)=='ACTIVE' and not o.get('collision_floor') and not o.get('impactor') and o.get('physical_role','stone' if o.get('masonry_brick') else '') in roles]
@@ -40,7 +40,7 @@ def choose(scene):
             if active not in eligible:raise ValueError('Activa una pieza móvil de la familia elegida como centro de daño.')
             center=tuple(active.matrix_world.translation)
         else:center=tuple(scene.cursor.location)
-        names,zone_count=regional([(o.name,tuple(o.matrix_world.translation)) for o in eligible],center,p.physics_selection_radii,p.physics_selection_percent)
+        names,zone_count=regional([(o.name,tuple(o.matrix_world.translation)) for o in eligible],center,[r*.001 for r in p.physics_selection_radii],p.physics_selection_percent)
     chosen={scene.objects[name] for name in names}
     if p.physics_selection_add:chosen.update(o for o in eligible if o.select_get())
     for ob in scene.objects:ob.select_set(ob in chosen)

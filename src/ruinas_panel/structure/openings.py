@@ -45,12 +45,17 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
         v.co=wall_point(w,*v.co)
     cutter.data.update()
     bpy.context.view_layer.update()
-    changed=[]
+    changed=[];rectangle=(x0,x1,z0,z1)
     for ob in list(coll.objects):
         if ob==cutter or ob.get('wall_id','front')!=w['id'] or ob.get('escombro') or ob.get('protected_sill'):
             continue
         if not ob.name.startswith(('Piedra','Mortero','Núcleo')):
             continue
+        x0,x1,z0,z1=rectangle
+        if ob.name.startswith(('Mortero','Núcleo')):x0-=1;x1+=1;z0-=.6;z1+=.6
+        for vertex,point in zip(cutter.data.vertices,((x0,-T,z0),(x1,-T,z0),(x1,T,z0),(x0,T,z0),(x0,-T,z1),(x1,-T,z1),(x1,T,z1),(x0,T,z1))):
+            vertex.co=wall_point(w,*point)
+        cutter.data.update()
         world=primitives.coords(ob)
         if not len(world):
             continue
@@ -234,7 +239,7 @@ def architectural_openings(coll,p,walls,door,edges):
             ww=p.balcony_width if has_balcony else p.window_width
             wh=p.balcony_height if has_balcony else p.window_height
             ceiling=bases[floor+1] if floor+1<len(bases) else w['height']
-            headroom=5 if has_balcony or not p.window_canopies else 11+min(12,(p.window_projection+7.3)*.52)
+            headroom=(9 if p.balcony_canopy else 5) if has_balcony else (5 if not p.window_canopies else 11+min(12,(p.window_projection+7.3)*.52))
             z0=bases[floor]+(0 if has_balcony else max(10,min((ceiling-bases[floor]-wh)*.45,ceiling-bases[floor]-wh-headroom)))
             z1=z0+wh
             if z1+headroom>ceiling or ww>usable[1]-usable[0]:
@@ -243,6 +248,9 @@ def architectural_openings(coll,p,walls,door,edges):
             attempts=9+quota*4
             candidates=[usable[0]+ww/2+i*(usable[1]-usable[0]-ww)/(attempts-1) for i in range(attempts)]
             candidates+= [usable[0]+(usable[1]-usable[0])*(i+1)/(quota+1) for i in range(quota)]
+            anchors=sorted({h['x'] for h in windows if h['wall']==w['id'] and h['floor']<floor})
+            if not anchors and floor>0 and w['id']=='front' and door:anchors=[(door['left']+door['right'])/2]
+            candidates+=anchors
             feasible=[]
             for cx in candidates:
                 x0=cx-ww/2
@@ -275,11 +283,9 @@ def architectural_openings(coll,p,walls,door,edges):
                 if best[1]-best[0]>=remaining*ww+max(0,remaining-1)*6:
                     distribution=best;feasible=[x for x in feasible if best[0]+ww/2<=x<=best[1]-ww/2]
             selected=layout.spread_positions(feasible,remaining,*distribution,ww+(12 if has_balcony else 6))
-            anchors=sorted(h['x'] for h in windows if h['wall']==w['id'] and h['floor']==0)
-            if has_balcony and w['id']=='front' and door and remaining==1:anchors=[(door['left']+door['right'])/2]
             if floor>0 and len(anchors)==remaining and feasible:
                 aligned=[min(feasible,key=lambda x:(abs(x-a),x)) for a in anchors]
-                if all(b-a>=ww+(12 if has_balcony else 6) for a,b in zip(aligned,aligned[1:])):selected=aligned
+                if all(abs(x-a)<.01 for x,a in zip(aligned,anchors)) and all(b-a>=ww+(12 if has_balcony else 6) for a,b in zip(aligned,aligned[1:])):selected=aligned
             for cx in selected:
                 x0=cx-ww/2;x1=cx+ww/2
                 carve_rectangle(coll,w,x0,x1,z0,z1,p.thickness+5,'Ventana')

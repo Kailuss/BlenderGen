@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.16 — 2026-10-19
+
+Escaleras con número de peldaños por desnivel, huella y contrahuella editables; valla por vanos sin postes duplicados; barrotes sobre plataforma. Cancelas de balcón, marco interior y tejadillo; ejes exactos de vanos y mortero retranqueado. Torreón con daño localizado y retirada de losas/parapetos sin apoyo. Corregidas unidades del selector de zona. Preparaciones completas de madera y piedra: 2.524/3.222 cuerpos, sin piezas inicialmente desconectadas; cierre, caché y regresión general verificados. No certifica todas las semillas ni simulación completa de ambos ejemplos. Uso y límites en `V03216.md`.
+
 ## v0.32.15 — 2026-10-19
 
 Selección elipsoidal por pieza maestra o cursor, porcentaje del centro hacia fuera y acumulación de focos. Liberar uniones reactiva explícitamente las colisiones de las parejas afectadas. Ensayo de caja sobre apoyo pasivo durante 120 fotogramas y pruebas de selección. No certifica todavía el caso completo del usuario ni propagación por pérdida de apoyo. Uso y límites en `V03215.md`.

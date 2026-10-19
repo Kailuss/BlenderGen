@@ -8,14 +8,16 @@ from . import floors,layout
 
 
 def plan(p,bounds):
-    'IA: Reserva una escalera junto al muro trasero para dos plantas; reserva 35 mm libres antes del primer peldaño sin reducir su huella.'
+    'IA: Número de peldaños por altura y contrahuella objetivo, huella configurable y 35 mm de aproximación; rechaza tramos que no caben sin comprimirlos.'
     if p.stair_type=='NONE' or p.height_type not in ('TWO','THREE') or not p.upper_floor or not p.floor_beams:return None
     xmin,xmax,ymin,ymax=bounds
     approach=35.0
     available=xmax-xmin-8-approach
-    pitch=22.4;landing=22.4
-    steps=min(7,int((available-landing)/pitch))
-    if steps<2 or ymax-ymin<29:return {'error':'Escalera jugable: necesita 111 × 29 mm interiores para peldaños útiles de 20 × 20 mm.'}
+    pitch=p.stair_tread;landing=22.4
+    bottom=3.2 if p.ground_floor else 1.0
+    steps=max(2,math.ceil((layout.upper_floor(p)-bottom)/p.stair_riser))
+    needed=steps*pitch+landing+8+approach
+    if steps*pitch+landing>available or ymax-ymin<29:return {'error':'Escalera: necesita %.1f × 29 mm interiores para %s peldaños; amplía la casa o ajusta huella/contrahuella.'%(needed,steps),'required_length_mm':needed,'steps':steps}
     run=steps*pitch;left=xmin+4+approach
     bottom=3.2 if p.ground_floor else 1.0
     right=left+run;ya=ymax-26.4;yb=ymax-4
@@ -25,7 +27,7 @@ def plan(p,bounds):
     x1=right if reverse else right+landing
     return {'x0':left,'x1':right,'y0':ya,'y1':yb,'bottom':bottom,'top':layout.upper_floor(p),'steps':steps,'reverse':reverse,
             'opening':[left-.5,right+.5,ya-.8,yb+.8],'landing':[x0,left] if reverse else [right,x1],'type':p.stair_type,
-            'usable_tread_mm':20,'pitch_mm':pitch,'riser_mm':(layout.upper_floor(p)-bottom)/steps,'width_mm':yb-ya,'approach_mm':approach,'approach':[right+1.5,right+approach+1.5,ya,yb] if reverse else [left-approach-1.5,left-1.5,ya,yb]}
+            'usable_tread_mm':min(20,pitch),'pitch_mm':pitch,'riser_mm':(layout.upper_floor(p)-bottom)/steps,'width_mm':yb-ya,'approach_mm':approach,'approach':[right+1.5,right+approach+1.5,ya,yb] if reverse else [left-approach-1.5,left-1.5,ya,yb]}
 
 
 def build_upper(coll,p,scene,bounds,first):
@@ -95,7 +97,7 @@ def stone_skin(coll,p,s,stone,xx):
 
 
 def stone_tread(coll,stone,name,a,b,ya,yb,top,amount,seed):
-    'IA: Losa cerrada de 1,05 mm con relieve físico sembrado y cantos gastados; centro útil 20×20 mm con depresiones de hasta 0,24 mm; Borrador/Trabajo omiten erosión.'
+    'IA: Losa cerrada de 1,05 mm con relieve sembrado; centro útil acotado por huella y ancho hasta 20 mm, sin vértices fuera del peldaño; Borrador/Trabajo omiten erosión.'
     import numpy
     detail=runtime.quality in config.DAMAGE_QUALITIES
     amount=max(0.0,min(1.0,amount)) if detail else 0.0
@@ -103,8 +105,9 @@ def stone_tread(coll,stone,name,a,b,ya,yb,top,amount,seed):
     spacing=.8 if detail else 3.2
     nx=max(2,math.ceil((b-a)/spacing));ny=max(2,math.ceil((yb-ya)/spacing))
     cx=(a+b)/2;cy=(ya+yb)/2
-    xs=sorted(set(numpy.linspace(a,b,nx+1).tolist()+[cx-10,cx+10]))
-    ys=sorted(set(numpy.linspace(ya,yb,ny+1).tolist()+[cy-10,cy+10]))
+    usable=min(20,b-a,yb-ya)
+    xs=sorted(set(numpy.linspace(a,b,nx+1).tolist()+[cx-usable/2,cx+usable/2]))
+    ys=sorted(set(numpy.linspace(ya,yb,ny+1).tolist()+[cy-usable/2,cy+usable/2]))
     nx=len(xs)-1;ny=len(ys)-1
     xx,yy=numpy.meshgrid(xs,ys)
     rng=random.Random(seed)
@@ -145,7 +148,7 @@ def stone_tread(coll,stone,name,a,b,ya,yb,top,amount,seed):
         faces.append((k,bottom+j,bottom+following,ring[following]))
     ob=primitives.mesh_obj(name,verts,faces,coll,stone)
     for face in ob.data.polygons[:nx*ny*2]:face.use_smooth=True
-    ob['stair']=True;ob['stair_surface']=True;ob['usable_tread_mm']=20.0
+    ob['stair']=True;ob['stair_surface']=True;ob['usable_tread_mm']=usable
     ob['stair_relief_mm']=float(loss.max()-loss.min())
     return ob
 

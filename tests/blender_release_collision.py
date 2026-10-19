@@ -22,7 +22,7 @@ def run():
     bpy.ops.object.empty_add();joint=bpy.context.object;bpy.ops.rigidbody.constraint_add()
     c=joint.rigid_body_constraint;c.type='FIXED';c.object1=floor;c.object2=brick;c.disable_collisions=True
     world=scene.rigidbody_world;world.substeps_per_frame=40;world.solver_iterations=60;world.point_cache.frame_end=120
-    scene.frame_end=120;p=scene.ruin_settings;p.physics_selection_mode='MASTER';p.physics_selection_radii=(2,2,2);p.physics_selection_percent=100
+    scene.frame_end=120;p=scene.ruin_settings;p.physics_selection_mode='MASTER';p.physics_selection_radii=(2000,2000,2000);p.physics_selection_percent=100
     bpy.context.view_layer.objects.active=brick
     assert height_selection.choose(scene)==[brick]
     assert c.enabled and c.disable_collisions

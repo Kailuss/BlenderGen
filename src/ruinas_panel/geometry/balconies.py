@@ -83,17 +83,17 @@ def balcony(coll,p,w,x0,x1,z,seed):
         broken=p.iron_mode=='BROKEN' and 0<i<count and rng.random()<grade*.24
         sway=rng.uniform(-1,1)*grade*.45
         if broken:
-            rod(coll,iron,w,'Hierro · barrote roto inferior',[(x,front,z),(x,front,z+5.2),(x+sway,front+side*.7,z+6.5)],.48)
+            rod(coll,iron,w,'Hierro · barrote roto inferior',[(x,front,z+.16),(x,front,z+5.2),(x+sway,front+side*.7,z+6.5)],.48)
             rod(coll,iron,w,'Hierro · barrote roto superior',[(x-sway,front+side*.5,z+9),(x,front,z+12),(x,front,z+14)],.48)
         else:
-            rod(coll,iron,w,'Hierro · barrote torcido',[(x,front,z),(x+sway,front+side*abs(sway),z+3),(x,front,z+5),(x-sway,front,z+8),(x,front,z+12),(x,front,z+14)],.48)
+            rod(coll,iron,w,'Hierro · barrote torcido',[(x,front,z+.65),(x,front,z+1.3),(x+sway,front+side*abs(sway),z+3),(x,front,z+5),(x-sway,front,z+8),(x,front,z+12),(x,front,z+14)],.48)
         arrow(coll,iron,w,x,front,z+13.7)
         # Rombo repetido engarzado al travesaño inferior y al barrote.
         if i<count and not broken:
             cx=x+(right-left)/count/2
             rod(coll,iron,w,'Hierro · filigrana rombo',[(cx,front,z+5),(cx+1.1,front,z+6.7),(cx,front,z+8.4),(cx-1.1,front,z+6.7),(cx,front,z+4.9)],.32)
     for x in (left,right):
-        rod(coll,iron,w,'Hierro · retorno anclado',[(x,rear,z),(x,rear,z+12.2)],.55)
+        rod(coll,iron,w,'Hierro · retorno anclado',[(x,rear,z+.16),(x,rear,z+12.2)],.55)
 
 
 def window_iron(coll,p,w,x0,x1,z0,z1,y):
