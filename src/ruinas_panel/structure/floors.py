@@ -51,7 +51,7 @@ def plank(coll,mat,name,a,b,y,width,top,seed,grain,broken=False,broken_left=Fals
 
 
 def build(coll,p,scene):
-    'IA: Solo Habitación; entreplantas sobre apoyos por cota, con refuerzos fuera de vanos y reserva común de escaleras; planta baja sobre rastreles.'
+    'IA: Solo Habitación; cada forjado reserva su propio tramo y desembarco completos para vigas, postes y tablas; planta baja sobre rastreles.'
     meta.put(scene,'suelos_generados',[])
     meta.put(scene,'escalera_generada',{})
     meta.put(scene,'escaleras_generadas',[])
@@ -62,20 +62,28 @@ def build(coll,p,scene):
     xmax=walls['right']['origin'][0]-p.thickness/2+.6
     ymin=p.thickness/2-.6;ymax=walls['back']['origin'][1]-p.thickness/2+.6
     from . import stairs
-    stair=stairs.plan(p,(xmin,xmax,ymin,ymax))
-    opening=stair['opening'] if stair and 'error' not in stair else None
+    first=stairs.plan(p,(xmin,xmax,ymin,ymax));plans={1:first}
+    if p.height_type=='THREE':plans[2]=stairs.upper_plan(p,(xmin,xmax,ymin,ymax))[1]
+    def reservation(stair):
+        'IA: Reserva la caja completa de tramo y desembarco, compartida por vigas, postes y tablones de su planta.'
+        if not stair or 'error' in stair:return None
+        a,b,c,d=stair['opening']
+        return [min(a,stair['landing'][0]),max(b,stair['landing'][1]),c,d]
     # Las vigas transversales terminan sobre el cabecero, nunca atraviesan la escalera.
-    if opening:
-        for ob in coll.objects:
-            if primitives.piece_key(ob)=='Madera · viga de planta':
-                co=primitives.coords(ob);cx=(co[:,0].min()+co[:,0].max())/2
-                if opening[0]-2<cx<opening[1]+2:
-                    primitives.clip_closed(ob,(0,stair['y0']-2.4,0),(0,1,0))
+    bases=layout.floor_bases(p)
+    for ob in coll.objects:
+        if primitives.piece_key(ob)=='Madera · viga de planta':
+            co=primitives.coords(ob);cx=(co[:,0].min()+co[:,0].max())/2;cz=(co[:,2].min()+co[:,2].max())/2
+            level=min(range(1,len(bases)),key=lambda i:abs(cz-(bases[i]-3.6))) if len(bases)>1 else 0
+            stair=plans.get(level);opening=reservation(stair)
+            if opening and opening[0]-2.5<cx<opening[1]+2.5:
+                primitives.clip_closed(ob,(0,stair['y0']-2.4,0),(0,1,0))
     wood=primitives.material('Madera · suelo',(.30,.205,.115))
     records=[]
     levels=[(0,p.ground_floor,3.2)]+[(i,p.upper_floor and p.floor_beams,z) for i,z in enumerate(layout.floor_bases(p)) if i]
     for level,enabled,top in levels:
         if not enabled:continue
+        stair=plans.get(level,first);opening=reservation(stair)
         if level==0:
             count=max(2,math.ceil((xmax-xmin)/24))
             anchors=[xmin+(xmax-xmin)*i/count for i in range(count+1)]
@@ -91,7 +99,7 @@ def build(coll,p,scene):
                 anchors=sorted(anchors+extra)
                 if len(anchors)<2:raise ValueError('No caben dos apoyos de forjado fuera de los vanos: amplía la casa o reduce los huecos.')
                 for j,x in enumerate(extra):
-                    end=stair['y0']-2.4 if opening and min(opening[0]-2,stair['approach'][0])<x<max(opening[1]+2,stair['approach'][1]) else ymax-4
+                    end=stair['y0']-2.8 if opening and min(opening[0]-2,stair['approach'][0],stair['landing'][0]-2.5)<x<max(opening[1]+2,stair['approach'][1],stair['landing'][1]+2.5) else ymax-4
                     # Este bastidor carga sobre postes propios, no sobre alojamientos en la fábrica.
                     for y in (ymin+4,end):
                         timber.timber_beam(coll,wood,'Madera · poste forjado',(x,y,layout.floor_bases(p)[level-1]-1.3),(x,y,top-3.6),3.6,3.6,p.seed+29100+j)
@@ -125,6 +133,6 @@ def build(coll,p,scene):
                     made+=1;broken_count+=int(left or right)
         records.append({'level':level,'boards':made,'broken':broken_count,'top_mm':top,'anchors':anchors,'holes':[list(h) for h in holes]})
     meta.put(scene,'suelos_generados',records)
-    stairs.build(coll,p,scene,stair)
-    if p.height_type=='THREE' and stair and 'error' not in stair:
-        stairs.build_upper(coll,p,scene,(xmin,xmax,ymin,ymax),stair)
+    stairs.build(coll,p,scene,first)
+    if p.height_type=='THREE' and first and 'error' not in first:
+        stairs.build_upper(coll,p,scene,(xmin,xmax,ymin,ymax),first)

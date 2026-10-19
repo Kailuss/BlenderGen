@@ -30,15 +30,21 @@ def plan(p,bounds):
             'usable_tread_mm':min(20,pitch),'pitch_mm':pitch,'riser_mm':(layout.upper_floor(p)-bottom)/steps,'width_mm':yb-ya,'approach_mm':approach,'approach':[right+1.5,right+approach+1.5,ya,yb] if reverse else [left-approach-1.5,left-1.5,ya,yb]}
 
 
-def build_upper(coll,p,scene,bounds,first):
-    'IA: En tres plantas construye el segundo tramo en un marco local y lo eleva a la primera entreplanta; conserva el plano del primer tramo y registra ambos.'
+def upper_plan(p,bounds):
+    'IA: Plan local único del segundo tramo; forjado y construcción consumen exactamente el mismo desnivel, huella y desembarco.'
     from types import SimpleNamespace
-    from mathutils import Matrix
     values={key:getattr(p,key) for key in config.FIELDS}
     values.update(height_type='TWO',ground_storey_height=p.upper_storey_height,ground_floor=True)
     settings=SimpleNamespace(**values);upper=plan(settings,bounds)
     if upper and 'error' not in upper:
         upper['bottom']=2.0;upper['riser_mm']=(upper['top']-upper['bottom'])/upper['steps']
+    return settings,upper
+
+
+def build_upper(coll,p,scene,bounds,first):
+    'IA: Construye segundo tramo con el mismo plano que reserva su forjado; lo eleva a primera planta y conserva ambos registros.'
+    from mathutils import Matrix
+    settings,upper=upper_plan(p,bounds)
     before=set(coll.objects);build(coll,settings,scene,upper)
     shift=p.ground_storey_height
     for ob in set(coll.objects)-before:ob.data.transform(Matrix.Translation((0,0,shift)))
@@ -154,7 +160,7 @@ def stone_tread(coll,stone,name,a,b,ya,yb,top,amount,seed):
 
 
 def build(coll,p,scene,plan):
-    'IA: Peldaños jugables y zancas o macizo hasta suelo; reserva 0,55 mm de relieve bajo losas de piedra; desembarco a layout.upper_floor(p) y postes bajo cabecero.'
+    'IA: Peldaños y zancas o macizo; cabecero cubre tramo y desembarco, postes de llegada retranqueados bajo su plataforma; conserva alivio bajo losas.'
     meta.put(scene,'escalera_generada',plan or {})
     if not plan or 'error' in plan:return
     s=plan;wood=primitives.material('Madera · escalera',(.34,.235,.13));stone=primitives.material('Piedra · neutro',(.52,.52,.52))
@@ -188,11 +194,12 @@ def build(coll,p,scene,plan):
             ob['stair']=True
     # Cabecero bajo el corte de las vigas existentes; sus postes mantienen el apoyo.
     hy=ya-2.4
-    for x in (x0-1.8,x1+1.8):
+    header_left=min(x0,s['landing'][0]);header_right=max(x1,s['landing'][1])
+    for x in (header_left-1.8,header_right+1.8):
         ob=timber.timber_beam(coll,wood,'Madera · poste hueco escalera',(x,hy,.7),(x,hy,s['top']-3.5),3.8,3.8,p.seed+round(x*11))
         ob['stair']=True
-    ob=timber.timber_beam(coll,wood,'Madera · cabecero escalera',(x0-3,hy,(layout.upper_floor(p)-3.6)),(x1+3,hy,(layout.upper_floor(p)-3.6)),4.2,4.7,p.seed+27400);ob['stair']=True
-    for x in s['landing']:
+    ob=timber.timber_beam(coll,wood,'Madera · cabecero escalera',(header_left-3,hy,(layout.upper_floor(p)-3.6)),(header_right+3,hy,(layout.upper_floor(p)-3.6)),4.2,4.7,p.seed+27400);ob['stair']=True
+    for x in (s['landing'][0]+2.2,s['landing'][1]-2.2):
         ob=timber.timber_beam(coll,wood,'Madera · poste desembarco',(x,(ya+yb)/2,.7),(x,(ya+yb)/2,s['top']-1.5),4,4,p.seed+round(x*7));ob['stair']=True
     a,b=s['landing']
     for i in range(4):

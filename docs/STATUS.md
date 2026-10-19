@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.17 — 2026-10-19
+
+Reserva de escalera por planta, incluido desembarco y ancho de vigas; cabecero prolongado y postes de llegada retranqueados. Prueba de tres plantas en ambos sentidos, sin cruces volumétricos de vigas/postes de forjado contra peldaños o desembarcos. Uso y alcance en `V03217.md`.
+
 ## v0.32.16 — 2026-10-19
 
 Escaleras con número de peldaños por desnivel, huella y contrahuella editables; valla por vanos sin postes duplicados; barrotes sobre plataforma. Cancelas de balcón, marco interior y tejadillo; ejes exactos de vanos y mortero retranqueado. Torreón con daño localizado y retirada de losas/parapetos sin apoyo. Corregidas unidades del selector de zona. Preparaciones completas de madera y piedra: 2.524/3.222 cuerpos, sin piezas inicialmente desconectadas; cierre, caché y regresión general verificados. No certifica todas las semillas ni simulación completa de ambos ejemplos. Uso y límites en `V03216.md`.
