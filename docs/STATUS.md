@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.18 — 2026-10-20
+
+Postes del desembarco junto al muro y travesaños inferiores. La regresión incluye los apoyos de la propia escalera contra todas las huellas, además del forjado: tres tramos, alturas distintas y ambos sentidos. Alcance y limitación de validación física en `V03218.md`.
+
 ## v0.32.17 — 2026-10-19
 
 Reserva de escalera por planta, incluido desembarco y ancho de vigas; cabecero prolongado y postes de llegada retranqueados. Prueba de tres plantas en ambos sentidos, sin cruces volumétricos de vigas/postes de forjado contra peldaños o desembarcos. Uso y alcance en `V03217.md`.

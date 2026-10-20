@@ -160,7 +160,7 @@ def stone_tread(coll,stone,name,a,b,ya,yb,top,amount,seed):
 
 
 def build(coll,p,scene,plan):
-    'IA: Peldaños y zancas o macizo; cabecero cubre tramo y desembarco, postes de llegada retranqueados bajo su plataforma; conserva alivio bajo losas.'
+    'IA: Peldaños y zancas o macizo; cabecero cubre tramo y desembarco, postes de llegada junto al muro fuera de las huellas y travesaños bajo plataforma; conserva alivio bajo losas.'
     meta.put(scene,'escalera_generada',plan or {})
     if not plan or 'error' in plan:return
     s=plan;wood=primitives.material('Madera · escalera',(.34,.235,.13));stone=primitives.material('Piedra · neutro',(.52,.52,.52))
@@ -200,7 +200,11 @@ def build(coll,p,scene,plan):
         ob['stair']=True
     ob=timber.timber_beam(coll,wood,'Madera · cabecero escalera',(header_left-3,hy,(layout.upper_floor(p)-3.6)),(header_right+3,hy,(layout.upper_floor(p)-3.6)),4.2,4.7,p.seed+27400);ob['stair']=True
     for x in (s['landing'][0]+2.2,s['landing'][1]-2.2):
-        ob=timber.timber_beam(coll,wood,'Madera · poste desembarco',(x,(ya+yb)/2,.7),(x,(ya+yb)/2,s['top']-1.5),4,4,p.seed+round(x*7));ob['stair']=True
+        # Fuera de las huellas de TODOS los tramos, también cuando cambia
+        # la longitud de la escalera superior por la altura de planta.
+        post_y=yb+2.5
+        ob=timber.timber_beam(coll,wood,'Madera · poste desembarco',(x,post_y,.7),(x,post_y,s['top']-5),4,4,p.seed+round(x*7));ob['stair']=True
+        ob=timber.timber_beam(coll,wood,'Madera · travesaño desembarco',(x,hy,s['top']-3.4),(x,post_y,s['top']-3.4),3.2,3.6,p.seed+round(x*7)+1);ob['stair']=True
     a,b=s['landing']
     for i in range(4):
         ob=floors.plank(coll,wood,'Madera · desembarco %s'%i,a,b,ya+(i+.5)*(yb-ya)/4,(yb-ya)/4-.08,s['top'],p.seed+27500+i,p.wood_grain);ob['stair']=True
