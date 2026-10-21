@@ -16,13 +16,18 @@ def perlin(x,z,seed):
 
 
 def panel(xs,bottom,tops,y0,y1,seed,damage=0,step=4,border_width=4):
-    'IA: Revoco cerrado con relieve y dos escalas Perlin desfasadas por semilla; step y border_width permiten refinar solo paños dañados, conservando perímetro y tapas sin booleanas.'
+    'IA: Revoco cerrado con relieve y corte Perlin sobre celdas triangulares alternas; evita contornos ambiguos de cuatro cruces, conserva perímetro y tapas sin booleanas.'
     points=[];indices={};polys=[];border=set();amount=max(0,(damage-.45)/.55)
     for column,(a,b) in enumerate(zip(xs,xs[1:])):
         za,zb=tops[column:column+2];slope=(zb-za)/(b-a)
+        cells=[]
         for row in range(math.ceil((max(za,zb)-bottom)/step)):
             low=bottom+row*step;high=low+step
-            square=[(a,low),(b,low),(b,high),(a,high)];clipped=[]
+            corners=[(a,low),(b,low),(b,high),(a,high)]
+            if (row+column+seed)%2:corners=corners[1:]+corners[:1]
+            cells.extend(([corners[0],corners[1],corners[2]],[corners[0],corners[2],corners[3]]))
+        for square in cells:
+            clipped=[]
             for previous,current in zip(square[-1:]+square[:-1],square):
                 dp=previous[1]-(za+slope*(previous[0]-a));dc=current[1]-(za+slope*(current[0]-a))
                 if (dp<=0)!=(dc<=0):
@@ -52,6 +57,7 @@ def panel(xs,bottom,tops,y0,y1,seed,damage=0,step=4,border_width=4):
                 if abs(x-xs[0])<1e-6 or abs(x-xs[-1])<1e-6 or abs(z-bottom)<1e-6 or abs(z-(za+slope*(x-a)))<1e-6:border.add(key)
             if len(keys)>1 and keys[0]==keys[-1]:keys.pop()
             if len(keys)>=3:polys.append(tuple(indices[key] for key in keys))
+    points,polys=separate_pinches(points,polys,border)
     n=len(points);verts=[];faces=[];edges={}
     for side,y in enumerate((y0,y1)):
         for x,z in points:
@@ -64,3 +70,33 @@ def panel(xs,bottom,tops,y0,y1,seed,damage=0,step=4,border_width=4):
     for (a,b),count in edges.items():
         if count==1:faces.append((a,b,b+n,a+n))
     return verts,faces
+
+
+def separate_pinches(points,polys,border):
+    'IA: Separa en 0,02 mm los lóbulos de revoco que solo se tocan en un punto 2D; evita una arista vertical con cuatro caras al extruir, sin subdividir los paños sanos.'
+    polys=[list(poly) for poly in polys];incident={}
+    for index,poly in enumerate(polys):
+        for vertex in poly:incident.setdefault(vertex,[]).append(index)
+    for vertex,owners in incident.items():
+        neighbors={}
+        for owner in owners:
+            poly=polys[owner];index=poly.index(vertex)
+            neighbors[owner]={poly[index-1],poly[(index+1)%len(poly)]}
+        remaining=set(owners);groups=[]
+        while remaining:
+            todo=[remaining.pop()];group=[]
+            while todo:
+                current=todo.pop();group.append(current)
+                linked={other for other in remaining if neighbors[current]&neighbors[other]}
+                remaining-=linked;todo.extend(linked)
+            groups.append(group)
+        if len(groups)<2:continue
+        x,z=points[vertex]
+        for group in groups:
+            adjacent={v for owner in group for v in polys[owner] if v!=vertex}
+            dx=sum(points[v][0]-x for v in adjacent);dz=sum(points[v][1]-z for v in adjacent)
+            length=max(1e-9,math.hypot(dx,dz));point=(round(x+.01*dx/length,7),round(z+.01*dz/length,7))
+            replacement=len(points);points.append(point);border.add(point)
+            for owner in group:polys[owner]=[replacement if v==vertex else v for v in polys[owner]]
+    used=sorted({v for poly in polys for v in poly});mapping={v:i for i,v in enumerate(used)}
+    return [points[v] for v in used],[tuple(mapping[v] for v in poly) for poly in polys]

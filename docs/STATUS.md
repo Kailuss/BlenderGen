@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.19 — 2026-10-21
+
+Reparada la triangulación de revocos y limitada la limpieza al plano de fractura; separados contactos Perlin puntuales antes de extruir. 48 combinaciones de semilla/daño verificadas. `repro_revoco_error.blend` preparado en 222,485 s: 3.960 cuerpos, 15.852 uniones, 167 fragmentos frágiles y ninguna pieza activa desconectada; reapertura y render verificados, no simulación completa. Vigas sin alojamientos traseros cuando terminan en cabecero; escalera superior de piedra hueca, vuelo de losa y seis muestras con 35 mm libres sobre desembarcos. Tejas rígidas ante hundimiento. Tres luces coloreadas, seguimiento de cámaras, materiales métricos y copia a reproducción. Manual y límites en `V03219.md`; entramado exterior y refinamiento artístico de fracturas siguen pendientes.
+
 ## v0.32.18 — 2026-10-20
 
 Postes del desembarco junto al muro y travesaños inferiores. La regresión incluye los apoyos de la propia escalera contra todas las huellas, además del forjado: tres tramos, alturas distintas y ambos sentidos. Alcance y limitación de validación física en `V03218.md`.

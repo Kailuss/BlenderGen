@@ -337,8 +337,11 @@ def architectural_openings(coll,p,walls,door,edges):
                 carve_rectangle(coll,w,x-2.5,x+2.5,z-2,z+size/2,p.thickness+6,'Alojamiento de viga')
                 length=p.thickness/2+4
                 if p.layout_mode=='ROOM':
-                    carve_rectangle(coll,rear,x-2.5,x+2.5,z-2,z+size/2,p.thickness+6,'Apoyo trasero de viga')
-                    end=(x,rear['origin'][1]+length,z)
+                    from . import stairs
+                    stop=stairs.beam_end(p,walls,x,base)
+                    if stop is None:
+                        carve_rectangle(coll,rear,x-2.5,x+2.5,z-2,z+size/2,p.thickness+6,'Apoyo trasero de viga')
+                    end=(x,rear['origin'][1]+length if stop is None else stop,z)
                 else:
                     end=wall_point(w,x,length,z)
                 ob=timber.timber_beam(coll,wood,'Madera · viga de planta',wall_point(w,x,-length,z),end,4.2,size+.2,p.seed+461+i)

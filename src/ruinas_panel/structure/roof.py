@@ -182,12 +182,23 @@ def tile_bay(coll,mat,p,xa,xm,y0,y1,z,rise,rows,seed,patches=(),missing=None,chi
             base=z+(spatial.roof_offset(cy,*profile) if profile else 0)
             start=(xa+(xm-xa)*t0,cy,spatial.roof_height(t0,base,rise,p.roof_curve)+3.35+1.15+lip)
             end=(xa+(xm-xa)*t1,cy,spatial.roof_height(t1,base,rise,p.roof_curve)+3.35+lip+tilt)
-            start=(*start[:2],start[2]-roof_damage.sag(*start[:2],patches))
-            end=(*end[:2],end[2]-roof_damage.sag(*end[:2],patches))
+            start,end=settled_tile(start,end,patches)
             curved_tile(verts,faces,start,end,width,crown,thickness=min(.58,width*.25),taper=.72,chip=chip)
             count+=1
     ceramic_mesh(coll,mat,'Tejas · paño curvo',verts,faces,count)
     return count
+
+
+def settled_tile(start,end,patches):
+    'IA: Traslada y gira el eje cerámico según el hundimiento de sus apoyos, conservando exactamente su longitud original y su sección.'
+    from mathutils import Vector
+    da=roof_damage.sag(start[0],start[1],patches);db=roof_damage.sag(end[0],end[1],patches)
+    if abs(da)+abs(db)<1e-9:return start,end
+    a,b=Vector(start),Vector(end);length=(b-a).length
+    a.z-=da
+    b.z-=db
+    center=(a+b)*.5;direction=(b-a).normalized()
+    return tuple(center-direction*length*.5),tuple(center+direction*length*.5)
 
 
 def build(coll,p,scene):

@@ -31,13 +31,14 @@ def plan(p,bounds):
 
 
 def upper_plan(p,bounds):
-    'IA: Plan local único del segundo tramo; forjado y construcción consumen exactamente el mismo desnivel, huella y desembarco.'
+    'IA: Plan local único del segundo tramo; piedra con intradós hueco para no cegar la llegada inferior, forjado y construcción comparten reserva.'
     from types import SimpleNamespace
     values={key:getattr(p,key) for key in config.FIELDS}
     values.update(height_type='TWO',ground_storey_height=p.upper_storey_height,ground_floor=True)
     settings=SimpleNamespace(**values);upper=plan(settings,bounds)
     if upper and 'error' not in upper:
         upper['bottom']=2.0;upper['riser_mm']=(upper['top']-upper['bottom'])/upper['steps']
+        upper['hollow']=True
     return settings,upper
 
 
@@ -54,6 +55,19 @@ def build_upper(coll,p,scene,bounds,first):
     meta.put(scene,'escaleras_generadas',[first,upper])
 
 
+def beam_end(p,walls,x,base):
+    'IA: Devuelve el cabecero de escalera para una viga de planta o None si llega al muro trasero; decide antes de cortar alojamientos.'
+    lookup={w['id']:w for w in walls}
+    if p.layout_mode!='ROOM' or not all(k in lookup for k in ('left','right','back')):return None
+    bounds=(lookup['left']['origin'][0]+p.thickness/2-.6,lookup['right']['origin'][0]-p.thickness/2+.6,p.thickness/2-.6,lookup['back']['origin'][1]-p.thickness/2+.6)
+    bases=layout.floor_bases(p)
+    level=min(range(1,len(bases)),key=lambda i:abs(bases[i]-base))
+    stair=upper_plan(p,bounds)[1] if level==2 else plan(p,bounds)
+    if not stair or 'error' in stair:return None
+    left=min(stair['opening'][0],stair['landing'][0]);right=max(stair['opening'][1],stair['landing'][1])
+    return stair['y0']-2.4 if left-2.5<x<right+2.5 else None
+
+
 def terrace_plan(p,bounds):
     'IA: Planifica acceso a terraza desde la última planta, con huella común y desembarco en la cara superior de las losas; no crea acceso si se desactivan escaleras.'
     from types import SimpleNamespace
@@ -62,6 +76,7 @@ def terrace_plan(p,bounds):
     settings=SimpleNamespace(**values);access=plan(settings,bounds)
     if access and 'error' not in access:
         access['bottom']=2.0;access['riser_mm']=(access['top']-2)/access['steps']
+        access['hollow']=True
     return settings,access
 
 
@@ -79,13 +94,15 @@ def build_terrace(coll,p,scene,settings,access):
 
 
 def stone_skin(coll,p,s,stone,xx):
-    'IA: Aparejo solo en caras expuestas de la escalera; reutiliza desgaste de pared y termina 0,55 mm bajo cada huella para no tapar el relieve de la losa.'
+    'IA: Aparejo solo en caras expuestas; tramos huecos conservan banda lateral de 5 mm bajo huellas, sin rellenar el paso inferior.'
     n=s['steps'];pitch=s['pitch_mm'];rise=s['riser_mm'];ya,yb=s['y0'],s['y1']
     for i in range(n):
         top=s['bottom']+(i+1)*rise
         rows=max(1,math.ceil((top-.6)/p.stone_size));rh=(top-.6)/rows
         for row in range(rows):
             z0=.6+row*rh;z1=min(z0+rh-.18,top-.55)
+            if s.get('hollow'):z0=max(z0,s['bottom']+i*rise-5)
+            if z1<=z0+.05:continue
             joints=[0,pitch*.5,pitch] if row%2==0 else [0,pitch*.25,pitch*.75,pitch]
             for part,(a,b) in enumerate(zip(joints,joints[1:])):
                 lo,hi=sorted((xx(i*pitch+a+.12),xx(i*pitch+b-.12)))
@@ -171,6 +188,12 @@ def build(coll,p,scene,plan):
     if s['type']=='STONE':
         # Perfil escalonado extruido: un solo macizo, sin pilas de cubos interiores.
         profile=[(0,.6),(x1-x0,.6),(x1-x0,s['top']-.55)]
+        if s.get('hollow'):
+            profile=[]
+            for i in range(n):
+                low=s['bottom']+i*rise-5
+                profile.extend(((i*pitch,low),((i+1)*pitch,low)))
+            profile.append((x1-x0,s['top']-.55))
         for i in range(n-1,-1,-1):
             profile.append((i*pitch,s['bottom']+(i+1)*rise-.55))
             if i:profile.append((i*pitch,s['bottom']+i*rise-.55))
@@ -182,7 +205,7 @@ def build(coll,p,scene,plan):
         stone_skin(coll,p,s,stone,xx)
         # El macizo queda bajo el relieve y cada losa mantiene solape de 0,4 mm con él.
         for i in range(n):
-            a,b=sorted((xx(i*pitch),xx((i+1)*pitch)))
+            a,b=sorted((xx(i*pitch-.65),xx((i+1)*pitch)))
             stone_tread(coll,stone,'Escalera · losa %02d'%i,a,b,ya-.2,yb+.2,s['bottom']+(i+1)*rise,p.wear,p.seed+33000+i)
     else:
         for y in (ya+1.2,yb-1.2):

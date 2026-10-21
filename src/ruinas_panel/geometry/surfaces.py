@@ -38,3 +38,28 @@ def grain_uv(ob,values):
     'IA: Coordenadas de veta en ejes físicos de la pieza antes de rotarla; permanecen alineadas tras transformaciones.'
     layer=ob.data.uv_layers.new(name='Fibra longitudinal')
     for loop in ob.data.loops:layer.data[loop.index].uv=values[loop.vertex_index]
+
+
+def lab_material(mat):
+    'IA: Copia compartida para laboratorio en metros: microrelieve mil veces menor, coordenadas ligadas a pieza para que no naden durante la simulación; fuente intacta.'
+    if mat.get('ruin_lab_material'):return mat
+    name=mat.name+' / laboratorio'
+    existing=bpy.data.materials.get(name)
+    if existing:return existing
+    result=mat.copy();result.name=name;result['ruin_lab_material']=True
+    if not result.use_nodes:
+        result.use_nodes=True
+        bsdf=result.node_tree.nodes.get('Principled BSDF')
+        if bsdf:
+            bsdf.inputs['Base Color'].default_value=mat.diffuse_color
+            bsdf.inputs['Roughness'].default_value=.78
+    if result.use_nodes:
+        nodes=result.node_tree.nodes;links=result.node_tree.links
+        for node in list(nodes):
+            if node.type=='BUMP':node.inputs['Distance'].default_value*=.001
+            if node.type=='NEW_GEOMETRY':
+                coords=nodes.new('ShaderNodeTexCoord')
+                for link in list(node.outputs['Position'].links):
+                    target=link.to_socket;links.remove(link);links.new(coords.outputs['Generated'],target)
+                    if target.node.type=='VECT_MATH':target.node.inputs[1].default_value=(6,6,6)
+    return result

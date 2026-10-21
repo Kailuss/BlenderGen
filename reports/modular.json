@@ -13,16 +13,16 @@
       "microdetail": false,
       "faces": 2267,
       "vertices": 2809,
-      "seconds": 0.06740759999956936,
+      "seconds": 0.06827360001625493,
       "stages": {
-        "biseles": 0.012659300089580938,
-        "desgaste": 0.00011149996134918183,
-        "estructura_base": 0.01735339999140706,
-        "aberturas_y_vigas": 0.0009285999985877424,
-        "integracion": 0.014271699998062104,
-        "preparacion": 0.03992519999155775,
-        "agrupacion": 0.004135299997869879,
-        "total": 0.06740759999956936
+        "biseles": 0.01333290000911802,
+        "desgaste": 0.00012110004900023341,
+        "estructura_base": 0.01746979999006726,
+        "aberturas_y_vigas": 0.0010349999938625842,
+        "integracion": 0.014384000009158626,
+        "preparacion": 0.0403465999988839,
+        "agrupacion": 0.003968999983044341,
+        "total": 0.06827360001625493
       },
       "cached": false,
       "solid": false,
@@ -131,7 +131,7 @@
   },
   {
     "case": "door_windows_work",
-    "digest": "f71600fd2dd25cdaadc0dd9a5b3cfe0433b74c7ea4cdcceba2faa0694c7169e3",
+    "digest": "155701856c3faf5ab8504fcb47010863c3795d1cc7d237cc9f59234d39d077f3",
     "blender": "5.2.2 LTS",
     "closure": {
       "open_edges": {},
@@ -143,16 +143,16 @@
       "microdetail": false,
       "faces": 19636,
       "vertices": 20095,
-      "seconds": 0.3380717999971239,
+      "seconds": 0.3511222000233829,
       "stages": {
-        "biseles": 0.014812399909715168,
-        "desgaste": 0.00015169988910201937,
-        "estructura_base": 0.023912999997264706,
-        "aberturas_y_vigas": 0.061729599998216145,
-        "integracion": 0.2221611999993911,
-        "preparacion": 0.25914179999381304,
-        "agrupacion": 0.040355899996939115,
-        "total": 0.3380717999971239
+        "biseles": 0.014840000367257744,
+        "desgaste": 0.00014980000560171902,
+        "estructura_base": 0.023531599988928065,
+        "aberturas_y_vigas": 0.06482559998403303,
+        "integracion": 0.23478359999717213,
+        "preparacion": 0.2717370000027586,
+        "agrupacion": 0.04102509998483583,
+        "total": 0.3511222000233829
       },
       "cached": false,
       "solid": false,
@@ -661,7 +661,7 @@
   },
   {
     "case": "room_beams_draft",
-    "digest": "081711012a0bee2a35a6e77673f4751cede0ce2fe8cf7817cf02e7250b99677b",
+    "digest": "50e25910d8a5f50d6403f1d143bfdbdf1ef27c5ddf33b1151a5aa1400c7bfa9e",
     "blender": "5.2.2 LTS",
     "closure": {
       "open_edges": {},
@@ -673,16 +673,16 @@
       "microdetail": false,
       "faces": 48150,
       "vertices": 49359,
-      "seconds": 2.1930535999999847,
+      "seconds": 2.2666252000199165,
       "stages": {
-        "biseles": 0.0655339998920681,
-        "desgaste": 0.0006908997747814283,
-        "estructura_base": 0.09506180000607856,
-        "aberturas_y_vigas": 0.8555041000072379,
-        "integracion": 1.3453717000083998,
-        "preparacion": 1.6277922000008402,
-        "agrupacion": 0.3020286999962991,
-        "total": 2.1930535999999847
+        "biseles": 0.0697559000691399,
+        "desgaste": 0.0006725000275764614,
+        "estructura_base": 0.09319059998961166,
+        "aberturas_y_vigas": 0.8970731000008527,
+        "integracion": 1.398006900009932,
+        "preparacion": 1.678249600023264,
+        "agrupacion": 0.32313209999119863,
+        "total": 2.2666252000199165
       },
       "cached": false,
       "solid": false,
@@ -2247,7 +2247,7 @@
   },
   {
     "case": "window_detail",
-    "digest": "0d53a6cf1de75deb7b424904eb0ea8015b559d0536daea3375d9a6a7b497436b",
+    "digest": "422f28fbff5197ca0a79b9823d54050305ceaf43a6f556321d8e7de4de417ed4",
     "blender": "5.2.2 LTS",
     "closure": {
       "open_edges": {},
@@ -2259,16 +2259,16 @@
       "microdetail": true,
       "faces": 42613,
       "vertices": 50216,
-      "seconds": 2.288590500000282,
+      "seconds": 2.113790900009917,
       "stages": {
-        "biseles": 0.06510670004354324,
-        "desgaste": 1.0450510999799008,
-        "estructura_base": 0.015037799996207468,
-        "aberturas_y_vigas": 0.0671957000013208,
-        "integracion": 0.17782869999064133,
-        "preparacion": 0.1993324999930337,
-        "grietas": 0.9565680999949109,
-        "total": 2.288590500000282
+        "biseles": 0.06666680003399961,
+        "desgaste": 0.8454775000282098,
+        "estructura_base": 0.015861300023971125,
+        "aberturas_y_vigas": 0.06765469998936169,
+        "integracion": 0.17987609998090193,
+        "preparacion": 0.20213709998643026,
+        "grietas": 0.9768948000855744,
+        "total": 2.113790900009917
       },
       "cached": false,
       "solid": false,
@@ -4471,6 +4471,6 @@
       "bajantes_generadas": "[]",
       "escombros_cubierta": "{}"
     },
-    "solid_faces": 83860
+    "solid_faces": 83872
   }
 ]
