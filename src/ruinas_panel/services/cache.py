@@ -51,7 +51,8 @@ def cache_signature(context,p):
     if runtime.quality not in config.DAMAGE_QUALITIES and not p.roof_frame:
         # Sin daño en esta calidad: cambiar desgaste o escombros no invalida la geometría guardada.
         ignored|={'wear','wear_level','rubble_amount'}
-    return (context.scene.as_pointer(),runtime.quality,layout.distribution_seed(p),tuple((k,getattr(p,k)) for k in config.FIELDS if k not in ignored))
+    from ..construction_core import materials
+    return (context.scene.as_pointer(),runtime.quality,layout.distribution_seed(p),materials.signature(),tuple((k,getattr(p,k)) for k in config.FIELDS if k not in ignored))
 
 
 def save_cache(context,coll,signature):

@@ -2,7 +2,7 @@
 from collections import defaultdict, deque
 import heapq
 
-KINDS={'SUPPORTED_BY','CONNECTED_TO','HOSTED_BY'}
+KINDS={'SUPPORTED_BY','CONNECTED_TO','HOSTED_BY','ARRIOSTRADO_POR'}
 
 
 def validate(model):
@@ -21,6 +21,7 @@ def validate(model):
         key=relation['id']
         if key in seen:issues.append({'code':'DUPLICATE_RELATION','element':a,'relation':key})
         seen.add(key)
+        if model.get('schema',1)>=3 and relation.get('state') not in ('INTACTO','ASENTADO'):issues.append({'code':'INVALID_RELATION_STATE','element':a,'relation':key})
         if a not in nodes or b not in nodes:issues.append({'code':'MISSING_ELEMENT','element':a,'relation':key});continue
         if kind not in KINDS:issues.append({'code':'INVALID_RELATION','element':a,'relation':key});continue
         if a==b:issues.append({'code':'SELF_RELATION','element':a,'relation':key})
@@ -61,7 +62,7 @@ def affected(model,changed):
     children=defaultdict(set);connections=defaultdict(set)
     for r in model['relations']:
         a,b=r['source'],r['target']
-        if r['kind'] in ('SUPPORTED_BY','HOSTED_BY'):children[b].add(a)
+        if r['kind'] in ('SUPPORTED_BY','HOSTED_BY','ARRIOSTRADO_POR'):children[b].add(a)
         elif r['kind']=='CONNECTED_TO':connections[a].add(b);connections[b].add(a)
     # Solo las conexiones de los cambios originales requieren revisar ambos extremos.
     for key in list(dirty):dirty.update(connections[key]&known)

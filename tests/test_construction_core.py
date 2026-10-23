@@ -1,6 +1,6 @@
 """Dependencias constructivas sin bpy, ni mallas, ni solucionador físico."""
 import unittest
-from ruinas_panel.construction_core import graph,adapter,schema
+from ruinas_panel.construction_core import graph,adapter,schema,units,materials
 
 
 def model():
@@ -12,6 +12,50 @@ def model():
 
 
 class ConstructionTests(unittest.TestCase):
+    def test_material_catalog_confidence_and_fingerprint(self):
+        'IA: La tabla conserva C por campo y cambia su firma al cambiar un valor; no acepta caminos críticos provisionales.'
+        from ruinas_panel import config_materials
+        before=materials.signature();old=config_materials.MECHANICAL['TIMBER_SOFT']['compression']
+        try:
+            config_materials.MECHANICAL['TIMBER_SOFT']['compression']=(21,15,35)
+            self.assertNotEqual(before,materials.signature())
+        finally:config_materials.MECHANICAL['TIMBER_SOFT']['compression']=old
+        self.assertEqual(before,materials.signature())
+        self.assertFalse(materials.acceptance('TIMBER_SOFT',['compression'])['accepted'])
+        self.assertEqual(materials.acceptance('PLASTER',['density_kg_m3'])['unknown'],['density_kg_m3'])
+
+    def test_variability_local_and_bounded(self):
+        'IA: Variabilidad reproducible e independiente del orden, acotada en espacio logarítmico sin usar hash de proceso.'
+        import math,random
+        state=random.getstate();sigma=math.sqrt(math.log1p(.25**2))
+        values=[materials.variability(seed,'beam.1',.25) for seed in range(100)]
+        self.assertEqual(state,random.getstate());self.assertEqual(len(set(values)),100)
+        self.assertEqual(values,[materials.variability(seed,'beam.1',.25) for seed in range(100)])
+        self.assertTrue(all(math.exp(-sigma*sigma/2-2*sigma)<=v<=math.exp(-sigma*sigma/2+2*sigma) for v in values))
+
+    def test_world_scale_invariance(self):
+        'IA: El mismo pilar de mundo a 1:30 y 1:60 conserva masa, área y tensión; una escala ausente falla explícitamente.'
+        results=[]
+        for scale in (30,60):
+            area=units.to_world((300/scale)**2,2,scale)
+            volume=units.to_world((300/scale)**2*(3000/scale),3,scale)
+            e=schema.element('pillar','POST',material='stone',volume_mm3=volume)
+            results.append((e['mass_kg'],area,e['mass_kg']*9.81/area))
+        self.assertEqual(results[0],results[1])
+        self.assertAlmostEqual(results[0][2],.064746)
+        with self.assertRaises(ValueError):units.to_world(1,3,None)
+
+    def test_bracing_and_event_are_separate(self):
+        'IA: Perder arriostramiento invalida revisión lateral sin inventar pérdida vertical; igual pico puede tener distinto impulso.'
+        m=adapter.from_nominal({'nodes':[{'id':'wall','type':'WALL'},{'id':'floor','type':'FLOOR'}],'relations':[]})
+        m['relations'].append({'id':'brace','source':'wall','target':'floor','kind':'ARRIOSTRADO_POR','state':'INTACTO'})
+        schema.synchronise_supports(m)
+        self.assertEqual(schema.validate(m),[])
+        self.assertEqual(graph.affected(m,['floor'])['dirty'],['floor','wall'])
+        self.assertEqual(graph.loss(m,['floor'])['unsupported'],[])
+        a=units.event(5,.01,(1,0,0));b=units.event(5,.1,(1,0,0))
+        self.assertEqual(a['peak_kpa'],b['peak_kpa']);self.assertNotEqual(a['impulse_kpa_s'],b['impulse_kpa_s'])
+
     def test_shared_schema_and_mass_units(self):
         'IA: Un litro de madera pesa 0,6 kg reales, sin multiplicadores Bullet; campos de evento e impresión existen también sin malla.'
         beam=schema.element('beam','BEAM',material='wood',volume_mm3=1000000)

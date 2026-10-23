@@ -1,5 +1,5 @@
 """Adaptación de lectura del grafo nominal existente; nunca fabrica contactos."""
-from . import graph,schema
+from . import graph,schema,materials
 
 
 def from_nominal(nominal):
@@ -11,9 +11,10 @@ def from_nominal(nominal):
         elif kind in ('supports','nominal_support'):source,target,typed=b,a,'SUPPORTED_BY'
         elif kind=='access':source,target,typed=a,b,'CONNECTED_TO'
         else:annotations.append({'source':a,'target':b,'kind':kind});continue
-        relations.append({'id':typed+':'+source+'>'+target,'source':source,'target':target,'kind':typed,'evidence':'declared_nominal'})
+        relations.append({'id':typed+':'+source+'>'+target,'source':source,'target':target,'kind':typed,'state':'INTACTO','evidence':'declared_nominal'})
     model={'schema':schema.VERSION,'units':dict(schema.UNITS),'elements':elements,'relations':relations,'annotations':annotations,'scope':'read_only_nominal; no measured contact or structural strength'}
     schema.synchronise_supports(model)
+    model['materials_signature']=materials.signature()
     return model
 
 
