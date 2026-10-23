@@ -1,6 +1,6 @@
 """Dependencias constructivas sin bpy, ni mallas, ni solucionador físico."""
 import unittest
-from ruinas_panel.construction_core import graph,adapter
+from ruinas_panel.construction_core import graph,adapter,schema
 
 
 def model():
@@ -12,6 +12,26 @@ def model():
 
 
 class ConstructionTests(unittest.TestCase):
+    def test_shared_schema_and_mass_units(self):
+        'IA: Un litro de madera pesa 0,6 kg reales, sin multiplicadores Bullet; campos de evento e impresión existen también sin malla.'
+        beam=schema.element('beam','BEAM',material='wood',volume_mm3=1000000)
+        self.assertAlmostEqual(beam['mass_kg'],.6)
+        self.assertIsNone(beam['capacity_N']);self.assertIsNone(beam['exposed_area_mm2'])
+        self.assertFalse(beam['pozo_de_colapso']);self.assertEqual(beam['print_parts'],[])
+        for value in (-1,float('nan'),float('inf')):
+            with self.assertRaises(ValueError):schema.element('bad','BEAM',volume_mm3=value)
+
+    def test_schema_supports_and_unknown_measurements(self):
+        'IA: No confunde datos desconocidos con cero; detecta relaciones duplicadas en la vista de apoyos y masa escalada accidentalmente.'
+        m=adapter.from_nominal({'nodes':[{'id':'a','type':'WALL'},{'id':'b','type':'BEAM'}],'relations':[['a','b','supports']]})
+        self.assertEqual(schema.validate(m),[])
+        self.assertEqual(m['elements'][1]['rests_on'],['a'])
+        m['elements'][1]['rests_on']=[]
+        self.assertIn('DIVERGENT_SUPPORTS',{x['code'] for x in schema.validate(m)})
+        m['elements'][0]=schema.element('a','WALL',material='stone',volume_mm3=1000000)
+        m['elements'][0]['mass_kg']*=10000
+        self.assertIn('INCONSISTENT_MASS',{x['code'] for x in schema.validate(m)})
+
     def test_redundant_support_and_cascade(self):
         'IA: Un apoyo perdido no derrumba una viga redundante; dos pérdidas propagan al tablero, nunca al vano por alojamiento.'
         m=model();self.assertEqual(graph.validate(m),[])
