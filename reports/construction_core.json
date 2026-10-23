@@ -1,0 +1,311 @@
+{
+  "issues": [],
+  "unresolved_supports": [
+    "floor.0",
+    "floor.1",
+    "floor.2",
+    "stair.0",
+    "stair.1",
+    "wall.back",
+    "wall.front",
+    "wall.left",
+    "wall.right"
+  ],
+  "unresolved_policies": [
+    "battens",
+    "rafters",
+    "roof",
+    "tiles"
+  ],
+  "regeneration_order": [
+    "building",
+    "floor.0",
+    "floor.1",
+    "floor.2",
+    "stair.0",
+    "stair.1",
+    "wall.back",
+    "wall.front",
+    "wall.left",
+    "wall.right",
+    "roof",
+    "rafters",
+    "battens",
+    "tiles"
+  ],
+  "geometry_changed": false,
+  "mean_validation_ms": 0.03110490000108257,
+  "model": {
+    "schema": 1,
+    "units": "mm",
+    "elements": [
+      {
+        "id": "building",
+        "kind": "BUILDING",
+        "properties": {}
+      },
+      {
+        "id": "floor.0",
+        "kind": "FLOOR",
+        "properties": {
+          "index": 0,
+          "base_mm": 2.0,
+          "top_mm": 57.0
+        }
+      },
+      {
+        "id": "floor.1",
+        "kind": "FLOOR",
+        "properties": {
+          "index": 1,
+          "base_mm": 57.0,
+          "top_mm": 112.0
+        }
+      },
+      {
+        "id": "floor.2",
+        "kind": "FLOOR",
+        "properties": {
+          "index": 2,
+          "base_mm": 112.0,
+          "top_mm": 167.0
+        }
+      },
+      {
+        "id": "wall.front",
+        "kind": "WALL",
+        "properties": {
+          "facade": "front"
+        }
+      },
+      {
+        "id": "wall.left",
+        "kind": "WALL",
+        "properties": {
+          "facade": "left"
+        }
+      },
+      {
+        "id": "wall.right",
+        "kind": "WALL",
+        "properties": {
+          "facade": "right"
+        }
+      },
+      {
+        "id": "wall.back",
+        "kind": "WALL",
+        "properties": {
+          "facade": "back"
+        }
+      },
+      {
+        "id": "roof",
+        "kind": "ROOF",
+        "properties": {}
+      },
+      {
+        "id": "rafters",
+        "kind": "RAFTERS",
+        "properties": {}
+      },
+      {
+        "id": "battens",
+        "kind": "BATTENS",
+        "properties": {}
+      },
+      {
+        "id": "tiles",
+        "kind": "TILES",
+        "properties": {}
+      },
+      {
+        "id": "stair.0",
+        "kind": "STAIR",
+        "properties": {
+          "x0": -46.44999999999999,
+          "x1": 9.550000000000011,
+          "y0": 77.62,
+          "y1": 100.02,
+          "bottom": 3.2,
+          "top": 57.0,
+          "steps": 7,
+          "reverse": false,
+          "opening": [
+            -46.94999999999999,
+            10.050000000000011,
+            76.82000000000001,
+            100.82
+          ],
+          "landing": [
+            9.550000000000011,
+            31.95000000000001
+          ],
+          "usable_tread_mm": 8.0,
+          "pitch_mm": 8.0,
+          "riser_mm": 7.685714285714285,
+          "width_mm": 22.39999999999999,
+          "approach_mm": 35.0,
+          "approach": [
+            -82.94999999999999,
+            -47.94999999999999,
+            77.62,
+            100.02
+          ]
+        }
+      },
+      {
+        "id": "stair.1",
+        "kind": "STAIR",
+        "properties": {
+          "x0": -46.44999999999999,
+          "x1": 9.550000000000011,
+          "y0": 77.62,
+          "y1": 100.02,
+          "bottom": 57.0,
+          "top": 112.0,
+          "steps": 7,
+          "reverse": false,
+          "opening": [
+            -46.94999999999999,
+            10.050000000000011,
+            76.82000000000001,
+            100.82
+          ],
+          "landing": [
+            9.550000000000011,
+            31.95000000000001
+          ],
+          "usable_tread_mm": 8.0,
+          "pitch_mm": 8.0,
+          "riser_mm": 7.857142857142857,
+          "width_mm": 22.39999999999999,
+          "approach_mm": 35.0,
+          "approach": [
+            -82.94999999999999,
+            -47.94999999999999,
+            77.62,
+            100.02
+          ],
+          "hollow": true
+        }
+      }
+    ],
+    "relations": [
+      {
+        "id": "HOSTED_BY:floor.0>building",
+        "source": "floor.0",
+        "target": "building",
+        "kind": "HOSTED_BY",
+        "evidence": "declared_nominal"
+      },
+      {
+        "id": "HOSTED_BY:floor.1>building",
+        "source": "floor.1",
+        "target": "building",
+        "kind": "HOSTED_BY",
+        "evidence": "declared_nominal"
+      },
+      {
+        "id": "HOSTED_BY:floor.2>building",
+        "source": "floor.2",
+        "target": "building",
+        "kind": "HOSTED_BY",
+        "evidence": "declared_nominal"
+      },
+      {
+        "id": "HOSTED_BY:wall.front>building",
+        "source": "wall.front",
+        "target": "building",
+        "kind": "HOSTED_BY",
+        "evidence": "declared_nominal"
+      },
+      {
+        "id": "HOSTED_BY:wall.left>building",
+        "source": "wall.left",
+        "target": "building",
+        "kind": "HOSTED_BY",
+        "evidence": "declared_nominal"
+      },
+      {
+        "id": "HOSTED_BY:wall.right>building",
+        "source": "wall.right",
+        "target": "building",
+        "kind": "HOSTED_BY",
+        "evidence": "declared_nominal"
+      },
+      {
+        "id": "HOSTED_BY:wall.back>building",
+        "source": "wall.back",
+        "target": "building",
+        "kind": "HOSTED_BY",
+        "evidence": "declared_nominal"
+      },
+      {
+        "id": "SUPPORTED_BY:roof>wall.left",
+        "source": "roof",
+        "target": "wall.left",
+        "kind": "SUPPORTED_BY",
+        "evidence": "declared_nominal"
+      },
+      {
+        "id": "SUPPORTED_BY:roof>wall.right",
+        "source": "roof",
+        "target": "wall.right",
+        "kind": "SUPPORTED_BY",
+        "evidence": "declared_nominal"
+      },
+      {
+        "id": "SUPPORTED_BY:rafters>roof",
+        "source": "rafters",
+        "target": "roof",
+        "kind": "SUPPORTED_BY",
+        "evidence": "declared_nominal"
+      },
+      {
+        "id": "SUPPORTED_BY:battens>rafters",
+        "source": "battens",
+        "target": "rafters",
+        "kind": "SUPPORTED_BY",
+        "evidence": "declared_nominal"
+      },
+      {
+        "id": "SUPPORTED_BY:tiles>battens",
+        "source": "tiles",
+        "target": "battens",
+        "kind": "SUPPORTED_BY",
+        "evidence": "declared_nominal"
+      },
+      {
+        "id": "CONNECTED_TO:floor.0>stair.0",
+        "source": "floor.0",
+        "target": "stair.0",
+        "kind": "CONNECTED_TO",
+        "evidence": "declared_nominal"
+      },
+      {
+        "id": "CONNECTED_TO:stair.0>floor.1",
+        "source": "stair.0",
+        "target": "floor.1",
+        "kind": "CONNECTED_TO",
+        "evidence": "declared_nominal"
+      },
+      {
+        "id": "CONNECTED_TO:floor.1>stair.1",
+        "source": "floor.1",
+        "target": "stair.1",
+        "kind": "CONNECTED_TO",
+        "evidence": "declared_nominal"
+      },
+      {
+        "id": "CONNECTED_TO:stair.1>floor.2",
+        "source": "stair.1",
+        "target": "floor.2",
+        "kind": "CONNECTED_TO",
+        "evidence": "declared_nominal"
+      }
+    ],
+    "annotations": [],
+    "scope": "read_only_nominal; no measured contact or structural strength"
+  }
+}

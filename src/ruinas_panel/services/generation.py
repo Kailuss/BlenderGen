@@ -80,6 +80,10 @@ def build(context,p,quality):
         phase=time.perf_counter();assembly.finish(coll,p,context.scene)
         runtime.timings['integracion']=time.perf_counter()-phase
         cache.save_cache(context,coll,signature)
+    from ..construction_core import adapter
+    construction=adapter.from_nominal(meta.get(context.scene,'architectural_graph'))
+    meta.put(context.scene,'construction_model',construction)
+    meta.put(context.scene,'construction_validation',adapter.report(construction))
     runtime.timings['preparacion']=time.perf_counter()-start
     runtime.instance_build=False
     if p.use_instances:
