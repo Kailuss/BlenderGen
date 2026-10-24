@@ -7,6 +7,8 @@ KINDS={'SUPPORTED_BY','CONNECTED_TO','HOSTED_BY','ARRIOSTRADO_POR'}
 
 def support_policy(node,parents):
     'IA: Grupos explícitos exigen k de n en cada grupo; minimum_supports es abreviatura de un único grupo y None conserva apoyo desconocido.'
+    if 'support_groups' in node and 'minimum_supports' in node:
+        raise ValueError('support_groups y minimum_supports son excluyentes')
     if 'support_groups' not in node:
         minimum=node.get('minimum_supports')
         if minimum is None:return None
@@ -57,6 +59,8 @@ def validate(model):
             if nodes[b].get('kind') in ('OPENING','DOOR','DAMAGE_EVENT'):
                 issues.append({'code':'INVALID_SUPPORT_KIND','element':a,'relation':key})
     for key,node in nodes.items():
+        if 'support_groups' in node and 'minimum_supports' in node:
+            issues.append({'code':'CONFLICTING_SUPPORT_POLICIES','element':key})
         if 'support_groups' in node:
             try:support_policy(node,supports[key])
             except ValueError as exc:issues.append({'code':'INVALID_SUPPORT_GROUPS','element':key,'reason':str(exc)})
@@ -120,4 +124,14 @@ def loss(model,removed):
             if groups is None:review.add(key);continue
             if any(len(set(g['members'])-missing)<g['minimum'] for g in groups):
                 failed.add(key);missing.add(key);changed=True
-    return {'removed':sorted(set(removed)&nodes.keys()),'unsupported':sorted(failed),'requires_review':sorted(review-failed)}
+    # La incertidumbre no se convierte en pérdida confirmada, pero exige revisar
+    # todos los descendientes por apoyo, incluso si conservan redundancia nominal.
+    children=defaultdict(set)
+    for key,parents in supports.items():
+        for parent in parents:children[parent].add(key)
+    queue=deque(sorted(review-missing))
+    while queue:
+        for child in sorted(children[queue.popleft()]):
+            if child not in review and child not in missing:
+                review.add(child);queue.append(child)
+    return {'removed':sorted(set(removed)&nodes.keys()),'unsupported':sorted(failed),'requires_review':sorted(review-missing)}

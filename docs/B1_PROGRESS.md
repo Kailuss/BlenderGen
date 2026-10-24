@@ -1,5 +1,15 @@
 # B1 — trabajo en curso
 
+## Orden actualizada y decisión D1
+
+Referencia: `Orden de trabajo B1 el forjado gobernado por el plan (1).docx`, recibida del usuario. D1 pasa a regir la implementación pendiente: apoyos localizados mediante WALL_SEGMENT, alojados en WALL mediante HOSTED_BY y con cadena vertical de apoyo hasta cimentación. Los segmentos se emitirán en concentraciones de carga, no por cada piedra. El informe deberá contar segmentos y ejes descartados. No se conecta todavía la retirada de piedras al campo de evento.
+
+Los ejes deberán concordar en fachada y trasera dentro de la tolerancia del alojamiento; esta tolerancia de emparejamiento no es la tolerancia de regresión entre cálculo y malla. El baseline utiliza ahora 0,05 mm para fachada y 0,001 mm para trasera.
+
+Corrección del alcance de la prueba: 53,4 y 108,4 mm son las cotas de vigas de los dos forjados elevados, bajo plantas a 57 y 112 mm. La tercera muestra, 163,4 mm, es `altura de muro (167) - 3,6`: una sonda cerca de coronación, no un tercer forjado ni una viga de terraza. El informe la identifica como `wall_top_probe`, sin número de planta. Se conservan 18 casos, pero no acreditan tres forjados.
+
+Ajustes del núcleo: políticas `support_groups` y `minimum_supports` mutuamente excluyentes; incertidumbre propagada por dependencias de apoyo como `requires_review`, sin convertirla en pérdida confirmada. Continúan pendientes las pruebas con segmentos emitidos por el planificador real.
+
 ## Primer control, 24 de octubre de 2026
 
 No es una entrega B1 terminada ni una nueva versión del complemento. No se ha cambiado la chimenea ni el trabajador físico.

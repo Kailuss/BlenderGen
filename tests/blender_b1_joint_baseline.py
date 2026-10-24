@@ -10,6 +10,8 @@ from ruinas_panel import meta,runtime
 from ruinas_panel.geometry import primitives
 from ruinas_panel.structure import damage,layout,openings,walls
 
+AXIS_TOLERANCES_MM={'front':.05,'back':.001}
+
 
 def joints(intervals):
     'IA: Reproduce el criterio contractual de junta sobre intervalos numéricos, sin consultar mallas.'
@@ -50,7 +52,9 @@ def run():
         coll=walls._build_wall(bpy.context,effective)
         descriptors={w['id']:w for w in meta.get(bpy.context.scene,'paredes_generadas')}
         edges,_=layout.course_layout(effective)
-        for level,base in enumerate(layout.floor_bases(effective)[1:]+[effective.height],1):
+        samples=[(level,base,'floor_beam') for level,base in enumerate(layout.floor_bases(effective)[1:],1)]
+        samples.append((None,effective.height,'wall_top_probe'))
+        for level,base,role in samples:
             z=base-3.6
             for wall_id in ('front','back'):
                 w=descriptors[wall_id]
@@ -65,13 +69,14 @@ def run():
                     intervals=rear_intervals(effective,w,z,edges);source='pure rear layout'
                 nominal=joints(intervals);measured=openings.beam_joints(coll,w,z)
                 delta=max((abs(a[0]-b[0]) for a,b in zip(nominal,measured)),default=0)
-                rows.append({'seed':seed,'level':level,'wall':wall_id,'z_mm':z,'source':source,
+                tolerance=AXIS_TOLERANCES_MM[wall_id]
+                rows.append({'seed':seed,'level':level,'sample_role':role,'base_mm':base,'wall':wall_id,'z_mm':z,'source':source,
                              'nominal_count':len(nominal),'measured_count':len(measured),
-                             'max_axis_error_mm':delta,'pass':len(nominal)==len(measured) and delta<=.3})
+                             'tolerance_mm':tolerance,'max_axis_error_mm':delta,'pass':len(nominal)==len(measured) and delta<=tolerance})
         primitives.drop_stage()
     report={'code_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
             'scope':'intact masonry before openings, DRAFT; front uses recorded nominal intervals, not a pure producer',
-            'tolerance_mm':.3,'seconds':time.perf_counter()-started,'cases':rows,
+            'axis_tolerances_mm':AXIS_TOLERANCES_MM,'seconds':time.perf_counter()-started,'cases':rows,
             'discrepancies':[r for r in rows if not r['pass']],
             'B1_0_complete':False,'remaining':'extract pure front course producer; test openings and damaged geometry separately'}
     (ROOT/'reports/b1_joint_baseline.json').write_text(json.dumps(report,indent=2),encoding='utf8')

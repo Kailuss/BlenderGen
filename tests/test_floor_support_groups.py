@@ -17,6 +17,25 @@ def fixture():
 
 
 class FloorSupportGroups(unittest.TestCase):
+    def test_conflicting_policies(self):
+        'IA: No permite que una política oculte a la otra, incluso si minimum_supports vale None.'
+        for value in (1,None):
+            m=fixture();next(e for e in m['elements'] if e['id']=='beam')['minimum_supports']=value
+            self.assertTrue(any(i['code']=='CONFLICTING_SUPPORT_POLICIES' for i in graph.validate(m)))
+            with self.assertRaises(ValueError):graph.loss(m,[])
+
+    def test_review_propagates_without_inventing_failure(self):
+        'IA: La pérdida de un apoyo con política desconocida obliga a revisar sus descendientes, sin declararlos caídos.'
+        m=fixture();beam=next(e for e in m['elements'] if e['id']=='beam')
+        del beam['support_groups']
+        m['elements'].append(schema.element('upper','PLANK'))
+        m['elements'][-1]['minimum_supports']=1
+        m['relations'].append(adapter.relation('upper','plank','SUPPORTED_BY'))
+        result=graph.loss(m,['c'])
+        self.assertEqual(result['unsupported'],[])
+        self.assertEqual(result['requires_review'],['beam','plank','upper'])
+        self.assertNotIn('neighbour',result['requires_review'])
+
     def test_header_post_cascade(self):
         'IA: Perder el poste hace caer su cabecero y la viga que termina allí, sin afectar la viga larga independiente.'
         m=fixture()

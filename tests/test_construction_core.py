@@ -91,7 +91,7 @@ class ConstructionTests(unittest.TestCase):
         self.assertEqual(graph.loss(m,['b','c'])['unsupported'],['beam','deck'])
         del m['elements'][3]['minimum_supports']
         result=graph.loss(m,['a','b','c'])
-        self.assertEqual(result['unsupported'],[]);self.assertEqual(result['requires_review'],['beam'])
+        self.assertEqual(result['unsupported'],[]);self.assertEqual(result['requires_review'],['beam','deck'])
 
     def test_invalid_and_cycles(self):
         'IA: Detecta soporte inexistente, ciclo, autocontacto y apoyo incompatible en vano.'
