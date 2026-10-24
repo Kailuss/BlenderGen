@@ -1,0 +1,39 @@
+{
+  "scale_mesh_test": [
+    {
+      "scale": 30,
+      "mass_kg": 314.71675091277456,
+      "area_mm2": 8110138.297748566,
+      "weight_per_surface_MPa": 0.0003806804783232113
+    },
+    {
+      "scale": 60,
+      "mass_kg": 314.71675091277456,
+      "area_mm2": 8110138.297748566,
+      "weight_per_surface_MPa": 0.0003806804783232113
+    }
+  ],
+  "scale_scope": "same generated mesh represented at two scales; not independently resized procedural parameters",
+  "reservation_cache": true,
+  "variability": {
+    "count": 1000,
+    "mean": 0.9939977413448304,
+    "stdev": 0.21843535390230068,
+    "min": 0.593649546693517,
+    "max": 1.5835982465178198
+  },
+  "acceptance": {
+    "state": "PROVISIONAL",
+    "accepted": false,
+    "unknown": [],
+    "class_C": [
+      "density_kg_m3",
+      "compression",
+      "bearing"
+    ],
+    "class_C_count": 3,
+    "verified": []
+  },
+  "materials_signature": "1a013106f5ab0c11e7420953d76779313a2d462288339de4ab8d4b4aa0739e32",
+  "bullet_tested": false
+}

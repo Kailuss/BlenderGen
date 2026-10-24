@@ -22,7 +22,7 @@ class ConstructionTests(unittest.TestCase):
         finally:config_materials.MECHANICAL['TIMBER_SOFT']['compression']=old
         self.assertEqual(before,materials.signature())
         self.assertFalse(materials.acceptance('TIMBER_SOFT',['compression'])['accepted'])
-        self.assertEqual(materials.acceptance('PLASTER',['density_kg_m3'])['unknown'],['density_kg_m3'])
+        self.assertEqual(materials.acceptance('PLASTER',['density_kg_m3'])['state'],'PROVISIONAL')
 
     def test_variability_local_and_bounded(self):
         'IA: Variabilidad reproducible e independiente del orden, acotada en espacio logarítmico sin usar hash de proceso.'
@@ -39,7 +39,7 @@ class ConstructionTests(unittest.TestCase):
         for scale in (30,60):
             area=units.to_world((300/scale)**2,2,scale)
             volume=units.to_world((300/scale)**2*(3000/scale),3,scale)
-            e=schema.element('pillar','POST',material='stone',volume_mm3=volume)
+            e=schema.element('pillar','POST',material='STONE_BLOCK',volume_mm3=volume)
             results.append((e['mass_kg'],area,e['mass_kg']*9.81/area))
         self.assertEqual(results[0],results[1])
         self.assertAlmostEqual(results[0][2],.064746)
@@ -58,7 +58,7 @@ class ConstructionTests(unittest.TestCase):
 
     def test_shared_schema_and_mass_units(self):
         'IA: Un litro de madera pesa 0,6 kg reales, sin multiplicadores Bullet; campos de evento e impresión existen también sin malla.'
-        beam=schema.element('beam','BEAM',material='wood',volume_mm3=1000000)
+        beam=schema.element('beam','BEAM',material='TIMBER_SOFT',volume_mm3=1000000)
         self.assertAlmostEqual(beam['mass_kg'],.6)
         self.assertIsNone(beam['capacity_N']);self.assertIsNone(beam['exposed_area_mm2'])
         self.assertFalse(beam['pozo_de_colapso']);self.assertEqual(beam['print_parts'],[])
@@ -72,7 +72,7 @@ class ConstructionTests(unittest.TestCase):
         self.assertEqual(m['elements'][1]['rests_on'],['a'])
         m['elements'][1]['rests_on']=[]
         self.assertIn('DIVERGENT_SUPPORTS',{x['code'] for x in schema.validate(m)})
-        m['elements'][0]=schema.element('a','WALL',material='stone',volume_mm3=1000000)
+        m['elements'][0]=schema.element('a','WALL',material='STONE_BLOCK',volume_mm3=1000000)
         m['elements'][0]['mass_kg']*=10000
         self.assertIn('INCONSISTENT_MASS',{x['code'] for x in schema.validate(m)})
 

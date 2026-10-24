@@ -1,5 +1,7 @@
 # Coherencia constructiva — primera integración, 2026-10-23
 
+Actualización 2026-10-24: contrato vigente esquema 3; el recuento anterior de pruebas queda como histórico (ahora 35 pruebas puras). La escala de medidas es de mundo; `building_definition.model_scale` debe conocerse para convertir medidas de malla mediante el adaptador. La física sigue desconectada del catálogo de capacidades. Hay una reserva previa común de escalera, pero todavía no un plan completo de elementos portantes. Ver `CHANGELOG.md` y el informe de iteración A1.
+
 ## Auditoría
 
 El descriptor `building_definition.define` describe cotas y semillas; su grafo se construye después de las mallas y no gobierna la construcción. Las relaciones de cubierta son nominales, no contactos físicos. `openings` decide vigas mediante consultas al muro y reserva alojamientos; `floors` añade un bastidor alternativo si faltan anclajes; `stairs` vuelve a calcular reservas por tramo; `roof` comprueba sus cerchas por separado. `relations.register` reserva mampostería próxima a carpintería antes de agujeros, pero esa proximidad no demuestra transmisión de carga. Esta dispersión sigue siendo el problema principal.

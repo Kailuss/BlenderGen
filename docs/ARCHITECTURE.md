@@ -1,5 +1,7 @@
 # Mapa de edición
 
+Contratos A1: `construction_core/schema.py` define elementos y magnitudes de mundo; `materials.py` resuelve `config_materials.py` y aceptación en tres estados; `units.py` convierte solo desde el adaptador; `adapter.py` agrupa contactos e incorpora medidas; `graph.py` valida y propaga dependencias. `structure/construction_plan.py` publica reservas de escalera antes de vanos/forjados/cubierta, conservadas por caché. El puente de capacidades con Bullet sigue pendiente.
+
 Núcleo constructivo inicial: `construction_core/graph.py` valida relaciones tipadas y calcula invalidación/orden sin bpy; `construction_core/adapter.py` adapta el grafo nominal en modo lectura. `generation.build` actualiza modelo e informe después de construir o restaurar caché. No gobierna todavía la geometría ni acredita contactos; límites en `CONSTRUCTION_CORE.md`.
 
 0.32.16: `stairs.plan` usa huella y contrahuella objetivo por desnivel; `foundations` secciona valla entre postes únicos. `openings` reserva ejes exactos y retranquea mortero en vanos; `facade_details` añade cancela y cubierta de balcón. `tower_roof` aplica daño localizado y comprueba vigas bajo losas. Uso y límites en `V03216.md`.

@@ -62,8 +62,9 @@ def build(coll,p,scene):
     xmax=walls['right']['origin'][0]-p.thickness/2+.6
     ymin=p.thickness/2-.6;ymax=walls['back']['origin'][1]-p.thickness/2+.6
     from . import stairs
-    first=stairs.plan(p,(xmin,xmax,ymin,ymax));plans={1:first}
-    if p.height_type=='THREE':plans[2]=stairs.upper_plan(p,(xmin,xmax,ymin,ymax))[1]
+    from . import construction_plan
+    first=construction_plan.stair(scene,1);plans={1:first}
+    if p.height_type=='THREE':plans[2]=construction_plan.stair(scene,2)
     def reservation(stair):
         'IA: Reserva la caja completa de tramo y desembarco, compartida por vigas, postes y tablones de su planta.'
         if not stair or 'error' in stair:return None

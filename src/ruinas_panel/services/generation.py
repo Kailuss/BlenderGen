@@ -64,7 +64,7 @@ def build(context,p,quality):
         raise ValueError('Resultado físico obsoleto: descártalo y vuelve a simular tras los cambios.')
     p=damage.effective_settings(p)
     runtime.settings=p
-    meta.put(context.scene,'building_definition',building_definition.define(p))
+    meta.put(context.scene,'building_definition',building_definition.define(p,context.scene.get('ruinas_model_scale')))
     door_plan=layout.plan_door(p)  # Validar espacio antes de reemplazar la geometría existente.
     layout.pillar_layout(p,door_plan,layout.course_layout(p)[1])
     signature=cache.cache_signature(context,p)

@@ -1,5 +1,7 @@
 # Paso 0 — esquema constructivo 2
 
+**Histórico.** Sustituido por el esquema 3 y la iteración de contratos A1. Este texto conserva decisiones anteriores, no el contrato vigente; sus volúmenes no pueden migrarse sin conocer su escala.
+
 Identidad de esta entrega: versión de esquema **2** más commit Git. No se reutiliza un ZIP de una versión anterior. La actualización de esquema no cambia el BUILD_ID del paquete todavía pendiente de entrega.
 
 Cada elemento registrado por el adaptador tiene `id`, `kind`, `material`, `volume_mm3`, `mass_kg`, `rests_on`, `load_N`, `capacity_N`, `fragility_class`, `exposed_area_mm2`, `pozo_de_colapso`, `representation`, `print_parts` y `properties`. La representación semántica no requiere una malla. Varias entidades pueden referirse a una misma pieza imprimible sin fusionar sus identidades estructurales.

@@ -8,11 +8,13 @@ def finish(coll,p,scene):
     'IA: Orden contractual: derrumbe, vanos/vigas, contactos, agujeros compatibles, suelos/escaleras y cubierta; acabado fino se difiere a generation.'
     walls=meta.get(scene,'paredes_generadas');door=meta.get(scene,'puerta_generada');centers=meta.get(scene,'pilares_generados')
     edges,rh=layout.course_layout(p)
+    from . import construction_plan
+    construction_plan.prepare(p,walls,scene)
     plan={}
     if p.layout_mode=='ROOM':
         lookup={w['id']:w for w in walls}
         bounds=(lookup['left']['origin'][0]+p.thickness/2-.6,lookup['right']['origin'][0]-p.thickness/2+.6,p.thickness/2-.6,lookup['back']['origin'][1]-p.thickness/2+.6)
-        plan=floor_plan.plan(p,bounds,door,placement.stair_reservation(p,walls))
+        plan=floor_plan.plan(p,bounds,door,construction_plan.stair(scene,1))
     meta.put(scene,'plano_interior',plan)
     destruction.apply(coll,p,scene)
     timber.wooden_frame(coll,p,door);timber.wooden_door(coll,p,door)

@@ -16,7 +16,8 @@ def catalog():
     result={}
     for key,raw in data.MECHANICAL.items():
         row={'density_ref':raw['density_ref'],'structural':key not in ('GLASS','PLASTER','JOINERY','TILE_CLAY')}
-        row['density_kg_m3']=record(config.PHYSICS_DENSITIES.get(raw['density_ref']),'kg/m3')
+        row['physical_role'],row['strength_family']=data.ROLE_MAP[key]
+        row['density_kg_m3']=record(density(key),'kg/m3')
         row['density_kg_m3']['source']='config.PHYSICS_DENSITIES; correspondencia provisional no contrastada'
         for field in ('compression','tension','shear','bending','bearing','friction'):
             entry=raw.get(field);row[field]=record(entry[0] if entry else None,'1' if field=='friction' else 'MPa',entry[1:] if entry else None)
@@ -49,11 +50,20 @@ def variability(seed,element_id,cv):
         if -2<=z<=2:return math.exp(-sigma*sigma/2+sigma*z)
 
 
+def density(material):
+    'IA: Resuelve ID del catálogo a densidad central o adición provisional C; nunca confunde material y physical_role.'
+    ref=data.MECHANICAL[material]['density_ref']
+    return config.PHYSICS_DENSITIES.get(ref,data.DENSITY_ADDITIONS.get(ref))
+
+
 def acceptance(material,fields):
-    'IA: Un camino crítico desconocido o C no pasa silenciosamente; devuelve campos ausentes y recuento provisional.'
-    row=catalog()[material];unknown=[];provisional=[]
+    'IA: Rechaza desconocidos; C es provisional; solo acepta camino completo con al menos B y fuente para cada campo no C.'
+    row=catalog()[material];unknown=[];provisional=[];verified=[]
     for field in fields:
         entry=row.get(field)
         if not entry or entry['value'] is None:unknown.append(field)
         if entry and entry['confidence']=='C':provisional.append(field)
-    return {'accepted':not unknown and not provisional,'unknown':unknown,'class_C':provisional,'class_C_count':len(provisional)}
+        elif entry and entry['confidence'] in ('A','B') and entry.get('source'):verified.append(field)
+        elif entry:unknown.append(field)
+    state='RECHAZADO' if unknown or not fields else ('ACEPTADO' if verified else 'PROVISIONAL')
+    return {'state':state,'accepted':state=='ACEPTADO','unknown':unknown,'class_C':provisional,'class_C_count':len(provisional),'verified':verified}

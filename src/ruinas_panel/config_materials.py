@@ -1,5 +1,7 @@
 """Catálogo provisional de mundo; números C del documento del usuario, no valores de diseño."""
-VERSION='materials-0.1.0-C'
+VERSION='materials-0.2.0-C'
+DENSITY_ADDITIONS={'plaster':1200,'glass':2500,'joinery':600}
+ROLE_MAP={'MASONRY_LIME':('stone','stone'),'STONE_BLOCK':('stone','stone'),'TIMBER_SOFT':('wood','wood'),'TIMBER_HARD':('wood','wood'),'IRON_WROUGHT':('metal','metal'),'GROUND':('ground',None),'GLASS':(None,None),'PLASTER':('stone','plaster'),'JOINERY':('wood','wood'),'TILE_CLAY':('tile','tile')}
 SOURCE='Usuario: Ruinas tabla mínima de materiales y revisión del esquema v2.docx; bibliografía de memoria no contrastada'
 # Cada entrada numérica: valor inicial, mínimo, máximo. Las resistencias son MPa.
 MECHANICAL={
@@ -9,8 +11,8 @@ MECHANICAL={
     'TIMBER_HARD':{'density_ref':'wood','compression':(35,30,50),'tension':(30,20,60),'shear':(7,5,12),'bending':(40,30,70),'bearing':(7,5,10),'friction':(.4,.4,.4)},
     'IRON_WROUGHT':{'density_ref':'metal','compression':(250,200,350),'tension':(250,200,350),'shear':(150,120,200),'friction':(.3,.3,.3)},
     'GROUND':{'density_ref':'ground','bearing':(.15,.1,.3),'tension':(0,0,0),'friction':(.5,.4,.6)},
-    'GLASS':{'density_ref':None},'PLASTER':{'density_ref':None},
-    'JOINERY':{'density_ref':None},'TILE_CLAY':{'density_ref':'tile'},
+    'GLASS':{'density_ref':'glass'},'PLASTER':{'density_ref':'plaster'},
+    'JOINERY':{'density_ref':'joinery'},'TILE_CLAY':{'density_ref':'tile'},
 }
 # Densidad ref es solo correspondencia heredada, no validación de esa densidad.
 EVENT={

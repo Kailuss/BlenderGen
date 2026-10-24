@@ -2,13 +2,13 @@
 from . import layout
 
 
-def define(p):
+def define(p,model_scale=None):
     'IA: Describe plantas y dimensiones nominales antes de crear mallas, preservando las semillas y cotas históricas del generador.'
     levels=[];z=2.0
     for index,height in enumerate(layout.level_spans(p)):
         levels.append({'id':'floor.%s'%index,'index':index,'base_mm':z,'top_mm':z+height});z+=height
     elevation=getattr(p,'foundation_height',0) if getattr(p,'foundation_enabled',False) and p.layout_mode=='ROOM' else 0
-    return {'schema':1,'id':'building','units':'mm','coordinate_frame':'building_local','world_origin_mm':[0,0,elevation],'nominal_width_mm':p.length,'nominal_depth_mm':p.building_depth,
+    return {'schema':1,'id':'building','model_scale':model_scale,'units':'mm','coordinate_frame':'building_local','world_origin_mm':[0,0,elevation],'nominal_width_mm':p.length,'nominal_depth_mm':p.building_depth,
             'wall_thickness_mm':p.thickness,'layout':p.layout_mode,'levels':levels,'roof_type':getattr(p,'roof_type','PITCHED'),
             'seeds':{'building':p.seed,'distribution':layout.distribution_seed(p),'roof_damage':getattr(p,'roof_damage_seed',0)},
             'migration':'adapter: existing construction rules remain authoritative'}
@@ -23,17 +23,18 @@ def graph(definition,walls,rooms,windows,roof_events,roof_present,door=None,stai
         key='wall.'+wall['id'];nodes.append({'id':key,'type':'WALL','facade':wall['id']});edges.append(['building',key,'contains'])
     for room in rooms.get('rooms',[]):
         key='room.'+room['id'];nodes.append(dict(room,id=key,type='ROOM'));edges.append(['floor.0',key,'contains'])
-    counters={}
     for window in windows:
         level=window.get('floor',0);family='balcony' if window.get('balcony') else 'window'
-        group=(window.get('wall','front'),level,family);index=counters.get(group,0);counters[group]=index+1
-        key='opening.%s.%s.%s.%s'%(*group,index);nodes.append(dict(window,id=key,type='OPENING'))
+        axis=window['x'] if 'x' in window else (window['x0']+window['x1'])/2
+        key='opening.%s.%s.%s.%s'%(window.get('wall','front'),level,family,float(axis).hex())
+        nodes.append(dict(window,id=key,type='OPENING'))
+        nodes.append({'id':key+'.joinery','type':'JOINERY','floor':level});edges.append([key,key+'.joinery','contains'])
         facade=window.get('wall')
         if facade:edges.append(['wall.'+facade,key,'contains'])
-        edges.append(['floor.%s'%level,key,'contains'])
     if door:
-        key='opening.front.0.door';nodes.append(dict(door,id=key,type='DOOR'))
-        edges.extend([['wall.front',key,'contains'],['floor.0',key,'contains']])
+        key='opening.front.0.door.'+float((door['left']+door['right'])/2).hex();nodes.append(dict(door,id=key,type='OPENING',floor=0))
+        nodes.append({'id':key+'.joinery','type':'JOINERY','floor':0})
+        edges.extend([['wall.front',key,'contains'],[key,key+'.joinery','contains']])
     if roof_present:
         nodes.append({'id':'roof','type':'ROOF'})
         for wall in walls:

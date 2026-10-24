@@ -65,7 +65,7 @@ def save_cache(context,coll,signature):
         copy.name=config.CACHE_PREFIX+ob.name
         copy['_source_name']=ob.name
         templates.append(copy)
-    runtime.cache[cache_key()]={'signature':signature,'objects':templates,'metadata':{k:meta.raw(context.scene,k) for k in config.CACHE_METADATA if meta.raw(context.scene,k) is not None}}
+    runtime.cache[cache_key()]={'signature':signature,'objects':templates,'metadata':{k:meta.raw(context.scene,k) for k in (*config.CACHE_METADATA,'construction_reservations') if meta.raw(context.scene,k) is not None}}
 
 
 def restore_cache(context):

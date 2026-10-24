@@ -27,6 +27,8 @@ def build(coll,p,scene,walls):
     z=p.height;t=min(6,p.thickness);joint=.12
     bounds=(x0+p.thickness-.6,x1-p.thickness+.6,y0+p.thickness-.6,y1-p.thickness+.6)
     settings,access=stairs.terrace_plan(p,bounds);hole=None
+    from . import construction_plan
+    access=construction_plan.stair(scene,'terrace')
     if access and 'error' not in access:
         opening=access['opening'];landing=access['landing']
         hole=[min(opening[0],landing[0]),max(opening[1],landing[1]),opening[2],opening[3]]

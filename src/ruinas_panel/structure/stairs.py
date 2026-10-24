@@ -46,6 +46,8 @@ def build_upper(coll,p,scene,bounds,first):
     'IA: Construye segundo tramo con el mismo plano que reserva su forjado; lo eleva a primera planta y conserva ambos registros.'
     from mathutils import Matrix
     settings,upper=upper_plan(p,bounds)
+    from . import construction_plan
+    upper=construction_plan.stair(scene,2)
     before=set(coll.objects);build(coll,settings,scene,upper)
     shift=p.ground_storey_height
     for ob in set(coll.objects)-before:ob.data.transform(Matrix.Translation((0,0,shift)))
@@ -55,14 +57,17 @@ def build_upper(coll,p,scene,bounds,first):
     meta.put(scene,'escaleras_generadas',[first,upper])
 
 
-def beam_end(p,walls,x,base):
+def beam_end(p,walls,x,base,scene=None):
     'IA: Devuelve el cabecero de escalera para una viga de planta o None si llega al muro trasero; decide antes de cortar alojamientos.'
     lookup={w['id']:w for w in walls}
     if p.layout_mode!='ROOM' or not all(k in lookup for k in ('left','right','back')):return None
     bounds=(lookup['left']['origin'][0]+p.thickness/2-.6,lookup['right']['origin'][0]-p.thickness/2+.6,p.thickness/2-.6,lookup['back']['origin'][1]-p.thickness/2+.6)
     bases=layout.floor_bases(p)
     level=min(range(1,len(bases)),key=lambda i:abs(bases[i]-base))
-    stair=upper_plan(p,bounds)[1] if level==2 else plan(p,bounds)
+    if scene is not None:
+        from . import construction_plan
+        stair=construction_plan.stair(scene,level)
+    else:stair=upper_plan(p,bounds)[1] if level==2 else plan(p,bounds)
     if not stair or 'error' in stair:return None
     left=min(stair['opening'][0],stair['landing'][0]);right=max(stair['opening'][1],stair['landing'][1])
     return stair['y0']-2.4 if left-2.5<x<right+2.5 else None

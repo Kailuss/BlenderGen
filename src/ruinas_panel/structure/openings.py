@@ -211,7 +211,8 @@ def architectural_openings(coll,p,walls,door,edges):
     'IA: Reparte cuotas por planta y alinea ejes con ventanas inferiores o entrada; reserva altura de tejadillos, informa vanos que no caben y aloja vigas en juntas reales.'
     windows=[];warnings=[]
     from . import placement,floor_plan
-    stair=placement.stair_reservation(p,walls)
+    from . import construction_plan
+    stair=construction_plan.stair(bpy.context.scene,1)
     from ..geometry import balconies
     beams=[]
     wood=primitives.material('Madera · envejecida',(.29,.21,.13))
@@ -338,7 +339,7 @@ def architectural_openings(coll,p,walls,door,edges):
                 length=p.thickness/2+4
                 if p.layout_mode=='ROOM':
                     from . import stairs
-                    stop=stairs.beam_end(p,walls,x,base)
+                    stop=stairs.beam_end(p,walls,x,base,bpy.context.scene)
                     if stop is None:
                         carve_rectangle(coll,rear,x-2.5,x+2.5,z-2,z+size/2,p.thickness+6,'Apoyo trasero de viga')
                     end=(x,rear['origin'][1]+length if stop is None else stop,z)
