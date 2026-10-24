@@ -1,0 +1,17 @@
+{
+  "delivery": "iteration-A1-2026-10-24",
+  "commit": "2bcd7be",
+  "catalog": "materials-0.2.0-C",
+  "docx_sha256": "836d2cf11e4ef9ff3652dec9a532d6e1334cf6ea31fef7cfa7972a61ccddbe25",
+  "source_docx_sha256": "df9cd8147e16a345f7dbb16826133bdf3c1f2d8c5c0644236accfe362127592e",
+  "complete_order": false,
+  "phase_B_accepted": false,
+  "phase_C_accepted": false,
+  "rendered_docx": false,
+  "geometry_digests": {
+    "basic_draft": "6decbb3f67eed414ecc1ad64a9ed9596f5d9c9465e10069c2b762242c6635f47",
+    "door_windows_work": "155701856c3faf5ab8504fcb47010863c3795d1cc7d237cc9f59234d39d077f3",
+    "room_beams_draft": "50e25910d8a5f50d6403f1d143bfdbdf1ef27c5ddf33b1151a5aa1400c7bfa9e",
+    "window_detail": "422f28fbff5197ca0a79b9823d54050305ceaf43a6f556321d8e7de4de417ed4"
+  }
+}
