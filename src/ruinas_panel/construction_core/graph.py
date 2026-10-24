@@ -5,6 +5,33 @@ import heapq
 KINDS={'SUPPORTED_BY','CONNECTED_TO','HOSTED_BY','ARRIOSTRADO_POR'}
 
 
+def support_policy(node,parents):
+    'IA: Grupos explícitos exigen k de n en cada grupo; minimum_supports es abreviatura de un único grupo y None conserva apoyo desconocido.'
+    if 'support_groups' not in node:
+        minimum=node.get('minimum_supports')
+        if minimum is None:return None
+        if not isinstance(minimum,int) or isinstance(minimum,bool) or minimum<1:
+            raise ValueError('Mínimo de apoyos inválido')
+        return [{'id':'all','members':sorted(parents),'minimum':minimum}]
+    groups=node['support_groups']
+    if not isinstance(groups,list) or not groups:raise ValueError('Grupos de apoyo vacíos')
+    seen=set();covered=set()
+    for group in groups:
+        if not isinstance(group,dict):raise ValueError('Grupo de apoyo inválido')
+        key=group.get('id');members=group.get('members');minimum=group.get('minimum')
+        if not isinstance(key,str) or not key or key in seen:raise ValueError('Identificador de grupo inválido o repetido')
+        seen.add(key)
+        if not isinstance(members,list) or not members or any(not isinstance(m,str) for m in members):
+            raise ValueError('Miembros de grupo vacíos o inválidos')
+        if len(set(members))!=len(members) or not set(members)<=parents:
+            raise ValueError('Grupo con apoyo repetido o no declarado')
+        if not isinstance(minimum,int) or isinstance(minimum,bool) or not 1<=minimum<=len(members):
+            raise ValueError('Mínimo de grupo inválido')
+        covered.update(members)
+    if covered!=parents:raise ValueError('Apoyos declarados sin grupo')
+    return groups
+
+
 def validate(model):
     'IA: Detecta IDs repetidos, referencias, tipos, políticas y ciclos; apoyo declarado no implica contacto geométrico ni cálculo resistente.'
     issues=[];nodes={};seen=set()
@@ -30,6 +57,9 @@ def validate(model):
             if nodes[b].get('kind') in ('OPENING','DOOR','DAMAGE_EVENT'):
                 issues.append({'code':'INVALID_SUPPORT_KIND','element':a,'relation':key})
     for key,node in nodes.items():
+        if 'support_groups' in node:
+            try:support_policy(node,supports[key])
+            except ValueError as exc:issues.append({'code':'INVALID_SUPPORT_GROUPS','element':key,'reason':str(exc)})
         minimum=node.get('minimum_supports')
         if isinstance(minimum,int) and len(supports[key])<minimum:
             issues.append({'code':'INSUFFICIENT_DECLARED_SUPPORTS','element':key,'required':minimum,'available':len(supports[key])})
@@ -75,19 +105,19 @@ def affected(model,changed):
 
 
 def loss(model,removed):
-    'IA: Evalúa pérdida discreta de apoyos únicos según mínimo explícito; política ausente produce revisión, nunca derrumbe automático.'
+    'IA: Propaga pérdida si falla cualquier grupo k-de-n, distinguiendo extremos; sin política solo pide revisión y nunca inventa caída.'
     nodes={e['id']:e for e in model['elements']};missing=set(removed)&nodes.keys();failed=set();review=set()
     supports=defaultdict(set)
     for r in model['relations']:
         if r['kind']=='SUPPORTED_BY' and r['source'] in nodes and r['target'] in nodes:supports[r['source']].add(r['target'])
+    policies={key:support_policy(node,supports[key]) for key,node in nodes.items()}
     changed=True
     while changed:
         changed=False
         for key,parents in supports.items():
             if key in missing or not parents&missing:continue
-            minimum=nodes[key].get('minimum_supports')
-            if minimum is None:review.add(key);continue
-            if not isinstance(minimum,int) or isinstance(minimum,bool) or minimum<1:raise ValueError('Política de apoyo inválida: '+key)
-            if len(parents-missing)<minimum:
+            groups=policies[key]
+            if groups is None:review.add(key);continue
+            if any(len(set(g['members'])-missing)<g['minimum'] for g in groups):
                 failed.add(key);missing.add(key);changed=True
     return {'removed':sorted(set(removed)&nodes.keys()),'unsupported':sorted(failed),'requires_review':sorted(review-failed)}

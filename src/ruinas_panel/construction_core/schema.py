@@ -33,10 +33,13 @@ def validate(model):
     'IA: Verifica esquema común, unidades y magnitudes finitas; detecta masa incoherente y divergencia entre rests_on y relaciones.'
     issues=[]
     if model.get('schema')!=VERSION or model.get('units')!=UNITS:issues.append({'code':'SCHEMA_OR_UNITS_MISMATCH'})
-    expected={e['id']:set() for e in model['elements']}
+    expected={e['id']:set() for e in model['elements']};shares={}
     for r in model['relations']:
         if r['kind']=='SUPPORTED_BY' and r['source'] in expected:expected[r['source']].add(r['target'])
         for contact in r.get('contacts',[]):
+            share=contact.get('load_share')
+            if r['kind']=='SUPPORTED_BY' and isinstance(share,(int,float)) and not isinstance(share,bool) and math.isfinite(share) and share>=0:
+                shares[r['source']]=shares.get(r['source'],0)+share
             for field in ('area_mm2','seat_mm','load_share'):
                 value=contact.get(field)
                 if value is not None and (not isinstance(value,(int,float)) or isinstance(value,bool) or not math.isfinite(value) or value<0 or (field=='load_share' and value>1)):
@@ -44,6 +47,8 @@ def validate(model):
             point=contact.get('point_mm')
             if point is not None and (not isinstance(point,(list,tuple)) or len(point)!=3 or not all(isinstance(v,(float,int)) and math.isfinite(v) for v in point)):
                 issues.append({'code':'INVALID_CONTACT_POINT','relation':r['id']})
+    for key,total in shares.items():
+        if total>1+1e-9:issues.append({'code':'EXCESS_SUPPORT_LOAD_SHARE','element':key,'total':total})
     fields=set(element('_','_'))
     for e in model['elements']:
         key=e['id']
