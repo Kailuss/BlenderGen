@@ -1,0 +1,209 @@
+{
+  "code_commit": "6e24314e93a08662a5cbb08892bb2fc2ba676368",
+  "scope": "intact masonry before openings, DRAFT; front uses recorded nominal intervals, not a pure producer",
+  "tolerance_mm": 0.3,
+  "seconds": 5.285319999999047,
+  "cases": [
+    {
+      "seed": 1,
+      "level": 1,
+      "wall": "front",
+      "z_mm": 53.4,
+      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "nominal_count": 10,
+      "measured_count": 10,
+      "max_axis_error_mm": 0.005413109311947828,
+      "pass": true
+    },
+    {
+      "seed": 1,
+      "level": 1,
+      "wall": "back",
+      "z_mm": 53.4,
+      "source": "pure rear layout",
+      "nominal_count": 14,
+      "measured_count": 14,
+      "max_axis_error_mm": 2.9829342906850798e-06,
+      "pass": true
+    },
+    {
+      "seed": 1,
+      "level": 2,
+      "wall": "front",
+      "z_mm": 108.4,
+      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "nominal_count": 9,
+      "measured_count": 9,
+      "max_axis_error_mm": 0.01198751815480037,
+      "pass": true
+    },
+    {
+      "seed": 1,
+      "level": 2,
+      "wall": "back",
+      "z_mm": 108.4,
+      "source": "pure rear layout",
+      "nominal_count": 13,
+      "measured_count": 13,
+      "max_axis_error_mm": 2.9881079370852603e-06,
+      "pass": true
+    },
+    {
+      "seed": 1,
+      "level": 3,
+      "wall": "front",
+      "z_mm": 163.4,
+      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "nominal_count": 10,
+      "measured_count": 10,
+      "max_axis_error_mm": 0.006468464025822129,
+      "pass": true
+    },
+    {
+      "seed": 1,
+      "level": 3,
+      "wall": "back",
+      "z_mm": 163.4,
+      "source": "pure rear layout",
+      "nominal_count": 14,
+      "measured_count": 14,
+      "max_axis_error_mm": 3.1561036735183734e-06,
+      "pass": true
+    },
+    {
+      "seed": 20,
+      "level": 1,
+      "wall": "front",
+      "z_mm": 53.4,
+      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "nominal_count": 10,
+      "measured_count": 10,
+      "max_axis_error_mm": 0.009704767812763748,
+      "pass": true
+    },
+    {
+      "seed": 20,
+      "level": 1,
+      "wall": "back",
+      "z_mm": 53.4,
+      "source": "pure rear layout",
+      "nominal_count": 14,
+      "measured_count": 14,
+      "max_axis_error_mm": 2.44827754158905e-06,
+      "pass": true
+    },
+    {
+      "seed": 20,
+      "level": 2,
+      "wall": "front",
+      "z_mm": 108.4,
+      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "nominal_count": 9,
+      "measured_count": 9,
+      "max_axis_error_mm": 0.006396431246578516,
+      "pass": true
+    },
+    {
+      "seed": 20,
+      "level": 2,
+      "wall": "back",
+      "z_mm": 108.4,
+      "source": "pure rear layout",
+      "nominal_count": 13,
+      "measured_count": 13,
+      "max_axis_error_mm": 3.3363646991801943e-06,
+      "pass": true
+    },
+    {
+      "seed": 20,
+      "level": 3,
+      "wall": "front",
+      "z_mm": 163.4,
+      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "nominal_count": 10,
+      "measured_count": 10,
+      "max_axis_error_mm": 0.013221943348469267,
+      "pass": true
+    },
+    {
+      "seed": 20,
+      "level": 3,
+      "wall": "back",
+      "z_mm": 163.4,
+      "source": "pure rear layout",
+      "nominal_count": 14,
+      "measured_count": 14,
+      "max_axis_error_mm": 2.745147824612104e-06,
+      "pass": true
+    },
+    {
+      "seed": 73,
+      "level": 1,
+      "wall": "front",
+      "z_mm": 53.4,
+      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "nominal_count": 10,
+      "measured_count": 10,
+      "max_axis_error_mm": 0.00811791894820324,
+      "pass": true
+    },
+    {
+      "seed": 73,
+      "level": 1,
+      "wall": "back",
+      "z_mm": 53.4,
+      "source": "pure rear layout",
+      "nominal_count": 14,
+      "measured_count": 14,
+      "max_axis_error_mm": 3.231045127449761e-06,
+      "pass": true
+    },
+    {
+      "seed": 73,
+      "level": 2,
+      "wall": "front",
+      "z_mm": 108.4,
+      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "nominal_count": 9,
+      "measured_count": 9,
+      "max_axis_error_mm": 0.003673084538327487,
+      "pass": true
+    },
+    {
+      "seed": 73,
+      "level": 2,
+      "wall": "back",
+      "z_mm": 108.4,
+      "source": "pure rear layout",
+      "nominal_count": 14,
+      "measured_count": 14,
+      "max_axis_error_mm": 2.9689745986161142e-06,
+      "pass": true
+    },
+    {
+      "seed": 73,
+      "level": 3,
+      "wall": "front",
+      "z_mm": 163.4,
+      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "nominal_count": 10,
+      "measured_count": 10,
+      "max_axis_error_mm": 0.010020915867555047,
+      "pass": true
+    },
+    {
+      "seed": 73,
+      "level": 3,
+      "wall": "back",
+      "z_mm": 163.4,
+      "source": "pure rear layout",
+      "nominal_count": 14,
+      "measured_count": 14,
+      "max_axis_error_mm": 3.5050729110253087e-06,
+      "pass": true
+    }
+  ],
+  "discrepancies": [],
+  "B1_0_complete": false,
+  "remaining": "extract pure front course producer; test openings and damaged geometry separately"
+}
