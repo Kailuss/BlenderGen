@@ -20,9 +20,9 @@ def snapshot(coll):
 
 
 def measure(stones,wall,x,z,half=2.6):
-    'IA: Fracción lineal de asiento en X a la cota de sonda; no equivale al área XY del 12% de prune_support.'
+    'IA: Fracción proyectada en X de piedras en la banda bajo asiento [z-4.5,z-2.7]; evita muestrear solo una junta horizontal de mortero.'
     selected=[s for s in stones if s['wall']==wall and s['hi'][0]>x-half and s['lo'][0]<x+half and s['hi'][2]>2 and s['lo'][2]<z]
-    spans=sorted((max(x-half,s['lo'][0]),min(x+half,s['hi'][0])) for s in selected if s['lo'][2]<z-2.7<s['hi'][2])
+    spans=sorted((max(x-half,s['lo'][0]),min(x+half,s['hi'][0])) for s in selected if s['lo'][2]<z-2.7 and s['hi'][2]>z-4.5)
     length=0;end=x-half
     for a,b in spans:
         length+=max(0,b-max(a,end));end=max(end,b)
@@ -61,20 +61,20 @@ def run():
                 records.append(dict(probe,remaining=measured,axis_state='BLOQUEADO_POR_VANO' if blocked else 'CANDIDATO',
                     sensitivity=[{'threshold':t,'measured_supported':measured['seat_fraction']>=t} for t in (.06,.12,.24)],
                     graph_state=None,discrepancy=None,cause='MISSING_PURE_DAMAGE_EVENTS: graph has no independent per-stone removal input'))
-            floating=0;beam_count=0
+            floating=0;beam_count=0;front_tree=openings.wall_tree(coll,descriptors['front'])
             for beam in meta.get(bpy.context.scene,'vigas_generadas',[]):
                 if beam['wall']!='front':continue
                 beam_count+=1
-                if measure(final,'front',beam['x'],beam['z'])['seat_fraction']<.12:floating+=1
+                if sum(openings.wall_hit(front_tree,descriptors['front'],q,beam['x']+dx,beam['z']-2.7) for dx in (-1.5,0,1.5))<2:floating+=1
             results.append({'mode':mode,'seed':seed,'seconds':time.perf_counter()-started,'segments':records,
-                'candidate_axis_count':len(probes)//2,'generated_front_beams':beam_count,'front_seat_below_threshold':floating,
+                'candidate_axis_count':len(probes)//2,'generated_front_beams':beam_count,'front_seat_failed_ray_audit':floating,
                 'graph_unsupported_beams':None,'derrumbe_global':meta.get(bpy.context.scene,'derrumbe_global'),
                 'holes':meta.get(bpy.context.scene,'huecos_generados'),'windows':windows,
                 'coverage_scope':'front/back segment boxes; first two floors and wall-top probe; no rear/header beam contact certification'})
             primitives.drop_stage();print('C3_CASE',mode,seed,flush=True)
     report={'code_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
             'B1_0_closed':False,'status':'MEASURED_WITH_UNRESOLVED_CAUSAL_INPUT',
-            'criterion':'union of remaining X intervals at z-2.7 / segment width; thresholds 0.06,0.12,0.24; sensitivity only, not calibrated structural criterion',
+            'criterion':'union of remaining X intervals intersecting band [z-4.5,z-2.7] / segment width; thresholds 0.06,0.12,0.24; sensitivity only; beam audit uses original 2-of-3 rays, including mortar',
             'cases':results}
     for mode in ('T1','T2'):
         (ROOT/f'reports/b1_c3_{mode.lower()}.json').write_text(json.dumps(dict(report,cases=[r for r in results if r['mode']==mode]),indent=2),encoding='utf8')
