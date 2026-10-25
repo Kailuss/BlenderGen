@@ -1,3 +1,9 @@
+## B1-C3 — 25 de octubre de 2026
+
+Fuente única de límites frontales, constantes de aparejo, caché acotada, tolerancia explícita de emparejamiento, candidatos filtrados sin renumerar y propiedades aleatorias de loss. Conserva los cuatro digests. Auditorías T1/T2 entregadas con limitación causal explícita; B1.0 no cerrado. Sin cambios en umbrales del worker ni daño por segmentos.
+
+Histórico de documentación: el núcleo inicial pasó 25 pruebas; A1 (2bcd7be) alcanzó 35 y adoptó IDs de vano por posición. Segundo control B1: 44 pruebas, productores puros y esqueleto mínimo. Los conteos históricos no sustituyen el log de cada entrega.
+
 # Registro de cambios constructivos
 
 ## iteration-A1-2026-10-24

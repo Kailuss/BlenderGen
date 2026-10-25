@@ -1,33 +1,30 @@
 """structure /layout — ver docs/ARCHITECTURE.md para contratos y dependencias."""
 
+from .. import config_masonry as masonry
 from .. import config
 from .. import runtime
 from itertools import combinations
 import random
 import math
+import copy
 
 
 def masonry_intervals(p,wall,z,edges=None):
     'IA: Intervalos de piedra antes de bisel/desgaste, derivados del productor puro; incluye puerta y derrumbe de fachada, no vanos posteriores de assembly.'
     if wall['id']=='front':
-        plan=front_courses(p);edges=plan['edges'];result=[]
-        for row,line in enumerate(plan['courses']):
-            z0=edges[row]+.23;z1=edges[row+1]-.25
-            for a,b in line:
-                meets=any((abs(a-(c['x_mm']+c['width_mm']/2+.2))<.01 or abs(b-(c['x_mm']-c['width_mm']/2-.2))<.01) and z0<c['height_mm'] for c in plan['centers'])
-                if z0<z<z1-(.28 if meets else 0):
-                    result.append((a if a<=-p.length/2+.01 else a+.22,b if b>=p.length/2-.01 else b-.22))
-        return result
+        plan=front_courses(p)
+        return [(stone['x0'],stone['x1']) for row,line in enumerate(plan['courses'])
+                for a,b in line for stone in [front_stone_bounds(p,plan,row,a,b)] if stone['z0']<z<stone['z1']]
     edges=course_layout(p)[0] if edges is None else edges
-    return [(a+.18,b-.18) for c in return_courses(p,wall['id'],wall['start'],wall['end'],wall['height'],edges)
+    return [(a+masonry.RETURN_STONE_INSET,b-masonry.RETURN_STONE_INSET) for c in return_courses(p,wall['id'],wall['start'],wall['end'],wall['height'],edges)
             if c['z0']<z<c['z1'] for a,b in c['pieces']]
 
 
 def masonry_joints(intervals):
-    'IA: Juntas nominales entre dos piedras con anchura residual suficiente para el alojamiento histórico de 5 mm; no consulta geometría.'
+    'IA: Devuelve pares (centro de junta, ancho medio de las dos piedras), en mm; filtra tamaño y holgura nominal, sin consultar geometría.'
     ordered=sorted(intervals)
     return [((a[1]+b[0])/2,((a[1]-a[0])+(b[1]-b[0]))/2) for a,b in zip(ordered,ordered[1:])
-            if -.05<=b[0]-a[1]<=1.5 and min(a[1]-a[0],b[1]-b[0])>=5.3]
+            if masonry.JOINT_MIN_GAP<=b[0]-a[1]<=masonry.JOINT_MAX_GAP and min(a[1]-a[0],b[1]-b[0])>=masonry.JOINT_MIN_STONE_WIDTH]
 
 
 def distribution_seed(p):
@@ -252,7 +249,7 @@ def trim_door_courses(courses,door,rh):
 
 
 
-def front_courses(p):
+def _front_courses(p):
     'IA: Calcula hiladas, derrumbe, puerta y pilares sin mallas; conserva el orden de RNG y devuelve intervalos nominales en mm.'
     L,H,T=p.length,p.height,p.thickness
     dseed=distribution_seed(p);door=plan_door(p)
@@ -420,8 +417,8 @@ def return_courses(p,wall_id,start,end,height,edges):
     for row in range(len(edges)-1):
         if edges[row]>=height-.01:
             break
-        z0=edges[row]+.23
-        z1=min(edges[row+1],height)-.25
+        z0=edges[row]+masonry.COURSE_BOTTOM_INSET
+        z1=min(edges[row+1],height)-masonry.COURSE_TOP_INSET
         subdivisions=min(p.bond_subdivisions,max(1,int(pitch/3.2))) if row%2 else 1
         local=pitch/subdivisions
         jr=random.Random(distribution_seed(p)+row*3701+{'left':101,'right':211,'back':307}.get(wall_id,0))
@@ -435,3 +432,28 @@ def return_courses(p,wall_id,start,end,height,edges):
         pieces=merge_thin_stones(list(zip(joints,joints[1:])),3.2)
         result.append({'row':row,'z0':z0,'z1':z1,'pieces':pieces})
     return result
+
+
+def front_courses(p):
+    'IA: Memoiza por firma completa de ajustes y devuelve copia independiente; caché de sesión acotada en runtime, nunca conserva referencias RNA.'
+    keys=set(config.FIELDS)|{'lock_distribution','distribution_seed'}
+    signature=tuple((key,getattr(p,key)) for key in sorted(keys) if hasattr(p,key))
+    cache=getattr(runtime,'front_course_cache',None)
+    if cache is None:cache={};runtime.front_course_cache=cache
+    if signature not in cache:
+        if len(cache)>=masonry.FRONT_CACHE_SIZE:cache.pop(next(iter(cache)))
+        cache[signature]=_front_courses(p)
+    return copy.deepcopy(cache[signature])
+
+
+def front_stone_bounds(p,plan,row,a,b):
+    'IA: Fuente única de límites y encuentros de piedra frontal; core_z1 conserva la cota del mortero anterior a la holgura de pilar.'
+    eps=masonry.BOUNDARY_EPSILON
+    z0=plan['edges'][row]+masonry.COURSE_BOTTOM_INSET
+    top=plan['edges'][row+1]-masonry.COURSE_TOP_INSET
+    left=any(abs(a-(c['x_mm']+c['width_mm']/2+masonry.PIER_SIDE_GAP))<eps and z0<c['height_mm'] for c in plan['centers'])
+    right=any(abs(b-(c['x_mm']-c['width_mm']/2-masonry.PIER_SIDE_GAP))<eps and z0<c['height_mm'] for c in plan['centers'])
+    return {'x0':a if a<=-p.length/2+eps else a+masonry.FRONT_STONE_INSET,
+            'x1':b if b>=p.length/2-eps else b-masonry.FRONT_STONE_INSET,
+            'z0':z0,'z1':top-(masonry.PIER_TOP_CLEARANCE if left or right else 0),
+            'core_z1':top,'meets_left':left,'meets_right':right}

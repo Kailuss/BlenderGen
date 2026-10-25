@@ -16,6 +16,7 @@ La base 0.31 integra el edificio completo aportado en `dist/ruinas_v031_completo
 
 | Tema | Archivo en `src/ruinas_panel` | Contrato principal |
 |---|---|---|
+| Límites de piedra y tolerancias | `config_masonry.py`, `structure/layout.py` | front_stone_bounds compartido; firma y caché frontal en runtime; ninguna decisión de apoyo por malla |
 | Perfiles, campos, secciones, calidad | `config.py` | Constantes sin dependencia de Blender |
 | Estado temporal | `runtime.py` | Única instancia por sesión; no persiste en .blend |
 | Datos de auditoría en la escena | `meta.py` | Un solo grupo `scene['ruinas']` con JSON por clave; borra las claves sueltas antiguas |

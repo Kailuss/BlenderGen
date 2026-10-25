@@ -1,31 +1,25 @@
-# Coherencia constructiva — primera integración, 2026-10-23
+# Núcleo constructivo vigente B1-C3
 
-Actualización 2026-10-24: contrato vigente esquema 3; el recuento anterior de pruebas queda como histórico (ahora 35 pruebas puras). La escala de medidas es de mundo; `building_definition.model_scale` debe conocerse para convertir medidas de malla mediante el adaptador. La física sigue desconectada del catálogo de capacidades. Hay una reserva previa común de escalera, pero todavía no un plan completo de elementos portantes. Ver `CHANGELOG.md` y el informe de iteración A1.
+Estado del 25 de octubre de 2026. Esquema 3, magnitudes estructurales en mundo y escala explícita en la frontera del adaptador. Los materiales mantienen confianza C salvo evidencia documental específica; no se han calibrado umbrales Bullet.
 
-## Auditoría
+## Productores y consumidores
 
-El descriptor `building_definition.define` describe cotas y semillas; su grafo se construye después de las mallas y no gobierna la construcción. Las relaciones de cubierta son nominales, no contactos físicos. `openings` decide vigas mediante consultas al muro y reserva alojamientos; `floors` añade un bastidor alternativo si faltan anclajes; `stairs` vuelve a calcular reservas por tramo; `roof` comprueba sus cerchas por separado. `relations.register` reserva mampostería próxima a carpintería antes de agujeros, pero esa proximidad no demuestra transmisión de carga. Esta dispersión sigue siendo el problema principal.
+layout.front_courses y return_courses calculan aparejo sin mallas. front_stone_bounds es la fuente única de límites y encuentros de piedra frontal, consumida por walls y masonry_intervals. El resultado frontal se memoiza en runtime con firma de ajustes, límite de 16 entradas y copia defensiva. config_masonry nombra retranqueos y tolerancias.
 
-## Incorporado
+construction_plan publica reservas previas, pero delega en stairs.plan, upper_plan y terrace_plan. No es todavía el productor único: persisten cálculos duplicados en consumidores. El grafo del edificio existente se adapta después de las mallas; no gobierna aún todos los objetos.
 
-`construction_core/graph.py` no importa Blender. Consume elementos y relaciones JSON: SUPPORTED_BY, CONNECTED_TO y HOSTED_BY. Valida referencias, duplicados, tipos incompatibles, políticas y ciclos. Calcula orden de regeneración e invalidación de dependientes. Los contactos repetidos con el mismo elemento cuentan como un solo apoyo. La pérdida se evalúa según un mínimo explícito; si no hay política, se pide revisión y no se propaga una caída inventada.
+floor_frame emite un esqueleto mínimo de viga y segmentos, no el forjado completo. WALL_SEGMENT se aloja en WALL y transmite apoyo hacia segmento inferior o cimentación, que apoya en terreno. Los IDs numeran la banda inferior con nivel 0 y el primer forjado con nivel 1. Los ordinales de eje se asignan antes de filtrar; filter_axes marca bloqueos sin renumerar. El campo de daño aún no retira piedras mediante estos segmentos.
 
-`construction_core/adapter.py` lee el grafo nominal actual conservando sus identificadores. No añade resistencias ni interpreta los accesos o eventos de daño como apoyos. Los datos quedan en `scene['ruinas']`, claves `construction_model` y `construction_validation`, también después de restaurar caché. No cambia geometría, materiales, selección, RNA ni ajustes guardados.
+## Políticas del grafo
 
-La visualización inicial es una tabla HTML de elementos y apoyos declarados: ámbar significa información pendiente, azul relación nominal. No es todavía una coloración de objetos en el visor ni un certificado de estabilidad.
+SUPPORTED_BY transmite apoyo; HOSTED_BY expresa alojamiento, CONNECTED_TO conexión y ARRIOSTRADO_POR arriostramiento. support_groups exige k de n por grupo y es incompatible con minimum_supports, incluso si este vale None. loss valida todas las políticas antes de evaluar, también las ajenas a la retirada solicitada; un grupo inválido lanza ValueError.
 
-## Límites explícitos
+La política de tres valores compara clausuras optimista y pesimista. unsupported son pérdidas confirmadas y requires_review solo elementos cuyo resultado depende de apoyos con política desconocida. Un apoyo redundante suficiente evita revisión. loss no propaga desaparición por HOSTED_BY: la carpintería no puede considerarse resuelta por esta función. La futura eliminación del anfitrión debe tener una regla explícita de alojamiento/daño; no basta perder un segmento cercano para borrar un vano entero.
 
-- El adaptador aún no representa individualmente todas las vigas, cabeceros y postes, ni verifica sus superficies de contacto. Los forjados del grafo heredado describen niveles, no cada tablero portante.
-- El mínimo de apoyos es una regla discreta. No mide luz admisible, área de asiento, material, voladizos, equilibrio o resistencia. No se asigna automáticamente a la casa real.
-- La invalidación devuelve qué habría que regenerar; todavía no ejecuta regeneración selectiva ni modifica el caché geométrico.
-- Los identificadores heredados de ventanas usan su posición ordinal. Son deterministas para la misma configuración, pero no garantizan identidad tras insertar otro vano anterior.
-- Las reservas volumétricas y los conflictos de paso siguen en sus módulos actuales. El núcleo no sustituye aún esas reglas; no se considera cerrada la coherencia constructiva general.
+Los IDs de vanos se basan en pared, planta, familia y posición, no en el ordinal de iteración. La escala de la miniatura no se confunde con la escala numérica de Bullet. Las capacidades desconocidas siguen siendo None.
 
-## Siguiente integración necesaria
+## Verificación y límites
 
-Convertir vigas, cabeceros, postes y forjados en elementos del plan previo a mallas; compartir una sola reserva de escalera por nivel entre vanos, alojamientos, tablas y cubierta de torreón. Después, resolver apoyos de ambos extremos y apoyos redundantes con dimensiones verificadas. Solo entonces activar reparación y daño causal, distinguiendo una dependencia inválida de una decisión artística explícita. El núcleo nuevo es infraestructura para ello, no una sustitución por excepciones adicionales.
+Los cuatro digests geométricos se conservan. El baseline intacto compara dos cotas de viga y una sonda de coronación, nunca tres forjados. T1/T2 miden daño/vanos y sensibilidad del asiento, pero carecen de predicción causal independiente: derrumbe_global y huecos_generados contienen conteos/zonas, no IDs de retirada; prune_support no publica eventos por piedra. No se afirma cero discrepancias ni cierre de B1.0. Los informes expresan los resultados desconocidos con null.
 
-## Verificación
-
-Seis pruebas puras nuevas cubren redundancia, cascada, referencias inexistentes, ciclos, unión frente a apoyo, contactos duplicados, orden estable y política desconocida. La suite total pasó 25 pruebas; los cuatro casos geométricos conservaron su digest anterior. `tests/blender_construction_core.py` comprueba integración, regeneración desde caché y coste del validador en una casa de tres plantas. Resultados en `reports/construction_core.json`.
+Los logs y el catálogo de pruebas de B1-C3 incluyen el commit y las pruebas añadidas desde A1. No equivalen a simulaciones Bullet. El banco de calibración y la integración completa de forjado/escaleras siguen pendientes. Historial anterior en CHANGELOG.md y commits de A1/B1.

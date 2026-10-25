@@ -20,10 +20,16 @@ def run():
     p=bpy.context.scene.ruin_settings
     p.layout_mode='ROOM';p.height_type='THREE';p.length=190;p.building_depth=100
     p.damage_enabled=False;p.lock_distribution=False;p.door_enabled=False
-    rows=[];skeletons=[];started=time.perf_counter()
+    rows=[];skeletons=[];timings=[];started=time.perf_counter()
     for seed in (1,20,73):
         p.seed=seed;layout.apply_profiles(p);effective=damage.effective_settings(p)
         runtime.settings=effective;runtime.quality='DRAFT';runtime.timings={}
+        runtime.front_course_cache={};tick=time.perf_counter();uncached=layout.front_courses(effective)
+        cold=time.perf_counter()-tick;tick=time.perf_counter()
+        for _ in range(100):cached=layout.front_courses(effective)
+        timings.append({'seed':seed,'cold_seconds':cold,'cached_mean_seconds':(time.perf_counter()-tick)/100})
+        assert cached==uncached
+        cached['courses'].clear();assert layout.front_courses(effective)==uncached
         coll=walls._build_wall(bpy.context,effective)
         descriptors={w['id']:w for w in meta.get(bpy.context.scene,'paredes_generadas')}
         edges,_=layout.course_layout(effective)
@@ -42,7 +48,7 @@ def run():
                              'nominal_count':len(nominal),'measured_count':len(measured),
                              'tolerance_mm':tolerance,'max_axis_error_mm':delta,'pass':len(nominal)==len(measured) and delta<=tolerance})
         z=layout.floor_bases(effective)[1]-3.6
-        axes=floor_frame.aligned_axes(*[layout.masonry_joints(layout.masonry_intervals(effective,descriptors[k],z,edges)) for k in ('front','back')],tolerance_mm=1.5)
+        axes=floor_frame.aligned_axes(*[layout.masonry_joints(layout.masonry_intervals(effective,descriptors[k],z,edges)) for k in ('front','back')])
         assert axes['axes'],axes
         model=floor_frame.beam_skeleton(axes['axes'][0],[(2,z)],{'front':0,'back':descriptors['back']['origin'][1]},
                                         seat_width_mm=4.2,seat_depth_mm=3,margin_world_mm=30,min_seat_world_mm=120,model_scale=60)
@@ -58,12 +64,14 @@ def run():
             coverage.append({'segment':element['id'],'stone_count':count})
         removed=coverage[0]['segment'];loss=graph.loss(model,[removed])
         assert loss['unsupported']==[model['beam_id']],loss
-        skeletons.append({'seed':seed,'axes':axes,'segment_count':model['segment_count'],'coverage':coverage,'loss':loss,
+        skeletons.append({'seed':seed,'axes':axes,'candidate_axis_count':len(axes['axes']),'selected_beam_count':1,
+                          'support_chains':[r for r in model['relations'] if r['kind']=='SUPPORTED_BY'],
+                          'segment_count':model['segment_count'],'coverage':coverage,'loss':loss,
                           'scope':'one beam at first floor; nominal contacts, no raycast or mesh consumer'})
         primitives.drop_stage()
     report={'code_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
             'scope':'intact masonry before assembly openings, DRAFT; both walls use pure layout',
-            'axis_tolerances_mm':AXIS_TOLERANCES_MM,'seconds':time.perf_counter()-started,'cases':rows,'skeletons':skeletons,
+            'axis_tolerances_mm':AXIS_TOLERANCES_MM,'seconds':time.perf_counter()-started,'cases':rows,'skeletons':skeletons,'front_courses_cost':timings,
             'discrepancies':[r for r in rows if not r['pass']],
             'B1_0_complete':False,'remaining':'test assembly openings and damaged geometry separately'}
     (ROOT/'reports/b1_joint_baseline.json').write_text(json.dumps(report,indent=2),encoding='utf8')

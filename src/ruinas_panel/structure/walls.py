@@ -1,6 +1,7 @@
 """structure /walls — ver docs/ARCHITECTURE.md para contratos y dependencias."""
 
 from .. import meta
+from .. import config_masonry as masonry
 from .. import config
 from .. import runtime
 from ..geometry import fracture
@@ -26,7 +27,7 @@ def rear_pier(coll,p,x,y,edges,index):
     primitives.block('Pilar trasero · pie',x-width/2-1,x+width/2+1,y-T/2-4.2,y+T/2+4.2,.6,3,coll,stone)
     primitives.block('Pilar trasero · núcleo',x-width/2+.8,x+width/2-.8,y-T/2-1.5,y+T/2+1.5,1.5,p.height-1.5,coll,mortar)
     for r,(z0,z1) in enumerate(zip(edges,edges[1:])):
-        ob=primitives.block('Pilar trasero · sillar %s.%s'%(index,r),x-width/2,x+width/2,y-T/2-3.1,y+T/2+3.1,z0+.18,z1-.18,coll,stone)
+        ob=primitives.block('Pilar trasero · sillar %s.%s'%(index,r),x-width/2,x+width/2,y-T/2-3.1,y+T/2+3.1,z0+masonry.RETURN_STONE_INSET,z1-masonry.RETURN_STONE_INSET,coll,stone)
         weather.weather_stone(ob,p.wear,p.seed+1911+r*31+index)
     terrain.earth_patch(coll,primitives.material('Tierra · arena',(.36,.31,.24)),'Tierra · pilar trasero',x,y,width/2+5,T/2+8,1.6,p.seed+890+index,p.ground_roughness)
     for ob in set(coll.objects)-before:ob['wall_id']='back'
@@ -51,7 +52,7 @@ def segment_wall(coll,p,wall_id,start,end,origin,axis,height,edges):
             at_end=j in (0,len(pieces)-1)
             front=p.thickness/2+p.projection*(.75 if at_end else .75+p.randomness*rr.uniform(-.15,.15))
             back=p.thickness/2+p.projection*(.75 if at_end else .75+p.randomness*rr.uniform(-.15,.15))
-            ob=primitives.block('Piedra · %s.%s.%s'%(wall_id,row,j),a+.18,b-.18,-front,back,z0,z1,coll,stone)
+            ob=primitives.block('Piedra · %s.%s.%s'%(wall_id,row,j),a+masonry.RETURN_STONE_INSET,b-masonry.RETURN_STONE_INSET,-front,back,z0,z1,coll,stone)
             weather.weather_stone(ob,p.wear,p.seed+191+row*31+j+len(wall_id))
     for ob in set(coll.objects)-before:
         co=primitives.coords(ob)
@@ -113,16 +114,13 @@ def _build_wall(context, p):
     courses,centers=planned['courses'],planned['centers']
     meta.put(context.scene,'puerta_generada',door)
     # Fábrica completa: las perforaciones se resuelven en assembly después de reservar apoyos.
-    holes=[];omitted=set()
     build_base_and_lintel(coll,stone,p,door,rh)
     audit=[]
     mortar_audit=[]
     for row,line in enumerate(courses):
         for index,(x,end) in enumerate(line):
-            if (row,index) in omitted:
-                continue
-            z0=z_edges[row]+.23
-            z1=z_edges[row+1]-.25
+            bounds=layout.front_stone_bounds(p,planned,row,x,end)
+            z0,z1=bounds['z0'],bounds['z1']
             rr=random.Random(p.seed+row*1201+index*139)
             overlap=0 if row==rows-1 else sum(max(0,min(end,b)-max(x,a)) for a,b in courses[row+1])/(end-x)
             exposed=overlap<.05
@@ -131,23 +129,19 @@ def _build_wall(context, p):
             at_end=x<=-L/2+.01 or end>=L/2-.01
             front=T/2+p.projection*(.75 if at_end else (.75+p.randomness*rr.uniform(-.15,.15)))
             back=T/2+p.projection*(.75 if at_end else (.75+p.randomness*rr.uniform(-.15,.15)))
-            bx0=x if x<=-L/2+.01 else x+.22
-            bx1=end if end>=L/2-.01 else end-.22
+            bx0,bx1=bounds['x0'],bounds['x1']
             # Las juntas se unen con mortero rebajado, sin un plano inclinado interior.
-            coretop=z0+.55 if fractured else z1-.85
+            coretop=z0+.55 if fractured else bounds['core_z1']-.85
             # Solo extender mortero hacia una junta que tiene piedra al otro lado.
             # En derrumbes, huecos y extremos el núcleo queda detrás del canto,
             # incluida la pérdida superficial por desgaste.
-            neighbours=[(a,b) for k,(a,b) in enumerate(line) if k!=index and (row,k) not in omitted]
+            neighbours=[(a,b) for k,(a,b) in enumerate(line) if k!=index]
             open_left=not any(abs(b-x)<.01 for a,b in neighbours)
             open_right=not any(abs(a-end)<.01 for a,b in neighbours)
-            meets_left=any(abs(x-(c['x_mm']+c['width_mm']/2+.2))<.01 and z0<c['height_mm'] for c in centers)
-            meets_right=any(abs(end-(c['x_mm']-c['width_mm']/2-.2))<.01 and z0<c['height_mm'] for c in centers)
+            meets_left,meets_right=bounds['meets_left'],bounds['meets_right']
             open_left=open_left and not meets_left
             open_right=open_right and not meets_right
             # Pequeño desnivel en el encuentro evita tapas coplanares superpuestas.
-            if meets_left or meets_right:
-                z1-=.28
             inset=min(1.6,(bx1-bx0)*.32)
             mx0=bx0+inset if open_left else x-(1.05 if meets_left else .05)
             mx1=bx1-inset if open_right else end+(1.05 if meets_right else .05)
@@ -164,7 +158,6 @@ def _build_wall(context, p):
                 ob=primitives.block('Piedra entera · hilada %02d.%02d'%(row,index),bx0,bx1,
                          -front,back,z0,z1,coll,stone,detail,0 if at_end else (.025+p.wear*.08)*p.randomness)
                 weather.weather_stone(ob,p.wear,p.seed+row*701+index)
-            fracture.opening_damage(ob,core,holes,bx0,bx1,z0,z1,p.hole_damage,p.seed+row*811+index)
             audit.append({'row':row,'x0':x,'x1':end,'z0':z0,'z1':z1,'fractured':fractured})
     meta.put(context.scene,'aparejo_escalonado',audit)
     meta.put(context.scene,'mortero_retranqueado',mortar_audit)
@@ -184,7 +177,7 @@ def _build_wall(context, p):
             half=width/2 if pier.get('connection') else width/2+(0.15 if j%2==0 else -.10)
             reach=T/2+3.1+rr.uniform(-.08,.08)
             ob=primitives.block('Pilar %s · sillar %02d'%(i,j),cx-half,cx+half,
-                     -reach,reach,pier_edges[j]+.18,pier_edges[j+1]-.18,
+                     -reach,reach,pier_edges[j]+masonry.RETURN_STONE_INSET,pier_edges[j+1]-masonry.RETURN_STONE_INSET,
                      coll,stone,None if pier.get("connection") else rr,0 if pier.get("connection") else .05)
             if not pier.get('connection'):
                 weather.weather_stone(ob,p.wear,p.seed+i*19+j)

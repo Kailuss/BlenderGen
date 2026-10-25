@@ -1,9 +1,10 @@
 """Plan puro B1: primer camino de carga localizado, todavía sin consumidores de malla."""
 import math
 from ..construction_core import adapter,graph,schema,units
+from .. import config_masonry as masonry
 
 
-def aligned_axes(front,rear,tolerance_mm):
+def aligned_axes(front,rear,tolerance_mm=masonry.AXIS_MATCH_TOLERANCE):
     'IA: Empareja juntas frontal/trasera una a una dentro de tolerancia explícita; devuelve ejes ordenados y todos los descartes con causa.'
     if not math.isfinite(tolerance_mm) or tolerance_mm<0:raise ValueError('Tolerancia inválida')
     candidates=sorted((abs(a-b),a,b) for a,_ in front for b,_ in rear if abs(a-b)<=tolerance_mm)
@@ -14,8 +15,21 @@ def aligned_axes(front,rear,tolerance_mm):
     pairs.sort(key=lambda p:p['x_mm'])
     rejected=[{'wall':wall,'x_mm':x,'reason':'NO_AVAILABLE_MATCH'} for wall,joints,used in
               (('front',front,used_front),('back',rear,used_rear)) for x,_ in joints if x not in used]
-    return {'axes':[dict(p,ordinal=i) for i,p in enumerate(pairs)],'discarded_axes':rejected,
+    return {'axes':[dict(p,ordinal=i,state='CANDIDATO') for i,p in enumerate(pairs)],'discarded_axes':rejected,
+            'match_tolerance_mm':tolerance_mm,'warnings':[dict(p,code='NEAR_MATCH_LIMIT') for p in pairs if p['mismatch_mm']>masonry.AXIS_WARNING_FRACTION*tolerance_mm],
             'errors':[] if pairs else [{'code':'NO_COMMON_BEAM_AXIS'}]}
+
+
+def filter_axes(axes,blocked_intervals,minimum_spacing_mm):
+    'IA: Filtra candidatos sin renumerar: vanos/reservas con causa y espaciado posterior; conserva IDs de todos los segmentos existentes.'
+    if minimum_spacing_mm<0 or not math.isfinite(minimum_spacing_mm):raise ValueError('Separación inválida')
+    result=[];selected=[]
+    for axis in sorted(axes,key=lambda a:a['ordinal']):
+        reason=next((reason for lo,hi,reason in blocked_intervals if lo<=axis['x_mm']<=hi),None)
+        if reason is None and any(abs(axis['x_mm']-x)<minimum_spacing_mm for x in selected):reason='BLOQUEADO_POR_ESPACIADO'
+        if reason is None:selected.append(axis['x_mm'])
+        result.append(dict(axis,state=reason or 'SELECCIONADO'))
+    return result
 
 
 def beam_skeleton(axis,bands,wall_y,seat_width_mm,seat_depth_mm,margin_world_mm,min_seat_world_mm,model_scale):
