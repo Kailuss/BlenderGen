@@ -1,0 +1,29 @@
+{
+  "code_commit": "ecf5a53",
+  "cases": [
+    {
+      "case": "basic_draft",
+      "before": "6decbb3f67eed414ecc1ad64a9ed9596f5d9c9465e10069c2b762242c6635f47",
+      "after": "6decbb3f67eed414ecc1ad64a9ed9596f5d9c9465e10069c2b762242c6635f47",
+      "equal": true
+    },
+    {
+      "case": "door_windows_work",
+      "before": "155701856c3faf5ab8504fcb47010863c3795d1cc7d237cc9f59234d39d077f3",
+      "after": "155701856c3faf5ab8504fcb47010863c3795d1cc7d237cc9f59234d39d077f3",
+      "equal": true
+    },
+    {
+      "case": "room_beams_draft",
+      "before": "50e25910d8a5f50d6403f1d143bfdbdf1ef27c5ddf33b1151a5aa1400c7bfa9e",
+      "after": "50e25910d8a5f50d6403f1d143bfdbdf1ef27c5ddf33b1151a5aa1400c7bfa9e",
+      "equal": true
+    },
+    {
+      "case": "window_detail",
+      "before": "422f28fbff5197ca0a79b9823d54050305ceaf43a6f556321d8e7de4de417ed4",
+      "after": "422f28fbff5197ca0a79b9823d54050305ceaf43a6f556321d8e7de4de417ed4",
+      "equal": true
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+Code commit: ecf5a535a63a4b984e14da9b06d59cd520c548fc
+............................................
+----------------------------------------------------------------------
+Ran 44 tests in 0.048s
+
+OK
+CHECK_PASSED 202 archivos 633 funciones documentadas
+BLENDER_PASSED G:\Alma zen\Personal\Tres Dimensiones\Impresora\Trabajos\Yho\IA\BlenderGen\reports\modular.json
+EXPECTED_PASSED basic_draft, door_windows_work, room_beams_draft, window_detail
+B1_JOINT_BASELINE_PASSED 18
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+
+Blender quit
+Contract-only revision: fb379e457330acc6ce694c965d91d3faaabe8d94
+............................................
+----------------------------------------------------------------------
+Ran 44 tests in 0.048s
+
+OK
+CHECK_PASSED 202 archivos 633 funciones documentadas

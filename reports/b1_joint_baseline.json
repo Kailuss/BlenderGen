@@ -1,11 +1,11 @@
 {
-  "code_commit": "60db5b28cdac98b924456c4da586512a9370cc51",
-  "scope": "intact masonry before openings, DRAFT; front uses recorded nominal intervals, not a pure producer",
+  "code_commit": "ecf5a535a63a4b984e14da9b06d59cd520c548fc",
+  "scope": "intact masonry before assembly openings, DRAFT; both walls use pure layout",
   "axis_tolerances_mm": {
     "front": 0.05,
     "back": 0.001
   },
-  "seconds": 7.359144800000649,
+  "seconds": 4.9982531999994535,
   "cases": [
     {
       "seed": 1,
@@ -14,7 +14,7 @@
       "base_mm": 57.0,
       "wall": "front",
       "z_mm": 53.4,
-      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "source": "pure layout producer",
       "nominal_count": 10,
       "measured_count": 10,
       "tolerance_mm": 0.05,
@@ -28,7 +28,7 @@
       "base_mm": 57.0,
       "wall": "back",
       "z_mm": 53.4,
-      "source": "pure rear layout",
+      "source": "pure layout producer",
       "nominal_count": 14,
       "measured_count": 14,
       "tolerance_mm": 0.001,
@@ -42,7 +42,7 @@
       "base_mm": 112.0,
       "wall": "front",
       "z_mm": 108.4,
-      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "source": "pure layout producer",
       "nominal_count": 9,
       "measured_count": 9,
       "tolerance_mm": 0.05,
@@ -56,7 +56,7 @@
       "base_mm": 112.0,
       "wall": "back",
       "z_mm": 108.4,
-      "source": "pure rear layout",
+      "source": "pure layout producer",
       "nominal_count": 13,
       "measured_count": 13,
       "tolerance_mm": 0.001,
@@ -70,7 +70,7 @@
       "base_mm": 167.0,
       "wall": "front",
       "z_mm": 163.4,
-      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "source": "pure layout producer",
       "nominal_count": 10,
       "measured_count": 10,
       "tolerance_mm": 0.05,
@@ -84,7 +84,7 @@
       "base_mm": 167.0,
       "wall": "back",
       "z_mm": 163.4,
-      "source": "pure rear layout",
+      "source": "pure layout producer",
       "nominal_count": 14,
       "measured_count": 14,
       "tolerance_mm": 0.001,
@@ -98,7 +98,7 @@
       "base_mm": 57.0,
       "wall": "front",
       "z_mm": 53.4,
-      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "source": "pure layout producer",
       "nominal_count": 10,
       "measured_count": 10,
       "tolerance_mm": 0.05,
@@ -112,7 +112,7 @@
       "base_mm": 57.0,
       "wall": "back",
       "z_mm": 53.4,
-      "source": "pure rear layout",
+      "source": "pure layout producer",
       "nominal_count": 14,
       "measured_count": 14,
       "tolerance_mm": 0.001,
@@ -126,7 +126,7 @@
       "base_mm": 112.0,
       "wall": "front",
       "z_mm": 108.4,
-      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "source": "pure layout producer",
       "nominal_count": 9,
       "measured_count": 9,
       "tolerance_mm": 0.05,
@@ -140,7 +140,7 @@
       "base_mm": 112.0,
       "wall": "back",
       "z_mm": 108.4,
-      "source": "pure rear layout",
+      "source": "pure layout producer",
       "nominal_count": 13,
       "measured_count": 13,
       "tolerance_mm": 0.001,
@@ -154,7 +154,7 @@
       "base_mm": 167.0,
       "wall": "front",
       "z_mm": 163.4,
-      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "source": "pure layout producer",
       "nominal_count": 10,
       "measured_count": 10,
       "tolerance_mm": 0.05,
@@ -168,7 +168,7 @@
       "base_mm": 167.0,
       "wall": "back",
       "z_mm": 163.4,
-      "source": "pure rear layout",
+      "source": "pure layout producer",
       "nominal_count": 14,
       "measured_count": 14,
       "tolerance_mm": 0.001,
@@ -182,7 +182,7 @@
       "base_mm": 57.0,
       "wall": "front",
       "z_mm": 53.4,
-      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "source": "pure layout producer",
       "nominal_count": 10,
       "measured_count": 10,
       "tolerance_mm": 0.05,
@@ -196,7 +196,7 @@
       "base_mm": 57.0,
       "wall": "back",
       "z_mm": 53.4,
-      "source": "pure rear layout",
+      "source": "pure layout producer",
       "nominal_count": 14,
       "measured_count": 14,
       "tolerance_mm": 0.001,
@@ -210,7 +210,7 @@
       "base_mm": 112.0,
       "wall": "front",
       "z_mm": 108.4,
-      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "source": "pure layout producer",
       "nominal_count": 9,
       "measured_count": 9,
       "tolerance_mm": 0.05,
@@ -224,7 +224,7 @@
       "base_mm": 112.0,
       "wall": "back",
       "z_mm": 108.4,
-      "source": "pure rear layout",
+      "source": "pure layout producer",
       "nominal_count": 14,
       "measured_count": 14,
       "tolerance_mm": 0.001,
@@ -238,7 +238,7 @@
       "base_mm": 167.0,
       "wall": "front",
       "z_mm": 163.4,
-      "source": "nominal intervals recorded by wall builder; pure front producer still missing",
+      "source": "pure layout producer",
       "nominal_count": 10,
       "measured_count": 10,
       "tolerance_mm": 0.05,
@@ -252,7 +252,7 @@
       "base_mm": 167.0,
       "wall": "back",
       "z_mm": 163.4,
-      "source": "pure rear layout",
+      "source": "pure layout producer",
       "nominal_count": 14,
       "measured_count": 14,
       "tolerance_mm": 0.001,
@@ -260,7 +260,372 @@
       "pass": true
     }
   ],
+  "skeletons": [
+    {
+      "seed": 1,
+      "axes": {
+        "axes": [
+          {
+            "x_mm": -72.55224985209767,
+            "front_mm": -72.55320027832587,
+            "back_mm": -72.55129942586946,
+            "mismatch_mm": 0.0019008524564156914,
+            "ordinal": 0
+          },
+          {
+            "x_mm": -61.34272344246431,
+            "front_mm": -61.43817631295972,
+            "back_mm": -61.247270571968905,
+            "mismatch_mm": 0.19090574099081437,
+            "ordinal": 1
+          },
+          {
+            "x_mm": -27.816361287256164,
+            "front_mm": -27.82033285818552,
+            "back_mm": -27.812389716326813,
+            "mismatch_mm": 0.007943141858707037,
+            "ordinal": 2
+          },
+          {
+            "x_mm": -16.68645514914241,
+            "front_mm": -16.699418981530165,
+            "back_mm": -16.673491316754657,
+            "mismatch_mm": 0.025927664775508674,
+            "ordinal": 3
+          },
+          {
+            "x_mm": -5.518496703774947,
+            "front_mm": -5.494065100202451,
+            "back_mm": -5.542928307347443,
+            "mismatch_mm": 0.04886320714499259,
+            "ordinal": 4
+          },
+          {
+            "x_mm": 5.5589392064129655,
+            "front_mm": 5.639145372216061,
+            "back_mm": 5.478733040609871,
+            "mismatch_mm": 0.16041233160618962,
+            "ordinal": 5
+          },
+          {
+            "x_mm": 16.705532473774852,
+            "front_mm": 16.806191417106206,
+            "back_mm": 16.604873530443502,
+            "mismatch_mm": 0.20131788666270367,
+            "ordinal": 6
+          },
+          {
+            "x_mm": 27.944081692769856,
+            "front_mm": 28.098821244653813,
+            "back_mm": 27.789342140885903,
+            "mismatch_mm": 0.30947910376790944,
+            "ordinal": 7
+          },
+          {
+            "x_mm": 61.51148679723588,
+            "front_mm": 61.6758211099488,
+            "back_mm": 61.347152484522965,
+            "mismatch_mm": 0.3286686254258342,
+            "ordinal": 8
+          },
+          {
+            "x_mm": 72.42711488750595,
+            "front_mm": 72.47449656746825,
+            "back_mm": 72.37973320754367,
+            "mismatch_mm": 0.09476335992458473,
+            "ordinal": 9
+          }
+        ],
+        "discarded_axes": [
+          {
+            "wall": "back",
+            "x_mm": -50.14468886677402,
+            "reason": "NO_AVAILABLE_MATCH"
+          },
+          {
+            "wall": "back",
+            "x_mm": -38.96377454197989,
+            "reason": "NO_AVAILABLE_MATCH"
+          },
+          {
+            "wall": "back",
+            "x_mm": 38.89057532880215,
+            "reason": "NO_AVAILABLE_MATCH"
+          },
+          {
+            "wall": "back",
+            "x_mm": 50.32703224241252,
+            "reason": "NO_AVAILABLE_MATCH"
+          }
+        ],
+        "errors": []
+      },
+      "segment_count": 2,
+      "coverage": [
+        {
+          "segment": "seg.front.0.0",
+          "stone_count": 14
+        },
+        {
+          "segment": "seg.back.0.0",
+          "stone_count": 14
+        }
+      ],
+      "loss": {
+        "removed": [
+          "seg.front.0.0"
+        ],
+        "unsupported": [
+          "beam.1.0"
+        ],
+        "requires_review": []
+      },
+      "scope": "one beam at first floor; nominal contacts, no raycast or mesh consumer"
+    },
+    {
+      "seed": 20,
+      "axes": {
+        "axes": [
+          {
+            "x_mm": -72.32283203124021,
+            "front_mm": -72.44880797650758,
+            "back_mm": -72.19685608597285,
+            "mismatch_mm": 0.2519518905347269,
+            "ordinal": 0
+          },
+          {
+            "x_mm": -61.27512195674347,
+            "front_mm": -61.27523565590855,
+            "back_mm": -61.275008257578385,
+            "mismatch_mm": 0.00022739833016771627,
+            "ordinal": 1
+          },
+          {
+            "x_mm": -50.21554970774771,
+            "front_mm": -50.306974588979756,
+            "back_mm": -50.124124826515676,
+            "mismatch_mm": 0.18284976246408036,
+            "ordinal": 2
+          },
+          {
+            "x_mm": -16.709778437688044,
+            "front_mm": -16.725577480869298,
+            "back_mm": -16.69397939450679,
+            "mismatch_mm": 0.03159808636250716,
+            "ordinal": 3
+          },
+          {
+            "x_mm": -5.523721019387464,
+            "front_mm": -5.673918797127822,
+            "back_mm": -5.3735232416471055,
+            "mismatch_mm": 0.3003955554807165,
+            "ordinal": 4
+          },
+          {
+            "x_mm": 5.368290734651549,
+            "front_mm": 5.4387605039078135,
+            "back_mm": 5.297820965395285,
+            "mismatch_mm": 0.14093953851252827,
+            "ordinal": 5
+          },
+          {
+            "x_mm": 38.9641671224997,
+            "front_mm": 39.225316697787065,
+            "back_mm": 38.70301754721235,
+            "mismatch_mm": 0.5222991505747174,
+            "ordinal": 6
+          },
+          {
+            "x_mm": 50.26854468124583,
+            "front_mm": 50.46675593355345,
+            "back_mm": 50.0703334289382,
+            "mismatch_mm": 0.3964225046152521,
+            "ordinal": 7
+          },
+          {
+            "x_mm": 61.19927962759382,
+            "front_mm": 61.31512201511365,
+            "back_mm": 61.083437240073984,
+            "mismatch_mm": 0.23168477503966756,
+            "ordinal": 8
+          },
+          {
+            "x_mm": 72.45820462411669,
+            "front_mm": 72.41475173330689,
+            "back_mm": 72.50165751492649,
+            "mismatch_mm": 0.08690578161960616,
+            "ordinal": 9
+          }
+        ],
+        "discarded_axes": [
+          {
+            "wall": "back",
+            "x_mm": -38.7880568895675,
+            "reason": "NO_AVAILABLE_MATCH"
+          },
+          {
+            "wall": "back",
+            "x_mm": -27.902510221336208,
+            "reason": "NO_AVAILABLE_MATCH"
+          },
+          {
+            "wall": "back",
+            "x_mm": 16.783209930175463,
+            "reason": "NO_AVAILABLE_MATCH"
+          },
+          {
+            "wall": "back",
+            "x_mm": 27.738913774375366,
+            "reason": "NO_AVAILABLE_MATCH"
+          }
+        ],
+        "errors": []
+      },
+      "segment_count": 2,
+      "coverage": [
+        {
+          "segment": "seg.front.0.0",
+          "stone_count": 14
+        },
+        {
+          "segment": "seg.back.0.0",
+          "stone_count": 14
+        }
+      ],
+      "loss": {
+        "removed": [
+          "seg.front.0.0"
+        ],
+        "unsupported": [
+          "beam.1.0"
+        ],
+        "requires_review": []
+      },
+      "scope": "one beam at first floor; nominal contacts, no raycast or mesh consumer"
+    },
+    {
+      "seed": 73,
+      "axes": {
+        "axes": [
+          {
+            "x_mm": -72.43399624081135,
+            "front_mm": -72.62758898091799,
+            "back_mm": -72.24040350070473,
+            "mismatch_mm": 0.3871854802132617,
+            "ordinal": 0
+          },
+          {
+            "x_mm": -61.37051001967468,
+            "front_mm": -61.625858331262975,
+            "back_mm": -61.11516170808639,
+            "mismatch_mm": 0.5106966231765853,
+            "ordinal": 1
+          },
+          {
+            "x_mm": -27.920370707794845,
+            "front_mm": -27.857674644572267,
+            "back_mm": -27.983066771017427,
+            "mismatch_mm": 0.12539212644515985,
+            "ordinal": 2
+          },
+          {
+            "x_mm": -16.702744688055795,
+            "front_mm": -16.528583552312803,
+            "back_mm": -16.876905823798783,
+            "mismatch_mm": 0.34832227148597994,
+            "ordinal": 3
+          },
+          {
+            "x_mm": -5.630713090580008,
+            "front_mm": -5.480239049883509,
+            "back_mm": -5.781187131276507,
+            "mismatch_mm": 0.3009480813929981,
+            "ordinal": 4
+          },
+          {
+            "x_mm": 5.486319627296003,
+            "front_mm": 5.3839542913236915,
+            "back_mm": 5.588684963268314,
+            "mismatch_mm": 0.20473067194462224,
+            "ordinal": 5
+          },
+          {
+            "x_mm": 16.748308803130676,
+            "front_mm": 16.966974849738182,
+            "back_mm": 16.52964275652317,
+            "mismatch_mm": 0.4373320932150122,
+            "ordinal": 6
+          },
+          {
+            "x_mm": 50.2635872367404,
+            "front_mm": 50.28250267374302,
+            "back_mm": 50.24467179973778,
+            "mismatch_mm": 0.03783087400523755,
+            "ordinal": 7
+          },
+          {
+            "x_mm": 61.23297774351306,
+            "front_mm": 61.212022171953336,
+            "back_mm": 61.253933315072786,
+            "mismatch_mm": 0.041911143119449434,
+            "ordinal": 8
+          },
+          {
+            "x_mm": 72.4876250683985,
+            "front_mm": 72.64110877555697,
+            "back_mm": 72.33414136124003,
+            "mismatch_mm": 0.30696741431694363,
+            "ordinal": 9
+          }
+        ],
+        "discarded_axes": [
+          {
+            "wall": "back",
+            "x_mm": -50.234495891813566,
+            "reason": "NO_AVAILABLE_MATCH"
+          },
+          {
+            "wall": "back",
+            "x_mm": -38.909429469029746,
+            "reason": "NO_AVAILABLE_MATCH"
+          },
+          {
+            "wall": "back",
+            "x_mm": 27.889664689664222,
+            "reason": "NO_AVAILABLE_MATCH"
+          },
+          {
+            "wall": "back",
+            "x_mm": 39.147199962461954,
+            "reason": "NO_AVAILABLE_MATCH"
+          }
+        ],
+        "errors": []
+      },
+      "segment_count": 2,
+      "coverage": [
+        {
+          "segment": "seg.front.0.0",
+          "stone_count": 14
+        },
+        {
+          "segment": "seg.back.0.0",
+          "stone_count": 14
+        }
+      ],
+      "loss": {
+        "removed": [
+          "seg.front.0.0"
+        ],
+        "unsupported": [
+          "beam.1.0"
+        ],
+        "requires_review": []
+      },
+      "scope": "one beam at first floor; nominal contacts, no raycast or mesh consumer"
+    }
+  ],
   "discrepancies": [],
   "B1_0_complete": false,
-  "remaining": "extract pure front course producer; test openings and damaged geometry separately"
+  "remaining": "test assembly openings and damaged geometry separately"
 }
