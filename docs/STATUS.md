@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.20 — 2026-10-22
+
+Diez segundos físicos a velocidad 1, órbita sincronizada y muestras de reproducción cada fotograma. En el trabajador: esquirlas booleanas de menos de 0,05 mm agregadas sin perder caras, suelo de seguridad ampliado y control de fugas. Ensayo real de 512 piezas seleccionadas: 1.455 s, pico de 1.496 MB; exportación cerrada de 4.908.174 triángulos, pico de 2.658 MB. Sin fugas bajo el suelo, pero hasta 65,7 mm de movimiento en el último segundo: asentamiento y rendimiento pendientes. Botón de render con luces, DOF, Cycles, MP4/H.264 y microrelieve visual posterior a física. Inventariados seis archivos de fallo; no certificados todos sus casos DETAIL. Alcance y uso en `V03220.md`.
+
 ## v0.32.19 — 2026-10-21
 
 Reparada la triangulación de revocos y limitada la limpieza al plano de fractura; separados contactos Perlin puntuales antes de extruir. 48 combinaciones de semilla/daño verificadas. `repro_revoco_error.blend` preparado en 222,485 s: 3.960 cuerpos, 15.852 uniones, 167 fragmentos frágiles y ninguna pieza activa desconectada; reapertura y render verificados, no simulación completa. Vigas sin alojamientos traseros cuando terminan en cabecero; escalera superior de piedra hueca, vuelo de losa y seis muestras con 35 mm libres sobre desembarcos. Tejas rígidas ante hundimiento. Tres luces coloreadas, seguimiento de cámaras, materiales métricos y copia a reproducción. Manual y límites en `V03219.md`; entramado exterior y refinamiento artístico de fracturas siguen pendientes.

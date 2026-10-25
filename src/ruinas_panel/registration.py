@@ -18,7 +18,7 @@ for _field in config.FIELDS:
         settings.RuinSettings.__annotations__[_field].keywords['update']=preview.settings_changed
 
 
-CLASSES=(preferences.RuinPreferences,settings.RuinSettings,operators.RUIN_OT_generate,operators.RUIN_OT_solid,operators.RUIN_OT_seed,operators.RUIN_OT_physics_shake,
+CLASSES=(preferences.RuinPreferences,settings.RuinSettings,operators.RUIN_OT_generate,operators.RUIN_OT_solid,operators.RUIN_OT_seed,operators.RUIN_OT_physics_shake,operators.RUIN_OT_physics_ten_seconds,operators.RUIN_OT_render_setup,
          operators.RUIN_OT_holes,operators.RUIN_OT_reset,operators.RUIN_OT_physics,operators.RUIN_OT_physics_return,
          operators.RUIN_OT_physics_simulate,operators.RUIN_OT_physics_accept,operators.RUIN_OT_physics_clear,operators.RUIN_OT_physics_release,operators.RUIN_OT_physics_height_selection,operators.RUIN_OT_masonry_remove,operators.RUIN_OT_masonry_impact,operators.RUIN_OT_physics_edit,operators.RUIN_OT_physics_demo,operators.RUIN_OT_physics_fracture,operators.RUIN_OT_physics_limit,operators.RUIN_OT_physics_export,panel.RUIN_PT_panel)+panel.SUBPANELS
 

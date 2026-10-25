@@ -304,6 +304,77 @@ def connect_timber_fragments(scene,strength=None):
     return added
 
 
+def reinforce_safety_floor(scene):
+    'IA: Amplía solo el suelo pasivo de seguridad a al menos 10 m de lado y 0,5 m de profundidad, conservando su cota superior; evita una lámina que expulse piezas por debajo.'
+    for ob in scene.objects:
+        if not ob.get('collision_floor') or not ob.rigid_body or ob.rigid_body.type!='PASSIVE':continue
+        matrix=ob.matrix_basis;inverse=matrix.inverted()
+        points=[matrix@v.co for v in ob.data.vertices]
+        lo=Vector([min(v[k] for v in points) for k in range(3)]);hi=Vector([max(v[k] for v in points) for k in range(3)])
+        center=(lo+hi)/2
+        half_x=max(5,(hi.x-lo.x)/2);half_y=max(5,(hi.y-lo.y)/2)
+        bottom=min(lo.z,hi.z-.5)
+        old=ob.data;mesh=old.copy()
+        for vert,point in zip(mesh.vertices,points):
+            vert.co=inverse@Vector((center.x+(-half_x if point.x<center.x else half_x),center.y+(-half_y if point.y<center.y else half_y),bottom if point.z<center.z else hi.z))
+        local_center=inverse@Vector((center.x,center.y,(bottom+hi.z)/2))
+        mesh.transform(Matrix.Translation(-local_center))
+        mesh.update();ob.data=mesh;ob.matrix_world=matrix@Matrix.Translation(local_center)
+        if old.users==0:bpy.data.meshes.remove(old)
+        ob.rigid_body.collision_shape='BOX'
+
+
+def attach_collision_slivers(scene):
+    'IA: En copias métricas une residuos de corte de espesor efectivo menor de 0,05 mm a un fragmento próximo de igual origen y movilidad; conserva geometría, materiales y uniones externas.'
+    bodies=[o for o in scene.objects if o.type=='MESH' and o.rigid_body and o.get('source_piece') and not o.get('collision_floor')]
+    thin=set();groups={}
+    for ob in bodies:
+        groups.setdefault((ob['source_piece'],ob.get('physical_role'),ob.rigid_body.type),[]).append(ob)
+        if 'cut_component' not in ob:continue
+        bm=bmesh.new();bm.from_mesh(ob.data)
+        try:
+            area=sum(f.calc_area() for f in bm.faces);volume=abs(bm.calc_volume())
+            if area>0 and 2*volume/area<.00005:thin.add(ob)
+        finally:bm.free()
+    replacements={};report=[]
+    for ob in sorted(thin,key=lambda o:o.name):
+        candidates=[o for o in groups[(ob['source_piece'],ob.get('physical_role'),ob.rigid_body.type)] if o not in thin]
+        if not candidates:continue
+        target=min(candidates,key=lambda o:(o.location-ob.location).length_squared)
+        points=[target.matrix_world@Vector(v) for v in target.bound_box]
+        distance=sum(max(min(v[k] for v in points)-ob.location[k],0,ob.location[k]-max(v[k] for v in points))**2 for k in range(3))**.5
+        if distance>.005:continue
+        bm=bmesh.new();bm.from_mesh(target.data)
+        old_verts=set(bm.verts);old_faces=set(bm.faces)
+        try:
+            bm.from_mesh(ob.data);transform=target.matrix_world.inverted()@ob.matrix_world
+            for vert in bm.verts:
+                if vert not in old_verts:vert.co=transform@vert.co
+            mesh=target.data.copy();materials=list(mesh.materials);mapping={}
+            for index,mat in enumerate(ob.data.materials):
+                if mat not in materials:mesh.materials.append(mat);materials.append(mat)
+                mapping[index]=materials.index(mat)
+            for face in bm.faces:
+                if face not in old_faces:face.material_index=mapping.get(face.material_index,0)
+            bm.to_mesh(mesh);mesh.update();old_mesh=target.data;target.data=mesh
+            if old_mesh.users==0:bpy.data.meshes.remove(old_mesh)
+        finally:bm.free()
+        target.rigid_body.mass+=ob.rigid_body.mass
+        target.rigid_body.collision_shape='MESH'
+        replacements[ob]=target;report.append({'fragment':ob.name,'attached_to':target.name})
+    remove=[]
+    for ob in scene.objects:
+        c=ob.rigid_body_constraint
+        if not c:continue
+        if c.object1 in replacements:c.object1=replacements[c.object1]
+        if c.object2 in replacements:c.object2=replacements[c.object2]
+        if c.object1==c.object2:remove.append(ob)
+    bpy.data.batch_remove(ids=tuple(remove))
+    bpy.data.batch_remove(ids=tuple(replacements))
+    scene['attached_collision_slivers']=json.dumps(report)
+    return report
+
+
 def discard_collision_dust(scene):
     'IA: En un laboratorio en metros elimina residuos de piedra recortada menores de 0,2 mm en todos los ejes y sus uniones; conserva piezas diseñadas y fragmentos mayores.'
     dust=[]
@@ -489,8 +560,10 @@ def prepare(source_scene):
         scene.unit_settings.system='METRIC';scene.unit_settings.scale_length=1;scene.unit_settings.length_unit='MILLIMETERS'
         for key in ('physics_strength','physics_fragile_size','physics_frames','physics_precision','physics_adaptive_collisions','physics_sparse_constraints','physics_memory_mb','physics_timeout_seconds','physics_shake_strength'):
             setattr(scene.ruin_settings,key,getattr(p,key))
-        scene.frame_end=p.physics_frames;scene.gravity=(0,0,-9.81)
-        world=scene.rigidbody_world;world.substeps_per_frame=40;world.solver_iterations=60;world.point_cache.frame_end=scene.frame_end;world.time_scale=.2
+        scene.render.fps=source_scene.render.fps;scene.render.fps_base=source_scene.render.fps_base
+        scene.frame_end=p.physics_frames if p.is_property_set('physics_frames') else 1+round(10*scene.render.fps/scene.render.fps_base)
+        scene.ruin_settings.physics_frames=scene.frame_end;scene.gravity=(0,0,-9.81)
+        world=scene.rigidbody_world;world.substeps_per_frame=40;world.solver_iterations=60;world.point_cache.frame_end=scene.frame_end;world.time_scale=1
         from . import lab_cameras
         from .. import meta
         walls=meta.get(source_scene,'paredes_generadas',[]);lookup={w['id']:w for w in walls}

@@ -154,6 +154,33 @@ class RUIN_OT_physics_release(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class RUIN_OT_render_setup(bpy.types.Operator):
+    bl_idname='ruin.render_setup'
+    bl_label='Preparar render · luces, detalle y vídeo'
+    def execute(self,context):
+        'IA: Configura render del laboratorio o reproducción sin alterar física; no inicia render ni sobrescribe vídeos previos.'
+        from ..services import lab_cameras
+        if runtime.physics_job:return fail(self,context,ValueError('Espera a que termine el cálculo actual.'))
+        try:lab_cameras.prepare_render(context.scene)
+        except Exception as exc:return fail(self,context,exc)
+        self.report({'INFO'},'Render preparado · Ctrl+F12 para vídeo · '+context.scene.render.filepath)
+        return {'FINISHED'}
+
+
+class RUIN_OT_physics_ten_seconds(bpy.types.Operator):
+    bl_idname='ruin.physics_ten_seconds'
+    bl_label='Preparar toma de 10 s y luces'
+    bl_options={'REGISTER','UNDO'}
+    def execute(self,context):
+        'IA: Sincroniza duración, órbita y luces del laboratorio editable; bloquea cambios mientras trabaja el hijo.'
+        from ..services import lab_cameras
+        if runtime.physics_job:return fail(self,context,ValueError('Espera a que termine el cálculo actual.'))
+        try:end=lab_cameras.ten_seconds(context.scene)
+        except Exception as exc:return fail(self,context,exc)
+        self.report({'INFO'},'Diez segundos físicos · fotogramas 1–%s · órbita y luces listas'%end)
+        return {'FINISHED'}
+
+
 class RUIN_OT_physics_simulate(bpy.types.Operator):
     bl_idname='ruin.physics_simulate'
     bl_label='Simular derrumbe'

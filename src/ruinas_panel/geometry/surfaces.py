@@ -40,6 +40,28 @@ def grain_uv(ob,values):
     for loop in ob.data.loops:layer.data[loop.index].uv=values[loop.vertex_index]
 
 
+def render_material(mat):
+    'IA: Añade microrelieve de sombreado a una copia compartida del material métrico; no subdivide ni altera geometría, poses o colisiones.'
+    if mat.get('ruin_render_detail'):return mat
+    base=lab_material(mat);name=base.name+' / detalle render'
+    existing=bpy.data.materials.get(name)
+    if existing and existing.get('ruin_render_detail'):return existing
+    result=base.copy();result.name=name;result['ruin_render_detail']=True
+    nodes=result.node_tree.nodes;links=result.node_tree.links
+    bsdf=next((n for n in nodes if n.type=='BSDF_PRINCIPLED'),None)
+    if bsdf:
+        coords=nodes.new('ShaderNodeTexCoord');noise=nodes.new('ShaderNodeTexNoise')
+        noise.label='Microrelieve visual posterior a física';noise.inputs['Scale'].default_value=80;noise.inputs['Detail'].default_value=3
+        links.new(coords.outputs['Generated'],noise.inputs['Vector'])
+        bump=nodes.new('ShaderNodeBump');bump.inputs['Strength'].default_value=.18
+        bump.inputs['Distance'].default_value=.000008 if mat.name.startswith(('Hierro','Latón')) else .000025
+        links.new(noise.outputs['Fac'],bump.inputs['Height'])
+        for old in list(bsdf.inputs['Normal'].links):
+            previous=old.from_socket;links.remove(old);links.new(previous,bump.inputs['Normal'])
+        links.new(bump.outputs['Normal'],bsdf.inputs['Normal'])
+    return result
+
+
 def lab_material(mat):
     'IA: Copia compartida para laboratorio en metros: microrelieve mil veces menor, coordenadas ligadas a pieza para que no naden durante la simulación; fuente intacta.'
     if mat.get('ruin_lab_material'):return mat

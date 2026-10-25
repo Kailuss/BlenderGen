@@ -49,6 +49,9 @@ class RUIN_PT_panel(bpy.types.Panel):
         layout = self.layout
         if context.scene.get('ruinas_replay'):
             layout.prop(context.scene,'camera',text='Cámara de render')
+            if context.scene.get('physics_result_scene'):
+                layout.operator('ruin.render_setup',icon='RENDER_ANIMATION')
+                layout.prop(context.scene.render,'filepath',text='Salida de vídeo')
             layout.label(text=context.scene.get('playback_instructions','Demostración calculada · pulsa Espacio'))
             layout.label(text='Reproducción calculada; edita en el laboratorio')
             if context.scene.get('lab_scene'):layout.operator('ruin.physics_edit')
@@ -62,6 +65,8 @@ class RUIN_PT_panel(bpy.types.Panel):
             return
         if context.scene.get('ruinas_physics_lab'):
             layout.prop(context.scene,'camera',text='Cámara de render')
+            layout.operator('ruin.render_setup',icon='RENDER_ANIMATION')
+            layout.prop(context.scene.render,'filepath',text='Salida de vídeo')
             layout.label(text='Física · '+context.scene.get('physics_room','tabique'))
             from ..services import physics
             if physics.source_matches(context.scene) is False:
@@ -109,6 +114,8 @@ class RUIN_PT_panel(bpy.types.Panel):
             layout.prop(context.scene.ruin_settings,'physics_sparse_constraints')
             layout.prop(context.scene.ruin_settings,'physics_memory_mb')
             layout.prop(context.scene.ruin_settings,'physics_timeout_seconds')
+            layout.operator('ruin.physics_ten_seconds',icon='TIME')
+            layout.label(text='Duración: %.1f s · tiempo físico ×%.2f'%((context.scene.frame_end-context.scene.frame_start)*context.scene.render.fps_base/context.scene.render.fps,context.scene.rigidbody_world.time_scale))
             layout.operator('ruin.physics_simulate',icon='PLAY')
             layout.label(text=context.scene.ruin_settings.status)
             if not structural:layout.operator('ruin.physics_accept',icon='CHECKMARK')

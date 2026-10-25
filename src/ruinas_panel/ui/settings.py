@@ -48,7 +48,7 @@ class RuinSettings(bpy.types.PropertyGroup):
     physics_precision: EnumProperty(name='Precisión física',items=[('BALANCED','Equilibrada','12 subpasos y 30 iteraciones: configuración de carga validada'),('HIGH','Alta','40 subpasos y 60 iteraciones: más coste por fotograma')],default='BALANCED')
     physics_adaptive_collisions: BoolProperty(name='Optimizar colisiones',default=True,description='Simplifica colisiones sin cambiar detalle visible: piedra hasta 5 % de volumen añadido; madera hasta 25 % y 0,1 mm de relleno medio')
     physics_export_voxel: FloatProperty(name='Resolución STL (mm)',default=.35,min=.15,max=1,description='Unión volumétrica del resultado físico: puede perder detalles menores que esta resolución')
-    physics_frames: IntProperty(name='Fotogramas',default=120,min=24,max=240)
+    physics_frames: IntProperty(name='Fotogramas',default=241,min=24,max=3601)
     physics_memory_mb: IntProperty(name='Límite de memoria (MB)',description='Memoria máxima del proceso aislado; deja RAM libre para Blender y el sistema',default=config.PHYSICS_JOB_MEMORY_MB,min=1024,max=16384)
     physics_timeout_seconds: IntProperty(name='Tiempo máximo (s)',description='Cancela el cálculo aislado si supera este presupuesto',default=config.PHYSICS_JOB_SECONDS,min=60,max=7200)
     interior_layout: EnumProperty(name='Habitaciones',items=[('OPEN','Planta abierta','Sin tabiques interiores'),('TWO','Dos estancias','Estancia de acceso y habitación trasera'),('THREE','Tres estancias','Dos cuartos conectados mediante distribuidor trasero')],default='OPEN')

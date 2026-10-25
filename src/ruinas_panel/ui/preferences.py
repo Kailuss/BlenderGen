@@ -4,11 +4,13 @@ from .. import config
 from bpy.props import BoolProperty
 from bpy.props import EnumProperty
 from bpy.props import FloatProperty
+from bpy.props import StringProperty
 import bpy
 
 
 class RuinPreferences(bpy.types.AddonPreferences):
     bl_idname = __package__.split('.')[0]
+    render_directory: StringProperty(name='Carpeta común de vídeos',subtype='DIR_PATH',default='//Videos Render/',description='Elige una ruta absoluta para reunir vídeos de todos los archivos en una sola carpeta')
     pause_refine: FloatProperty(name='Pausar refinado a partir de (s)', default=config.PREVIEW_PAUSE_SECONDS['refine'], min=1, max=120,
                                 description='Si el último refinado tardó más, la vista automática espera a «Actualizar»')
     pause_fast: FloatProperty(name='Pausar vista rápida a partir de (s)', default=config.PREVIEW_PAUSE_SECONDS['fast'], min=2, max=300,
@@ -30,6 +32,7 @@ class RuinPreferences(bpy.types.AddonPreferences):
         col = layout.column(heading='Generación')
         col.prop(self, 'scene_units')
         layout.prop(self, 'export_method', expand=True)
+        layout.prop(self,'render_directory')
 
 
 def get():

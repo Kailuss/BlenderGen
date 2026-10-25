@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 import bpy
 import numpy as np
-from mathutils import Quaternion,Matrix
+from mathutils import Quaternion,Matrix,Vector
 
 
 def progress(path,**values):
@@ -20,9 +20,11 @@ def progress(path,**values):
 
 
 def run(output,path,name):
-    'IA: Calcula contactos a escala ampliada solo en el hijo; devuelve poses y tamaños originales cada cuatro fotogramas, sin alterar el laboratorio.'
+    'IA: Calcula contactos a escala ampliada solo en el hijo; conserva cada fotograma de poses originales para no interpolar a través de apoyos entre contactos.'
     scene=bpy.data.scenes[name];bpy.context.window.scene=scene
     from ruinas_panel.services import structural_physics
+    structural_physics.reinforce_safety_floor(scene)
+    attached=structural_physics.attach_collision_slivers(scene)
     dust=structural_physics.discard_collision_dust(scene)
     pruned=structural_physics.prune_static_constraints(scene)
     structural_physics.merge_ground(scene)
@@ -33,21 +35,37 @@ def run(output,path,name):
     from ruinas_panel.services import material_strength
     material_strength.apply(scene)
     world=scene.rigidbody_world
-    if scene.ruin_settings.physics_precision=='BALANCED':world.substeps_per_frame=12;world.solver_iterations=30
-    else:world.substeps_per_frame=40;world.solver_iterations=60
+    if scene.ruin_settings.physics_precision=='BALANCED':world.substeps_per_frame=40;world.solver_iterations=30
+    else:world.substeps_per_frame=80;world.solver_iterations=60
     objects=[o for o in scene.objects if o.type=='MESH']
     if not scene.get('ruinas_physics_lab') or not objects:raise ValueError('Laboratorio vacío o inválido.')
     from ruinas_panel import config
     factor=config.PHYSICS_SOLVER_SCALE
     scale_solver(scene,factor)
+    for ob in objects:
+        if ob.rigid_body and ob.rigid_body.type=='ACTIVE':
+            ob.rigid_body.use_deactivation=True
+            ob.rigid_body.deactivate_linear_velocity=.002*factor
+            ob.rigid_body.deactivate_angular_velocity=.1
     bpy.context.view_layer.update()
     scene.frame_set(0)
-    samples=sorted(set(range(1,scene.frame_end+1,4))|{scene.frame_end})
+    samples=range(1,scene.frame_end+1)
     poses=np.zeros((len(samples),len(objects),10),dtype=np.float32);lookup={f:i for i,f in enumerate(samples)}
     started=time.perf_counter()
+    floors=[o for o in objects if o.get('collision_floor')]
+    monitored=[o for o in objects if o.rigid_body and o.rigid_body.type=='ACTIVE' and not o.get('impactor')]
     for frame in range(1,scene.frame_end+1):
         scene.frame_set(frame)
         deps=bpy.context.evaluated_depsgraph_get()
+        if floors:
+            floor=floors[0];floor_matrix=floor.evaluated_get(deps).matrix_world
+            floor_top=max((floor_matrix@Vector(v)).z for v in floor.bound_box)
+            for ob in monitored:
+                matrix=ob.evaluated_get(deps).matrix_world
+                if max((matrix@Vector(v)).z for v in ob.bound_box)<floor_top-.001*factor:
+                    details={'frame':frame,'object':ob.name,'collision_shape':ob.rigid_body.collision_shape,'position_m':list(matrix.translation/factor),'previous_position_m':poses[lookup[frame-1],objects.index(ob),:3].tolist() if frame>1 else None,'floor_bounds_m':[[min((floor_matrix@Vector(v))[i] for v in floor.bound_box)/factor,max((floor_matrix@Vector(v))[i] for v in floor.bound_box)/factor] for i in range(3)],'local_bounds_m':[[min(v[i] for v in ob.bound_box)/factor,max(v[i] for v in ob.bound_box)/factor] for i in range(3)]}
+                    path.with_name('escaped_body.json').write_text(json.dumps(details,indent=2),encoding='utf8')
+                    raise ValueError('Fuga bajo el suelo de seguridad en fotograma %s: %s. No se entrega una reproducción inválida.'%(frame,ob.name))
         if frame in lookup:
             for index,ob in enumerate(objects):
                 matrix=ob.evaluated_get(deps).matrix_world
@@ -56,6 +74,7 @@ def run(output,path,name):
         progress(path,stage='Simulando',frame=frame,total=scene.frame_end,seconds=time.perf_counter()-started)
     result=bpy.data.scenes.new('RESULTADO · '+scene.name)
     result['ruinas_replay']=True;result['physics_result_scene']=True;result['source_scene']=scene.get('source_scene','');result['lab_scene']=name
+    result['attached_collision_slivers']=json.dumps(attached)
     for key in ('source_signature','physics_room','structural_physics','masonry_lab','shake_report'):
         if key in scene:result[key]=scene[key]
     result['playback_instructions']='Simulación aislada calculada · Espacio';result.frame_end=scene.frame_end
@@ -96,7 +115,7 @@ def run(output,path,name):
                         for curve in bag.fcurves:
                             for key in curve.keyframe_points:key.interpolation='CONSTANT' if curve.data_path in ('hide_viewport','hide_render') else 'LINEAR'
         if index%100==0:progress(path,stage='Guardando reproducción',objects=index,total=len(objects))
-    result['simulation_report']=json.dumps({'objects':len(objects),'moving':moving,'seconds':time.perf_counter()-started,'sample_step':4,'static_constraints_omitted':pruned,'solver_scale':factor,'collision_dust_omitted':dust})
+    result['simulation_report']=json.dumps({'objects':len(objects),'moving':moving,'seconds':time.perf_counter()-started,'sample_step':1,'static_constraints_omitted':pruned,'solver_scale':factor,'collision_dust_omitted':dust,'time_scale':world.time_scale,'duration_seconds':(scene.frame_end-1)*scene.render.fps_base/scene.render.fps})
     from ruinas_panel.services import lab_cameras
     lab_cameras.copy_to_replay(scene,result)
     result.frame_set(1);bpy.data.libraries.write(str(output),{result},fake_user=True)
