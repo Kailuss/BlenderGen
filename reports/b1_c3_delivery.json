@@ -1,0 +1,12 @@
+{
+  "version": "B1-C3_2026-10-25",
+  "code_commit": "4e28654",
+  "C1": "validated: four digests unchanged and 18 intact comparisons",
+  "pure_tests": 46,
+  "random_models": 200,
+  "T1": "measured, causal acceptance pending",
+  "T2": "measured, causal acceptance and exact joint shift tracking pending",
+  "B1_0_closed": false,
+  "T4_started": false,
+  "docx_visual_verified": false
+}
