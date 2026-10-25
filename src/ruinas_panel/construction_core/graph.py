@@ -109,7 +109,7 @@ def affected(model,changed):
 
 
 def loss(model,removed):
-    'IA: Propaga pérdida si falla cualquier grupo k-de-n, distinguiendo extremos; sin política solo pide revisión y nunca inventa caída.'
+    'IA: Compara clausuras optimista/pesimista: pérdidas seguras en ambas y revisión solo en su diferencia; respeta grupos k-de-n por extremo.'
     nodes={e['id']:e for e in model['elements']};removed=set(removed)&nodes.keys()
     supports=defaultdict(set)
     for r in model['relations']:

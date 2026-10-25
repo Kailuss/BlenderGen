@@ -1,5 +1,5 @@
 """B1.0: juntas nominales frente a mallas antes de modificar el productor."""
-import json,random,subprocess,sys,time
+import json,subprocess,sys,time
 from pathlib import Path
 import bpy
 
@@ -15,7 +15,7 @@ AXIS_TOLERANCES_MM={'front':.05,'back':.001}
 
 
 def run():
-    'IA: Mide tres cotas y tres semillas sin tocar el laboratorio; identifica la ausencia de productor puro de fachada en vez de ocultarla.'
+    'IA: Compara dos cotas de viga y una sonda con layout puro en tres semillas; verifica cobertura de segmentos y pérdida localizada sin ejecutar el laboratorio.'
     addon.register();runtime.busy=True;runtime.preview=True;runtime.instance_build=False
     p=bpy.context.scene.ruin_settings
     p.layout_mode='ROOM';p.height_type='THREE';p.length=190;p.building_depth=100

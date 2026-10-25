@@ -25,7 +25,7 @@ class FloorSupportGroups(unittest.TestCase):
             with self.assertRaises(ValueError):graph.loss(m,[])
 
     def test_review_propagates_without_inventing_failure(self):
-        'IA: La pérdida de un apoyo con política desconocida obliga a revisar sus descendientes, sin declararlos caídos.'
+        'IA: La incertidumbre solo alcanza descendientes sin redundancia suficiente en el caso pesimista, sin declararlos caídos.'
         m=fixture();beam=next(e for e in m['elements'] if e['id']=='beam')
         del beam['support_groups']
         m['elements'].append(schema.element('upper','PLANK'))
