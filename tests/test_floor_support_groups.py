@@ -33,8 +33,10 @@ class FloorSupportGroups(unittest.TestCase):
         m['relations'].append(adapter.relation('upper','plank','SUPPORTED_BY'))
         result=graph.loss(m,['c'])
         self.assertEqual(result['unsupported'],[])
-        self.assertEqual(result['requires_review'],['beam','plank','upper'])
+        self.assertEqual(result['requires_review'],['beam'])
         self.assertNotIn('neighbour',result['requires_review'])
+        result=graph.loss(m,['c','neighbour'])
+        self.assertEqual(result['requires_review'],['beam','plank','upper'])
 
     def test_header_post_cascade(self):
         'IA: Perder el poste hace caer su cabecero y la viga que termina allí, sin afectar la viga larga independiente.'

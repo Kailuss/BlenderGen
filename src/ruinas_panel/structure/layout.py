@@ -4,6 +4,30 @@ from .. import config
 from .. import runtime
 from itertools import combinations
 import random
+import math
+
+
+def masonry_intervals(p,wall,z,edges=None):
+    'IA: Intervalos de piedra antes de bisel/desgaste, derivados del productor puro; incluye puerta y derrumbe de fachada, no vanos posteriores de assembly.'
+    if wall['id']=='front':
+        plan=front_courses(p);edges=plan['edges'];result=[]
+        for row,line in enumerate(plan['courses']):
+            z0=edges[row]+.23;z1=edges[row+1]-.25
+            for a,b in line:
+                meets=any((abs(a-(c['x_mm']+c['width_mm']/2+.2))<.01 or abs(b-(c['x_mm']-c['width_mm']/2-.2))<.01) and z0<c['height_mm'] for c in plan['centers'])
+                if z0<z<z1-(.28 if meets else 0):
+                    result.append((a if a<=-p.length/2+.01 else a+.22,b if b>=p.length/2-.01 else b-.22))
+        return result
+    edges=course_layout(p)[0] if edges is None else edges
+    return [(a+.18,b-.18) for c in return_courses(p,wall['id'],wall['start'],wall['end'],wall['height'],edges)
+            if c['z0']<z<c['z1'] for a,b in c['pieces']]
+
+
+def masonry_joints(intervals):
+    'IA: Juntas nominales entre dos piedras con anchura residual suficiente para el alojamiento histórico de 5 mm; no consulta geometría.'
+    ordered=sorted(intervals)
+    return [((a[1]+b[0])/2,((a[1]-a[0])+(b[1]-b[0]))/2) for a,b in zip(ordered,ordered[1:])
+            if -.05<=b[0]-a[1]<=1.5 and min(a[1]-a[0],b[1]-b[0])>=5.3]
 
 
 def distribution_seed(p):
@@ -224,4 +248,190 @@ def trim_door_courses(courses,door,rh):
                 if b-right>1.3:
                     kept.append((right,b))
         result.append(kept)
+    return result
+
+
+
+def front_courses(p):
+    'IA: Calcula hiladas, derrumbe, puerta y pilares sin mallas; conserva el orden de RNG y devuelve intervalos nominales en mm.'
+    L,H,T=p.length,p.height,p.thickness
+    dseed=distribution_seed(p);door=plan_door(p)
+    z_edges,rh=course_layout(p);rows=len(z_edges)-1
+    # Referencias físicas de los extremos. El límite general y las hiladas mandan.
+    left=min(H,p.left_height)
+    right=min(H,p.right_height)
+    # Una franja corta en cada extremo preserva su altura y el apoyo de sus piedras.
+    edge=min(.20,max(.10,2.2*rh/L))
+    center=max(.05,min(.95,(p.break_position-edge)/(1-2*edge)))
+    # Irregularidad del derrumbe, fijada por la semilla de distribución: laderas asimétricas,
+    # a veces una muesca secundaria y una silueta que sigue el perfil con un paseo aleatorio gaussiano.
+    cr=random.Random(dseed+61717)
+    wide=(.24*cr.uniform(.7,1.35),.24*cr.uniform(.7,1.35))
+    notch=(center+cr.choice((-1,1))*cr.uniform(.15,.3),cr.uniform(.08,.14),cr.uniform(.25,.5)) if cr.random()<.5 else None
+    def bell(u):
+        'IA: Campana del derrumbe con ancho distinto a cada lado del centro, más la muesca secundaria si la hay.'
+        value=math.exp(-((u-center)/wide[0 if u<center else 1])**2)
+        if notch:
+            value=max(value,notch[2]*math.exp(-((u-notch[0])/notch[1])**2))
+        return value
+    g0=bell(0)
+    g1=bell(1)
+    peak=max(.1,max(bell(center),1)-((1-center)*g0+center*g1))
+    def collapse_loss(x):
+        'IA: Pérdida 0-1 del perfil de derrumbe en x; 0 en las franjas extremas que conservan su altura.'
+        u=max(0,min(1,(x/L+.5-edge)/(1-2*edge)))
+        return max(0,min(1,(bell(u)-((1-u)*g0+u*g1))/peak))
+    def smooth_height(x):
+        'IA: Perfil continuo del derrumbe (sin irregularidad), entre la altura de los extremos y 12 mm.'
+        u=max(0,min(1,(x/L+.5-edge)/(1-2*edge)))
+        baseline=left*(1-u)+right*u
+        return baseline,max(12,baseline-p.collapse**1.6*(baseline-12)*collapse_loss(x))
+    # Silueta: paseo aleatorio gaussiano cada media piedra que vuelve hacia el perfil (reversión 0,25);
+    # el ruido crece con la pérdida local, y caídas bruscas ocasionales dejan cortes casi verticales.
+    step=max(2.0,L/max(3,round(L/(rh*1.8)))/2)
+    samples=int(L/step)+1
+    outline=[]
+    level=smooth_height(-L/2)[1]
+    for i in range(samples):
+        x=-L/2+i*step
+        baseline,target=smooth_height(x)
+        loss=collapse_loss(x)
+        level+=.25*(target-level)+cr.gauss(0,1)*rh*(.5+1.3*loss)*p.collapse**1.6
+        if cr.random()<.12*loss*p.collapse**1.6:
+            level-=rh*cr.uniform(1.5,3)
+        level=max(12,min(baseline,level))
+        outline.append(level)
+    def requested_height(x):
+        'IA: Silueta irregular del derrumbe previa al escalonado; conserva apoyo suficiente sobre el dintel.'
+        f=max(0,min(samples-1,(x+L/2)/step))
+        i=min(samples-2,int(f))
+        result=outline[i]+(outline[i+1]-outline[i])*(f-i)
+        if door and door['left']-3*rh<=x<=door['right']+3*rh:
+            result=max(result,door['lintel_top'])
+        return result
+    def erode_edges(line,rng,z):
+        'IA: Quita al azar piedras del borde de un hueco según la pérdida local; las de encima caen por la regla de apoyo.'
+        result=[]
+        for i,(a,b) in enumerate(line):
+            mid=(a+b)/2
+            open_left=i==0 or abs(line[i-1][1]-a)>.01
+            open_right=i==len(line)-1 or abs(line[i+1][0]-b)>.01
+            wall_end=a<=-L/2+.01 or b>=L/2-.01
+            exposed=(open_left and a>-L/2+.01) or (open_right and b<L/2-.01)
+            if exposed and not wall_end and not near_door(mid,z) and rng.random()<p.collapse*(.1+.45*collapse_loss(mid)):
+                continue
+            result.append((a,b))
+        return result
+    def near_door(x,z):
+        'IA: Protege el entorno del dintel hasta una hilada por encima; más arriba el derrumbe varía como el resto.'
+        return door and door['left']-3*rh<=x<=door['right']+3*rh and z<=door['lintel_top']+rh
+    # Aparejo a media pieza: ambos extremos terminan en piezas enteras o medias,
+    # nunca en lascas residuales por acumular anchuras aleatorias.
+    bays=max(3,round(L/(rh*1.8)))
+    pitch=L/bays
+    courses=[]
+    for row in range(rows):
+        jr=random.Random(dseed+row*3701)
+        subdivisions=min(p.bond_subdivisions,max(1,int(pitch/3.2))) if row%2 else 1
+        local_pitch=pitch/subdivisions
+        offset=.5 if row%2 else 1.0
+        joints=[-L/2]
+        for i in range(bays*subdivisions):
+            x=-L/2+(i+offset)*local_pitch
+            if x<L/2-.01:
+                jitter=.12 if subdivisions==1 else .08
+                joints.append(x+jr.uniform(-1,1)*local_pitch*jitter*p.stone_variation)
+        joints.append(L/2)
+        kept=[]
+        kr=random.Random(dseed+row*7919+5)
+        for x,end in zip(joints,joints[1:]):
+            mid=(x+end)/2
+            # Variación gaussiana por piedra: escalones desiguales en vez de una piedra menos por hilada.
+            zmid=(z_edges[row]+z_edges[row+1])/2
+            spread=0 if near_door(mid,zmid) else kr.gauss(0,1)*rh*(.15+1.0*collapse_loss(mid))*p.collapse
+            wanted=(z_edges[row]+z_edges[row+1])/2<=requested_height(mid)+spread
+            support=1.0 if row==0 else sum(max(0,min(end,b)-max(x,a)) for a,b in courses[row-1])/(end-x)
+            # Umbral de apoyo variable por piedra: con hiladas a media piedra, un umbral fijo del 62 %
+            # quitaba siempre la piedra del borde (50 % de apoyo) y dejaba una escalera perfecta de 45°.
+            need=.62 if near_door(mid,zmid) else kr.uniform(.35,.72)
+            if support<need:
+                continue
+            # Diente: a veces sobrevive una piedra apoyada por encima del perfil.
+            tooth=not near_door(mid,zmid) and kr.random()<.12*p.collapse*collapse_loss(mid)
+            if wanted or tooth:
+                kept.append((x,end))
+        if row>0:
+            kept=erode_edges(kept,kr,(z_edges[row]+z_edges[row+1])/2)
+        courses.append(kept)
+    def height(x):
+        'IA: Consulta altura real de hiladas conservadas, no el perfil continuo del derrumbe.'
+        return max([z_edges[r+1] for r,line in enumerate(courses) for a,b in line if a<=x<=b] or [z_edges[1]])
+    # Planificar refuerzos antes de huecos para mantenerlos íntegros.
+    centers=[]
+    for cx,width in pillar_layout(p,door,rh):
+        top=height(cx)
+        clearance=2+max(2.8,rh*.65)
+        if door and cx+width/2>door['left']-clearance and cx-width/2<door['right']+clearance:
+            continue
+        centers.append({'x_mm':cx,'width_mm':width,'height_mm':top})
+    for side in (-1,1):
+        corner=turn_mode(p,side)!='NONE'
+        connection=p.connection_enabled and (p.connection_side=='BOTH' or (side<0 and p.connection_side=='LEFT') or (side>0 and p.connection_side=='RIGHT'))
+        if corner or connection:
+            width=corner_width(p) if corner else 12.0
+            cx=side*(L/2-width/2)
+            centers=[c for c in centers if abs(c['x_mm']-cx)>width+2]
+            centers.append({'x_mm':cx,'width_mm':width,'height_mm':height(cx),'connection':True,'corner':side if corner else 0})
+    # El pilar sustituye al aparejo en su franja: no hay dos tapas coplanares.
+    trimmed=[]
+    for row_index,line in enumerate(courses):
+        fragments=[]
+        for a,b in line:
+            pieces=[(a,b)]
+            for pier in centers:
+                if z_edges[row_index]>=pier['height_mm']-.01:
+                    continue
+                left=pier['x_mm']-pier['width_mm']/2-.2
+                right=pier['x_mm']+pier['width_mm']/2+.2
+                remaining=[]
+                for x,y in pieces:
+                    if y<=left or x>=right:
+                        remaining.append((x,y))
+                    else:
+                        if left-x>1.8:
+                            remaining.append((x,left))
+                        if y-right>1.8:
+                            remaining.append((right,y))
+                pieces=remaining
+            fragments.extend(pieces)
+        trimmed.append(fragments)
+    courses=trimmed
+    if door:
+        courses=trim_door_courses(courses,door,z_edges)
+    courses=[merge_thin_stones(line,max(3.2,(z_edges[r+1]-z_edges[r])*.65)) for r,line in enumerate(courses)]
+    return {'courses':courses,'centers':centers,'door':door,'edges':z_edges,'row_height':rh}
+
+
+def return_courses(p,wall_id,start,end,height,edges):
+    'IA: Aparejo puro de retornos y trasera; intervalos nominales y cotas previos al bisel, con semillas históricas por pared.'
+    length=end-start;rh=(p.height-2)/(len(edges)-1);result=[]
+    bays=max(2,round(length/(rh*1.8)))
+    pitch=length/bays
+    for row in range(len(edges)-1):
+        if edges[row]>=height-.01:
+            break
+        z0=edges[row]+.23
+        z1=min(edges[row+1],height)-.25
+        subdivisions=min(p.bond_subdivisions,max(1,int(pitch/3.2))) if row%2 else 1
+        local=pitch/subdivisions
+        jr=random.Random(distribution_seed(p)+row*3701+{'left':101,'right':211,'back':307}.get(wall_id,0))
+        joints=[start]
+        for j in range(bays*subdivisions):
+            x=start+(j+(.5 if row%2 else 1))*local
+            if start+.01<x<end-.01:
+                jitter=.12 if subdivisions==1 else .08
+                joints.append(x+jr.uniform(-1,1)*local*jitter*p.stone_variation)
+        joints.append(end)
+        pieces=merge_thin_stones(list(zip(joints,joints[1:])),3.2)
+        result.append({'row':row,'z0':z0,'z1':z1,'pieces':pieces})
     return result

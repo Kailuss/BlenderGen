@@ -20,6 +20,9 @@ La base 0.31 integra el edificio completo aportado en `dist/ruinas_v031_completo
 | Estado temporal | `runtime.py` | Única instancia por sesión; no persiste en .blend |
 | Datos de auditoría en la escena | `meta.py` | Un solo grupo `scene['ruinas']` con JSON por clave; borra las claves sueltas antiguas |
 | Aparejo, alturas, planificación de puerta | `structure/layout.py` | Cálculo de intervalos y cotas sin crear mallas |
+| Aparejo puro B1 | `structure/layout.py` | `front_courses` y `return_courses` son consumidos por `walls`; consultas nominales sin leer vértices |
+| Camino de carga mínimo B1 | `structure/floor_frame.py` | Ejes concordantes y esqueleto de una viga sobre segmentos; todavía sin construir el forjado completo |
+| Dependencias constructivas | `construction_core/graph.py` | Grupos de apoyo excluyentes, pérdidas optimista/pesimista y revisión solo cuando cambia el resultado |
 | Planos interiores y tabiques | `structure/floor_plan.py`, `structure/interiors.py` | Plan puro de estancias y conexiones antes de vanos; geometría de planta baja consume sus reservas |
 | Fachada, pilares, paredes contiguas | `structure/walls.py` | Orquesta piezas; asigna wall_id |
 | Integración del edificio | `structure/assembly.py` | Ordena derrumbe, huecos, apoyos, suelos, escaleras y cubierta antes del acabado |

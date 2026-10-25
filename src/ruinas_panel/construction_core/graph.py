@@ -110,28 +110,21 @@ def affected(model,changed):
 
 def loss(model,removed):
     'IA: Propaga pérdida si falla cualquier grupo k-de-n, distinguiendo extremos; sin política solo pide revisión y nunca inventa caída.'
-    nodes={e['id']:e for e in model['elements']};missing=set(removed)&nodes.keys();failed=set();review=set()
+    nodes={e['id']:e for e in model['elements']};removed=set(removed)&nodes.keys()
     supports=defaultdict(set)
     for r in model['relations']:
         if r['kind']=='SUPPORTED_BY' and r['source'] in nodes and r['target'] in nodes:supports[r['source']].add(r['target'])
     policies={key:support_policy(node,supports[key]) for key,node in nodes.items()}
-    changed=True
-    while changed:
-        changed=False
-        for key,parents in supports.items():
-            if key in missing or not parents&missing:continue
-            groups=policies[key]
-            if groups is None:review.add(key);continue
-            if any(len(set(g['members'])-missing)<g['minimum'] for g in groups):
-                failed.add(key);missing.add(key);changed=True
-    # La incertidumbre no se convierte en pérdida confirmada, pero exige revisar
-    # todos los descendientes por apoyo, incluso si conservan redundancia nominal.
-    children=defaultdict(set)
-    for key,parents in supports.items():
-        for parent in parents:children[parent].add(key)
-    queue=deque(sorted(review-missing))
-    while queue:
-        for child in sorted(children[queue.popleft()]):
-            if child not in review and child not in missing:
-                review.add(child);queue.append(child)
-    return {'removed':sorted(set(removed)&nodes.keys()),'unsupported':sorted(failed),'requires_review':sorted(review-missing)}
+    def closure(pessimistic):
+        'IA: Punto fijo monótono de pérdidas; política desconocida conserva en optimista y pierde en pesimista solo tras perder algún apoyo.'
+        missing=set(removed);changed=True
+        while changed:
+            changed=False
+            for key,parents in supports.items():
+                if key in missing or not parents&missing:continue
+                groups=policies[key]
+                fails=pessimistic if groups is None else any(len(set(g['members'])-missing)<g['minimum'] for g in groups)
+                if fails:missing.add(key);changed=True
+        return missing
+    optimistic=closure(False);pessimistic=closure(True)
+    return {'removed':sorted(removed),'unsupported':sorted(optimistic-removed),'requires_review':sorted(pessimistic-optimistic)}

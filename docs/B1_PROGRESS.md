@@ -1,5 +1,17 @@
 # B1 — trabajo en curso
 
+## Segundo control aplicado — 25 de octubre de 2026
+
+Se ha extraído el cálculo de fachada a `layout.front_courses` y el de retornos/trasera a `layout.return_courses`. El constructor `walls` consume ambos. Se conservaron operaciones, orden de los generadores aleatorios, semillas y nombres; las regresiones mantienen los cuatro digests existentes. `masonry_intervals` y `masonry_joints` permiten consultar las juntas sin construir mallas. El baseline ya no duplica el algoritmo de trasera ni lee el registro del constructor de fachada.
+
+Decisión escrita sobre incertidumbre: se sustituye la propagación conservadora por dos clausuras, optimista y pesimista. `unsupported` contiene pérdidas confirmadas en ambas; `requires_review` solo la diferencia entre ellas. Un tablón con redundancia suficiente incluso si falla su apoyo incierto queda fuera de revisión. Se mantiene la prueba adicional donde, al retirar también el apoyo redundante, la incertidumbre sí alcanza al tablón y a su dependiente.
+
+`floor_frame` inicia el esqueleto D1 solicitado: emparejamiento uno a uno de juntas dentro de tolerancia explícita, ejes ordenados y descartes informados, una viga con dos grupos por extremo y segmentos encadenados hasta cimentación y terreno. Los WALL son anfitriones, nunca apoyos de la viga. Cada segmento tiene banda y ancho nominales; su geometría y contactos se expresan con escala explícita. No se inventan masa ni capacidad cuando falta el volumen de la pieza. Todas las dimensiones del esqueleto son argumentos, no nuevos valores por defecto del edificio.
+
+Validación actual: 44 pruebas puras; 18 comparaciones de juntas; tres esqueletos construidos con ejes de las casas del baseline (semillas 1/20/73), dos segmentos por caso. Cada segmento contiene piedras de la malla intacta. Retirar uno deja como pérdida confirmada únicamente su viga. El baseline guarda ejes, descartes, conteos y pérdida. No se afirma equivalencia con Bullet ni validación de contacto por raycast.
+
+Sigue pendiente para cerrar B1.0: ampliar la equivalencia a vanos de assembly y fábrica dañada. Sigue pendiente para cerrar B1: integrar los consumidores geométricos, productores de escalera, forjado completo y demás criterios de la orden. El esqueleto es la prueba mínima de paso solicitada, no una entrega del edificio completo.
+
 ## Orden actualizada y decisión D1
 
 Referencia: `Orden de trabajo B1 el forjado gobernado por el plan (1).docx`, recibida del usuario. D1 pasa a regir la implementación pendiente: apoyos localizados mediante WALL_SEGMENT, alojados en WALL mediante HOSTED_BY y con cadena vertical de apoyo hasta cimentación. Los segmentos se emitirán en concentraciones de carga, no por cada piedra. El informe deberá contar segmentos y ejes descartados. No se conecta todavía la retirada de piedras al campo de evento.
