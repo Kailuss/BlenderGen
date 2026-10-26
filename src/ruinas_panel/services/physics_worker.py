@@ -37,7 +37,7 @@ def run(output,path,name):
     world=scene.rigidbody_world
     if scene.ruin_settings.physics_precision=='BALANCED':world.substeps_per_frame=40;world.solver_iterations=30
     else:world.substeps_per_frame=80;world.solver_iterations=60
-    objects=[o for o in scene.objects if o.type=='MESH']
+    objects=[o for o in scene.objects if o.type=='MESH' and not o.get('lab_decor')]
     if not scene.get('ruinas_physics_lab') or not objects:raise ValueError('Laboratorio vacío o inválido.')
     from ruinas_panel import config
     factor=config.PHYSICS_SOLVER_SCALE
@@ -126,7 +126,7 @@ def run(output,path,name):
 
 def scale_solver(scene,factor):
     'IA: Amplía mallas, traslaciones, trayectorias, gravedad e impulsos por el mismo factor; conserva masas, tiempos y escalas de objeto. Solo para copias aisladas sin padres ni modificadores.'
-    objects=[o for o in scene.objects if o.type=='MESH' or o.rigid_body_constraint]
+    objects=[o for o in scene.objects if (o.type=='MESH' or o.rigid_body_constraint) and not o.get('lab_decor')]
     if any(o.parent for o in objects):raise ValueError('El laboratorio físico debe contener piezas sin padres.')
     if any(o.type=='MESH' and o.modifiers for o in objects):raise ValueError('El laboratorio físico debe tener sus modificadores aplicados.')
     meshes={}

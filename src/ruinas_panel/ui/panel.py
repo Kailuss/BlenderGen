@@ -48,7 +48,12 @@ class RUIN_PT_panel(bpy.types.Panel):
         'IA: Acciones, estado y semilla arriba; no generes ni modifiques geometría desde el panel.'
         layout = self.layout
         if context.scene.get('ruinas_replay'):
+            layout.prop(context.scene.ruin_settings,'lab_camera_type')
+            layout.operator('ruin.lab_camera',icon='CAMERA_DATA')
             layout.prop(context.scene,'camera',text='Cámara de render')
+            layout.prop(context.scene.ruin_settings,'lab_fog_density')
+            layout.operator('ruin.lab_fog')
+            layout.operator('ruin.lab_smoke')
             if context.scene.get('physics_result_scene'):
                 layout.operator('ruin.render_setup',icon='RENDER_ANIMATION')
                 layout.prop(context.scene.render,'filepath',text='Salida de vídeo')
@@ -64,9 +69,18 @@ class RUIN_PT_panel(bpy.types.Panel):
             layout.operator('ruin.physics_return',icon='BACK')
             return
         if context.scene.get('ruinas_physics_lab'):
+            layout.prop(context.scene.ruin_settings,'lab_camera_type')
+            layout.operator('ruin.lab_camera',icon='CAMERA_DATA')
             layout.prop(context.scene,'camera',text='Cámara de render')
+            layout.prop(context.scene.ruin_settings,'lab_fog_density')
+            layout.operator('ruin.lab_fog')
+            layout.operator('ruin.lab_smoke')
             layout.operator('ruin.render_setup',icon='RENDER_ANIMATION')
             layout.prop(context.scene.render,'filepath',text='Salida de vídeo')
+            box=layout.box();box.label(text='Lámpara de tres velas · decorativa')
+            box.prop(context.scene.ruin_settings,'chandelier_drop_mm')
+            box.prop(context.scene.ruin_settings,'chandelier_sway_deg')
+            box.operator('ruin.lab_chandelier',icon='LIGHT_POINT')
             layout.label(text='Física · '+context.scene.get('physics_room','tabique'))
             from ..services import physics
             if physics.source_matches(context.scene) is False:

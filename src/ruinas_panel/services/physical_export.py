@@ -29,12 +29,12 @@ def triangles(mesh):
 
 
 def export(scene,path,voxel=.35):
-    'IA: Fusiona copias de poses en mm a resolución explícita; permite escombros separados, excluye suelo y proyectiles y valida STL por bloques sin BMesh de alta densidad.'
+    'IA: Fusiona copias de poses en mm a resolución explícita; permite escombros separados, excluye suelo, proyectiles y decoración de render y valida STL por bloques sin BMesh de alta densidad.'
     scene.frame_set(scene.frame_current);bpy.context.window.scene=scene
     deps=bpy.context.evaluated_depsgraph_get();combined=bmesh.new();pieces=0
     try:
         for ob in scene.objects:
-            if ob.type!='MESH' or ob.get('collision_floor') or ob.get('impactor'):continue
+            if ob.type!='MESH' or ob.get('collision_floor') or ob.get('impactor') or ob.get('lab_decor'):continue
             evaluated=ob.evaluated_get(deps);mesh=bpy.data.meshes.new_from_object(evaluated,depsgraph=deps)
             mesh.transform(Matrix.Scale(1000,4)@evaluated.matrix_world)
             combined.from_mesh(mesh);bpy.data.meshes.remove(mesh);pieces+=1

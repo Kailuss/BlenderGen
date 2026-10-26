@@ -231,3 +231,10 @@ Carga medida: casa de 240 × 240 mm y dos plantas, calidad Trabajo, 390.980 cara
 Exportación por bloques del fotograma 96 a 0,50 mm: 6.437.706 triángulos, 46 s y 2.323 MB. Comprueba cierre, orientación y volumen antes de escribir. La unión a 0,35 mm de esta casa supera el límite de memoria. El remallado puede perder detalles finos y conserva escombros desconectados; no reconstruye mortero arquitectónico.
 
 Límites de cobertura: en este caso máximo, chimenea y bajantes estaban activadas pero sus reglas de colocación no generaron piezas. No queda probada su física en esta carga, ni la calidad Detalle. El movimiento observado es principalmente asentamiento; este ensayo no demuestra derrumbe generalizado ni rotura adaptativa. Informes `reports/stress_max_*.json`; uso y alcance en `docs/MANUAL_CARGA_MAXIMA.md`.
+
+## v0.32.21 — 2026-10-26 (rama física/render)
+
+Cámaras manuales con travelling y espiral, alturas hasta 125 mm por planta,
+lámpara decorativa de tres velas y bruma. Botón de horneado Mantaflow sobre replay:
+32 celdas y hasta 32 obstáculos aproximados. Prueba corta con densidad no nula;
+no certifica humo completo de diez segundos ni cadena física. Uso y límites en V03221.md.

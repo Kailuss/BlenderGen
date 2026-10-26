@@ -4,39 +4,67 @@ import bpy
 from mathutils import Vector
 
 
-def create(scene,door=None):
-    'IA: Tres cámaras con seguimiento y órbita de diez segundos según FPS, sol/área/spot métricos; conserva duración física y excluye terreno del encuadre.'
-    points=[o.matrix_basis@Vector(v) for o in scene.objects if o.type=='MESH' and o.get('physical_role')!='ground' and not o.get('impactor') for v in o.bound_box]
-    if not points:return []
-    lo=Vector([min(v[k] for v in points) for k in range(3)]);hi=Vector([max(v[k] for v in points) for k in range(3)])
-    center=(lo+hi)/2;size=max(hi-lo);radius=max(.10,size*2.2);result=[]
-    for kind,label in (('STATIC','Estática'),('ORBIT','Órbita 10 s'),('INTERIOR','Interior')):
-        existing=next((o for o in scene.objects if o.type=='CAMERA' and o.get('lab_camera')==kind),None)
-        if existing:
-            result.append(existing);continue
-        data=bpy.data.cameras.new('Cámara · '+label);ob=bpy.data.objects.new(data.name,data);scene.collection.objects.link(ob)
-        ob['lab_camera']=kind;data.type='PERSP';data.lens=42 if kind!='INTERIOR' else 18;data.clip_start=.0001;data.clip_end=max(200,size*100)
+def bounds(scene):
+    'IA: Encuadre en metros originales de piezas del edificio; excluye suelo, impactos y decoración.'
+    points=[o.matrix_basis@Vector(v) for o in scene.objects if o.type=='MESH' and o.get('physical_role')!='ground' and not o.get('impactor') and not o.get('lab_decor') for v in o.bound_box]
+    if not points:raise ValueError('El laboratorio no contiene piezas para encuadrar.')
+    lo=Vector([min(v[k] for v in points) for k in range(3)])
+    hi=Vector([max(v[k] for v in points) for k in range(3)])
+    return lo,hi
+
+
+def enter(scene):
+    'IA: Migra una sola vez cámaras automáticas antiguas del laboratorio; conserva cámaras ajenas y las añadidas tras migrar.'
+    if scene.get('lab_manual_cameras'):return
+    old=[o for o in scene.objects if o.type=='CAMERA' and o.get('lab_camera')]
+    targets={c.target for ob in old for c in ob.constraints if hasattr(c,'target') and c.target and c.target.get('lab_render_target')}
+    for ob in old:
+        if scene.camera==ob:scene.camera=None
+        for coll in list(ob.users_collection):
+            if coll in tuple(scene.collection.children_recursive) or coll==scene.collection:coll.objects.unlink(ob)
+        if ob.users==0:bpy.data.objects.remove(ob)
+    for ob in targets:
+        if any(c.target==ob for cam in scene.objects for c in cam.constraints if hasattr(c,'target')):continue
+        for coll in list(ob.users_collection):
+            if coll in tuple(scene.collection.children_recursive) or coll==scene.collection:coll.objects.unlink(ob)
+        if ob.users==0:bpy.data.objects.remove(ob)
+    scene['lab_manual_cameras']=True
+
+
+def setup(scene):
+    'IA: Prepara iluminación sin crear cámaras; entrar al laboratorio o preparar render no añade tomas.'
+    lo,hi=bounds(scene);lighting(scene,(lo+hi)/2,max(hi-lo))
+
+
+def create(scene,door=None,kind='STATIC'):
+    'IA: Añade solo el tipo solicitado o activa el existente; rutas de diez segundos, seguimiento editable y ninguna cámara implícita.'
+    if scene.get('ruinas_physics_lab'):enter(scene)
+    labels={'STATIC':'Estática','ORBIT':'Órbita 10 s','INTERIOR':'Interior','TRAVELLING':'Travelling 10 s','SPIRAL':'Espiral 10 s'}
+    if kind not in labels:raise ValueError('Tipo de cámara desconocido')
+    existing=next((o for o in scene.objects if o.type=='CAMERA' and o.get('lab_camera')==kind),None)
+    if existing:scene.camera=existing;return [existing]
+    lo,hi=bounds(scene);center=(lo+hi)/2;size=max(hi-lo);radius=max(.10,size*2.2)
+    data=bpy.data.cameras.new('Cámara · '+labels[kind]);ob=bpy.data.objects.new(data.name,data);scene.collection.objects.link(ob)
+    ob['lab_camera']=kind;data.type='PERSP';data.lens=18 if kind=='INTERIOR' else 42;data.clip_start=.0001;data.clip_end=max(200,size*100)
+    target=center.copy();intervals=max(1,round(10*scene.render.fps/scene.render.fps_base))
+    animated=kind in ('ORBIT','TRAVELLING','SPIRAL')
+    for frame in (range(1,intervals+2) if animated else (1,)):
+        t=(frame-1)/intervals;angle=-math.pi*.75+2*math.pi*t
         if kind=='INTERIOR':
-            target=Vector(((door['left']+door['right'])*.0005 if door else center.x,lo.y,(door['top']*.0005 if door else lo.z+.025)))
+            target=Vector(((door['left']+door['right'])*.0005 if door else center.x,lo.y,door['top']*.0005 if door else lo.z+.025))
             ob.location=(center.x,hi.y-(hi.y-lo.y)*.15,min(hi.z-.01,lo.z+.045))
-            ob.rotation_euler=(target-ob.location).to_track_quat('-Z','Y').to_euler()
+        elif kind=='TRAVELLING':ob.location=center+Vector((radius*(t-.5),-radius,radius*.35))
+        elif kind=='SPIRAL':ob.location=center+Vector((radius*math.cos(angle),radius*math.sin(angle),size*(-.3+1.4*t)))
         else:
-            intervals=max(1,round(10*scene.render.fps/scene.render.fps_base))
-            for frame in (range(1,intervals+2) if kind=='ORBIT' else (1,)):
-                angle=-math.pi*.75+2*math.pi*(frame-1)/intervals
-                ob.location=center+Vector((radius*math.cos(angle),radius*math.sin(angle),radius*.55))
-                ob.rotation_euler=(center-ob.location).to_track_quat('-Z','Y').to_euler()
-                if kind=='ORBIT':
-                    ob.keyframe_insert(data_path='location',frame=frame);ob.keyframe_insert(data_path='rotation_euler',frame=frame)
-        aim=bpy.data.objects.new('Objetivo · '+label,None);scene.collection.objects.link(aim)
-        aim.location=target if kind=='INTERIOR' else center
-        aim.empty_display_type='SPHERE';aim.empty_display_size=max(.002,size*.035);aim['lab_render_target']=True
-        track=ob.constraints.new('TRACK_TO');track.name='Seguir objetivo editable'
-        track.target=aim;track.track_axis='TRACK_NEGATIVE_Z';track.up_axis='UP_Y'
-        result.append(ob)
-    lighting(scene,center,size)
-    scene.camera=result[0];scene.frame_set(1)
-    return result
+            angle=angle if animated else -math.pi*.75
+            ob.location=center+Vector((radius*math.cos(angle),radius*math.sin(angle),radius*.55))
+        if animated:ob.keyframe_insert(data_path='location',frame=frame)
+    aim=bpy.data.objects.new('Objetivo · '+labels[kind],None);scene.collection.objects.link(aim)
+    aim.location=target;aim.empty_display_type='SPHERE';aim.empty_display_size=max(.002,size*.035);aim['lab_render_target']=True
+    track=ob.constraints.new('TRACK_TO');track.name='Seguir objetivo editable';track.target=aim;track.track_axis='TRACK_NEGATIVE_Z';track.up_axis='UP_Y'
+    data.dof.use_dof=True;data.dof.focus_object=aim;data.dof.aperture_fstop=11
+    scene.camera=ob;scene.frame_set(scene.frame_current)
+    return [ob]
 
 
 def lighting(scene,center,size):
@@ -61,27 +89,25 @@ def lighting(scene,center,size):
     scene.render.resolution_x=1600;scene.render.resolution_y=1200;scene.render.resolution_percentage=100
     from ..geometry import surfaces
     for ob in scene.objects:
-        if ob.type=='MESH':
+        if ob.type=='MESH' and not ob.get('lab_decor'):
             for slot in ob.material_slots:
                 if slot.material:
                     material=surfaces.lab_material(slot.material);slot.link='OBJECT';slot.material=material
 
 
 def ten_seconds(scene):
-    'IA: Configura diez segundos físicos a escala temporal uno, retima solo órbitas marcadas y completa luces; rechaza caché horneada y conserva nombres y selección.'
+    'IA: Configura diez segundos físicos a escala temporal uno, retima recorridos marcados y completa luces; rechaza caché horneada y conserva nombres y selección.'
     world=scene.rigidbody_world
     if not world:raise ValueError('Abre un laboratorio físico antes de preparar la toma.')
     if world.point_cache.is_baked:raise ValueError('Libera la caché horneada antes de cambiar la duración.')
-    points=[o.matrix_basis@Vector(v) for o in scene.objects if o.type=='MESH' and o.get('physical_role')!='ground' and not o.get('impactor') for v in o.bound_box]
-    if not points:raise ValueError('El laboratorio no contiene piezas.')
-    lo=Vector([min(v[k] for v in points) for k in range(3)]);hi=Vector([max(v[k] for v in points) for k in range(3)])
+    lo,hi=bounds(scene)
     intervals=max(1,round(10*scene.render.fps/scene.render.fps_base))
     from . import impact_physics
     impact_physics.reset(scene)
     scene.frame_start=1;scene.frame_end=intervals+1;scene.ruin_settings.physics_frames=scene.frame_end
     world.point_cache.frame_start=1;world.point_cache.frame_end=scene.frame_end;world.time_scale=1
     for ob in scene.objects:
-        if ob.get('lab_camera')!='ORBIT' or not ob.animation_data or not ob.animation_data.action:continue
+        if ob.get('lab_camera') not in ('ORBIT','TRAVELLING','SPIRAL') or not ob.animation_data or not ob.animation_data.action:continue
         action=ob.animation_data.action.copy();ob.animation_data.action=action
         curves=[curve for layer in action.layers for strip in layer.strips for bag in strip.channelbags for curve in bag.fcurves if curve.data_path in ('location','rotation_euler')]
         keys=[key for curve in curves for key in curve.keyframe_points]
@@ -101,7 +127,7 @@ def ten_seconds(scene):
 def prepare_render(scene):
     'IA: Completa equipo de render, Cycles con rebotes, DOF y vídeo H264; aplica materiales visuales compartidos sin cambiar mallas ni recalcular física.'
     camera=scene.camera;frame=scene.frame_current;subframe=scene.frame_subframe
-    create(scene)
+    setup(scene)
     scene.frame_set(frame,subframe=subframe)
     if camera and camera.name in scene.objects:scene.camera=camera
     for ob in scene.objects:
@@ -123,7 +149,7 @@ def prepare_render(scene):
     scene.render.filepath=str(folder/(stem+'_'+bpy.path.clean_name(scene.name)+'_'+datetime.now().strftime('%Y%m%d_%H%M%S')+'_'));scene.render.use_file_extension=True
     from ..geometry import surfaces
     for ob in scene.objects:
-        if ob.type!='MESH' or ob.get('collision_floor'):continue
+        if ob.type!='MESH' or ob.get('collision_floor') or ob.get('lab_decor'):continue
         for slot in ob.material_slots:
             if slot.material:
                 material=surfaces.render_material(slot.material);slot.link='OBJECT';slot.material=material
@@ -134,7 +160,7 @@ def copy_to_replay(source,result):
     'IA: Copia cámaras, luces, objetivos, seguimiento y mundo sin escalarlos con Bullet; remapea objetivos al duplicado o pieza de reproducción.'
     mapping={}
     for original in source.objects:
-        if original.type not in ('CAMERA','LIGHT') and not original.get('lab_render_target'):continue
+        if original.type not in ('CAMERA','LIGHT') and not original.get('lab_render_target') and not original.get('lab_decor'):continue
         ob=original.copy()
         if original.data:ob.data=original.data.copy()
         result.collection.objects.link(ob)
@@ -142,6 +168,8 @@ def copy_to_replay(source,result):
         mapping[original]=ob
     pieces={o.get('replay_source_object'):o for o in result.objects if o.get('replay_source_object')}
     for original,ob in mapping.items():
+        if original.parent:
+            ob.parent=mapping.get(original.parent) or pieces.get(original.parent.name)
         for constraint in ob.constraints:
             if hasattr(constraint,'target') and constraint.target:
                 constraint.target=mapping.get(constraint.target) or pieces.get(constraint.target.name)

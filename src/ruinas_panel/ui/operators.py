@@ -154,6 +154,60 @@ class RUIN_OT_physics_release(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class RUIN_OT_lab_camera(bpy.types.Operator):
+    bl_idname='ruin.lab_camera'
+    bl_label='Añadir / activar cámara'
+    bl_options={'REGISTER','UNDO'}
+    def execute(self,context):
+        'IA: Crea una cámara del tipo elegido, sin duplicar si el laboratorio ya conserva ese tipo.'
+        from ..services import lab_cameras
+        if runtime.physics_job:return fail(self,context,ValueError('Espera a que termine el cálculo actual.'))
+        try:lab_cameras.create(context.scene,kind=context.scene.ruin_settings.lab_camera_type)
+        except Exception as exc:return fail(self,context,exc)
+        return {'FINISHED'}
+
+
+class RUIN_OT_lab_chandelier(bpy.types.Operator):
+    bl_idname='ruin.lab_chandelier'
+    bl_label='Añadir lámpara bajo techo seleccionado'
+    bl_options={'REGISTER','UNDO'}
+    def execute(self,context):
+        'IA: Añade decoración colgante al techo seleccionado, sin cuerpos rígidos ni modificación de caché física.'
+        from ..services import lab_chandelier
+        if runtime.physics_job:return fail(self,context,ValueError('Espera a que termine el cálculo actual.'))
+        try:lab_chandelier.create(context.scene,context.active_object)
+        except Exception as exc:return fail(self,context,exc)
+        return {'FINISHED'}
+
+
+class RUIN_OT_lab_fog(bpy.types.Operator):
+    bl_idname='ruin.lab_fog'
+    bl_label='Añadir / ajustar bruma'
+    bl_options={'REGISTER','UNDO'}
+    def execute(self,context):
+        'IA: Envuelve el edificio en bruma visual sin modificar física.'
+        from ..services import lab_atmosphere
+        if runtime.physics_job:return fail(self,context,ValueError('Espera a que termine el cálculo actual.'))
+        try:lab_atmosphere.fog(context.scene)
+        except Exception as exc:return fail(self,context,exc)
+        return {'FINISHED'}
+
+
+class RUIN_OT_lab_smoke(bpy.types.Operator):
+    bl_idname='ruin.lab_smoke'
+    bl_label='Simular polvo para render'
+    bl_description='Sobre la reproducción calculada: prepara humo y hornea una caché de 32 celdas con hasta 32 obstáculos animados'
+    def execute(self,context):
+        'IA: Lanza una simulación volumétrica nativa sobre trayectorias calculadas, con progreso de Blender.'
+        from ..services import lab_atmosphere
+        if runtime.physics_job:return fail(self,context,ValueError('Espera a que termine el cálculo actual.'))
+        try:result=lab_atmosphere.bake(context.scene)
+        except Exception as exc:return fail(self,context,exc)
+        if 'CANCELLED' in result:return {'CANCELLED'}
+        self.report({'INFO'},'Cálculo de polvo iniciado; espera a que termine antes de renderizar.')
+        return {'FINISHED'}
+
+
 class RUIN_OT_render_setup(bpy.types.Operator):
     bl_idname='ruin.render_setup'
     bl_label='Preparar render · luces, detalle y vídeo'
@@ -348,6 +402,8 @@ class RUIN_OT_physics_edit(bpy.types.Operator):
         'IA: Abre la escena física asociada a una reproducción horneada.'
         scene=bpy.data.scenes.get(context.scene.get('lab_scene',''))
         if scene is None:return {'CANCELLED'}
+        from ..services import lab_cameras
+        lab_cameras.enter(scene)
         context.window.scene=scene;scene.frame_set(1);frame_view(context)
         return {'FINISHED'}
 

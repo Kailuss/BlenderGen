@@ -119,16 +119,20 @@ def calibrate(blender, output):
 
 
 def pack(project=False):
-    """IA: empaqueta únicamente fuentes del addon; excluye cachés, renders y pruebas del ZIP instalable."""
+    """IA: Empaqueta fuentes Python registradas en Git con versión única; excluye experimentos sin registrar, cachés y renders."""
     check()
     out=ROOT/'dist';out.mkdir(exist_ok=True)
-    target=out/'ruinas_panel_v03220.zip'
+    from ruinas_panel import config
+    version=config.BUILD_ID.replace('.','')
+    target=out/('ruinas_panel_v'+version+'.zip')
+    tracked=set(subprocess.check_output(['git','ls-files','-z','--','src/ruinas_panel'],cwd=ROOT).decode('utf8').split('\0'))
     with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED) as archive:
-        for file in sorted(SOURCE.rglob('*.py')):archive.write(file,file.relative_to(SOURCE.parent))
+        for file in sorted(SOURCE.rglob('*.py')):
+            if file.relative_to(ROOT).as_posix() in tracked:archive.write(file,file.relative_to(SOURCE.parent))
     with zipfile.ZipFile(target) as archive:assert archive.testzip() is None
     print('PACKAGED',target)
     if project:
-        bundle=out/'ruinas_desarrollo_v03220.zip'
+        bundle=out/('ruinas_desarrollo_v'+version+'.zip')
         files=[ROOT/'README.md',ROOT/'AGENTS.md',ROOT/'dev.py',ROOT/'.gitignore',target]
         for folder in ('src','tools','tests','docs','agent'):
             files.extend(p for p in (ROOT/folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix!='.pyc')

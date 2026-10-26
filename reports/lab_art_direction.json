@@ -1,0 +1,19 @@
+{
+  "cameras": 5,
+  "candle_lights": 3,
+  "height_mm": 377,
+  "floor_bases_mm": [
+    2,
+    127,
+    252
+  ],
+  "smoke_frames": 6,
+  "max_smoke_density": 0.0687255859375,
+  "smoke_resolution": 32,
+  "smoke_proxies": 1,
+  "cache": "C:\\Users\\yhora\\AppData\\Local\\Temp\\Ruinas_cache\\polvo_h_fz2ecz",
+  "cache_files": 12,
+  "physics_scale_excludes_fog": true,
+  "chandelier_motion": "decorative; parent follows ceiling",
+  "full_ten_second_smoke_tested": false
+}

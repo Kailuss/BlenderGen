@@ -13,7 +13,8 @@ def run():
     addon.register();runtime.busy=True
     source=bpy.context.scene;source.ruin_settings.physics_brick_limit=16
     lab=masonry_physics.prepare(source);bpy.context.window.scene=lab
-    lab_cameras.create(lab)
+    lab_cameras.setup(lab)
+    for kind in ('STATIC','ORBIT','INTERIOR'):lab_cameras.create(lab,kind=kind)
     orbit=next(o for o in lab.objects if o.get('lab_camera')=='ORBIT')
     lights={o.name:o.data.energy for o in lab.objects if o.type=='LIGHT'}
     for fps,base in ((24,1),(30,1),(30,1.001),(60,1)):

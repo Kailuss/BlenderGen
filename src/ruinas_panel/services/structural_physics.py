@@ -570,7 +570,8 @@ def prepare(source_scene):
         if all(k in lookup for k in ('left','right','back')):
             elevation=p.foundation_height if p.foundation_enabled else 0
             scene['structural_bounds_mm']=[lookup['left']['origin'][0]-p.thickness/2,lookup['right']['origin'][0]+p.thickness/2,-p.thickness/2,lookup['back']['origin'][1]+p.thickness/2,elevation+2,elevation+p.height]
-        lab_cameras.create(scene,meta.get(source_scene,'puerta_generada'))
+        lab_cameras.enter(scene)
+        lab_cameras.setup(scene)
         print('STRUCTURAL_PREPARED',{k:(len(v) if isinstance(v,list) else v) for k,v in report.items()},flush=True)
         return scene
     except Exception:

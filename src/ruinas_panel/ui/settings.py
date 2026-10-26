@@ -11,6 +11,11 @@ import bpy
 
 
 class RuinSettings(bpy.types.PropertyGroup):
+    lab_fog_density: FloatProperty(name='Densidad de bruma',default=.12,min=0,max=2)
+    lab_camera_type: EnumProperty(name='Tipo de cámara',items=[('STATIC','Estática','Encuadre fijo con objetivo editable'),('ORBIT','Órbita','Vuelta completa en diez segundos'),('INTERIOR','Interior','Vista desde el interior hacia la entrada'),('TRAVELLING','Travelling','Desplazamiento lateral en diez segundos'),('SPIRAL','Espiral','Vuelta ascendente en diez segundos')],default='STATIC')
+    chandelier_drop_mm: FloatProperty(name='Caída de lámpara (mm)',default=25,min=10,max=80)
+    chandelier_sway_deg: FloatProperty(name='Balanceo (grados)',default=8,min=0,max=25,description='Animación decorativa; no simula una cadena ni colisiones')
+
     foundation_enabled: BoolProperty(name='Cimientos elevados',default=False)
     foundation_height: FloatProperty(name='Elevación (mm)',default=8,min=0,max=40)
     entrance_tread: FloatProperty(name='Huella exterior (mm)',default=12,min=6,max=25)
@@ -102,8 +107,8 @@ class RuinSettings(bpy.types.PropertyGroup):
     microdetail_preview: BoolProperty(name='Microrelieve en vista',description='Añade poros y subdivisión fina también al editar: mucho más costoso. Al preparar Detalle siempre se aplica',default=False)
     build_type: EnumProperty(name='Construcción',items=[('PARTITION','Tabique','6 mm de grosor'),('WALL','Pared','9 mm de grosor'),('FORTRESS','Muralla','15 mm de grosor')],default='WALL')
     height_type: EnumProperty(name='Altura',items=[('RUIN','Baja','Altura ajustable del muro bajo'),('ONE','1 planta','Altura ajustable de planta baja'),('TWO','2 plantas','Alturas independientes de ambas plantas'),('THREE','3 plantas','Planta baja y dos plantas superiores de igual altura')],default='ONE')
-    ground_storey_height: FloatProperty(name='Planta baja (mm)',description='Altura entre cotas: la entreplanta se sitúa dos mm por encima de este valor',default=55,min=35,max=75)
-    upper_storey_height: FloatProperty(name='Planta superior (mm)',description='Altura desde la entreplanta hasta la coronación del muro',default=55,min=35,max=75)
+    ground_storey_height: FloatProperty(name='Planta baja (mm)',description='Altura entre cotas: la entreplanta se sitúa dos mm por encima de este valor',default=55,min=35,max=125)
+    upper_storey_height: FloatProperty(name='Planta superior (mm)',description='Altura desde la entreplanta hasta la coronación del muro',default=55,min=35,max=125)
     low_wall_height: FloatProperty(name='Muro bajo (mm)',default=27,min=25,max=45)
     layout_mode: EnumProperty(name='Paredes',description='Paredes contiguas que forman L, U o habitación',items=[('NONE','Ninguna','Un muro'),('ONE','1 pared','Forma de L'),('TWO','2 paredes','Forma de U'),('ROOM','Habitación','Cuatro paredes sin cubierta')],default='NONE')
     building_depth: FloatProperty(name='Fondo (mm)',default=50,min=40,max=240)
@@ -145,9 +150,9 @@ class RuinSettings(bpy.types.PropertyGroup):
     live_preview: BoolProperty(name='Vista previa automática',default=True,update=preview.settings_changed)
     status: StringProperty(default='Ajusta un deslizador para previsualizar',options={'SKIP_SAVE'})
     length: FloatProperty(name='Longitud (mm)',default=120,min=60,max=240)
-    height: FloatProperty(name='Altura máxima (mm)',default=52,min=25,max=227)
-    left_height: FloatProperty(name='Extremo izquierdo (mm)',default=55,min=12,max=227)
-    right_height: FloatProperty(name='Extremo derecho (mm)',default=40,min=12,max=227)
+    height: FloatProperty(name='Altura máxima (mm)',default=52,min=25,max=377)
+    left_height: FloatProperty(name='Extremo izquierdo (mm)',default=55,min=12,max=377)
+    right_height: FloatProperty(name='Extremo derecho (mm)',default=40,min=12,max=377)
     thickness: FloatProperty(name='Grosor nominal (mm)',default=12,min=6,max=22)
     stone_size: FloatProperty(name='Altura de hilada (mm)',default=6.5,min=4,max=10)
     stone_variation: FloatProperty(name='Anchuras',description='Variación de anchura entre piedras',default=.2,min=0,max=1)

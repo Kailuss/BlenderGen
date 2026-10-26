@@ -26,6 +26,7 @@ def run():
         else:
             ob.scale*=.001;ob.location*=.001
     bpy.context.view_layer.update()
+    lab_cameras.setup(scene)
     lab_cameras.create(scene)
     assert {o.data.type for o in scene.objects if o.type=='LIGHT'}=={'SUN','AREA','SPOT'}
     assert all(o.constraints[0].target for o in scene.objects if o.type=='CAMERA')
