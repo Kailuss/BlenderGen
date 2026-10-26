@@ -227,3 +227,11 @@ Carga medida: casa de 240 × 240 mm y dos plantas, calidad Trabajo, 390.980 cara
 Exportación por bloques del fotograma 96 a 0,50 mm: 6.437.706 triángulos, 46 s y 2.323 MB. Comprueba cierre, orientación y volumen antes de escribir. La unión a 0,35 mm de esta casa supera el límite de memoria. El remallado puede perder detalles finos y conserva escombros desconectados; no reconstruye mortero arquitectónico.
 
 Límites de cobertura: en este caso máximo, chimenea y bajantes estaban activadas pero sus reglas de colocación no generaron piezas. No queda probada su física en esta carga, ni la calidad Detalle. El movimiento observado es principalmente asentamiento; este ensayo no demuestra derrumbe generalizado ni rotura adaptativa. Informes `reports/stress_max_*.json`; uso y alcance en `docs/MANUAL_CARGA_MAXIMA.md`.
+
+## B1-C4, primer control causal — 2026-10-26
+
+Rama limpia separada de física/render. Ledger de operaciones posteriores a fábrica,
+replay conservador y criterio compartido de rayos para asiento frontal/trasero.
+51 pruebas puras y regresión de cuatro digests sin cambios. El control geométrico
+causal no equivale a Bullet ni a T1 completo: faltan las omisiones de layout y los
+IDs semánticos anteriores al filtrado. Alcance en `B1_C4_CONTROL1.md`.

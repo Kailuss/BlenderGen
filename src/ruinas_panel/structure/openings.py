@@ -1,4 +1,6 @@
 """structure /openings — ver docs/ARCHITECTURE.md para contratos y dependencias."""
+from ..services import removal_events
+from ..construction_core import seat
 
 from .. import meta
 from .. import config
@@ -56,6 +58,7 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
         for vertex,point in zip(cutter.data.vertices,((x0,-T,z0),(x1,-T,z0),(x1,T,z0),(x0,T,z0),(x0,-T,z1),(x1,-T,z1),(x1,T,z1),(x0,T,z1))):
             vertex.co=wall_point(w,*point)
         cutter.data.update()
+        ledger_before=removal_events.fingerprint(ob)
         world=primitives.coords(ob)
         if not len(world):
             continue
@@ -71,10 +74,7 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
         # Las piezas totalmente dentro del hueco se eliminan directamente.
         # Evita booleanos degenerados y reduce el trabajo de ventanas grandes.
         if ((x0<=local[:,0])&(local[:,0]<=x1)&(z0<=local[:,2])&(local[:,2]<=z1)&(-T<=local[:,1])&(local[:,1]<=T)).all():
-            mesh=ob.data
-            bpy.data.objects.remove(ob,do_unlink=True)
-            if mesh.users==0:
-                bpy.data.meshes.remove(mesh)
+            removal_events.remove([ob],'ARCHITECTURAL_OPENING')
             continue
         import bmesh
         bm=bmesh.new()
@@ -109,16 +109,14 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
         bpy.data.meshes.remove(backup)
         if ob.data.vertices and not ob.get('hueco_revertido') and sliver(ob,w,before):
             # Una lámina junto al hueco es frágil al imprimir y se ve arrugada: se elimina como las piezas contenidas.
-            primitives.remove_objects([ob])
+            removal_events.remove([ob],'OPENING_SLIVER')
             continue
         if not ob.data.vertices:
-            mesh=ob.data
-            bpy.data.objects.remove(ob,do_unlink=True)
-            if mesh.users==0:
-                bpy.data.meshes.remove(mesh)
+            removal_events.remove([ob],'ARCHITECTURAL_OPENING')
         else:
             ob['ruin_box']=False
             ob['architectural_cut']=True
+            removal_events.cut_confirmed(ob,ledger_before,'ARCHITECTURAL_CUT',{'wall':w['id'],'box':[x0,x1,-T,T,z0,z1]})
             changed.append(ob)
     mesh=cutter.data
     bpy.data.objects.remove(cutter,do_unlink=True)
@@ -321,7 +319,7 @@ def architectural_openings(coll,p,walls,door,edges):
             support_tree=support_trees[w['id']]
             rear_wall=next((q for q in walls if q['id']=='back'),None) if p.layout_mode=='ROOM' else None
             for i,x in enumerate(beam_positions(coll,w,z,rear_wall)):
-                if sum(wall_hit(support_tree,w,p,sx,z-2.7) for sx in (x-1.5,x,x+1.5))<2:
+                if not seat.supported(wall_hit(support_tree,w,p,sx,sz) for sx,sz in seat.samples(x,z)):
                     continue
                 if any(h['wall']==w['id'] and h['x0']-3<x<h['x1']+3 and h['z0']<z+size/2 and h['z1']>z-size/2 for h in windows):
                     continue
@@ -333,7 +331,7 @@ def architectural_openings(coll,p,walls,door,edges):
                         continue
                     if any(h['wall']=='back' and h['x0']-3<x<h['x1']+3 and h['z0']-1<z+size/2 and h['z1']+1>z-size/2 for h in windows):
                         continue
-                    if sum(wall_hit(support_trees['back'],rear,p,sx,z-2.7) for sx in (x-1.5,x,x+1.5))<2:
+                    if not seat.supported(wall_hit(support_trees['back'],rear,p,sx,sz) for sx,sz in seat.samples(x,z)):
                         continue
                 carve_rectangle(coll,w,x-2.5,x+2.5,z-2,z+size/2,p.thickness+6,'Alojamiento de viga')
                 length=p.thickness/2+4

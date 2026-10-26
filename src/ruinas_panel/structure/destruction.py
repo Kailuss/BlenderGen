@@ -5,6 +5,7 @@ import zlib
 from mathutils import Vector
 from ..geometry import primitives
 from .. import meta
+from ..services import removal_events
 from . import spatial
 
 
@@ -39,15 +40,17 @@ def apply(coll,p,scene):
             rng=random.Random(p.seed+zlib.crc32(name.encode()))
             if rng.random()<.45:
                 corner=Vector((high[0],high[1],high[2]-.35))
-                primitives.clip_closed(ob,corner,Vector((.25,.3,1)))
+                removal_events.clip(ob,corner,Vector((.25,.3,1)),'COLLAPSE_EDGE')
                 ob['borde_agujero']=True  # No sustituir esta forma única por una caja GN.
-    primitives.remove_objects(discard)
+    removal_events.remove(discard,'GLOBAL_COLLAPSE')
     for ob in cores:
         co=primitives.coords(ob);mid=(co.min(axis=0)+co.max(axis=0))/2
         tops=[height for center,height in supports if abs(center[0]-mid[0])<1 and abs(center[1]-mid[1])<1]
         if tops:
+            before=removal_events.fingerprint(ob)
             co[:,2]=co[:,2].clip(max= max(tops)-1)
             primitives.set_coords(ob,co)
+            removal_events.cut_confirmed(ob,before,'PILLAR_CORE_LOWERED',{'max_z_mm':max(tops)-1})
     counts['sin_apoyo']=prune_support(coll)
     meta.put(scene,'derrumbe_global',counts)
 
@@ -78,5 +81,5 @@ def prune_support(coll):
         mid=tuple((a+b)/2 for a,b in zip(lo,hi))
         if not any(a[2]-1<=mid[2]<=b[2] and a[0]-1<=mid[0]<=b[0]+1 and a[1]-1<=mid[1]<=b[1]+1 for other,a,b in kept):
             discard.append(ob)
-    primitives.remove_objects(discard)
+    removal_events.remove(discard,'PRUNE_SUPPORT')
     return len(discard)

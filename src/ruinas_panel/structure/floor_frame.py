@@ -1,6 +1,6 @@
 """Plan puro B1: primer camino de carga localizado, todavía sin consumidores de malla."""
 import math
-from ..construction_core import adapter,graph,schema,units
+from ..construction_core import adapter,graph,schema,units,identifiers
 from .. import config_masonry as masonry
 
 
@@ -56,13 +56,13 @@ def beam_skeleton(axis,bands,wall_y,seat_width_mm,seat_depth_mm,margin_world_mm,
         parent='wall.'+wall;elements.append(schema.element(parent,'WALL','MASONRY_LIME'))
         below='foundation'
         for level,(z0,z1) in enumerate(bands):
-            key=f'seg.{wall}.{level}.{ordinal}'
+            key=identifiers.segment(wall,level,ordinal)
             segment=schema.element(key,'WALL_SEGMENT','MASONRY_LIME',wall=wall,interval_model_mm=[x-half,x+half],band_model_mm=[z0,z1])
             segment['minimum_supports']=1;elements.append(segment)
             relations.append(adapter.relation(key,parent,'HOSTED_BY'))
             contact(key,below,x,wall_y[wall],z0,1);below=key
         ends.append(below)
-    key=f'beam.{len(bands)}.{ordinal}';beam=schema.element(key,'BEAM','TIMBER_SOFT')
+    key=identifiers.beam(len(bands),ordinal);beam=schema.element(key,'BEAM','TIMBER_SOFT')
     beam['support_groups']=[{'id':wall,'members':[end],'minimum':1} for wall,end in zip(('front','back'),ends)]
     elements.append(beam)
     for wall,end in zip(('front','back'),ends):contact(key,end,x,wall_y[wall],bands[-1][1],.5)
