@@ -238,3 +238,11 @@ Cámaras manuales con travelling y espiral, alturas hasta 125 mm por planta,
 lámpara decorativa de tres velas y bruma. Botón de horneado Mantaflow sobre replay:
 32 celdas y hasta 32 obstáculos aproximados. Prueba corta con densidad no nula;
 no certifica humo completo de diez segundos ni cadena física. Uso y límites en V03221.md.
+
+## 2026-10-28 — Guía de impacto y ensayo de ladrillos
+
+Los impactos nuevos incluyen una flecha de orientación inicial, oculta en render y sin cuerpo rígido. Es una guía de la dirección configurada, no un gizmo que reprograme la trayectoria al rotarla. Se conserva en la reproducción con su referencia al proyectil remapeada.
+
+El ensayo pequeño de mampostería aplica su bisel al preparar los ladrillos. Antes conservaba modificadores que `scale_solver` rechaza; la prueba aislada de duración de proyectiles reproducía ese bloqueo. No cambia la casa fuente ni elimina el control del trabajador.
+
+Verificación: `dev.py test` (46 pruebas y cuatro casos geométricos), regresión de impactos, y duración/colisiones/visibilidad/reapertura con remapeo de la guía. Los escenarios grandes y el reparto físico de resistencias por material siguen requiriendo calibración; estos cambios no acreditan por sí solos un derrumbe estructural realista.

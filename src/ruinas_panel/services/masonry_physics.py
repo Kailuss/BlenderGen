@@ -6,7 +6,7 @@ from . import physics
 
 
 def prepare(source):
-    'IA: Crea hasta 256 ladrillos individuales según el límite solicitado, aparejados sobre suelo pasivo; no modifica la casa.'
+    'IA: Crea hasta 256 ladrillos con bisel aplicado, aptos para el trabajador físico escalado, sobre suelo pasivo; no modifica la casa.'
     p=source.ruin_settings
     scene=bpy.data.scenes.new('LAB · ladrillos '+p.physics_masonry_shape)
     scene['ruinas_physics_lab']=True;scene['structural_physics']=True;scene['masonry_lab']=True
@@ -32,6 +32,8 @@ def prepare(source):
         ob.rigid_body.mass=11.96*5.96*5.96*1e-9*2200*config.PHYSICS_MASS_SCALE
         ob.rigid_body.friction=1;ob.data.materials.append(mat)
         bevel=ob.modifiers.new('Aristas de piedra','BEVEL');bevel.width=.00015;bevel.segments=1
+        with bpy.context.temp_override(scene=scene,view_layer=scene.view_layers[0],object=ob,active_object=ob,selected_objects=[ob],selected_editable_objects=[ob]):
+            bpy.ops.object.modifier_apply(modifier=bevel.name)
     floor=physics.body(scene,'Suelo de colisión',(-500,-500,-5),(500,500,0),False)
     floor['collision_floor']=True
     from . import structural_physics

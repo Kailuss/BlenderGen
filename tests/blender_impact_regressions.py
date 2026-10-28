@@ -39,6 +39,11 @@ def run():
     impact.limit_to_selection(lab,fragments)
     assert all(o.rigid_body.type=='ACTIVE' for o in fragments)
     first=impact.launch(lab,fragments);second=impact.launch(lab,fragments)
+    guide=next(o for o in lab.objects if o.get('impact_direction_guide') and o.parent==first)
+    assert impact.direction_guide(lab,first,p.impact_direction)==guide
+    bpy.context.view_layer.update()
+    assert (guide.matrix_world.to_3x3()@Vector((0,0,1))).normalized().dot(Vector(p.impact_direction).normalized())>.99999
+    assert guide.hide_render and guide.rigid_body is None and guide.get('lab_decor')
     assert (Vector(first['launch_start'])-Vector(second['launch_start'])).length>.016
     assert first!=second and sum(bool(o.get('impactor')) for o in lab.objects)==2
     # Second stone offset avoids coincident projectile collision.

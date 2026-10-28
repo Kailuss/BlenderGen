@@ -16,8 +16,24 @@ def reset(scene):
             if scene.rigidbody_world.point_cache.is_baked:bpy.ops.ptcache.free_bake()
 
 
+def direction_guide(scene,projectile,direction):
+    'IA: Flecha de orientación inicial, local al proyectil, sin render ni colisión; reutiliza su guía y no cambia la trayectoria física.'
+    vector=Vector(direction)
+    if vector.length<1e-6:raise ValueError('La dirección no puede ser cero en los tres ejes.')
+    guide=next((o for o in scene.objects if o.get('impact_direction_guide') and o.parent==projectile),None)
+    if guide is None:
+        guide=bpy.data.objects.new('Dirección del impacto · flecha',None);scene.collection.objects.link(guide)
+    guide.parent=projectile;guide.location=(0,0,0)
+    guide.rotation_euler=(projectile.matrix_world.to_3x3().inverted()@vector).to_track_quat('Z','Y').to_euler()
+    guide.empty_display_type='SINGLE_ARROW';guide.empty_display_size=max(.06,max(projectile.dimensions)*3)
+    guide.show_in_front=True;guide.hide_render=True;guide.color=(1,.25,.02,1)
+    guide['lab_decor']=True;guide['impact_direction_guide']=True
+    projectile['launch_direction']=list(vector.normalized())
+    return guide
+
+
 def launch(scene,selected):
-    'IA: Añade hasta ocho impactos dirigidos a selección o estructura; lanzamiento con cesión a Bullet o empuje cinemático explícito.'
+    'IA: Añade hasta ocho impactos con flecha inicial de orientación; lanzamiento con cesión a Bullet o empuje cinemático explícito.'
     if not scene.get('structural_physics'):raise ValueError('Prepara primero la casa en el laboratorio físico.')
     if sum(bool(o.get('impactor')) for o in scene.objects)>=8:raise ValueError('Límite de ocho impactos por ensayo.')
     p=scene.ruin_settings;direction=Vector(p.impact_direction)
@@ -68,7 +84,7 @@ def launch(scene,selected):
             for bag in strip.channelbags:
                 for curve in bag.fcurves:
                     for key in curve.keyframe_points:key.interpolation='LINEAR' if curve.data_path=='location' else 'CONSTANT'
-    ob['release_frame']=end+1;reset(scene)
+    ob['release_frame']=end+1;reset(scene);direction_guide(scene,ob,direction)
     return ob
 
 
