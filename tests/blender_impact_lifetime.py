@@ -17,6 +17,10 @@ def run():
     source=bpy.context.scene;source.ruin_settings.live_preview=False;source.ruin_settings.physics_brick_limit=16;source.ruin_settings.physics_frames=24
     lab=masonry_physics.prepare(source);bpy.context.window.scene=lab;p=lab.ruin_settings
     assert all(not ob.modifiers for ob in lab.objects if ob.get('masonry_brick'))
+    brick=next(ob for ob in lab.objects if ob.get('masonry_brick'))
+    finish=bpy.data.materials.new('Acabado de objeto');finish['replay_finish_test']=True
+    brick.material_slots[0].link='OBJECT';brick.material_slots[0].material=finish
+    brick_name=brick.name
     p.impact_lifetime=3;p.impact_mode='PRESS';p.impact_speed=250;p.impact_render_visible=True
     ob=impact_physics.launch(lab,[]);assert ob['impact_expire_frame']==4
     lab.frame_set(1);assert not ob.hide_viewport and any(ob.rigid_body.collision_collections)
@@ -30,6 +34,8 @@ def run():
     replay=status['finished'];bpy.context.window.scene=replay;projectile=next(o for o in replay.objects if o.get('impactor'))
     guide=next(o for o in replay.objects if o.get('impact_direction_guide'))
     assert guide.parent==projectile and guide.hide_render and guide.rigid_body is None
+    replay_brick=next(o for o in replay.objects if o.get('replay_source_object')==brick_name)
+    assert replay_brick.material_slots[0].link=='OBJECT' and replay_brick.material_slots[0].material.get('replay_finish_test')
     replay.frame_set(1);assert not projectile.hide_viewport and not projectile.hide_render
     replay.frame_set(4);assert projectile.hide_viewport and projectile.hide_render
     replay.frame_set(1);bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'dist/ruinas_v03210_lifetime.blend'))

@@ -20,7 +20,7 @@ def progress(path,**values):
 
 
 def run(output,path,name):
-    'IA: Calcula contactos a escala ampliada solo en el hijo; conserva cada fotograma de poses originales para no interpolar a través de apoyos entre contactos.'
+    'IA: Calcula contactos ampliados solo en el hijo; conserva poses por fotograma y materiales de objeto, sin interpolar apoyos ni perder acabados del laboratorio.'
     scene=bpy.data.scenes[name];bpy.context.window.scene=scene
     from ruinas_panel.services import structural_physics
     structural_physics.reinforce_safety_floor(scene)
@@ -92,6 +92,9 @@ def run(output,path,name):
                 mesh=original.data.copy();mesh.transform(Matrix.Scale(1/factor,4));meshes[original.data]=mesh
             mesh=meshes[original.data]
         ob=bpy.data.objects.new(original.name,mesh);result.collection.objects.link(ob)
+        for slot_index,slot in enumerate(original.material_slots):
+            if slot.link=='OBJECT':
+                ob.material_slots[slot_index].link='OBJECT';ob.material_slots[slot_index].material=slot.material
         for key in original.keys():ob[key]=original[key]
         ob['replay_source_object']=original.name
         expiry=original.get('impact_expire_frame',0)

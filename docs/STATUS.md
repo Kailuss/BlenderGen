@@ -246,3 +246,7 @@ Los impactos nuevos incluyen una flecha de orientación inicial, oculta en rende
 El ensayo pequeño de mampostería aplica su bisel al preparar los ladrillos. Antes conservaba modificadores que `scale_solver` rechaza; la prueba aislada de duración de proyectiles reproducía ese bloqueo. No cambia la casa fuente ni elimina el control del trabajador.
 
 Verificación: `dev.py test` (46 pruebas y cuatro casos geométricos), regresión de impactos, y duración/colisiones/visibilidad/reapertura con remapeo de la guía. Los escenarios grandes y el reparto físico de resistencias por material siguen requiriendo calibración; estos cambios no acreditan por sí solos un derrumbe estructural realista.
+
+## 0.32.22 — Entrega de torre e impacto dirigido
+
+El trabajador conserva los materiales por objeto en la reproducción. Caso de aceptación de torre, alcance, recursos medidos y límites en V03222.md. La perforación es guiada y la rotura de la zona superior es programada; no constituye calibración mecánica general. Se conserva la separación respecto a B1.
