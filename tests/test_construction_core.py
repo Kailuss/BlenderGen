@@ -12,6 +12,20 @@ def model():
 
 
 class ConstructionTests(unittest.TestCase):
+    def test_nominal_room_subtype_does_not_override_structural_kind(self):
+        'IA: Habitaciones y corredores conservan su subtipo sin colisionar con ROOM ni perder pertenencia.'
+        source={'nodes':[{'id':'floor.0','type':'FLOOR'},
+                        {'id':'room.rear','type':'ROOM','kind':'corridor','bounds':[0,10,20,30]}],
+                'relations':[['floor.0','room.rear','contains']]}
+        result=adapter.from_nominal(source)
+        room=next(e for e in result['elements'] if e['id']=='room.rear')
+        self.assertEqual(room['kind'],'ROOM')
+        self.assertEqual(room['properties']['kind'],'corridor')
+        self.assertEqual(room['properties']['bounds'],[0,10,20,30])
+        self.assertEqual(result['relations'][0]['kind'],'HOSTED_BY')
+        self.assertEqual(source['nodes'][1]['kind'],'corridor')
+        self.assertEqual(schema.validate(result),[])
+
     def test_material_catalog_confidence_and_fingerprint(self):
         'IA: La tabla conserva C por campo y cambia su firma al cambiar un valor; no acepta caminos críticos provisionales.'
         from ruinas_panel import config_materials

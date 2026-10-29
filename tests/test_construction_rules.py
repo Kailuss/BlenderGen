@@ -18,6 +18,23 @@ class ConstructionRules(unittest.TestCase):
         self.assertGreaterEqual(xs[-1]-xs[0],50)
         self.assertTrue(all(b-a>=20 for a,b in zip(xs,xs[1:])))
 
+    def test_balcony_window_reserves_accessories_and_clear_wall(self):
+        'IA: Reproduce el hueco de 9,2 mm del ejercicio; se rechaza sin impedir vanos separados ni miradores compartidos.'
+        p=SimpleNamespace(balcony_canopy=True,window_canopies=True,window_projection=10)
+        balcony=dict(wall='front',x0=-16,x1=16,z0=252,z1=312,balcony=True)
+        window=dict(wall='front',x0=25.2,x1=53.2,z0=291.15,z1=329.15,balcony=False)
+        self.assertTrue(layout.openings_conflict(p,balcony,window))
+        self.assertTrue(layout.openings_conflict(p,window,balcony))
+        window.update(x0=50,x1=78)
+        self.assertFalse(layout.openings_conflict(p,balcony,window))
+        window.update(wall='back',x0=25.2,x1=53.2)
+        self.assertFalse(layout.openings_conflict(p,balcony,window))
+        window.update(wall='front',z0=420,z1=458)
+        self.assertFalse(layout.openings_conflict(p,balcony,window))
+        a=dict(wall='front',x0=0,x1=28,z0=30,z1=68,balcony=False)
+        b=dict(a,x0=35,x1=63)
+        self.assertFalse(layout.openings_conflict(p,a,b))
+
     def test_manual_pillars(self):
         'IA: Las posiciones explícitas se respetan y los conflictos de puerta se rechazan antes de construir.'
         p=SimpleNamespace(length=200,pillar_count=3,pillar_width=12,pillar_distribution='CUSTOM',pillar_positions='20;50;80',lock_distribution=False,seed=17,left_turn='NONE',right_turn='NONE',connection_enabled=False)

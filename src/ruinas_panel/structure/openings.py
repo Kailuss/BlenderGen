@@ -208,7 +208,7 @@ def beam_positions(coll,w,z,rear=None):
 
 @profiling.timed('aberturas_y_vigas')
 def architectural_openings(coll,p,walls,door,edges):
-    'IA: Reparte cuotas por planta y alinea ejes con ventanas inferiores o entrada; reserva altura de tejadillos, informa vanos que no caben y aloja vigas en juntas reales.'
+    'IA: Reparte cuotas por planta y alinea ejes de la misma familia o entrada; reserva envolventes y paños libres entre balcones y ventanas, informa vanos que no caben y aloja vigas en juntas reales.'
     windows=[];warnings=[]
     from . import placement,floor_plan
     from . import construction_plan
@@ -249,8 +249,8 @@ def architectural_openings(coll,p,walls,door,edges):
             attempts=9+quota*4
             candidates=[usable[0]+ww/2+i*(usable[1]-usable[0]-ww)/(attempts-1) for i in range(attempts)]
             candidates+= [usable[0]+(usable[1]-usable[0])*(i+1)/(quota+1) for i in range(quota)]
-            anchors=sorted({h['x'] for h in windows if h['wall']==w['id'] and h['floor']<floor})
-            if not anchors and floor>0 and w['id']=='front' and door:anchors=[(door['left']+door['right'])/2]
+            anchors=sorted({h['x'] for h in windows if h['wall']==w['id'] and h['floor']<floor and h.get('balcony',False)==has_balcony})
+            if not anchors and has_balcony and floor>0 and w['id']=='front' and door:anchors=[(door['left']+door['right'])/2]
             candidates+=anchors
             feasible=[]
             for cx in candidates:
@@ -264,7 +264,8 @@ def architectural_openings(coll,p,walls,door,edges):
                     continue
                 if w['id']=='front' and door and x0<door['right']+4 and x1>door['left']-4 and z0<door['top']+6:
                     continue
-                if any(h['wall']==w['id'] and x0<h['x1']+6 and x1>h['x0']-6 and z0<h['z1']+5 and z1>h['z0']-5 for h in windows):
+                candidate={'wall':w['id'],'x0':x0,'x1':x1,'z0':z0,'z1':z1,'balcony':has_balcony}
+                if any(layout.openings_conflict(p,candidate,h) for h in windows):
                     continue
                 # No crear marcos flotando sobre zonas derrumbadas: requieren jambas y dintel.
                 supported=True
@@ -283,10 +284,10 @@ def architectural_openings(coll,p,walls,door,edges):
                 best=max(spans,key=lambda s:s[1]-s[0])
                 if best[1]-best[0]>=remaining*ww+max(0,remaining-1)*6:
                     distribution=best;feasible=[x for x in feasible if best[0]+ww/2<=x<=best[1]-ww/2]
-            selected=layout.spread_positions(feasible,remaining,*distribution,ww+(12 if has_balcony else 6))
+            selected=layout.spread_positions(feasible,remaining,*distribution,ww+(2*config.FACADE_CANOPY_HALF_OVERHANG_MM+max(config.FACADE_ACCESSORY_CLEARANCE_MM,.6*ww) if has_balcony else 6))
             if floor>0 and len(anchors)==remaining and feasible:
                 aligned=[min(feasible,key=lambda x:(abs(x-a),x)) for a in anchors]
-                if all(abs(x-a)<.01 for x,a in zip(aligned,anchors)) and all(b-a>=ww+(12 if has_balcony else 6) for a,b in zip(aligned,aligned[1:])):selected=aligned
+                if all(abs(x-a)<.01 for x,a in zip(aligned,anchors)) and all(b-a>=ww+(2*config.FACADE_CANOPY_HALF_OVERHANG_MM+max(config.FACADE_ACCESSORY_CLEARANCE_MM,.6*ww) if has_balcony else 6) for a,b in zip(aligned,aligned[1:])):selected=aligned
             for cx in selected:
                 x0=cx-ww/2;x1=cx+ww/2
                 carve_rectangle(coll,w,x0,x1,z0,z1,p.thickness+5,'Ventana')

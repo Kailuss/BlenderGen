@@ -250,3 +250,8 @@ Verificación: `dev.py test` (46 pruebas y cuatro casos geométricos), regresió
 ## 0.32.22 — Entrega de torre e impacto dirigido
 
 El trabajador conserva los materiales por objeto en la reproducción. Caso de aceptación de torre, alcance, recursos medidos y límites en V03222.md. La perforación es guiada y la rotura de la zona superior es programada; no constituye calibración mecánica general. Se conserva la separación respecto a B1.
+
+
+## 0.32.23 — distribución de accesorios
+
+Balcones y ventanas reservan envolventes completas y un paño libre mínimo de 18 mm (creciente con el ancho), con alineación por familia. Se conserva la agrupación explícita de miradores. Corregido el conflicto `kind` de habitaciones en el adaptador nominal. El segundo ejercicio de tres impactos sigue en preparación; esta corrección no acredita su simulación ni el humo. Detalles en `V03223.md`.

@@ -3,7 +3,7 @@
 bl_info = {
     'name': 'Ruinas — Muro de fantasía',
     'author': 'Codex',
-    'version': (0, 32, 22),
+    'version': (0, 32, 23),
     'blender': (5, 0, 0),
     'location': 'Vista 3D > N > Ruinas',
     'category': 'Add Mesh',

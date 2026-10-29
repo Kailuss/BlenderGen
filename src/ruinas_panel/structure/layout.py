@@ -9,6 +9,27 @@ import math
 import copy
 
 
+def opening_envelope(p,opening):
+    'IA: Reserva exterior conservadora del vano en mm, incluido vuelo lateral y altura del tejadillo; no requiere mallas.'
+    balcony=opening.get('balcony',False)
+    canopy=p.balcony_canopy if balcony else p.window_canopies
+    side=max(3 if balcony else 1.5,config.FACADE_CANOPY_HALF_OVERHANG_MM if canopy else 0)
+    depth=0 if balcony else p.window_projection
+    head=11+min(12,(depth+7.3)*.52) if canopy else 3
+    return (opening['x0']-side,opening['x1']+side,opening['z0']-3,opening['z1']+head)
+
+
+def openings_conflict(p,a,b):
+    'IA: Balcones reservan un paño libre entre envolventes completas; ventanas agrupables conservan la separación histórica de seis mm.'
+    if a['wall']!=b['wall']:return False
+    if not a.get('balcony') and not b.get('balcony'):
+        return a['x0']<b['x1']+6 and a['x1']>b['x0']-6 and a['z0']<b['z1']+5 and a['z1']>b['z0']-5
+    ax0,ax1,az0,az1=opening_envelope(p,a)
+    bx0,bx1,bz0,bz1=opening_envelope(p,b)
+    clear=max(config.FACADE_ACCESSORY_CLEARANCE_MM,.6*max(a['x1']-a['x0'],b['x1']-b['x0']))
+    return ax0<bx1+clear and ax1>bx0-clear and az0<bz1+3 and az1>bz0-3
+
+
 def masonry_intervals(p,wall,z,edges=None):
     'IA: Intervalos de piedra antes de bisel/desgaste, derivados del productor puro; incluye puerta y derrumbe de fachada, no vanos posteriores de assembly.'
     if wall['id']=='front':

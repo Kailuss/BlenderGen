@@ -30,8 +30,12 @@ def merge_relations(relations):
 
 
 def from_nominal(nominal):
-    'IA: Traduce pertenencia, apoyos declarados y accesos; conserva IDs; no convierte daño/acceso en apoyo ni asigna resistencia no medida.'
-    elements=[schema.element(n['id'],n['type'],**{k:v for k,v in n.items() if k not in ('id','type')}) for n in nominal['nodes']]
+    'IA: Traduce pertenencia, apoyos declarados y accesos; conserva IDs y kind nominal dentro de properties, separado del tipo estructural; no inventa contactos ni resistencias.'
+    elements=[]
+    for n in nominal['nodes']:
+        element=schema.element(n['id'],n['type'],**{k:v for k,v in n.items() if k not in ('id','type','kind')})
+        if 'kind' in n:element['properties']['kind']=n['kind']
+        elements.append(element)
     relations=[];annotations=[]
     for a,b,kind in nominal['relations']:
         if kind=='contains':source,target,typed=b,a,'HOSTED_BY'
