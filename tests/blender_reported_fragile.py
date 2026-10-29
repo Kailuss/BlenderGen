@@ -15,9 +15,9 @@ def run():
     source=sys.argv[sys.argv.index('--')+1] if '--' in sys.argv else r'C:\Users\yhora\AppData\Local\Temp\ruinas_physics_zih647eb\input.blend'
     bpy.ops.wm.open_mainfile(filepath=source)
     original=fragile_physics.split
-    def capture(mesh,axis,seed):
+    def capture(mesh,axis,seed,**kwargs):
         'IA: Guarda el sólido fallido y el plano reproducible antes de propagar el error.'
-        try:return original(mesh,axis,seed)
+        try:return original(mesh,axis,seed,**kwargs)
         except Exception:
             ob=bpy.data.objects.new('FALLO_REVOCO',mesh.copy())
             bpy.context.scene.collection.objects.link(ob)

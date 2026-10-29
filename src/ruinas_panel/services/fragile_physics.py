@@ -37,22 +37,22 @@ def triangulate_closed(bm):
     bmesh.ops.triangulate(bm,faces=list(bm.faces),ngon_method='EAR_CLIP')
 
 
-def split(mesh,axis,seed):
-    'IA: Ensaya hasta ocho planos oblicuos sembrados para evitar cortes tangentes degenerados; cada resultado debe conservar cierre y volumen, sin aceptar fragmentos defectuosos.'
+def split(mesh,axis,seed,preserve_axis=None):
+    'IA: Ensaya hasta ocho planos oblicuos sembrados para evitar cortes tangentes degenerados; puede preservar la dirección del conducto al abrirlo; cada resultado conserva cierre y volumen.'
     failure=None
     for attempt in range(8):
-        try:return _split_once(mesh,axis,seed+attempt*104729)
+        try:return _split_once(mesh,axis,seed+attempt*104729,preserve_axis)
         except ValueError as error:failure=error
     raise failure
 
 
-def _split_once(mesh,axis,seed):
-    'IA: Bisección oblicua reproducible de un sólido triangulado antes del corte para preservar el relieve; exige cierre y conservación de volumen, incluidas las tapas interiores de conductos.'
+def _split_once(mesh,axis,seed,preserve_axis=None):
+    'IA: Bisección oblicua reproducible de un sólido triangulado antes del corte para preservar el relieve; exige cierre y conservación de volumen, incluidas las tapas interiores de conductos; preserve_axis impide inclinar el plano en la dirección longitudinal.'
     rng=random.Random(seed);points=[v.co for v in mesh.vertices]
     lo=Vector([min(v[k] for v in points) for k in range(3)]);hi=Vector([max(v[k] for v in points) for k in range(3)])
     center=(lo+hi)/2;center[axis]+=(hi[axis]-lo[axis])*rng.uniform(-.08,.08)
     normal=Vector((0,0,0));normal[axis]=1
-    other=max((k for k in range(3) if k!=axis),key=lambda k:hi[k]-lo[k]);normal[other]=rng.uniform(-.09,.09)
+    other=max((k for k in range(3) if k!=axis and k!=preserve_axis),key=lambda k:hi[k]-lo[k]);normal[other]=rng.uniform(-.09,.09)
     results=[];volumes=[]
     original=bmesh.new();original.from_mesh(mesh)
     triangulate_closed(original)
@@ -112,8 +112,9 @@ def fragment(objects,coll,report,size=20):
                 if created+len(pending)+len(finished)+2>config.PHYSICS_FRAGILE_LIMIT:
                     bpy.data.meshes.remove(mesh);raise ValueError('Demasiados fragmentos de revoco/chimenea: aumenta el tamaño de fragmento o reduce la casa.')
                 # Abrir primero el anillo en vertical evita tapar la luz hueca al cortar por altura.
-                axis=0 if not lineage and any(s in key for s in ('conducto','campana','remate chimenea')) else max(range(3),key=lambda k:spans[k])
-                try:children=split(mesh,axis,seed+sum((i+1)*ord(c) for i,c in enumerate(lineage)))
+                open_ring=not lineage and any(s in key for s in ('conducto','campana','remate chimenea'))
+                axis=0 if open_ring else max(range(3),key=lambda k:spans[k])
+                try:children=split(mesh,axis,seed+sum((i+1)*ord(c) for i,c in enumerate(lineage)),preserve_axis=2 if open_ring else None)
                 finally:bpy.data.meshes.remove(mesh)
                 pending.extend((child,lineage+str(i)) for i,child in enumerate(children))
             if len(finished)==1:

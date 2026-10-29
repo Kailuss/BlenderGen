@@ -255,3 +255,10 @@ El trabajador conserva los materiales por objeto en la reproducción. Caso de ac
 ## 0.32.23 — distribución de accesorios
 
 Balcones y ventanas reservan envolventes completas y un paño libre mínimo de 18 mm (creciente con el ancho), con alineación por familia. Se conserva la agrupación explícita de miradores. Corregido el conflicto `kind` de habitaciones en el adaptador nominal. El segundo ejercicio de tres impactos sigue en preparación; esta corrección no acredita su simulación ni el humo. Detalles en `V03223.md`.
+
+
+## Diagnóstico de conducto largo y reposo — 2026-10-29
+
+El segundo ejercicio reprodujo un fallo de volumen en el conducto interior: la apertura inicial oblicua también inclinaba el plano respecto a Z y dejaba anillos cerrados en chimeneas largas. Se prueba conservar Z en esa apertura; ocho casos de 80/420 mm y dos orientaciones conservan cierre, volumen y paso libre. El caso real aislado produce 29 fragmentos y conserva el volumen con error relativo de 1,21e-8.
+
+La prueba histórica `blender_fragile_physics.py` no cumple reposo con la configuración actual: 45,83 mm con el plano anterior y 117,50 mm con el nuevo. No se considera una validación física aprobada ni se relaja el umbral. El segundo ejercicio usará apoyos pasivos fuera del daño y uniones retenidas hasta el contacto programado; debe comprobar su propio reposo antes de entregarse.
