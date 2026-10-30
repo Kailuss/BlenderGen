@@ -262,3 +262,7 @@ Balcones y ventanas reservan envolventes completas y un paño libre mínimo de 1
 El segundo ejercicio reprodujo un fallo de volumen en el conducto interior: la apertura inicial oblicua también inclinaba el plano respecto a Z y dejaba anillos cerrados en chimeneas largas. Se prueba conservar Z en esa apertura; ocho casos de 80/420 mm y dos orientaciones conservan cierre, volumen y paso libre. El caso real aislado produce 29 fragmentos y conserva el volumen con error relativo de 1,21e-8.
 
 La prueba histórica `blender_fragile_physics.py` no cumple reposo con la configuración actual: 45,83 mm con el plano anterior y 117,50 mm con el nuevo. No se considera una validación física aprobada ni se relaja el umbral. El segundo ejercicio usará apoyos pasivos fuera del daño y uniones retenidas hasta el contacto programado; debe comprobar su propio reposo antes de entregarse.
+
+## 0.32.25 — coste de prefractura
+
+Los cuerpos de las mitades se copian con configuraciones independientes y las uniones se crean desde una plantilla del lote. Diez piezas del laboratorio grande pasan a veinte fragmentos cerrados en 12,32 s, conservando masa. Regresión de impactos y `dev.py test` aprobados. El ejercicio de metralla todavía no está aceptado: se recalcula tras movimiento prematuro y una pieza expulsada fuera del suelo. Ver `V03225.md`.

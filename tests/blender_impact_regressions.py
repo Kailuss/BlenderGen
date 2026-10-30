@@ -29,6 +29,8 @@ def run():
     stones=[o for o in lab.objects if o.get('physical_role')=='stone'];before=sum(volume(o.data) for o in stones)
     lab.ruin_settings.fracture_strength=.001
     fragments=impact.fracture(lab,stones);assert len(fragments)==8
+    assert all(o.name in lab.rigidbody_world.collection.objects for o in fragments)
+    assert len({o.rigid_body.as_pointer() for o in fragments})==len(fragments)
     assert abs(sum(volume(o.data) for o in fragments)-before)<before*.00001
     pair=fragments[2:4];start_distance=(pair[0].location-pair[1].location).length
     for frame in range(1,31):lab.frame_set(frame)

@@ -119,7 +119,7 @@ def halves(mesh):
 
 
 def fracture(scene,selected):
-    'IA: Prefractura hasta 32 piedras activas en dos mitades cerradas con unión rompible; retiene conexiones exteriores y no toca la fuente.'
+    'IA: Prefractura hasta 32 piedras activas en dos mitades cerradas con unión rompible; copia cuerpos independientes y los enlaza al mundo sin reconstruirlo por fragmento; retiene conexiones exteriores y no toca la fuente.'
     if not scene.get('structural_physics'):raise ValueError('Abre el laboratorio físico.')
     chosen=[o for o in selected if o.name in scene.objects and o.rigid_body and o.rigid_body.type=='ACTIVE' and not o.get('fracture_fragment') and (o.get('masonry_brick') or o.get('physical_role')=='stone')]
     if not chosen:raise ValueError('Selecciona ladrillos de piedra sin fracturar, no el proyectil ni el terreno.')
@@ -131,19 +131,20 @@ def fracture(scene,selected):
         for _,meshes in prepared:
             for mesh in meshes:bpy.data.meshes.remove(mesh)
         raise
-    fragments=[]
+    fragments=[];joint_template=None
     for original,meshes in prepared:
         children=[];volumes=[]
         for mesh in meshes:
             bm=bmesh.new();bm.from_mesh(mesh);volumes.append(bm.calc_volume());bm.free()
         for i,mesh in enumerate(meshes):
-            ob=bpy.data.objects.new(original.name+' · rotura '+str(i+1),mesh);scene.collection.objects.link(ob)
+            ob=original.copy();ob.data=mesh;ob.animation_data_clear()
+            ob.name=original.name+' · rotura '+str(i+1);scene.collection.objects.link(ob)
+            if ob.name not in scene.rigidbody_world.collection.objects:scene.rigidbody_world.collection.objects.link(ob)
             center=sum((v.co for v in mesh.vertices),Vector())/len(mesh.vertices)
             mesh.transform(Matrix.Translation(-center));ob.matrix_world=original.matrix_world@Matrix.Translation(center)
             for key in original.keys():ob[key]=original[key]
             ob['fracture_fragment']=True;ob['physical_volume_mm3']=volumes[i]*1e9
-            with bpy.context.temp_override(scene=scene,view_layer=scene.view_layers[0],object=ob,active_object=ob,selected_objects=[ob]):bpy.ops.rigidbody.object_add(type='ACTIVE')
-            rb=ob.rigid_body;rb.collision_shape='MESH';rb.mesh_source='BASE';rb.use_margin=True;rb.collision_margin=0
+            rb=ob.rigid_body;rb.type='ACTIVE';rb.kinematic=False;rb.collision_shape='MESH';rb.mesh_source='BASE';rb.use_margin=True;rb.collision_margin=0
             rb.mass=max(.001,original.rigid_body.mass*volumes[i]/sum(volumes));rb.friction=1;rb.restitution=0;rb.angular_damping=.5
             children.append(ob)
         for other in list(scene.objects):
@@ -152,7 +153,7 @@ def fracture(scene,selected):
             nearest=min(children,key=lambda o:(o.location-other.location).length)
             if c.object1==original:c.object1=nearest
             if c.object2==original:c.object2=nearest
-        structural_physics.joint(scene,*children,original.location*1000,scene.ruin_settings.fracture_strength)
+        joint_template=structural_physics.joint(scene,*children,original.location*1000,scene.ruin_settings.fracture_strength,template=joint_template)
         fragments.extend(children);bpy.data.objects.remove(original,do_unlink=True)
     reset(scene)
     return fragments
