@@ -21,6 +21,7 @@ def progress(path,**values):
 
 def run(output,path,name):
     'IA: Calcula contactos ampliados solo en el hijo; conserva poses por fotograma y materiales de objeto, sin interpolar apoyos ni perder acabados del laboratorio.'
+    from ruinas_panel.services.physics_bounds import below_floor
     scene=bpy.data.scenes[name];bpy.context.window.scene=scene
     from ruinas_panel.services import structural_physics
     structural_physics.reinforce_safety_floor(scene)
@@ -59,10 +60,10 @@ def run(output,path,name):
         deps=bpy.context.evaluated_depsgraph_get()
         if floors:
             floor=floors[0];floor_matrix=floor.evaluated_get(deps).matrix_world
-            floor_top=max((floor_matrix@Vector(v)).z for v in floor.bound_box)
+            floor_points=tuple(floor_matrix@Vector(v) for v in floor.bound_box)
             for ob in monitored:
                 matrix=ob.evaluated_get(deps).matrix_world
-                if max((matrix@Vector(v)).z for v in ob.bound_box)<floor_top-.001*factor:
+                if below_floor((matrix@Vector(v) for v in ob.bound_box),floor_points,.001*factor):
                     details={'frame':frame,'object':ob.name,'collision_shape':ob.rigid_body.collision_shape,'position_m':list(matrix.translation/factor),'previous_position_m':poses[lookup[frame-1],objects.index(ob),:3].tolist() if frame>1 else None,'floor_bounds_m':[[min((floor_matrix@Vector(v))[i] for v in floor.bound_box)/factor,max((floor_matrix@Vector(v))[i] for v in floor.bound_box)/factor] for i in range(3)],'local_bounds_m':[[min(v[i] for v in ob.bound_box)/factor,max(v[i] for v in ob.bound_box)/factor] for i in range(3)]}
                     path.with_name('escaped_body.json').write_text(json.dumps(details,indent=2),encoding='utf8')
                     raise ValueError('Fuga bajo el suelo de seguridad en fotograma %s: %s. No se entrega una reproducción inválida.'%(frame,ob.name))

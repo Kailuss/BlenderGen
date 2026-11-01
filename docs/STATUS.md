@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.26 — 2026-11-01
+
+El detector de fugas respeta la huella finita del suelo horizontal: una caída completamente exterior ya no se confunde con atravesarlo. Regresión en escalas 1 y 100, sin relajar el rechazo interior. No acredita estabilidad general ni la entrega del segundo ejercicio, todavía en cálculo. Diagnóstico y límites en `V03226.md`.
+
 ## v0.32.20 — 2026-10-22
 
 Diez segundos físicos a velocidad 1, órbita sincronizada y muestras de reproducción cada fotograma. En el trabajador: esquirlas booleanas de menos de 0,05 mm agregadas sin perder caras, suelo de seguridad ampliado y control de fugas. Ensayo real de 512 piezas seleccionadas: 1.455 s, pico de 1.496 MB; exportación cerrada de 4.908.174 triángulos, pico de 2.658 MB. Sin fugas bajo el suelo, pero hasta 65,7 mm de movimiento en el último segundo: asentamiento y rendimiento pendientes. Botón de render con luces, DOF, Cycles, MP4/H.264 y microrelieve visual posterior a física. Inventariados seis archivos de fallo; no certificados todos sus casos DETAIL. Alcance y uso en `V03220.md`.
