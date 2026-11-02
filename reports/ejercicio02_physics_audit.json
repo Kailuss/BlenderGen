@@ -1,0 +1,29 @@
+{
+  "preimpact_max_mm": 0.0,
+  "regions": {
+    "foundation": {
+      "total": 521,
+      "moved_over_5mm": 67
+    },
+    "ground": {
+      "total": 2212,
+      "moved_over_5mm": 488
+    },
+    "middle": {
+      "total": 2150,
+      "moved_over_5mm": 556
+    },
+    "upper": {
+      "total": 2022,
+      "moved_over_5mm": 215
+    },
+    "roof": {
+      "total": 4071,
+      "moved_over_5mm": 484
+    }
+  },
+  "foundation_blocks_moved": 46,
+  "roof_retained": 2387,
+  "roof_total": 2684,
+  "scale_error": 1.353957258653706e-06
+}

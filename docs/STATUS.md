@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## Ejercicio 02 de render — 2026-11-02
+
+Reproducción completa de tres impactos y diez segundos, gas Mantaflow horneado, acabado Cycles/OptiX y lanzador de vídeo. Reapertura, cachés, render visual y vídeo breve del lanzador verificados. Detalles, métricas y límites en `EJERCICIO02_ENTREGA.md`. No implica cierre del modelo causal B1 ni calibración estructural general.
+
 ## v0.32.26 — 2026-11-01
 
 El detector de fugas respeta la huella finita del suelo horizontal: una caída completamente exterior ya no se confunde con atravesarlo. Regresión en escalas 1 y 100, sin relajar el rechazo interior. No acredita estabilidad general ni la entrega del segundo ejercicio, todavía en cálculo. Diagnóstico y límites en `V03226.md`.
