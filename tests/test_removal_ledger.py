@@ -6,6 +6,13 @@ from ruinas_panel.construction_core import causal_support,seat
 
 
 class LedgerTests(unittest.TestCase):
+    def test_segment_floor_identity(self):
+        'IA: La planta de la viga forma parte del ID; filtrar otros ordinales no altera el superviviente.'
+        self.assertEqual(identifiers.segment('front',2,0,7),'seg.front.f2.b0.7')
+        self.assertNotEqual(identifiers.segment('front',1,0,7),identifiers.segment('front',2,0,7))
+        for values in ((0,0,1),(1,-1,1),(1,0,-1),(1,0,1.5)):
+            with self.assertRaises(ValueError):identifiers.segment('front',*values)
+
     def test_cut_outside_contact(self):
         'IA: Un alojamiento sobre el rayo no invalida asiento; un corte que toca el rayo permanece incierto, y REMOVE siempre propaga.'
         ledger=RemovalLedger();ledger.register('stone',{})

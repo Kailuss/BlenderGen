@@ -24,7 +24,7 @@ def capture(coll,p,scene):
         axes=floor_frame.aligned_axes(*[layout.masonry_joints(layout.masonry_intervals(p,descriptors[w],z)) for w in ('front','back')])
         for axis in axes['axes']:
             for wall in ('front','back'):
-                records.append({'id':identifiers.segment(wall,level-1,axis['ordinal']),'level':level,'wall':wall,'x':axis['x_mm'],'z':z,'axis':axis['ordinal'],'contacts':[[],[],[]]})
+                records.append({'id':identifiers.segment(wall,level,level-1,axis['ordinal']),'level':level,'wall':wall,'x':axis['x_mm'],'z':z,'axis':axis['ordinal'],'contacts':[[],[],[]]})
     for wall in ('front','back'):
         w=descriptors[wall];selected=[r for r in records if r['wall']==wall]
         for ob in coll.objects:

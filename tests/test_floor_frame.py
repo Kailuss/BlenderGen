@@ -15,12 +15,12 @@ class FloorFrameTests(unittest.TestCase):
     def test_segment_loss_is_local(self):
         'IA: Perder asiento superior elimina su viga sin eliminar muro padre, otra columna ni base inferior.'
         model=floor_frame.beam_skeleton({'x_mm':-20,'ordinal':0},[(2,25),(25,50)],{'front':0,'back':100},4.2,3,30,120,60)
-        result=graph.loss(model,['seg.front.1.0'])
+        result=graph.loss(model,['seg.front.f2.b1.0'])
         self.assertEqual(result['unsupported'],[model['beam_id']])
         self.assertEqual(result['requires_review'],[])
         self.assertEqual(model['segment_count'],4)
-        result=graph.loss(model,['seg.front.0.0'])
-        self.assertEqual(result['unsupported'],['beam.2.0','seg.front.1.0'])
+        result=graph.loss(model,['seg.front.f2.b0.0'])
+        self.assertEqual(result['unsupported'],['beam.2.0','seg.front.f2.b1.0'])
 
     def test_insufficient_seat(self):
         'IA: Rechaza un asiento inferior al mínimo explícito sin inventar relación de apoyo.'

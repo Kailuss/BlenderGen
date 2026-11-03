@@ -56,7 +56,7 @@ def beam_skeleton(axis,bands,wall_y,seat_width_mm,seat_depth_mm,margin_world_mm,
         parent='wall.'+wall;elements.append(schema.element(parent,'WALL','MASONRY_LIME'))
         below='foundation'
         for level,(z0,z1) in enumerate(bands):
-            key=identifiers.segment(wall,level,ordinal)
+            key=identifiers.segment(wall,len(bands),level,ordinal)
             segment=schema.element(key,'WALL_SEGMENT','MASONRY_LIME',wall=wall,interval_model_mm=[x-half,x+half],band_model_mm=[z0,z1])
             segment['minimum_supports']=1;elements.append(segment)
             relations.append(adapter.relation(key,parent,'HOSTED_BY'))
