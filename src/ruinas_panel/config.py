@@ -8,9 +8,6 @@ BUILD_ID = '0.32.26'
 FACADE_ACCESSORY_CLEARANCE_MM = 18.0
 FACADE_CANOPY_HALF_OVERHANG_MM = 4.3
 ROOF_DAMAGE_SAMPLE_MM = 1.0
-SHAKE_FRAMES = 10
-SHAKE_EXPIRE_FRAME = 5
-SHAKE_RADIUS_MM = 12.0
 
 
 SOLID_NAME = 'MURO · sólido exportable'
@@ -149,23 +146,39 @@ TURN_ITEMS=[('NONE','Recto','Sin tramo perpendicular'),('LEFT','Giro izq.','Giro
 
 # Subpaneles de la barra lateral, en orden. toggle: casilla en la cabecera que activa el bloque;
 # closed: empieza plegado. El botón de restablecer vuelve a los valores por defecto de fields (no del toggle).
+# Orden del panel = orden de construcción: volumen, fábrica, interior, huecos, cubierta,
+# entorno, daño, calidad y física. Cada campo visible aparece en una sola sección
+# (tests/test_api_layout.py lo comprueba).
 SECTIONS=(
- {'id':'build','title':'Construcción','fields':('build_type','height_type','ground_storey_height','upper_storey_height','low_wall_height','length','floor_beams'),'closed':False},
- {'id':'layout','title':'Distribución','fields':('layout_mode','building_depth','extra_side','interior_layout'),'closed':False},
- {'id':'finish','title':'Acabado','fields':('damage_enabled','collapse','wear_level','wear','cracks','rubble_amount','ground_roughness'),'closed':False},
+ {'id':'volume','title':'Volumen','fields':('build_type','height_type','ground_storey_height','upper_storey_height','low_wall_height','length','layout_mode','building_depth','extra_side'),'closed':False},
+ {'id':'masonry','title':'Muros y aparejo','fields':('stone_variation','bond_subdivisions','alternate_height','randomness'),'closed':True},
+ {'id':'pillars','title':'Pilares','fields':('pillar_count','pillar_distribution','pillar_positions','connection_enabled','connection_side'),'closed':True},
+ {'id':'interior','title':'Interior','fields':('interior_layout','floor_beams','ground_floor','upper_floor'),'closed':False},
+ {'id':'stairs','title':'Escaleras','fields':('stair_type','stair_side','stair_tread','stair_riser'),'closed':True},
  {'id':'door','title':'Puerta','toggle':'door_enabled','fields':('door_style','door_leaf','door_position','door_width','door_height','wood_frame','door_canopy'),'closed':True},
- {'id':'windows','title':'Ventanas','toggle':'windows_enabled','fields':('window_facing','windows_per_wall','window_width','window_height','window_leaves','window_open_angle','window_canopies','window_projection','window_bay_join','window_bay_gap','facade_damage','iron_mode','iron_damage'),'closed':False},
- {'id':'balconies','title':'Balcones','toggle':'balconies','fields':('balconies_per_wall','balcony_width','balcony_height','balcony_depth','balcony_gate','balcony_open_angle','balcony_canopy'),'closed':False},
- {'id':'wood','title':'Madera y cubierta','fields':('wood_grain','wood_damage','roof_frame','roof_type','roof_curve','roof_sweep','roof_sweep_bias','roof_asymmetry','roof_tiles','roof_gables','roof_damage','roof_damage_seed','chimneys','brass_pipes'),'closed':False},
+ {'id':'windows','title':'Ventanas','toggle':'windows_enabled','fields':('window_facing','windows_per_wall','window_width','window_height','window_leaves','window_open_angle','window_canopies','window_projection','window_bay_join','window_bay_gap'),'closed':True},
+ {'id':'balconies','title':'Balcones','toggle':'balconies','fields':('balconies_per_wall','balcony_width','balcony_height','balcony_depth','balcony_gate','balcony_open_angle','balcony_canopy'),'closed':True},
+ {'id':'roof','title':'Cubierta','toggle':'roof_frame','fields':('roof_type','roof_curve','roof_sweep','roof_sweep_bias','roof_asymmetry','roof_tiles','roof_gables','chimneys','brass_pipes'),'closed':True},
  {'id':'foundation','title':'Cimientos y patio','fields':('foundation_enabled','foundation_height','entrance_tread','patio_enabled','patio_margin','patio_fence','fence_height'),'closed':True},
- {'id':'floors','title':'Suelos de madera','fields':('ground_floor','upper_floor','floor_damage'),'closed':False},
- {'id':'stairs','title':'Escaleras','fields':('stair_type','stair_side','stair_tread','stair_riser'),'closed':False},
- {'id':'quality','title':'Calidad','fields':('preview_quality','export_quality','export_density','use_instances','quick_edit','batch_preview','microdetail_preview'),'closed':True},
- {'id':'bond','title':'Aparejo','fields':('stone_variation','bond_subdivisions','alternate_height','randomness'),'closed':True},
+ {'id':'damage','title':'Daño','toggle':'damage_enabled','fields':('collapse','break_position','hole_count','hole_size','hole_seed','hole_damage','wear_level','wear','cracks','rubble_amount','ground_roughness','wood_damage','floor_damage','roof_damage','roof_damage_seed','facade_damage','iron_mode','iron_damage'),'closed':False},
  {'id':'cracks','title':'Grietas','fields':('cracks_per_stone','crack_length_var','crack_width_var','crack_angle_var','crack_path_var'),'closed':True},
- {'id':'collapse','title':'Derrumbe y agujeros','fields':('break_position','hole_count','hole_size','hole_seed','hole_damage'),'closed':True},
- {'id':'pillars','title':'Pilares','fields':('pillar_count','pillar_distribution','pillar_positions','connection_enabled','connection_side'),'closed':True})
+ {'id':'quality','title':'Calidad y exportación','fields':('preview_quality','export_quality','export_density','use_instances','quick_edit','batch_preview','microdetail_preview','wood_grain'),'closed':True},
+ {'id':'physics','title':'Física','fields':('physics_target','physics_frames','physics_memory_mb','physics_timeout_seconds','physics_brick_limit','physics_masonry_shape','physics_strength','physics_fragile_size'),'closed':True})
 
+
+# Ajustes guardados que el panel no muestra a propósito, con su motivo. Un campo nuevo
+# debe estar en una sección, dibujarse en panel.py o declararse aquí.
+HIDDEN_FIELDS={
+ 'status':'Mensaje de estado; se escribe desde el código',
+ 'distribution_seed':'Semilla interna del aparejo bloqueado',
+ 'height':'Muro suelto heredado: lo calcula el perfil de construcción',
+ 'left_height':'Muro suelto heredado', 'right_height':'Muro suelto heredado',
+ 'left_turn':'Muro suelto heredado', 'right_turn':'Muro suelto heredado',
+ 'left_return_length':'Muro suelto heredado', 'right_return_length':'Muro suelto heredado',
+ 'thickness':'Lo fija build_type (config.BUILD_TYPES)',
+ 'stone_size':'Altura de hilada del perfil de construcción',
+ 'projection':'Saliente de piedra del perfil de construcción',
+ 'pillar_width':'Anchura de pilar del perfil de construcción'}
 
 # Enums de 2-3 opciones que definen un modo: botones en fila. FULL_WIDTH: sin etiqueta y a todo lo
 # ancho, porque cada botón se explica solo y con etiqueta no caben en la barra lateral.

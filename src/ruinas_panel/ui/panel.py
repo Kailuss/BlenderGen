@@ -69,69 +69,24 @@ class RUIN_PT_panel(bpy.types.Panel):
             layout.operator('ruin.physics_return',icon='BACK')
             return
         if context.scene.get('ruinas_physics_lab'):
-            layout.prop(context.scene.ruin_settings,'lab_camera_type')
-            layout.operator('ruin.lab_camera',icon='CAMERA_DATA')
-            layout.prop(context.scene,'camera',text='Cámara de render')
-            layout.prop(context.scene.ruin_settings,'lab_fog_density')
-            layout.operator('ruin.lab_fog')
-            layout.operator('ruin.lab_smoke')
-            layout.operator('ruin.render_setup',icon='RENDER_ANIMATION')
-            layout.prop(context.scene.render,'filepath',text='Salida de vídeo')
-            box=layout.box();box.label(text='Lámpara de tres velas · decorativa')
-            box.prop(context.scene.ruin_settings,'chandelier_drop_mm')
-            box.prop(context.scene.ruin_settings,'chandelier_sway_deg')
-            box.operator('ruin.lab_chandelier',icon='LIGHT_POINT')
-            layout.label(text='Física · '+context.scene.get('physics_room','tabique'))
+            p=context.scene.ruin_settings
+            structural=context.scene.get('structural_physics',False)
             from ..services import physics
             if physics.source_matches(context.scene) is False:
                 box=layout.box();box.alert=True
                 box.label(text='La fuente ha cambiado',icon='ERROR')
                 box.label(text='Prepara de nuevo su laboratorio')
-            structural=context.scene.get('structural_physics',False)
-            layout.label(text='Edificio sin mortero · experimental' if structural else 'Ensayo antiguo: solo tabiques')
+            col=layout.column(align=True)
+            col.label(text='Física · '+context.scene.get('physics_room','tabique'))
+            col.label(text='Edificio sin mortero · experimental' if structural else 'Ensayo antiguo: solo tabiques')
             if structural:
                 report=parsed(context.scene.get('preparation_report','{}'),{})
-                layout.label(text='%s cuerpos móviles · %s uniones'%(sum(bool(o.rigid_body and o.rigid_body.type=='ACTIVE') for o in context.scene.objects),sum(o.rigid_body_constraint is not None for o in context.scene.objects)))
-                if report.get('unconnected'):layout.label(text='%s piezas sin unión inicial'%len(report['unconnected']),icon='ERROR')
-            if structural:
-                p=context.scene.ruin_settings
-                box=layout.box();box.label(text='Preparar selección de desprendimiento')
-                for field in ('physics_selection_mode','physics_selection_material','physics_selection_percent'):box.prop(p,field)
-                if p.physics_selection_mode=='HEIGHT':
-                    for field in ('physics_selection_gradient','physics_selection_seed'):box.prop(p,field)
-                else:
-                    box.prop(p,'physics_selection_radii')
-                    box.label(text='Del centro hacia fuera · sin azar')
-                box.prop(p,'physics_selection_add')
-                box.operator('ruin.physics_height_selection')
-                from ..services import material_strength
-                box=layout.box();box.label(text='Resistencia por familia · multiplicador')
-                for field in material_strength.FIELDS:box.prop(p,field)
-            if context.scene.get('masonry_lab'):
-                layout.label(text='Ladrillos activos · juntas rompibles')
-                layout.operator('ruin.masonry_remove')
-
-            else:layout.operator('ruin.physics_release',text='Soltar uniones seleccionadas' if structural else 'Retirar apoyo (ensayo antiguo)',icon='RIGID_BODY')
-            if structural:
-                p=context.scene.ruin_settings
-                layout.prop(p,'physics_brick_limit');layout.operator('ruin.physics_limit')
-                layout.prop(p,'fracture_strength');layout.operator('ruin.physics_fracture')
-                layout.prop(p,'impact_direction');layout.prop(p,'impact_speed')
-                layout.prop(p,'impact_radius');layout.prop(p,'impact_mass');layout.prop(p,'impact_mode');layout.prop(p,'impact_lifetime')
-                layout.prop(p,'impact_render_visible')
-                layout.operator('ruin.masonry_impact',text='Añadir impacto dirigido')
-                layout.label(text='Apunta a la selección; sin selección, al edificio')
-                layout.prop(p,'physics_shake_strength')
-                layout.operator('ruin.physics_shake',icon='PLAY')
-            layout.prop(context.scene.ruin_settings,'physics_precision')
-            layout.prop(context.scene.ruin_settings,'physics_adaptive_collisions')
-            layout.prop(context.scene.ruin_settings,'physics_sparse_constraints')
-            layout.prop(context.scene.ruin_settings,'physics_memory_mb')
-            layout.prop(context.scene.ruin_settings,'physics_timeout_seconds')
-            layout.operator('ruin.physics_ten_seconds',icon='TIME')
-            layout.label(text='Duración: %.1f s · tiempo físico ×%.2f'%((context.scene.frame_end-context.scene.frame_start)*context.scene.render.fps_base/context.scene.render.fps,context.scene.rigidbody_world.time_scale))
-            layout.operator('ruin.physics_simulate',icon='PLAY')
-            layout.label(text=context.scene.ruin_settings.status)
+                col.label(text='%s cuerpos móviles · %s uniones'%(sum(bool(o.rigid_body and o.rigid_body.type=='ACTIVE') for o in context.scene.objects),sum(o.rigid_body_constraint is not None for o in context.scene.objects)))
+                if report.get('unconnected'):col.label(text='%s piezas sin unión inicial'%len(report['unconnected']),icon='ERROR')
+            col.label(text='Duración: %.1f s · tiempo físico ×%.2f'%((context.scene.frame_end-context.scene.frame_start)*context.scene.render.fps_base/context.scene.render.fps,context.scene.rigidbody_world.time_scale))
+            row=layout.row(align=True);row.scale_y=1.3
+            row.operator('ruin.physics_simulate',icon='PLAY')
+            layout.label(text=p.status,icon=status_icon(p.status))
             if not structural:layout.operator('ruin.physics_accept',icon='CHECKMARK')
             else:layout.label(text='Tras simular: exporta el fotograma a STL')
             layout.operator('ruin.physics_return',icon='BACK')
@@ -181,6 +136,8 @@ def enabled(p, field):
     if field=='stair_side' and p.stair_type=='NONE':return False
     if field in ('stair_type','stair_side'):return p.layout_mode=='ROOM' and p.height_type in ('TWO','THREE') and p.upper_floor and p.floor_beams
     if field=='roof_frame':return p.layout_mode=='ROOM'
+    if field in ('physics_brick_limit','physics_masonry_shape'):return p.physics_target=='MASONRY'
+    if field in ('physics_strength','physics_fragile_size'):return p.physics_target=='BUILDING'
     if field=='upper_floor':return p.layout_mode=='ROOM' and p.height_type in ('TWO','THREE') and p.floor_beams
     if field=='floor_damage':return p.layout_mode=='ROOM' and (p.ground_floor or (p.upper_floor and p.floor_beams and p.height_type in ('TWO','THREE')))
     if field=='ground_floor':return p.layout_mode=='ROOM'
@@ -205,8 +162,10 @@ def section_panel(index, section):
         return not (context.scene.get('ruinas_physics_lab',False) or context.scene.get('ruinas_replay',False))
 
     def draw_header(self, context):
-        'IA: Casilla que activa el bloque, dibujada en la cabecera del subpanel.'
-        self.layout.prop(context.scene.ruin_settings, section['toggle'], text='')
+        'IA: Casilla que activa el bloque, dibujada en la cabecera del subpanel; se atenúa si el bloque no aplica a la forma actual.'
+        p = context.scene.ruin_settings
+        self.layout.enabled = enabled(p, section['toggle'])
+        self.layout.prop(p, section['toggle'], text='')
 
     def draw_header_preset(self, context):
         'IA: Botón de restablecer los valores por defecto de la sección, alineado a la derecha.'
@@ -231,32 +190,24 @@ def section_panel(index, section):
             row = col.row()
             row.enabled = enabled(p, field)
             row.prop(p, field, expand=field in config.EXPANDED_ENUMS, slider=True)
-        if section['id'] in ('finish', 'cracks') and p.preview_quality not in config.DAMAGE_QUALITIES:
+        if section['id'] in ('damage', 'cracks') and p.preview_quality not in config.DAMAGE_QUALITIES:
             col.label(text='Desgaste, grietas y escombros se ven en Detalle', icon='INFO')
-        if section['id'] == 'build':
+        if section['id'] == 'volume':
             from ..structure import layout as building_layout
             col.label(text='Grosor %.0f mm · altura %.0f mm' % (config.BUILD_TYPES[p.build_type][0], building_layout.building_height(p)))
-        if section['id']=='layout':
-            col.prop(p,'physics_target')
-            col.prop(p,'physics_frames')
-            col.prop(p,'physics_memory_mb')
-            col.prop(p,'physics_timeout_seconds')
-            if p.physics_target=='MASONRY':
-                col.prop(p,'physics_brick_limit');col.prop(p,'physics_masonry_shape')
-            if p.physics_target=='BUILDING':
-                col.prop(p,'physics_strength');col.prop(p,'physics_fragile_size')
+        if section['id']=='physics':
             col.operator('ruin.physics_lab',icon='PHYSICS')
             col.operator('ruin.physics_demo')
             result=parsed(meta.raw(context.scene,'physics_result') or '{}',{})
             if result:
                 col.label(text='Física aceptada · '+result['room'],icon='CHECKMARK')
                 col.operator('ruin.physics_clear')
+        if section['id']=='interior':
             if p.layout_mode!='ROOM':col.label(text='Habitaciones: requiere cuatro paredes',icon='INFO')
             elif p.height_type=='RUIN':col.label(text='Habitaciones: requiere al menos una planta',icon='INFO')
+            else:col.label(text='Entreplanta sobre vigas')
             plan=parsed(meta.raw(context.scene,'plano_interior') or '{}',{})
             if plan.get('error'):col.label(text=plan['error'],icon='INFO')
-        if section['id']=='floors':
-            col.label(text='Requiere Habitación; entreplanta sobre vigas')
         if section['id']=='stairs':
             col.label(text='Habitación · plantas superiores y vigas')
             stair=parsed(meta.raw(context.scene,'escalera_generada') or '{}',{})
@@ -268,7 +219,7 @@ def section_panel(index, section):
                     roof=parsed(meta.raw(context.scene,'cubierta_detalles') or '{}',{})
                     if roof.get('access_opening'):col.label(text='Conexión hasta terraza abierta',icon='CHECKMARK')
                     elif roof.get('access_error'):col.label(text=roof['access_error'],icon='INFO')
-        if section['id']=='collapse':
+        if section['id']=='damage':
             col.operator('ruin.next_holes',icon='FILE_REFRESH')
             holes=parsed(meta.raw(context.scene,'huecos_generados') or '[]',[])
             col.label(text='Huecos generados: %s · respetan anclajes'%len(holes))
@@ -296,6 +247,97 @@ def section_panel(index, section):
     if 'toggle' in section:
         attrs['draw_header'] = draw_header
     return type('RUIN_PT_' + section['id'], (bpy.types.Panel,), attrs)
+
+
+def in_lab(context):
+    'IA: Verdadero solo en la escena de laboratorio físico editable (no en la reproducción).'
+    return bool(context.scene.get('ruinas_physics_lab')) and not context.scene.get('ruinas_replay')
+
+
+def lab_panel(ident, title, draw, closed=True, structural_only=False):
+    'IA: Subpanel del laboratorio bajo el panel principal; poll limita a laboratorio y, si se pide, a ensayo estructural.'
+
+    def poll(cls, context):
+        'IA: Visible solo en laboratorio; los bloques estructurales exigen edificio sin mortero.'
+        return in_lab(context) and (not structural_only or bool(context.scene.get('structural_physics')))
+
+    return type('RUIN_PT_lab_'+ident,(bpy.types.Panel,),{
+        'bl_label':title,'bl_idname':'RUIN_PT_lab_'+ident,'bl_space_type':'VIEW_3D','bl_region_type':'UI',
+        'bl_category':CATEGORY,'bl_parent_id':RUIN_PT_panel.bl_idname,
+        'bl_options':{'DEFAULT_CLOSED'} if closed else set(),'poll':classmethod(poll),'draw':draw})
+
+
+def draw_lab_event(self, context):
+    'IA: Evento: proyectil dirigido; los parámetros solo afectan a impactos nuevos.'
+    layout=self.layout;layout.use_property_split=True;layout.use_property_decorate=False
+    p=context.scene.ruin_settings
+    for field in ('impact_mode','impact_direction','impact_speed','impact_radius','impact_mass','impact_lifetime','impact_render_visible'):layout.prop(p,field)
+    layout.operator('ruin.masonry_impact',text='Añadir impacto dirigido')
+    layout.label(text='Apunta a la selección; sin selección, al edificio')
+
+
+def draw_lab_selection(self, context):
+    'IA: Qué se suelta: selección por zona, límite de piezas, fractura y retirada; sin simular.'
+    layout=self.layout;layout.use_property_split=True;layout.use_property_decorate=False
+    p=context.scene.ruin_settings
+    structural=context.scene.get('structural_physics',False)
+    if structural:
+        for field in ('physics_selection_mode','physics_selection_material','physics_selection_percent'):layout.prop(p,field)
+        if p.physics_selection_mode=='HEIGHT':
+            for field in ('physics_selection_gradient','physics_selection_seed'):layout.prop(p,field)
+        else:
+            layout.prop(p,'physics_selection_radii')
+            layout.label(text='Del centro hacia fuera · sin azar')
+        layout.prop(p,'physics_selection_add')
+        layout.operator('ruin.physics_height_selection')
+        layout.prop(p,'physics_brick_limit');layout.operator('ruin.physics_limit')
+        layout.prop(p,'fracture_strength');layout.operator('ruin.physics_fracture')
+    if context.scene.get('masonry_lab'):
+        layout.label(text='Ladrillos activos · juntas rompibles')
+        layout.operator('ruin.masonry_remove')
+    else:layout.operator('ruin.physics_release',text='Soltar uniones seleccionadas' if structural else 'Retirar apoyo (ensayo antiguo)',icon='RIGID_BODY')
+
+
+def draw_lab_strength(self, context):
+    'IA: Multiplicadores artísticos de rotura por familia; se aplican al simular sin acumularse.'
+    layout=self.layout;layout.use_property_split=True;layout.use_property_decorate=False
+    from ..services import material_strength
+    for field in material_strength.FIELDS:layout.prop(context.scene.ruin_settings,field)
+
+
+def draw_lab_solver(self, context):
+    'IA: Coste y precisión del cálculo aislado y duración de la toma.'
+    layout=self.layout;layout.use_property_split=True;layout.use_property_decorate=False
+    p=context.scene.ruin_settings
+    for field in ('physics_precision','physics_adaptive_collisions','physics_sparse_constraints','physics_memory_mb','physics_timeout_seconds'):layout.prop(p,field)
+    layout.operator('ruin.physics_ten_seconds',icon='TIME')
+
+
+def draw_lab_render(self, context):
+    'IA: Cámara, atmósfera y salida de vídeo; no altera la física.'
+    layout=self.layout;layout.use_property_split=True;layout.use_property_decorate=False
+    p=context.scene.ruin_settings
+    layout.prop(p,'lab_camera_type');layout.operator('ruin.lab_camera',icon='CAMERA_DATA')
+    layout.prop(context.scene,'camera',text='Cámara de render')
+    layout.prop(p,'lab_fog_density');layout.operator('ruin.lab_fog');layout.operator('ruin.lab_smoke')
+    layout.operator('ruin.render_setup',icon='RENDER_ANIMATION')
+    layout.prop(context.scene.render,'filepath',text='Salida de vídeo')
+
+
+def draw_lab_decor(self, context):
+    'IA: Atrezo decorativo animado; no participa en la simulación.'
+    layout=self.layout;layout.use_property_split=True;layout.use_property_decorate=False
+    p=context.scene.ruin_settings
+    layout.prop(p,'chandelier_drop_mm');layout.prop(p,'chandelier_sway_deg')
+    layout.operator('ruin.lab_chandelier',icon='LIGHT_POINT')
+
+
+LAB_SUBPANELS=(lab_panel('event','Impacto',draw_lab_event,closed=False,structural_only=True),
+               lab_panel('selection','Piezas que se sueltan',draw_lab_selection,closed=False),
+               lab_panel('strength','Resistencia por familia',draw_lab_strength,structural_only=True),
+               lab_panel('solver','Cálculo',draw_lab_solver),
+               lab_panel('render','Cámara y render',draw_lab_render),
+               lab_panel('decor','Lámpara decorativa',draw_lab_decor))
 
 
 SUBPANELS = tuple(section_panel(index, section) for index, section in enumerate(config.SECTIONS))

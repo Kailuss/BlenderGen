@@ -559,7 +559,7 @@ def prepare(source_scene):
         scene['limitations']='Experimental: uniones rígidas rompibles y prefractura de revocos/chimenea; sin flexión ni fractura adaptativa. Sin reconstrucción de mortero para exportar.'
         scene['mass_scale']=config.PHYSICS_MASS_SCALE
         scene.unit_settings.system='METRIC';scene.unit_settings.scale_length=1;scene.unit_settings.length_unit='MILLIMETERS'
-        for key in ('physics_strength','physics_fragile_size','physics_frames','physics_precision','physics_adaptive_collisions','physics_sparse_constraints','physics_memory_mb','physics_timeout_seconds','physics_shake_strength'):
+        for key in ('physics_strength','physics_fragile_size','physics_frames','physics_precision','physics_adaptive_collisions','physics_sparse_constraints','physics_memory_mb','physics_timeout_seconds'):
             setattr(scene.ruin_settings,key,getattr(p,key))
         scene.render.fps=source_scene.render.fps;scene.render.fps_base=source_scene.render.fps_base
         scene.frame_end=p.physics_frames if p.is_property_set('physics_frames') else 1+round(10*scene.render.fps/scene.render.fps_base)

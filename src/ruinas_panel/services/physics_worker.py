@@ -76,7 +76,7 @@ def run(output,path,name):
     result=bpy.data.scenes.new('RESULTADO · '+scene.name)
     result['ruinas_replay']=True;result['physics_result_scene']=True;result['source_scene']=scene.get('source_scene','');result['lab_scene']=name
     result['attached_collision_slivers']=json.dumps(attached)
-    for key in ('source_signature','physics_room','structural_physics','masonry_lab','shake_report'):
+    for key in ('source_signature','physics_room','structural_physics','masonry_lab'):
         if key in scene:result[key]=scene[key]
     result['playback_instructions']='Simulación aislada calculada · Espacio';result.frame_end=scene.frame_end
     result.render.fps=scene.render.fps;result.render.fps_base=scene.render.fps_base
@@ -176,11 +176,6 @@ if __name__=='__main__':
         result=physical_export.export(scene,args[4],scene.ruin_settings.physics_export_voxel)
         bpy.data.libraries.write(args[0],{result},fake_user=True)
     else:
-        if len(args)>3 and args[3]=='SHAKE':
-            from ruinas_panel.services import shake_physics
-            request=json.loads((Path(args[0]).parent/'job.json').read_text(encoding='utf8'))
-            scene=bpy.data.scenes[args[2]];bpy.context.window.scene=scene
-            shake_physics.prepare(scene,request['selection'])
         run(Path(args[0]),Path(args[1]),args[2])
     # libraries.write es síncrono. Solo tras guardar con éxito se devuelve cero;
     # el SO libera el proceso aislado sin recorrer destructores nativos de Bullet.

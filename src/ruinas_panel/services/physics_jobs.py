@@ -13,9 +13,6 @@ from .. import runtime,config
 def start(scene,mode='SIMULATE',export_path='',selection=None):
     'IA: Guarda una copia del laboratorio y arranca otro Blender sin ventana; no evalúa Bullet en la sesión del usuario.'
     if runtime.physics_job:raise ValueError('Ya hay una simulación en curso.')
-    if mode=='SHAKE':
-        from . import shake_physics
-        shake_physics.selected(scene,selection or [])
     if not (mode=='PREPARE' or scene.get('ruinas_physics_lab') or (mode=='EXPORT' and scene.get('physics_result_scene'))):raise ValueError('Abre un laboratorio físico.')
     folder=Path(tempfile.mkdtemp(prefix='ruinas_physics_'))
     source=folder/'input.blend';output=folder/'result.blend';progress=folder/'progress.json'
@@ -79,5 +76,5 @@ def poll():
         raise ValueError('Preparación/cálculo fallido: %s. Fuente intacta. Log: %s'%(reason,log))
     with bpy.data.libraries.load(str(job['output']),link=False) as (data,loaded):loaded.scenes=data.scenes
     result=loaded.scenes[0]
-    if job['mode'] in ('SIMULATE','SHAKE'):result['lab_scene']=job['scene']
+    if job['mode']=='SIMULATE':result['lab_scene']=job['scene']
     return {'finished':result}
