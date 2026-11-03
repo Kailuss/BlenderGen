@@ -1,346 +1,663 @@
 {
-  "commit": "24101c1d725f42f2b27fcd8a02b455301a660bab",
-  "seconds": 0.2609521000049426,
+  "version": 2,
+  "commit": "cd117b1428d75fa571a6d56ec8766e0d00dd4b21",
+  "dirty": true,
+  "blender": "5.2.2 LTS",
+  "seconds": 1.6918518000020413,
   "trials": [
     {
       "mass_ratio": 0.1,
-      "restitution_pair": 0.1,
+      "restitution_requested": 0.1,
       "substeps": 40,
-      "dissipation_model": {
-        "target_speed": 1.0,
-        "projectile_speed": 0.0,
-        "eta": 0.1,
-        "restitution_requested": 0.1,
-        "restitution_effective": 0.1,
-        "energy_initial": 5.0,
-        "energy_final": 0.5,
-        "energy_dissipated": 4.5,
-        "additional_dissipation": 0.0,
-        "eta_max": 0.3,
-        "model": "Disipaci\u00f3n interna idealizada de contacto 1D; no arrastre del aire ni recorte de poses"
+      "speed": 10.0,
+      "shapes": [
+        "CONVEX_HULL",
+        "CONVEX_HULL"
+      ],
+      "regime": {
+        "step": 0.002083301544189453,
+        "step_ratio": 0.002083301544189453,
+        "limit": 0.025,
+        "shapes": [
+          "CONVEX_HULL",
+          "CONVEX_HULL"
+        ],
+        "pair_supported": true,
+        "resolved": true,
+        "restitution_effective": 0.0,
+        "eta_bound": 0.25,
+        "substeps_required": 4
+      },
+      "model": {
+        "target_speed": 0.9090770374644885,
+        "projectile_speed": 0.9090770374644885,
+        "eta": 0.08264462809917354,
+        "restitution_effective": 0.0,
+        "energy_initial": 4.999847413273528,
+        "energy_final": 0.4545315830248661,
+        "energy_dissipated": 4.545315830248662,
+        "model": "R\u00e9gimen resuelto de Bullet: contacto anticipado, restituci\u00f3n anulada; medido en Blender 5.2.2"
       },
       "split_impulse": true,
       "incoming": 9.999847412109375,
-      "outgoing_projectile": -1.7915210723876953,
-      "outgoing_target": 1.1791366338729858,
-      "expected_target": 0.9999847412109374,
-      "relative_error": 0.17915462634470145,
-      "eta_target": 0.1390405632830112,
-      "energy_ratio_total": 0.1711370203097646,
-      "target_displacement": 0.5205397605895996
+      "outgoing_projectile": 0.9117708206176758,
+      "outgoing_target": 0.9088078737258911,
+      "restitution_measured": -0.0002962992103456168,
+      "expected_target": 0.9090770374644885,
+      "relative_error": 0.00029608463035008355,
+      "eta_target": 0.08259569573598413,
+      "energy_ratio_total": 0.09090920973565976,
+      "momentum": 1.0000002145799953,
+      "target_displacement": 0.4422803223133087
     },
     {
       "mass_ratio": 0.1,
-      "restitution_pair": 0.1,
+      "restitution_requested": 0.1,
       "substeps": 160,
-      "dissipation_model": {
-        "target_speed": 1.0,
-        "projectile_speed": 0.0,
-        "eta": 0.1,
-        "restitution_requested": 0.1,
-        "restitution_effective": 0.1,
-        "energy_initial": 5.0,
-        "energy_final": 0.5,
-        "energy_dissipated": 4.5,
-        "additional_dissipation": 0.0,
-        "eta_max": 0.3,
-        "model": "Disipaci\u00f3n interna idealizada de contacto 1D; no arrastre del aire ni recorte de poses"
+      "speed": 10.0,
+      "shapes": [
+        "CONVEX_HULL",
+        "CONVEX_HULL"
+      ],
+      "regime": {
+        "step": 0.0005211830139160156,
+        "step_ratio": 0.0005211830139160156,
+        "limit": 0.025,
+        "shapes": [
+          "CONVEX_HULL",
+          "CONVEX_HULL"
+        ],
+        "pair_supported": true,
+        "resolved": true,
+        "restitution_effective": 0.0,
+        "eta_bound": 0.25,
+        "substeps_required": 4
+      },
+      "model": {
+        "target_speed": 0.9097012606534091,
+        "projectile_speed": 0.9097012606534091,
+        "eta": 0.08264462809917354,
+        "restitution_effective": 0.0,
+        "energy_initial": 5.006716120988131,
+        "energy_final": 0.45515601099892095,
+        "energy_dissipated": 4.55156010998921,
+        "model": "R\u00e9gimen resuelto de Bullet: contacto anticipado, restituci\u00f3n anulada; medido en Blender 5.2.2"
       },
       "split_impulse": true,
-      "incoming": 10.00213623046875,
-      "outgoing_projectile": -1.4923095703125,
-      "outgoing_target": 1.149444580078125,
-      "expected_target": 1.0002136230468752,
-      "relative_error": 0.14919908466819196,
-      "eta_target": 0.13206585362022108,
-      "energy_ratio_total": 0.15432622048604747,
-      "target_displacement": 0.5076713562011719
+      "incoming": 10.0067138671875,
+      "outgoing_projectile": 0.9105062484741211,
+      "outgoing_target": 0.9096207618713379,
+      "restitution_measured": -8.848924977127173e-05,
+      "expected_target": 0.9097012606534091,
+      "relative_error": 8.848924977123845e-05,
+      "eta_target": 0.08263000242403346,
+      "energy_ratio_total": 0.09090909802758848,
+      "momentum": 1.0,
+      "target_displacement": 0.4428122639656067
     },
     {
       "mass_ratio": 0.1,
-      "restitution_pair": 0.3,
+      "restitution_requested": 0.3,
       "substeps": 40,
-      "dissipation_model": {
-        "target_speed": 1.1818181818181817,
-        "projectile_speed": -1.818181818181818,
-        "eta": 0.13966942148760325,
-        "restitution_requested": 0.3,
-        "restitution_effective": 0.3,
-        "energy_initial": 5.0,
-        "energy_final": 0.8636363636363633,
-        "energy_dissipated": 4.136363636363637,
-        "additional_dissipation": 0.0,
-        "eta_max": 0.3,
-        "model": "Disipaci\u00f3n interna idealizada de contacto 1D; no arrastre del aire ni recorte de poses"
+      "speed": 10.0,
+      "shapes": [
+        "CONVEX_HULL",
+        "CONVEX_HULL"
+      ],
+      "regime": {
+        "step": 0.002083301544189453,
+        "step_ratio": 0.002083301544189453,
+        "limit": 0.025,
+        "shapes": [
+          "CONVEX_HULL",
+          "CONVEX_HULL"
+        ],
+        "pair_supported": true,
+        "resolved": true,
+        "restitution_effective": 0.0,
+        "eta_bound": 0.25,
+        "substeps_required": 4
+      },
+      "model": {
+        "target_speed": 0.9090770374644885,
+        "projectile_speed": 0.9090770374644885,
+        "eta": 0.08264462809917354,
+        "restitution_effective": 0.0,
+        "energy_initial": 4.999847413273528,
+        "energy_final": 0.4545315830248661,
+        "energy_dissipated": 4.545315830248662,
+        "model": "R\u00e9gimen resuelto de Bullet: contacto anticipado, restituci\u00f3n anulada; medido en Blender 5.2.2"
       },
       "split_impulse": true,
       "incoming": 9.999847412109375,
-      "outgoing_projectile": -3.609675407409668,
-      "outgoing_target": 1.3609524965286255,
-      "expected_target": 1.1818001487038352,
-      "relative_error": 0.15159276128140572,
-      "eta_target": 0.1852248223506106,
-      "energy_ratio_total": 0.31552636427633945,
-      "target_displacement": 0.6008037328720093
+      "outgoing_projectile": 0.9116034507751465,
+      "outgoing_target": 0.9088243246078491,
+      "restitution_measured": -0.0002779168574044404,
+      "expected_target": 0.9090770374644885,
+      "relative_error": 0.00027798838406947014,
+      "eta_target": 0.0825986859925126,
+      "energy_ratio_total": 0.09090914812040647,
+      "momentum": 0.9999999284733349,
+      "target_displacement": 0.4422885477542877
     },
     {
       "mass_ratio": 0.1,
-      "restitution_pair": 0.3,
+      "restitution_requested": 0.3,
       "substeps": 160,
-      "dissipation_model": {
-        "target_speed": 1.1818181818181817,
-        "projectile_speed": -1.818181818181818,
-        "eta": 0.13966942148760325,
-        "restitution_requested": 0.3,
-        "restitution_effective": 0.3,
-        "energy_initial": 5.0,
-        "energy_final": 0.8636363636363633,
-        "energy_dissipated": 4.136363636363637,
-        "additional_dissipation": 0.0,
-        "eta_max": 0.3,
-        "model": "Disipaci\u00f3n interna idealizada de contacto 1D; no arrastre del aire ni recorte de poses"
+      "speed": 10.0,
+      "shapes": [
+        "CONVEX_HULL",
+        "CONVEX_HULL"
+      ],
+      "regime": {
+        "step": 0.0005211830139160156,
+        "step_ratio": 0.0005211830139160156,
+        "limit": 0.025,
+        "shapes": [
+          "CONVEX_HULL",
+          "CONVEX_HULL"
+        ],
+        "pair_supported": true,
+        "resolved": true,
+        "restitution_effective": 0.0,
+        "eta_bound": 0.25,
+        "substeps_required": 4
+      },
+      "model": {
+        "target_speed": 0.9097012606534091,
+        "projectile_speed": 0.9097012606534091,
+        "eta": 0.08264462809917354,
+        "restitution_effective": 0.0,
+        "energy_initial": 5.006716120988131,
+        "energy_final": 0.45515601099892095,
+        "energy_dissipated": 4.55156010998921,
+        "model": "R\u00e9gimen resuelto de Bullet: contacto anticipado, restituci\u00f3n anulada; medido en Blender 5.2.2"
       },
       "split_impulse": true,
-      "incoming": 10.00213623046875,
-      "outgoing_projectile": -3.3108787536621094,
-      "outgoing_target": 1.331301212310791,
-      "expected_target": 1.182070645419034,
-      "relative_error": 0.12624504928709748,
-      "eta_target": 0.17716059253420222,
-      "energy_ratio_total": 0.2867329543848168,
-      "target_displacement": 0.5879915356636047
+      "incoming": 10.0067138671875,
+      "outgoing_projectile": 0.9139552116394043,
+      "outgoing_target": 0.9092756509780884,
+      "restitution_measured": -0.0004676420974382434,
+      "expected_target": 0.9097012606534091,
+      "relative_error": 0.0004678565301920985,
+      "eta_target": 0.08256731453135112,
+      "energy_ratio_total": 0.09090925072962283,
+      "momentum": 0.999999785567246,
+      "target_displacement": 0.44263458251953125
     },
     {
       "mass_ratio": 1,
-      "restitution_pair": 0.1,
+      "restitution_requested": 0.1,
       "substeps": 40,
-      "dissipation_model": {
-        "target_speed": 5.47722557505166,
-        "projectile_speed": 4.52277442494834,
-        "eta": 0.2999999999999999,
-        "restitution_requested": 0.1,
-        "restitution_effective": 0.09544511501033215,
-        "energy_initial": 50.0,
-        "energy_final": 25.227744249483386,
-        "energy_dissipated": 24.772255750516614,
-        "additional_dissipation": 0.02225575051661366,
-        "eta_max": 0.3,
-        "model": "Disipaci\u00f3n interna idealizada de contacto 1D; no arrastre del aire ni recorte de poses"
+      "speed": 10.0,
+      "shapes": [
+        "CONVEX_HULL",
+        "CONVEX_HULL"
+      ],
+      "regime": {
+        "step": 0.002083301544189453,
+        "step_ratio": 0.002083301544189453,
+        "limit": 0.025,
+        "shapes": [
+          "CONVEX_HULL",
+          "CONVEX_HULL"
+        ],
+        "pair_supported": true,
+        "resolved": true,
+        "restitution_effective": 0.0,
+        "eta_bound": 0.25,
+        "substeps_required": 4
+      },
+      "model": {
+        "target_speed": 4.9999237060546875,
+        "projectile_speed": 4.9999237060546875,
+        "eta": 0.25,
+        "restitution_effective": 0.0,
+        "energy_initial": 49.99847413273528,
+        "energy_final": 24.99923706636764,
+        "energy_dissipated": 24.99923706636764,
+        "model": "R\u00e9gimen resuelto de Bullet: contacto anticipado, restituci\u00f3n anulada; medido en Blender 5.2.2"
       },
       "split_impulse": true,
       "incoming": 9.999847412109375,
-      "outgoing_projectile": 3.537369132041931,
-      "outgoing_target": 6.462475776672363,
-      "expected_target": 5.477141999221963,
-      "relative_error": 0.17989925723860511,
-      "eta_target": 0.4176486771696636,
-      "energy_ratio_total": 0.5427822996788605,
-      "target_displacement": 2.852914810180664
+      "outgoing_projectile": 4.9999237060546875,
+      "outgoing_target": 4.9999237060546875,
+      "restitution_measured": 0.0,
+      "expected_target": 4.9999237060546875,
+      "relative_error": 0.0,
+      "eta_target": 0.25,
+      "energy_ratio_total": 0.5,
+      "momentum": 1.0,
+      "target_displacement": 2.4332797527313232
     },
     {
       "mass_ratio": 1,
-      "restitution_pair": 0.1,
+      "restitution_requested": 0.1,
       "substeps": 160,
-      "dissipation_model": {
-        "target_speed": 5.47722557505166,
-        "projectile_speed": 4.52277442494834,
-        "eta": 0.2999999999999999,
-        "restitution_requested": 0.1,
-        "restitution_effective": 0.09544511501033215,
-        "energy_initial": 50.0,
-        "energy_final": 25.227744249483386,
-        "energy_dissipated": 24.772255750516614,
-        "additional_dissipation": 0.02225575051661366,
-        "eta_max": 0.3,
-        "model": "Disipaci\u00f3n interna idealizada de contacto 1D; no arrastre del aire ni recorte de poses"
+      "speed": 10.0,
+      "shapes": [
+        "CONVEX_HULL",
+        "CONVEX_HULL"
+      ],
+      "regime": {
+        "step": 0.0005211830139160156,
+        "step_ratio": 0.0005211830139160156,
+        "limit": 0.025,
+        "shapes": [
+          "CONVEX_HULL",
+          "CONVEX_HULL"
+        ],
+        "pair_supported": true,
+        "resolved": true,
+        "restitution_effective": 0.0,
+        "eta_bound": 0.25,
+        "substeps_required": 4
+      },
+      "model": {
+        "target_speed": 5.00335693359375,
+        "projectile_speed": 5.00335693359375,
+        "eta": 0.25,
+        "restitution_effective": 0.0,
+        "energy_initial": 50.067161209881306,
+        "energy_final": 25.033580604940653,
+        "energy_dissipated": 25.033580604940653,
+        "model": "R\u00e9gimen resuelto de Bullet: contacto anticipado, restituci\u00f3n anulada; medido en Blender 5.2.2"
       },
       "split_impulse": true,
-      "incoming": 10.00213623046875,
-      "outgoing_projectile": 3.702970504760742,
-      "outgoing_target": 6.299165725708008,
-      "expected_target": 5.478395636667425,
-      "relative_error": 0.14981942588211225,
-      "eta_target": 0.3966254136407611,
-      "energy_ratio_total": 0.5336867540549776,
-      "target_displacement": 2.7821316719055176
+      "incoming": 10.0067138671875,
+      "outgoing_projectile": 5.003641717135906,
+      "outgoing_target": 5.003070831298828,
+      "restitution_measured": -5.7050280906907596e-05,
+      "expected_target": 5.00335693359375,
+      "relative_error": 5.7182067703568164e-05,
+      "eta_target": 0.24997140978359544,
+      "energy_ratio_total": 0.4999998698405793,
+      "momentum": 0.9999998682132033,
+      "target_displacement": 2.435512065887451
     },
     {
       "mass_ratio": 1,
-      "restitution_pair": 0.3,
+      "restitution_requested": 0.3,
       "substeps": 40,
-      "dissipation_model": {
-        "target_speed": 5.47722557505166,
-        "projectile_speed": 4.52277442494834,
-        "eta": 0.2999999999999999,
-        "restitution_requested": 0.3,
-        "restitution_effective": 0.09544511501033215,
-        "energy_initial": 50.0,
-        "energy_final": 25.227744249483386,
-        "energy_dissipated": 24.772255750516614,
-        "additional_dissipation": 2.0222557505166137,
-        "eta_max": 0.3,
-        "model": "Disipaci\u00f3n interna idealizada de contacto 1D; no arrastre del aire ni recorte de poses"
+      "speed": 10.0,
+      "shapes": [
+        "CONVEX_HULL",
+        "CONVEX_HULL"
+      ],
+      "regime": {
+        "step": 0.002083301544189453,
+        "step_ratio": 0.002083301544189453,
+        "limit": 0.025,
+        "shapes": [
+          "CONVEX_HULL",
+          "CONVEX_HULL"
+        ],
+        "pair_supported": true,
+        "resolved": true,
+        "restitution_effective": 0.0,
+        "eta_bound": 0.25,
+        "substeps_required": 4
+      },
+      "model": {
+        "target_speed": 4.9999237060546875,
+        "projectile_speed": 4.9999237060546875,
+        "eta": 0.25,
+        "restitution_effective": 0.0,
+        "energy_initial": 49.99847413273528,
+        "energy_final": 24.99923706636764,
+        "energy_dissipated": 24.99923706636764,
+        "model": "R\u00e9gimen resuelto de Bullet: contacto anticipado, restituci\u00f3n anulada; medido en Blender 5.2.2"
       },
       "split_impulse": true,
       "incoming": 9.999847412109375,
-      "outgoing_projectile": 3.537369132041931,
-      "outgoing_target": 6.462475776672363,
-      "expected_target": 5.477141999221963,
-      "relative_error": 0.17989925723860511,
-      "eta_target": 0.4176486771696636,
-      "energy_ratio_total": 0.5427822996788605,
-      "target_displacement": 2.852914810180664
+      "outgoing_projectile": 4.9999237060546875,
+      "outgoing_target": 4.9999237060546875,
+      "restitution_measured": 0.0,
+      "expected_target": 4.9999237060546875,
+      "relative_error": 0.0,
+      "eta_target": 0.25,
+      "energy_ratio_total": 0.5,
+      "momentum": 1.0,
+      "target_displacement": 2.4332797527313232
     },
     {
       "mass_ratio": 1,
-      "restitution_pair": 0.3,
+      "restitution_requested": 0.3,
       "substeps": 160,
-      "dissipation_model": {
-        "target_speed": 5.47722557505166,
-        "projectile_speed": 4.52277442494834,
-        "eta": 0.2999999999999999,
-        "restitution_requested": 0.3,
-        "restitution_effective": 0.09544511501033215,
-        "energy_initial": 50.0,
-        "energy_final": 25.227744249483386,
-        "energy_dissipated": 24.772255750516614,
-        "additional_dissipation": 2.0222557505166137,
-        "eta_max": 0.3,
-        "model": "Disipaci\u00f3n interna idealizada de contacto 1D; no arrastre del aire ni recorte de poses"
+      "speed": 10.0,
+      "shapes": [
+        "CONVEX_HULL",
+        "CONVEX_HULL"
+      ],
+      "regime": {
+        "step": 0.0005211830139160156,
+        "step_ratio": 0.0005211830139160156,
+        "limit": 0.025,
+        "shapes": [
+          "CONVEX_HULL",
+          "CONVEX_HULL"
+        ],
+        "pair_supported": true,
+        "resolved": true,
+        "restitution_effective": 0.0,
+        "eta_bound": 0.25,
+        "substeps_required": 4
+      },
+      "model": {
+        "target_speed": 5.00335693359375,
+        "projectile_speed": 5.00335693359375,
+        "eta": 0.25,
+        "restitution_effective": 0.0,
+        "energy_initial": 50.067161209881306,
+        "energy_final": 25.033580604940653,
+        "energy_dissipated": 25.033580604940653,
+        "model": "R\u00e9gimen resuelto de Bullet: contacto anticipado, restituci\u00f3n anulada; medido en Blender 5.2.2"
       },
       "split_impulse": true,
-      "incoming": 10.00213623046875,
-      "outgoing_projectile": 3.702970504760742,
-      "outgoing_target": 6.299165725708008,
-      "expected_target": 5.478395636667425,
-      "relative_error": 0.14981942588211225,
-      "eta_target": 0.3966254136407611,
-      "energy_ratio_total": 0.5336867540549776,
-      "target_displacement": 2.7821316719055176
+      "incoming": 10.0067138671875,
+      "outgoing_projectile": 5.00335693359375,
+      "outgoing_target": 5.00335693359375,
+      "restitution_measured": 0.0,
+      "expected_target": 5.00335693359375,
+      "relative_error": 0.0,
+      "eta_target": 0.25,
+      "energy_ratio_total": 0.5,
+      "momentum": 1.0,
+      "target_displacement": 2.435683250427246
     },
     {
       "mass_ratio": 10,
-      "restitution_pair": 0.1,
+      "restitution_requested": 0.1,
       "substeps": 40,
-      "dissipation_model": {
-        "target_speed": 10.0,
-        "projectile_speed": 9.0,
-        "eta": 0.1,
-        "restitution_requested": 0.1,
-        "restitution_effective": 0.1,
-        "energy_initial": 500.0,
-        "energy_final": 455.0,
-        "energy_dissipated": 45.0,
-        "additional_dissipation": 0.0,
-        "eta_max": 0.3,
-        "model": "Disipaci\u00f3n interna idealizada de contacto 1D; no arrastre del aire ni recorte de poses"
+      "speed": 10.0,
+      "shapes": [
+        "CONVEX_HULL",
+        "CONVEX_HULL"
+      ],
+      "regime": {
+        "step": 0.002083301544189453,
+        "step_ratio": 0.002083301544189453,
+        "limit": 0.025,
+        "shapes": [
+          "CONVEX_HULL",
+          "CONVEX_HULL"
+        ],
+        "pair_supported": true,
+        "resolved": true,
+        "restitution_effective": 0.0,
+        "eta_bound": 0.25,
+        "substeps_required": 4
+      },
+      "model": {
+        "target_speed": 9.090770374644887,
+        "projectile_speed": 9.090770374644887,
+        "eta": 0.08264462809917357,
+        "restitution_effective": 0.0,
+        "energy_initial": 499.9847413273528,
+        "energy_final": 454.5315830248663,
+        "energy_dissipated": 45.45315830248654,
+        "model": "R\u00e9gimen resuelto de Bullet: contacto anticipado, restituci\u00f3n anulada; medido en Blender 5.2.2"
       },
       "split_impulse": true,
       "incoming": 9.999847412109375,
-      "outgoing_projectile": 8.820711135864258,
-      "outgoing_target": 11.79136848449707,
-      "expected_target": 9.999847412109375,
-      "relative_error": 0.17915484092469672,
-      "eta_target": 0.13904061388761468,
-      "energy_ratio_total": 0.9171138080395421,
-      "target_displacement": 5.205397605895996
+      "outgoing_projectile": 9.09104061126709,
+      "outgoing_target": 9.08807373046875,
+      "restitution_measured": -0.00029669260700389104,
+      "expected_target": 9.090770374644887,
+      "relative_error": 0.00029663538567181394,
+      "eta_target": 0.0825956047290255,
+      "energy_ratio_total": 0.909091021132107,
+      "momentum": 1.0000000572213321,
+      "target_displacement": 4.422802925109863
     },
     {
       "mass_ratio": 10,
-      "restitution_pair": 0.1,
+      "restitution_requested": 0.1,
       "substeps": 160,
-      "dissipation_model": {
-        "target_speed": 10.0,
-        "projectile_speed": 9.0,
-        "eta": 0.1,
-        "restitution_requested": 0.1,
-        "restitution_effective": 0.1,
-        "energy_initial": 500.0,
-        "energy_final": 455.0,
-        "energy_dissipated": 45.0,
-        "additional_dissipation": 0.0,
-        "eta_max": 0.3,
-        "model": "Disipaci\u00f3n interna idealizada de contacto 1D; no arrastre del aire ni recorte de poses"
+      "speed": 10.0,
+      "shapes": [
+        "CONVEX_HULL",
+        "CONVEX_HULL"
+      ],
+      "regime": {
+        "step": 0.0005211830139160156,
+        "step_ratio": 0.0005211830139160156,
+        "limit": 0.025,
+        "shapes": [
+          "CONVEX_HULL",
+          "CONVEX_HULL"
+        ],
+        "pair_supported": true,
+        "resolved": true,
+        "restitution_effective": 0.0,
+        "eta_bound": 0.25,
+        "substeps_required": 4
+      },
+      "model": {
+        "target_speed": 9.097012606534092,
+        "projectile_speed": 9.097012606534092,
+        "eta": 0.08264462809917357,
+        "restitution_effective": 0.0,
+        "energy_initial": 500.67161209881306,
+        "energy_final": 455.15601099892103,
+        "energy_dissipated": 45.515601099892024,
+        "model": "R\u00e9gimen resuelto de Bullet: contacto anticipado, restituci\u00f3n anulada; medido en Blender 5.2.2"
       },
       "split_impulse": true,
-      "incoming": 10.00213623046875,
-      "outgoing_projectile": 8.852691650390625,
-      "outgoing_target": 11.49444580078125,
-      "expected_target": 10.002136230468752,
-      "relative_error": 0.149199084668192,
-      "eta_target": 0.13206585362022108,
-      "energy_ratio_total": 0.9154326220486048,
-      "target_displacement": 5.076713562011719
+      "incoming": 10.0067138671875,
+      "outgoing_projectile": 9.097093105316162,
+      "outgoing_target": 9.096207618713379,
+      "restitution_measured": -8.848924977127173e-05,
+      "expected_target": 9.097012606534092,
+      "relative_error": 8.848924977136048e-05,
+      "eta_target": 0.08263000242403346,
+      "energy_ratio_total": 0.9090909098027589,
+      "momentum": 1.0,
+      "target_displacement": 4.428119659423828
     },
     {
       "mass_ratio": 10,
-      "restitution_pair": 0.3,
+      "restitution_requested": 0.3,
       "substeps": 40,
-      "dissipation_model": {
-        "target_speed": 11.818181818181818,
-        "projectile_speed": 8.818181818181818,
-        "eta": 0.1396694214876033,
-        "restitution_requested": 0.3,
-        "restitution_effective": 0.3,
-        "energy_initial": 500.0,
-        "energy_final": 458.6363636363636,
-        "energy_dissipated": 41.363636363636374,
-        "additional_dissipation": 0.0,
-        "eta_max": 0.3,
-        "model": "Disipaci\u00f3n interna idealizada de contacto 1D; no arrastre del aire ni recorte de poses"
+      "speed": 10.0,
+      "shapes": [
+        "CONVEX_HULL",
+        "CONVEX_HULL"
+      ],
+      "regime": {
+        "step": 0.002083301544189453,
+        "step_ratio": 0.002083301544189453,
+        "limit": 0.025,
+        "shapes": [
+          "CONVEX_HULL",
+          "CONVEX_HULL"
+        ],
+        "pair_supported": true,
+        "resolved": true,
+        "restitution_effective": 0.0,
+        "eta_bound": 0.25,
+        "substeps_required": 4
+      },
+      "model": {
+        "target_speed": 9.090770374644887,
+        "projectile_speed": 9.090770374644887,
+        "eta": 0.08264462809917357,
+        "restitution_effective": 0.0,
+        "energy_initial": 499.9847413273528,
+        "energy_final": 454.5315830248663,
+        "energy_dissipated": 45.45315830248654,
+        "model": "R\u00e9gimen resuelto de Bullet: contacto anticipado, restituci\u00f3n anulada; medido en Blender 5.2.2"
       },
       "split_impulse": true,
       "incoming": 9.999847412109375,
-      "outgoing_projectile": 8.63889455795288,
-      "outgoing_target": 13.609525680541992,
-      "expected_target": 11.818001487038352,
-      "relative_error": 0.15159282180396857,
-      "eta_target": 0.18522484181978688,
-      "energy_ratio_total": 0.9315526095962579,
-      "target_displacement": 6.008037090301514
+      "outgoing_projectile": 9.09102201461792,
+      "outgoing_target": 9.088242530822754,
+      "restitution_measured": -0.00027795262073701077,
+      "expected_target": 9.090770374644887,
+      "relative_error": 0.0002780670634012715,
+      "eta_target": 0.08259867299128011,
+      "energy_ratio_total": 0.9090907080367733,
+      "momentum": 0.9999998855573358,
+      "target_displacement": 4.422885417938232
     },
     {
       "mass_ratio": 10,
-      "restitution_pair": 0.3,
+      "restitution_requested": 0.3,
       "substeps": 160,
-      "dissipation_model": {
-        "target_speed": 11.818181818181818,
-        "projectile_speed": 8.818181818181818,
-        "eta": 0.1396694214876033,
-        "restitution_requested": 0.3,
-        "restitution_effective": 0.3,
-        "energy_initial": 500.0,
-        "energy_final": 458.6363636363636,
-        "energy_dissipated": 41.363636363636374,
-        "additional_dissipation": 0.0,
-        "eta_max": 0.3,
-        "model": "Disipaci\u00f3n interna idealizada de contacto 1D; no arrastre del aire ni recorte de poses"
+      "speed": 10.0,
+      "shapes": [
+        "CONVEX_HULL",
+        "CONVEX_HULL"
+      ],
+      "regime": {
+        "step": 0.0005211830139160156,
+        "step_ratio": 0.0005211830139160156,
+        "limit": 0.025,
+        "shapes": [
+          "CONVEX_HULL",
+          "CONVEX_HULL"
+        ],
+        "pair_supported": true,
+        "resolved": true,
+        "restitution_effective": 0.0,
+        "eta_bound": 0.25,
+        "substeps_required": 4
+      },
+      "model": {
+        "target_speed": 9.097012606534092,
+        "projectile_speed": 9.097012606534092,
+        "eta": 0.08264462809917357,
+        "restitution_effective": 0.0,
+        "energy_initial": 500.67161209881306,
+        "energy_final": 455.15601099892103,
+        "energy_dissipated": 45.515601099892024,
+        "model": "R\u00e9gimen resuelto de Bullet: contacto anticipado, restituci\u00f3n anulada; medido en Blender 5.2.2"
       },
       "split_impulse": true,
-      "incoming": 10.00213623046875,
-      "outgoing_projectile": 8.670833587646484,
-      "outgoing_target": 13.313020706176758,
-      "expected_target": 11.820706454190342,
-      "relative_error": 0.12624577539165632,
-      "eta_target": 0.17716082096966654,
-      "energy_ratio_total": 0.9286732569684412,
-      "target_displacement": 5.879915714263916
+      "incoming": 10.0067138671875,
+      "outgoing_projectile": 9.097437858581543,
+      "outgoing_target": 9.092757225036621,
+      "restitution_measured": -0.00046774931381518754,
+      "expected_target": 9.097012606534092,
+      "relative_error": 0.0004677779048491281,
+      "eta_target": 0.08256732752119589,
+      "energy_ratio_total": 0.9090908769971593,
+      "momentum": 0.9999999714089661,
+      "target_displacement": 4.4263458251953125
+    }
+  ],
+  "controls": [
+    {
+      "mass_ratio": 1,
+      "restitution_requested": 0.3,
+      "substeps": 40,
+      "speed": 288.0,
+      "shapes": [
+        "CONVEX_HULL",
+        "CONVEX_HULL"
+      ],
+      "regime": {
+        "step": 0.060001373291015625,
+        "step_ratio": 0.060001373291015625,
+        "limit": 0.025,
+        "shapes": [
+          "CONVEX_HULL",
+          "CONVEX_HULL"
+        ],
+        "pair_supported": true,
+        "resolved": false,
+        "restitution_effective": null,
+        "eta_bound": null,
+        "substeps_required": 97
+      },
+      "model": {
+        "target_speed": 144.0032958984375,
+        "projectile_speed": 144.0032958984375,
+        "eta": 0.25,
+        "restitution_effective": 0.0,
+        "energy_initial": 41473.89845922589,
+        "energy_final": 20736.949229612947,
+        "energy_dissipated": 20736.949229612947,
+        "model": "R\u00e9gimen resuelto de Bullet: contacto anticipado, restituci\u00f3n anulada; medido en Blender 5.2.2"
+      },
+      "split_impulse": true,
+      "incoming": 288.006591796875,
+      "outgoing_projectile": 110.68258666992188,
+      "outgoing_target": 177.32400512695312,
+      "restitution_measured": 0.23138851802403204,
+      "expected_target": 144.0032958984375,
+      "relative_error": 0.23138851802403204,
+      "eta_target": 0.3790794205803555,
+      "energy_ratio_total": 0.5267703231366789,
+      "momentum": 1.0,
+      "target_displacement": 87.14735412597656
+    },
+    {
+      "mass_ratio": 1,
+      "restitution_requested": 0.0,
+      "substeps": 40,
+      "speed": 288.0,
+      "shapes": [
+        "CONVEX_HULL",
+        "CONVEX_HULL"
+      ],
+      "regime": {
+        "step": 0.060001373291015625,
+        "step_ratio": 0.060001373291015625,
+        "limit": 0.025,
+        "shapes": [
+          "CONVEX_HULL",
+          "CONVEX_HULL"
+        ],
+        "pair_supported": true,
+        "resolved": false,
+        "restitution_effective": null,
+        "eta_bound": null,
+        "substeps_required": 97
+      },
+      "model": {
+        "target_speed": 144.0032958984375,
+        "projectile_speed": 144.0032958984375,
+        "eta": 0.25,
+        "restitution_effective": 0.0,
+        "energy_initial": 41473.89845922589,
+        "energy_final": 20736.949229612947,
+        "energy_dissipated": 20736.949229612947,
+        "model": "R\u00e9gimen resuelto de Bullet: contacto anticipado, restituci\u00f3n anulada; medido en Blender 5.2.2"
+      },
+      "split_impulse": true,
+      "incoming": 288.006591796875,
+      "outgoing_projectile": 136.8640594482422,
+      "outgoing_target": 151.14248657226562,
+      "restitution_measured": 0.04957673723695086,
+      "expected_target": 144.0032958984375,
+      "relative_error": 0.04957657829486935,
+      "eta_target": 0.2754027484262915,
+      "energy_ratio_total": 0.501228767495462,
+      "momentum": 0.9999998410579185,
+      "target_displacement": 74.23345184326172
     }
   ],
   "convergence": [
-    0.025347903188235914,
-    0.021789764701195487,
-    0.025442051858985598,
-    0.025442051858985598,
-    0.025347903188235914,
-    0.021789662006003206
+    0.0012012803067696645,
+    0.0007817617034662254,
+    0.000916568300931213,
+    0.000986785820981136,
+    0.0012006753933692567,
+    0.0007817751693469156
   ],
-  "scope": "Colisi\u00f3n central libre sin gravedad; desplazamiento a tiempo fijo, no alcance bal\u00edstico ni panel cohesivo.",
+  "scope": "Colisi\u00f3n central libre sin gravedad entre cascos convexos de radio 1; r\u00e9gimen resuelto de Bullet. No valida alcance bal\u00edstico, panel cohesivo ni la casa completa.",
   "accepted_eta_max": 0.3,
+  "anticipation_ratio": 0.025,
+  "calibration_reference": "e = 0 (decisi\u00f3n del usuario, 2026-11-03)",
+  "material_restitution_evaluated": false,
+  "material_restitution_note": "En r\u00e9gimen resuelto Bullet anula la restituci\u00f3n; esta configuraci\u00f3n no eval\u00faa restituci\u00f3n por material. La pedida se registra solo para mostrar que no act\u00faa.",
   "checks": {
-    "analytical": false,
+    "analytical": true,
     "convergence": true,
     "energy": true,
-    "budget": false
+    "momentum": true,
+    "budget": true,
+    "regime_classification": true
   }
 }

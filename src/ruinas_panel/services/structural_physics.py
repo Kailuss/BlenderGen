@@ -13,9 +13,10 @@ from ..geometry import primitives, instances
 
 
 def role(name,materials):
-    'IA: Clasifica por identidad y material antes de agrupar; el mortero y los núcleos de impresión nunca son cuerpos estructurales.'
+    'IA: Clasifica por identidad y material antes de agrupar; el mortero y los núcleos de impresión nunca son cuerpos estructurales; un metal nombrado en la pieza (plomo, hierro, latón) prevalece sobre materiales de render heredados (el plomo de chimenea lleva tejas y piedra).'
     text=(name+' '+' '.join(materials)).lower()
     if any(s in text for s in ('mortero','núcleo')):return 'binder'
+    if any(s in name.lower() for s in ('plomo','hierro','latón')):return 'metal'
     if any(s in text for s in ('tierra','grava','peana')):return 'ground'
     if any(s in text for s in ('madera','tabique interior')):return 'wood'
     if any(s in text for s in ('teja','cerámica')):return 'tile'

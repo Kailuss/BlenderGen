@@ -1,0 +1,198 @@
+{
+ "source": "G:\\Alma zen\\Personal\\Tres Dimensiones\\Impresora\\Trabajos\\Yho\\IA\\BlenderGen\\dist\\Ejercicio02_metralla_20261028\\03e_laboratorio_entrega.blend",
+ "sha256": "0ecf91716eba94c52183d7c99624e18eb39a666cf10dd07bae1f54e2478f6d40",
+ "fps": 24.0,
+ "substeps_assumed": 160,
+ "projectile_speed_m_s": 0.8,
+ "active_pieces": 1893,
+ "moving_pieces": 1860,
+ "launch_horizontal_m_s": {
+  "p50": 0.41801379716973375,
+  "p90": 1.7800279332087112,
+  "p95": 2.598322245846978,
+  "p99": 5.199432800983884
+ },
+ "launch_horizontal_over_1_5v": 299,
+ "launch_horizontal_over_by_shape": {
+  "MESH": 149,
+  "CONVEX_HULL": 150
+ },
+ "launch_horizontal_over_by_family": {
+  "Tejas": 150,
+  "Madera": 63,
+  "Piedra": 51,
+  "Latón": 15,
+  "Hierro": 11,
+  "Piedra entera": 6,
+  "Hogar": 2,
+  "Pilar 1": 1
+ },
+ "launch_horizontal_over_by_window": {
+  "antes de liberar 01": 205,
+  "tras liberar 01": 69,
+  "tras liberar 02": 25
+ },
+ "launch_upward_over_v": 183,
+ "launch_upward_p99_m_s": 2.9296528494358114,
+ "anomalous_horizontal_kinetic": 2592.3693125621494,
+ "projectiles_nominal_kinetic": 19895.105000000003,
+ "anomalous_to_projectile_energy": 0.13030186634160257,
+ "escaped_below_floor": 23,
+ "escaped": [
+  {
+   "name": "Madera · rastrel cubierta.947",
+   "shape": "MESH",
+   "start_frame": 43,
+   "launch_horizontal_m_s": 4.8569324405574985
+  },
+  {
+   "name": "Tejas · paño curvo.075",
+   "shape": "CONVEX_HULL",
+   "start_frame": 42,
+   "launch_horizontal_m_s": 0.7790865047120977
+  },
+  {
+   "name": "Madera · correa cubierta.120",
+   "shape": "MESH",
+   "start_frame": 42,
+   "launch_horizontal_m_s": 7.423793565767948
+  },
+  {
+   "name": "Tejas · paño curvo.162",
+   "shape": "CONVEX_HULL",
+   "start_frame": 42,
+   "launch_horizontal_m_s": 2.5977796712631527
+  },
+  {
+   "name": "Madera · rastrel cubierta.1035",
+   "shape": "MESH",
+   "start_frame": 43,
+   "launch_horizontal_m_s": 9.907205877611156
+  },
+  {
+   "name": "Tejas · paño curvo.313",
+   "shape": "CONVEX_HULL",
+   "start_frame": 43,
+   "launch_horizontal_m_s": 7.221371097799492
+  },
+  {
+   "name": "Madera · rastrel cubierta.1088",
+   "shape": "MESH",
+   "start_frame": 44,
+   "launch_horizontal_m_s": 4.004313125108251
+  },
+  {
+   "name": "Tejas · paño curvo.425",
+   "shape": "CONVEX_HULL",
+   "start_frame": 43,
+   "launch_horizontal_m_s": 4.965621783140057
+  },
+  {
+   "name": "Tejas · paño curvo.426",
+   "shape": "CONVEX_HULL",
+   "start_frame": 44,
+   "launch_horizontal_m_s": 4.344432903427854
+  },
+  {
+   "name": "Tejas · paño curvo.428",
+   "shape": "CONVEX_HULL",
+   "start_frame": 43,
+   "launch_horizontal_m_s": 6.642212613856446
+  },
+  {
+   "name": "Madera · rastrel cubierta.1135",
+   "shape": "MESH",
+   "start_frame": 44,
+   "launch_horizontal_m_s": 0.37304479454778056
+  },
+  {
+   "name": "Tejas · paño curvo.590",
+   "shape": "CONVEX_HULL",
+   "start_frame": 44,
+   "launch_horizontal_m_s": 9.118040845061612
+  },
+  {
+   "name": "Tejas · paño curvo.592",
+   "shape": "CONVEX_HULL",
+   "start_frame": 44,
+   "launch_horizontal_m_s": 7.2370386966945555
+  },
+  {
+   "name": "Madera · rastrel cubierta.1182",
+   "shape": "MESH",
+   "start_frame": 45,
+   "launch_horizontal_m_s": 9.531854556244623
+  },
+  {
+   "name": "Tejas · paño curvo.713",
+   "shape": "CONVEX_HULL",
+   "start_frame": 45,
+   "launch_horizontal_m_s": 0.49451396848003637
+  },
+  {
+   "name": "Tejas · paño curvo.716",
+   "shape": "CONVEX_HULL",
+   "start_frame": 45,
+   "launch_horizontal_m_s": 8.671140056576737
+  },
+  {
+   "name": "Tejas · paño curvo.717",
+   "shape": "CONVEX_HULL",
+   "start_frame": 45,
+   "launch_horizontal_m_s": 4.0478312492698665
+  },
+  {
+   "name": "Piedra · back.2.13",
+   "shape": "MESH",
+   "start_frame": 127,
+   "launch_horizontal_m_s": 0.4385387596925815
+  },
+  {
+   "name": "Piedra · back.3.14",
+   "shape": "MESH",
+   "start_frame": 128,
+   "launch_horizontal_m_s": 0.3838213212320457
+  },
+  {
+   "name": "Piedra · back.4.12",
+   "shape": "MESH",
+   "start_frame": 127,
+   "launch_horizontal_m_s": 0.35529801062075145
+  },
+  {
+   "name": "Piedra · back.4.13",
+   "shape": "MESH",
+   "start_frame": 127,
+   "launch_horizontal_m_s": 0.2866715025727854
+  },
+  {
+   "name": "Piedra · back.5.13",
+   "shape": "MESH",
+   "start_frame": 127,
+   "launch_horizontal_m_s": 0.3126943567667518
+  },
+  {
+   "name": "Revoco · tabique interior.050 · fragmento",
+   "shape": "MESH",
+   "start_frame": 123,
+   "launch_horizontal_m_s": 0.8124957309450485
+  }
+ ],
+ "regime_by_shape": {
+  "CONVEX_HULL": {
+   "bodies": 353,
+   "moving_samples": 10305,
+   "fast_samples": 7283,
+   "fast_fraction": 0.7067442988840369
+  },
+  "MESH": {
+   "bodies": 1540,
+   "moving_samples": 48847,
+   "fast_samples": 6259,
+   "fast_fraction": 0.12813478821626711
+  }
+ },
+ "substeps_required_p50": 10,
+ "substeps_required_p95": 2900,
+ "limits": "Traslación solamente; velocidades a 24 fps; masas de solver; radio propio como aproximación del radio menor de la pareja."
+}

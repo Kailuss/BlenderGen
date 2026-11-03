@@ -67,3 +67,44 @@ def dissipative_collision(mass_projectile, mass_target, speed, restitution, eta_
                 energy_initial=initial, energy_final=final, energy_dissipated=initial-final,
                 additional_dissipation=max(0., baseline_final-final), eta_max=eta_max,
                 model='Disipación interna idealizada de contacto 1D; no arrastre del aire ni recorte de poses')
+
+
+# Medido en Blender 5.2.2 (sondas E-9b a E-9d, reports/impact_*_probe.json): con
+# avance relativo por subpaso <= 0,025 veces el radio envolvente de la pieza menor,
+# los contactos convexos (CONVEX_HULL, y SPHERE contra CONVEX_HULL) se crean antes de
+# tocar y Bullet anula la restitución: choque completamente inelástico, sin inyección.
+# Por encima de 0,03 vuelve la restitución pedida más un exceso de hasta +0,3.
+# Las parejas SPHERE-SPHERE, BOX-BOX y MESH no tienen régimen resuelto fiable.
+# Decisión del usuario (2026-11-03): e = 0 es la referencia de calibración; en esta
+# configuración no se evalúa restitución por material.
+BULLET_ANTICIPATION_RATIO = .025
+BULLET_RESOLVED_PAIRS = frozenset({('CONVEX_HULL', 'CONVEX_HULL'), ('CONVEX_HULL', 'SPHERE'),
+                                   ('SPHERE', 'CONVEX_HULL')})
+
+
+def contact_regime(relative_speed, radius_min, fps, substeps, time_scale=1.,
+                   shapes=('CONVEX_HULL', 'CONVEX_HULL'), limit=BULLET_ANTICIPATION_RATIO):
+    """IA: Clasifica un contacto de Bullet por avance relativo por subpaso / radio menor (adimensional, invariante a la escala del solver); en régimen resuelto e efectiva = 0 y eta <= 0,25; fuera de él la restitución es desconocida (None), nunca 0."""
+    speed = positive(relative_speed, 'velocidad relativa')
+    radius = positive(radius_min, 'radio menor')
+    rate = positive(fps, 'fps') * positive(substeps, 'subpasos') / positive(time_scale, 'escala temporal')
+    limit = positive(limit, 'límite de anticipación')
+    step = speed / rate
+    ratio = step / radius
+    pair_ok = tuple(shapes) in BULLET_RESOLVED_PAIRS
+    resolved = pair_ok and ratio <= limit
+    return dict(step=step, step_ratio=ratio, limit=limit, shapes=list(shapes),
+                pair_supported=pair_ok, resolved=resolved,
+                restitution_effective=0. if resolved else None,
+                eta_bound=.25 if resolved else None,
+                substeps_required=math.ceil(speed * time_scale / (fps * limit * radius)) if pair_ok else None)
+
+
+def inelastic_collision(mass_projectile, mass_target, speed):
+    """IA: Referencia del régimen resuelto de Bullet (e=0): conserva momento, eta = M·m/(M+m)² <= 0,25 para cualquier razón de masas."""
+    result = central_collision(mass_projectile, mass_target, speed, 0.)
+    initial = .5 * mass_projectile * speed**2
+    final = .5 * (mass_projectile + mass_target) * result['target_speed']**2
+    return dict(result, restitution_effective=0., energy_initial=initial, energy_final=final,
+                energy_dissipated=initial - final,
+                model='Régimen resuelto de Bullet: contacto anticipado, restitución anulada; medido en Blender 5.2.2')

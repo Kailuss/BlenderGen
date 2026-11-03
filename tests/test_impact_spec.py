@@ -51,6 +51,37 @@ class ImpactSpecTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             impact_spec.dissipative_collision(1,1,10,.3,.1)
 
+    def test_contact_regime_scale_invariant(self):
+        """IA: El régimen depende de avance/radio: escalar velocidad y radio por 100 no lo cambia."""
+        a=impact_spec.contact_regime(.8,.005,24,160)
+        b=impact_spec.contact_regime(80,.5,24,160)
+        self.assertAlmostEqual(a['step_ratio'],b['step_ratio'])
+        self.assertEqual(a['resolved'],b['resolved'])
+        self.assertEqual(a['substeps_required'],b['substeps_required'])
+
+    def test_contact_regime_threshold(self):
+        """IA: Resuelto con razón <= 0,025 y pareja convexa; fuera, restitución desconocida (None), nunca 0."""
+        ok=impact_spec.contact_regime(10*.02*4800/1,10,120,40)
+        self.assertTrue(ok['resolved']);self.assertEqual(ok['restitution_effective'],0.);self.assertEqual(ok['eta_bound'],.25)
+        fast=impact_spec.contact_regime(10*.04*4800,10,120,40)
+        self.assertFalse(fast['resolved']);self.assertIsNone(fast['restitution_effective']);self.assertIsNone(fast['eta_bound'])
+        self.assertLessEqual(impact_spec.contact_regime(10*.04*4800,10,120,fast['substeps_required'])['step_ratio'],.025+1e-12)
+
+    def test_contact_regime_unsupported_pair(self):
+        """IA: Parejas de primitivas o malla nunca se declaran resueltas, aunque el paso sea mínimo."""
+        for shapes in (('SPHERE','SPHERE'),('BOX','BOX'),('MESH','CONVEX_HULL')):
+            r=impact_spec.contact_regime(.001,1,120,400,shapes=shapes)
+            self.assertFalse(r['resolved']);self.assertIsNone(r['substeps_required'])
+
+    def test_inelastic_budget(self):
+        """IA: En régimen resuelto eta <= 0,25 para cualquier razón de masas y se conserva el momento."""
+        for mass in (.01,.1,1,10,100):
+            r=impact_spec.inelastic_collision(mass,1,10)
+            self.assertLessEqual(r['eta'],.25+1e-12)
+            self.assertAlmostEqual(mass*r['projectile_speed']+r['target_speed'],mass*10)
+            self.assertAlmostEqual(r['energy_initial'],r['energy_final']+r['energy_dissipated'])
+        self.assertAlmostEqual(impact_spec.inelastic_collision(1,1,10)['eta'],.25)
+
 
 if __name__ == '__main__':
     unittest.main()
