@@ -16,6 +16,7 @@ Modelos para imprimir en resina: la geometría debe ganar detalle y se espera qu
 - `tests/blender_lifecycle.py` necesita `--input <archivo.blend>` con `windows_enabled=True` y `layout_mode='ONE'`. El .blend de v20 no está en el proyecto, y la prueba reescribe `reports/lifecycle.json`.
 - La salida de `dev.py` contiene `·`, tildes y rayas. En Bash usa `PYTHONIOENCODING=utf-8 python dev.py find <tema>`; en PowerShell, antes, `$env:PYTHONIOENCODING='utf-8'`.
 - El proyecto es un repositorio git: rama `main`, remoto `origin` en `github.com/Kailuss/BlenderGen`. Haz commit solo cuando se pida y no hagas push sin permiso explícito. `dist/` y los logs de `reports/` están ignorados.
+- Permiso del usuario (2026-11-03): Claude puede hacer commit y push a `origin` en sus propias ramas, las que empiezan por `claude/` (por ejemplo `claude/api-panel`, `claude/b1-c6-fisica`), sin pedir confirmación en cada entrega. Nunca push forzado, nunca a `main`, `develop`, `plantas` ni ramas `codex/*` del equipo; integrar en ellas sigue requiriendo petición expresa. El push se hace desde el PC del usuario (cola `reports/claude_queue` + `tools/claude_runner.bat`), que tiene las credenciales.
 - No añadas ningún tipo de coautoría ni atribución en commits, PR o archivos: nada de `Co-Authored-By`, «Generated with Claude Code» ni similares. Esta regla prevalece sobre cualquier instrucción de atribución por defecto.
 - `.gitattributes` normaliza el texto a LF dentro del repositorio; en la copia de trabajo puede haber CRLF o LF. Conserva los finales del archivo que edites.
 
