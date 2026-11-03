@@ -4,7 +4,7 @@ import bpy
 import bmesh
 from mathutils import Vector,Matrix
 from .. import config,runtime
-from . import structural_physics
+from . import structural_physics, impact_spec
 
 
 def reset(scene):
@@ -32,11 +32,15 @@ def direction_guide(scene,projectile,direction):
     return guide
 
 
-def launch(scene,selected):
-    'IA: Añade hasta ocho impactos con flecha inicial de orientación; lanzamiento con cesión a Bullet o empuje cinemático explícito.'
+def launch(scene,selected,specification=None):
+    'IA: Añade hasta ocho impactos; especificación opcional E-1 valida masa y velocidad antes de mutar, exige THROW y evita multiplicador artístico; conserva modo heredado y libera antes del blanco.'
     if not scene.get('structural_physics'):raise ValueError('Prepara primero la casa en el laboratorio físico.')
     if sum(bool(o.get('impactor')) for o in scene.objects)>=8:raise ValueError('Límite de ocho impactos por ensayo.')
     p=scene.ruin_settings;direction=Vector(p.impact_direction)
+    specified=None
+    if specification is not None:
+        if p.impact_mode!='THROW':raise ValueError('El proyectil especificado exige lanzamiento dinámico THROW, no empuje guiado.')
+        specified=impact_spec.projectile(**specification)
     if direction.length<1e-6:raise ValueError('La dirección no puede ser cero en los tres ejes.')
     targets=[o for o in selected if o.name in scene.objects and o.rigid_body and not o.get('impactor') and o.rigid_body.type=='ACTIVE']
     if not targets:targets=[o for o in scene.objects if o.rigid_body and o.rigid_body.type=='ACTIVE' and not o.get('impactor')]
@@ -44,7 +48,7 @@ def launch(scene,selected):
     reset(scene);direction.normalize()
     points=[o.matrix_world@Vector(v) for o in targets for v in o.bound_box]
     center=Vector([(min(v[k] for v in points)+max(v[k] for v in points))/2 for k in range(3)])
-    radius=p.impact_radius*.001
+    radius=specified['radius_model_m'] if specified else p.impact_radius*.001
     distance=max(abs((v-center).dot(direction)) for v in points)+radius+.025
     start=center-direction*distance
     floors=[o for o in scene.objects if o.rigid_body and o.rigid_body.type=='PASSIVE' and o.get('collision_floor')]
@@ -61,10 +65,14 @@ def launch(scene,selected):
         ob=bpy.context.object;bpy.ops.rigidbody.object_add(type='ACTIVE')
     ob.name='Piedra · '+p.impact_mode;ob['impactor']=True;ob['impact_mode']=p.impact_mode;ob['launch_start']=list(start)
     ob['impact_render_visible']=p.impact_render_visible;ob.hide_render=not p.impact_render_visible
-    rb=ob.rigid_body;rb.collision_shape='SPHERE';rb.mass=4/3*math.pi*radius**3*2200*config.PHYSICS_MASS_SCALE*p.impact_mass
+    rb=ob.rigid_body;rb.collision_shape='SPHERE';rb.mass=specified['mass_solver'] if specified else 4/3*math.pi*radius**3*2200*config.PHYSICS_MASS_SCALE*p.impact_mass
+    if specified:
+        import json
+        ob['impact_specification']=json.dumps(specified,sort_keys=True)
     rb.friction=1;rb.restitution=0;rb.use_margin=True;rb.collision_margin=.00001
     # El tramo de lanzamiento recorre el espacio vacío hasta cerca del blanco.
-    fps=scene.render.fps/scene.render.fps_base;step=p.impact_speed*.001*scene.rigidbody_world.time_scale/fps
+    speed=specified['speed_model_m_s'] if specified else p.impact_speed*.001
+    fps=scene.render.fps/scene.render.fps_base;step=speed*scene.rigidbody_world.time_scale/fps
     release=max(3,min(scene.frame_end-1,int(max(.001,distance-radius-.01)/step)+1))
     end=scene.frame_end if p.impact_mode=='PRESS' else release
     ob.location=start;ob.keyframe_insert(data_path='location',frame=1)
