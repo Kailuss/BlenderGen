@@ -11,6 +11,7 @@ import bpy
 
 
 class RuinSettings(bpy.types.PropertyGroup):
+    game_scale: EnumProperty(name='Escala de juego',description='Convierte el modelo a medidas reales (1:λ) para la física y la definición del edificio; no cambia la geometría',items=[(k,v[1],v[2]) for k,v in config.GAME_SCALES.items()],default='H28')
     lab_fog_density: FloatProperty(name='Densidad de bruma',default=.12,min=0,max=2)
     lab_camera_type: EnumProperty(name='Tipo de cámara',items=[('STATIC','Estática','Encuadre fijo con objetivo editable'),('ORBIT','Órbita','Vuelta completa en diez segundos'),('INTERIOR','Interior','Vista desde el interior hacia la entrada'),('TRAVELLING','Travelling','Desplazamiento lateral en diez segundos'),('SPIRAL','Espiral','Vuelta ascendente en diez segundos')],default='STATIC')
     chandelier_drop_mm: FloatProperty(name='Caída de lámpara (mm)',default=25,min=10,max=80)

@@ -146,11 +146,18 @@ TURN_ITEMS=[('NONE','Recto','Sin tramo perpendicular'),('LEFT','Giro izq.','Giro
 
 # Subpaneles de la barra lateral, en orden. toggle: casilla en la cabecera que activa el bloque;
 # closed: empieza plegado. El botón de restablecer vuelve a los valores por defecto de fields (no del toggle).
+# Escalas de juego: denominador λ (1:λ) que convierte el modelo en mundo para física y
+# definición del edificio. Valores habituales del mercado de miniaturas, confianza C.
+GAME_SCALES={'H28':(56,'28 mm heroica','Mordheim y escaramuzas de 28 mm · 1:56'),
+             'S32':(50,'32 mm','Miniaturas de 32 mm · 1:50'),
+             'S20':(72,'20 mm','Escala 1:72'),
+             'S15':(100,'15 mm','Escala 1:100')}
+
 # Orden del panel = orden de construcción: volumen, fábrica, interior, huecos, cubierta,
 # entorno, daño, calidad y física. Cada campo visible aparece en una sola sección
 # (tests/test_api_layout.py lo comprueba).
 SECTIONS=(
- {'id':'volume','title':'Volumen','fields':('build_type','height_type','ground_storey_height','upper_storey_height','low_wall_height','length','layout_mode','building_depth','extra_side'),'closed':False},
+ {'id':'volume','title':'Volumen','fields':('game_scale','build_type','height_type','ground_storey_height','upper_storey_height','low_wall_height','length','layout_mode','building_depth','extra_side'),'closed':False},
  {'id':'masonry','title':'Muros y aparejo','fields':('stone_variation','bond_subdivisions','alternate_height','randomness'),'closed':True},
  {'id':'pillars','title':'Pilares','fields':('pillar_count','pillar_distribution','pillar_positions','connection_enabled','connection_side'),'closed':True},
  {'id':'interior','title':'Interior','fields':('interior_layout','floor_beams','ground_floor','upper_floor'),'closed':False},

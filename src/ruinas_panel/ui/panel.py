@@ -191,6 +191,9 @@ def section_panel(index, section):
         if section['id'] == 'volume':
             from ..structure import layout as building_layout
             col.label(text='Grosor %.0f mm · altura %.0f mm' % (config.BUILD_TYPES[p.build_type][0], building_layout.building_height(p)))
+            scale=config.GAME_SCALES[p.game_scale][0]
+            storey=p.low_wall_height if p.height_type=='RUIN' else p.ground_storey_height
+            col.label(text='A 1:%d · planta %.1f m · puerta %.1f m' % (scale, storey*scale/1000, p.door_height*scale/1000))
         if section['id']=='physics':
             col.operator('ruin.physics_lab',icon='PHYSICS')
             col.label(text='Límite y construcción: solo el ejemplo aislado')
