@@ -46,7 +46,7 @@ def hull_box(name, size, location, passive=False):
     ob = bpy.context.object
     ob.name = name
     ob.scale = size
-    bpy.ops.object.transform_apply(scale=True)
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     bpy.ops.rigidbody.object_add(type='PASSIVE' if passive else 'ACTIVE')
     rb = ob.rigid_body
     rb.collision_shape = 'CONVEX_HULL'
