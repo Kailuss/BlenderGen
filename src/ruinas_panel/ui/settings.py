@@ -23,7 +23,6 @@ class RuinSettings(bpy.types.PropertyGroup):
     patio_margin: FloatProperty(name='Espacio alrededor (mm)',default=25,min=10,max=100)
     patio_fence: BoolProperty(name='Valla exterior',default=True)
     fence_height: FloatProperty(name='Altura de valla (mm)',default=18,min=6,max=40)
-    physics_target: EnumProperty(name='Zona de física',items=[('MASONRY','Ladrillos: impacto y huecos','Ensayo acotado sin mortero ni uniones elásticas',5),('BUILDING','Edificio completo','Ensayo experimental de todas las piezas sin mortero, con encajes y uniones',4),('PARTITION','Primer tabique','Ensayo libre de un tabique',0),('ROOM1','Estancia 1','Tabiques junto a la primera estancia del plano',1),('ROOM2','Estancia 2','Tabiques junto a la segunda estancia del plano',2),('ROOM3','Estancia 3','Tabiques junto a la tercera estancia o distribuidor',3)],default='BUILDING')
     physics_brick_limit: IntProperty(name='Límite de piezas',default=96,min=16,max=2048,description='Máximo de piezas seleccionadas en la casa; el ejemplo aislado conserva su límite de 256 ladrillos')
     physics_masonry_shape: EnumProperty(name='Construcción de ensayo',items=[('WALL','Muro','Muro aparejado'),('TOWER','Torre','Torre hueca aparejada')],default='WALL')
     impact_direction: FloatVectorProperty(name='Dirección XYZ',size=3,default=(0,1,0),description='Vector de avance en coordenadas mundiales; apunta al centro de la selección o del edificio')

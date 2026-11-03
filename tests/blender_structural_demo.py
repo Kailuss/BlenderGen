@@ -15,7 +15,6 @@ def build_demo():
     bpy.ops.wm.open_mainfile(filepath=str(ROOT/'dist/ruinas_estructura_preparada.blend'),use_scripts=False)
     addon.register()
     lab=next(s for s in bpy.data.scenes if s.get('structural_physics'));bpy.context.window.scene=lab;lab.frame_set(1)
-    bpy.data.scenes[lab['source_scene']].ruin_settings.physics_target='BUILDING'
     bodies=[o for o in lab.objects if o.rigid_body]
     assert lab['mass_scale']==10000,'Regenera la preparación con masas normalizadas'
     prepared=json.loads((ROOT/'reports/structural_physics.json').read_text(encoding='utf8'))

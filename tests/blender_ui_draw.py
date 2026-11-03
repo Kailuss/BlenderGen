@@ -89,7 +89,6 @@ def run():
     addon.register()
     house = bpy.context.scene
     draw_all(house, 'casa')
-    house.ruin_settings.physics_target = 'BUILDING'
     draw_all(house, 'casa-fisica-edificio')
     labs = {}
     for name, flags in (('lab-estructural', dict(ruinas_physics_lab=True, structural_physics=True)),

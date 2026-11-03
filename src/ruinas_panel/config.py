@@ -163,7 +163,7 @@ SECTIONS=(
  {'id':'damage','title':'Daño','toggle':'damage_enabled','fields':('collapse','break_position','hole_count','hole_size','hole_seed','hole_damage','wear_level','wear','cracks','rubble_amount','ground_roughness','wood_damage','floor_damage','roof_damage','roof_damage_seed','facade_damage','iron_mode','iron_damage'),'closed':False},
  {'id':'cracks','title':'Grietas','fields':('cracks_per_stone','crack_length_var','crack_width_var','crack_angle_var','crack_path_var'),'closed':True},
  {'id':'quality','title':'Calidad y exportación','fields':('preview_quality','export_quality','export_density','use_instances','quick_edit','batch_preview','microdetail_preview','wood_grain'),'closed':True},
- {'id':'physics','title':'Física','fields':('physics_target','physics_frames','physics_memory_mb','physics_timeout_seconds','physics_brick_limit','physics_masonry_shape','physics_strength','physics_fragile_size'),'closed':True})
+ {'id':'physics','title':'Física','fields':('physics_frames','physics_memory_mb','physics_timeout_seconds','physics_strength','physics_fragile_size','physics_brick_limit','physics_masonry_shape'),'closed':True})
 
 
 # Ajustes guardados que el panel no muestra a propósito, con su motivo. Un campo nuevo

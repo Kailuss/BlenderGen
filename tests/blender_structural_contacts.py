@@ -14,8 +14,6 @@ def run():
     'IA: Recorta una viga que cruza piedra, conserva el hueco, elimina mortero y prueba caída tras desconectar una tabla colgada; compara fuente agrupada e individual.'
     bpy.ops.wm.read_factory_settings(use_empty=True);addon.register();runtime.busy=True;runtime.preview=True;runtime.instance_build=True
     source=bpy.context.scene;p=source.ruin_settings;p.live_preview=False;p.physics_strength=1000
-    for key,value in [('PARTITION',0),('ROOM1',1),('ROOM2',2),('ROOM3',3),('BUILDING',4)]:
-        p.physics_target=key;assert p['physics_target']==value
     coll=bpy.data.collections.new(config.COLLECTION);source.collection.children.link(coll)
     stone=primitives.material('Piedra',(.5,.5,.5));wood=primitives.material('Madera',(.4,.2,.1))
     for name,box,mat in [('Tierra',(-10,35,-10,10,-2,0),stone),('Pie',(0,8,-3,3,0,3),stone),('Piedra soporte',(0,8,-3,3,3,15),stone),('Madera viga',(4,26,-2,2,12,15),wood),('Madera tabla colgada',(22,24,-1,1,7,12),wood),('Mortero',(1,7,-2,2,2,14),stone)]:

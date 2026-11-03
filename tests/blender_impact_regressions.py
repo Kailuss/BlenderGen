@@ -19,7 +19,6 @@ def run():
     'IA: Conserva la fuente, divide piedra en sólidos unidos, lanza dos impactos y comprueba transferencia de movimiento y vista en ambas escalas.'
     bpy.ops.wm.read_factory_settings(use_empty=True);addon.register();runtime.busy=True;runtime.instance_build=True
     source=bpy.context.scene;source.name='CASA ORIGINAL';p=source.ruin_settings;p.live_preview=False;p.physics_strength=.1
-    assert p.physics_target=='BUILDING'
     coll=bpy.data.collections.new(config.COLLECTION);source.collection.children.link(coll)
     mat=primitives.material('Piedra',(.5,.4,.3))
     for i in range(4):primitives.block('Ladrillo real '+str(i),i*12,i*12+11.96,-3,3,0,6,coll,mat)

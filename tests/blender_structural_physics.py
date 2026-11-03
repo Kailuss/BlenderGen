@@ -19,7 +19,7 @@ def run():
     p.batch_preview=False;p.use_instances=False;p.door_enabled=True;p.door_width=40;p.door_leaf=False
     p.windows_enabled=True;p.ground_floor=True;p.roof_frame=True;p.roof_tiles=True;p.roof_gables=True
     p.wood_grain=1;p.damage_enabled=False;p.wear_level='CUSTOM';p.wear=.1;p.cracks=0;p.rubble_amount=0;p.ground_roughness=0
-    p.collapse=0;p.wood_damage=0;p.floor_damage=0;p.roof_damage=0;p.hole_count=0;p.preview_quality='WORK';p.physics_target='BUILDING'
+    p.collapse=0;p.wood_damage=0;p.floor_damage=0;p.roof_damage=0;p.hole_count=0;p.preview_quality='WORK'
     coll=addon.generate(bpy.context,p,'WORK');before=digest(coll);assert not closure(coll)['open_edges']
     lab=physics.prepare(source);lab.name='02 LABORATORIO ESTRUCTURAL';bpy.context.window.scene=lab
     assert digest(coll)==before;report=json.loads(lab['preparation_report'])

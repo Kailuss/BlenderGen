@@ -45,16 +45,5 @@ def run():
         assert runtime.physics_job is None and (stopped['folder']/'resource_limit.json').exists()
         assert len(lab.objects)==before
     finally:config.PHYSICS_JOB_MEMORY_MB=limit
-    del lab['structural_physics'];lab['source_signature']=physics.signature(source.ruin_settings)
-    original['source_section']='seccion_prueba';original['initial_matrix']=json.dumps([list(row) for row in original.matrix_world])
-    physics_jobs.start(lab)
-    for attempt in range(120):
-        partition=physics_jobs.poll()
-        if 'finished' in partition:break
-        time.sleep(.25)
-    else:physics_jobs.cancel();raise AssertionError('Partition worker timeout')
-    accepted=partition['finished'];bpy.context.window.scene=accepted;accepted.frame_set(24)
-    assert physics.accept(accepted)==source
-    assert 'seccion_prueba' in meta.get(source,'physics_result')['poses']
     print('PHYSICS_JOBS_PASSED',replay['simulation_report'],flush=True)
 if __name__=='__main__':run()

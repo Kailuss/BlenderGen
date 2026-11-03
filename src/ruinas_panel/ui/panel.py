@@ -61,7 +61,6 @@ class RUIN_PT_panel(bpy.types.Panel):
             layout.label(text='Reproducción calculada; edita en el laboratorio')
             if context.scene.get('lab_scene'):layout.operator('ruin.physics_edit')
             if context.scene.get('physics_result_scene'):
-                if not context.scene.get('structural_physics'):layout.operator('ruin.physics_accept',icon='CHECKMARK')
                 layout.prop(context.scene.ruin_settings,'physics_export_voxel')
                 layout.operator('ruin.physics_export')
                 layout.label(text=context.scene.ruin_settings.status)
@@ -77,8 +76,8 @@ class RUIN_PT_panel(bpy.types.Panel):
                 box.label(text='La fuente ha cambiado',icon='ERROR')
                 box.label(text='Prepara de nuevo su laboratorio')
             col=layout.column(align=True)
-            col.label(text='Física · '+context.scene.get('physics_room','tabique'))
-            col.label(text='Edificio sin mortero · experimental' if structural else 'Ensayo antiguo: solo tabiques')
+            col.label(text='Física · '+context.scene.get('physics_room','edificio'))
+            col.label(text='Edificio sin mortero · experimental' if structural else 'Ejemplo aislado de ladrillos')
             if structural:
                 report=parsed(context.scene.get('preparation_report','{}'),{})
                 col.label(text='%s cuerpos móviles · %s uniones'%(sum(bool(o.rigid_body and o.rigid_body.type=='ACTIVE') for o in context.scene.objects),sum(o.rigid_body_constraint is not None for o in context.scene.objects)))
@@ -87,8 +86,7 @@ class RUIN_PT_panel(bpy.types.Panel):
             row=layout.row(align=True);row.scale_y=1.3
             row.operator('ruin.physics_simulate',icon='PLAY')
             layout.label(text=p.status,icon=status_icon(p.status))
-            if not structural:layout.operator('ruin.physics_accept',icon='CHECKMARK')
-            else:layout.label(text='Tras simular: exporta el fotograma a STL')
+            layout.label(text='Tras simular: exporta el fotograma a STL')
             layout.operator('ruin.physics_return',icon='BACK')
             return
         p = context.scene.ruin_settings
@@ -136,8 +134,6 @@ def enabled(p, field):
     if field=='stair_side' and p.stair_type=='NONE':return False
     if field in ('stair_type','stair_side'):return p.layout_mode=='ROOM' and p.height_type in ('TWO','THREE') and p.upper_floor and p.floor_beams
     if field=='roof_frame':return p.layout_mode=='ROOM'
-    if field in ('physics_brick_limit','physics_masonry_shape'):return p.physics_target=='MASONRY'
-    if field in ('physics_strength','physics_fragile_size'):return p.physics_target=='BUILDING'
     if field=='upper_floor':return p.layout_mode=='ROOM' and p.height_type in ('TWO','THREE') and p.floor_beams
     if field=='floor_damage':return p.layout_mode=='ROOM' and (p.ground_floor or (p.upper_floor and p.floor_beams and p.height_type in ('TWO','THREE')))
     if field=='ground_floor':return p.layout_mode=='ROOM'
@@ -197,11 +193,8 @@ def section_panel(index, section):
             col.label(text='Grosor %.0f mm · altura %.0f mm' % (config.BUILD_TYPES[p.build_type][0], building_layout.building_height(p)))
         if section['id']=='physics':
             col.operator('ruin.physics_lab',icon='PHYSICS')
+            col.label(text='Límite y construcción: solo el ejemplo aislado')
             col.operator('ruin.physics_demo')
-            result=parsed(meta.raw(context.scene,'physics_result') or '{}',{})
-            if result:
-                col.label(text='Física aceptada · '+result['room'],icon='CHECKMARK')
-                col.operator('ruin.physics_clear')
         if section['id']=='interior':
             if p.layout_mode!='ROOM':col.label(text='Habitaciones: requiere cuatro paredes',icon='INFO')
             elif p.height_type=='RUIN':col.label(text='Habitaciones: requiere al menos una planta',icon='INFO')
@@ -295,7 +288,7 @@ def draw_lab_selection(self, context):
     if context.scene.get('masonry_lab'):
         layout.label(text='Ladrillos activos · juntas rompibles')
         layout.operator('ruin.masonry_remove')
-    else:layout.operator('ruin.physics_release',text='Soltar uniones seleccionadas' if structural else 'Retirar apoyo (ensayo antiguo)',icon='RIGID_BODY')
+    elif structural:layout.operator('ruin.physics_release',text='Soltar uniones seleccionadas',icon='RIGID_BODY')
 
 
 def draw_lab_strength(self, context):

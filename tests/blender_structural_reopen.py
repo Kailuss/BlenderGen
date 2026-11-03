@@ -27,7 +27,7 @@ def run():
     import ruinas_panel as addon
     addon.register()
     p=bpy.data.scenes[lab['source_scene']].ruin_settings
-    assert p.physics_target=='BUILDING' and p.length==170 and p.building_depth==155 and p.interior_layout=='TWO'
+    assert p.length==170 and p.building_depth==155 and p.interior_layout=='TWO'
     report['editable_parameters_preserved']=True
     (ROOT/'reports/structural_reopen.json').write_text(json.dumps(report,indent=2,ensure_ascii=False),encoding='utf8')
     print('STRUCTURAL_REOPEN_PASSED',report,flush=True)

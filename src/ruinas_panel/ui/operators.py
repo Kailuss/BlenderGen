@@ -106,8 +106,8 @@ class RUIN_OT_physics_return(bpy.types.Operator):
 
 class RUIN_OT_physics(bpy.types.Operator):
     bl_idname='ruin.physics_lab'
-    bl_label='Preparar casa diseñada / zona'
-    bl_description='Prepara el edificio completo sin mortero o el ensayo antiguo de tabiques; conserva la fuente'
+    bl_label='Preparar laboratorio del edificio'
+    bl_description='Prepara una copia física del edificio completo sin mortero; conserva la fuente'
     bl_options={'REGISTER','UNDO'}
     poll=classmethod(ready)
     def execute(self,context):
@@ -115,7 +115,6 @@ class RUIN_OT_physics(bpy.types.Operator):
         from ..services import physics_jobs
         preview.cancel_pending()
         try:
-            if context.scene.ruin_settings.physics_target=='MASONRY':context.scene.ruin_settings.physics_target='BUILDING'
             if preview.stale_preview(context.scene):preview.update_preview(context)
             physics_jobs.start(context.scene,'PREPARE')
         except Exception as exc:return fail(self,context,exc)
@@ -143,13 +142,13 @@ class RUIN_OT_physics_height_selection(bpy.types.Operator):
 
 class RUIN_OT_physics_release(bpy.types.Operator):
     bl_idname='ruin.physics_release'
-    bl_label='Retirar apoyo seleccionado (ensayo)'
-    bl_description='En el edificio completo suelta las uniones sin mover la pieza; el ensayo antiguo retira una sección de base'
+    bl_label='Soltar uniones seleccionadas'
+    bl_description='Suelta las uniones de las piezas seleccionadas sin moverlas'
     bl_options={'REGISTER','UNDO'}
     def execute(self,context):
-        'IA: Solicita soltar uniones en estructura completa o retirar apoyo en el ensayo antiguo; nunca altera la generación normal.'
+        'IA: Suelta uniones de la selección en el laboratorio de edificio; nunca altera la generación normal.'
         from ..services import physics
-        try:physics.release_support(context.scene,context.selected_objects if context.scene.get('structural_physics') else context.active_object)
+        try:physics.release_support(context.scene,context.selected_objects)
         except Exception as exc:return fail(self,context,exc)
         return {'FINISHED'}
 
@@ -266,36 +265,6 @@ class RUIN_OT_physics_simulate(bpy.types.Operator):
             return fail(self,context,exc)
         return {'RUNNING_MODAL'}
 
-
-
-class RUIN_OT_physics_accept(bpy.types.Operator):
-    bl_idname='ruin.physics_accept'
-    bl_label='Aceptar para exportación'
-    bl_description='Conserva las poses del ensayo sobre la geometría detallada; después usa Preparar sólido en la casa'
-    bl_options={'REGISTER','UNDO'}
-    def execute(self,context):
-        'IA: Guarda las poses revisadas, vuelve a la casa y regenera el detalle conservando las transformaciones físicas.'
-        from ..services import physics
-        try:
-            source=physics.accept(context.scene);context.window.scene=source
-            preview.update_preview(context)
-            frame_view(context)
-        except Exception as exc:return fail(self,context,exc)
-        return {'FINISHED'}
-
-
-class RUIN_OT_physics_clear(bpy.types.Operator):
-    bl_idname='ruin.physics_clear'
-    bl_label='Descartar resultado físico'
-    bl_options={'REGISTER','UNDO'}
-    poll=classmethod(ready)
-    def execute(self,context):
-        'IA: Borra solo las poses aceptadas y recupera el edificio procedural; conserva escenas de ensayo.'
-        from .. import meta
-        meta.put(context.scene,'physics_result',{})
-        try:preview.update_preview(context)
-        except Exception as exc:return fail(self,context,exc)
-        return {'FINISHED'}
 
 
 class RUIN_OT_seed(bpy.types.Operator):

@@ -58,10 +58,6 @@ def build(context,p,quality):
     start=time.perf_counter()
     layout.apply_profiles(p)
     original=p
-    from . import physics
-    result=meta.get(context.scene,'physics_result',{})
-    if result and result['signature']!=physics.signature(p):
-        raise ValueError('Resultado físico obsoleto: descártalo y vuelve a simular tras los cambios.')
     p=damage.effective_settings(p)
     runtime.settings=p
     meta.put(context.scene,'building_definition',building_definition.define(p,context.scene.get('ruinas_model_scale')))
@@ -91,8 +87,6 @@ def build(context,p,quality):
     else:
         fracture.apply_damage(coll,p)
         for piece in coll.objects:primitives.repair_precision(piece)
-    from . import physics
-    physics.apply_result(context.scene,coll,original)
     if runtime.preview and p.batch_preview:
         batching.pack_preview(coll)
     runtime.timings['total']=time.perf_counter()-start
