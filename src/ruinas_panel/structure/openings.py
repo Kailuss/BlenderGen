@@ -1,4 +1,6 @@
 """structure /openings — ver docs/ARCHITECTURE.md para contratos y dependencias."""
+from ..services import removal_events
+from ..construction_core import seat
 
 from .. import meta
 from .. import config
@@ -56,6 +58,7 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
         for vertex,point in zip(cutter.data.vertices,((x0,-T,z0),(x1,-T,z0),(x1,T,z0),(x0,T,z0),(x0,-T,z1),(x1,-T,z1),(x1,T,z1),(x0,T,z1))):
             vertex.co=wall_point(w,*point)
         cutter.data.update()
+        ledger_before=removal_events.fingerprint(ob)
         world=primitives.coords(ob)
         if not len(world):
             continue
@@ -71,10 +74,7 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
         # Las piezas totalmente dentro del hueco se eliminan directamente.
         # Evita booleanos degenerados y reduce el trabajo de ventanas grandes.
         if ((x0<=local[:,0])&(local[:,0]<=x1)&(z0<=local[:,2])&(local[:,2]<=z1)&(-T<=local[:,1])&(local[:,1]<=T)).all():
-            mesh=ob.data
-            bpy.data.objects.remove(ob,do_unlink=True)
-            if mesh.users==0:
-                bpy.data.meshes.remove(mesh)
+            removal_events.remove([ob],'ARCHITECTURAL_OPENING')
             continue
         import bmesh
         bm=bmesh.new()
@@ -109,16 +109,14 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
         bpy.data.meshes.remove(backup)
         if ob.data.vertices and not ob.get('hueco_revertido') and sliver(ob,w,before):
             # Una lámina junto al hueco es frágil al imprimir y se ve arrugada: se elimina como las piezas contenidas.
-            primitives.remove_objects([ob])
+            removal_events.remove([ob],'OPENING_SLIVER')
             continue
         if not ob.data.vertices:
-            mesh=ob.data
-            bpy.data.objects.remove(ob,do_unlink=True)
-            if mesh.users==0:
-                bpy.data.meshes.remove(mesh)
+            removal_events.remove([ob],'ARCHITECTURAL_OPENING')
         else:
             ob['ruin_box']=False
             ob['architectural_cut']=True
+            removal_events.cut_confirmed(ob,ledger_before,'ARCHITECTURAL_CUT',{'wall':w['id'],'box':[x0,x1,-T,T,z0,z1]})
             changed.append(ob)
     mesh=cutter.data
     bpy.data.objects.remove(cutter,do_unlink=True)
@@ -126,16 +124,16 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
     return changed
 
 
-def wall_tree(coll,w):
-    'IA: BVH de mampostería del tramo para apoyos; excluye escombros y otros muros.'
+def wall_tree(coll,w,bearing=False):
+    'IA: BVH de mampostería del tramo para apoyos; excluye escombros y otros muros. bearing=True deja solo sillares (asiento de viga, C5-2): el mortero no cuenta como apoyo.'
     from mathutils.bvhtree import BVHTree
     verts=[]
     tris=[]
     offset=0
     for ob in coll.objects:
-        is_wall=ob.get('wall_id','front')==w['id'] and ob.name.startswith(('Piedra','Mortero'))
+        is_wall=ob.get('wall_id','front')==w['id'] and ob.name.startswith(('Piedra',) if bearing else ('Piedra','Mortero'))
         is_pillar=False
-        if ob.name.startswith('Pilar'):
+        if ob.name.startswith('Pilar') and (not bearing or 'sillar' in ob.name):
             co=primitives.coords(ob)
             local=numpy.array([wall_local(w,v) for v in co])
             # Solape real del sillar: el margen fijo de 12 mm excluía esquinas de Muralla.
@@ -313,16 +311,16 @@ def architectural_openings(coll,p,walls,door,edges):
             if totals[family]<quota:warnings.append({'wall':w['id'],'family':'balcony' if family else 'window','reason':'capacity_or_support','requested':quota,'generated':totals[family]})
     meta.put(bpy.context.scene,'vanos_limitaciones',warnings)
     for base in (layout.floor_bases(p)[1:] if p.floor_beams else []):
-        z=base-(3.6 if p.layout_mode=='ROOM' else 2.5)
-        size=4.5
+        z=seat.beam_z(base,p.layout_mode)
+        size=2*seat.POCKET_HALF_HEIGHT_MM
         targets=[w for w in walls if w['id']=='front'] if p.layout_mode=='ROOM' else walls
         # Congelar apoyos antes del primer alojamiento: un recorte no cambia la decisión del siguiente.
-        support_trees={w['id']:wall_tree(coll,w) for w in walls}
+        support_trees={w['id']:wall_tree(coll,w,bearing=True) for w in walls}
         for w in targets:
             support_tree=support_trees[w['id']]
             rear_wall=next((q for q in walls if q['id']=='back'),None) if p.layout_mode=='ROOM' else None
             for i,x in enumerate(beam_positions(coll,w,z,rear_wall)):
-                if sum(wall_hit(support_tree,w,p,sx,z-2.7) for sx in (x-1.5,x,x+1.5))<2:
+                if not seat.supported(wall_hit(support_tree,w,p,sx,sz) for sx,sz in seat.samples(x,z)):
                     continue
                 if any(h['wall']==w['id'] and h['x0']-3<x<h['x1']+3 and h['z0']<z+size/2 and h['z1']>z-size/2 for h in windows):
                     continue
@@ -334,19 +332,19 @@ def architectural_openings(coll,p,walls,door,edges):
                         continue
                     if any(h['wall']=='back' and h['x0']-3<x<h['x1']+3 and h['z0']-1<z+size/2 and h['z1']+1>z-size/2 for h in windows):
                         continue
-                    if sum(wall_hit(support_trees['back'],rear,p,sx,z-2.7) for sx in (x-1.5,x,x+1.5))<2:
+                    if not seat.supported(wall_hit(support_trees['back'],rear,p,sx,sz) for sx,sz in seat.samples(x,z)):
                         continue
-                carve_rectangle(coll,w,x-2.5,x+2.5,z-2,z+size/2,p.thickness+6,'Alojamiento de viga')
-                length=p.thickness/2+4
+                carve_rectangle(coll,w,*seat.pocket(x,z),p.thickness+6,'Alojamiento de viga')
+                length=seat.embed_length(p.thickness)
                 if p.layout_mode=='ROOM':
                     from . import stairs
                     stop=stairs.beam_end(p,walls,x,base,bpy.context.scene)
                     if stop is None:
-                        carve_rectangle(coll,rear,x-2.5,x+2.5,z-2,z+size/2,p.thickness+6,'Apoyo trasero de viga')
+                        carve_rectangle(coll,rear,*seat.pocket(x,z),p.thickness+6,'Apoyo trasero de viga')
                     end=(x,rear['origin'][1]+length if stop is None else stop,z)
                 else:
                     end=wall_point(w,x,length,z)
-                ob=timber.timber_beam(coll,wood,'Madera · viga de planta',wall_point(w,x,-length,z),end,4.2,size+.2,p.seed+461+i)
+                ob=timber.timber_beam(coll,wood,'Madera · viga de planta',wall_point(w,x,-length,z),end,seat.BEAM_WIDTH_MM,seat.BEAM_HEIGHT_MM,p.seed+461+i)
                 beams.append({'wall':w['id'],'x':x,'z':z,'span':list(end)})
                 # Clavos en una abrazadera de frente; unidos al extremo de la viga.
                 if w['id']=='front':

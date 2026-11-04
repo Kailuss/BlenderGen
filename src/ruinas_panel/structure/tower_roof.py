@@ -25,10 +25,9 @@ def build(coll,p,scene,walls):
     x0=walls['left']['origin'][0]-p.thickness/2;x1=walls['right']['origin'][0]+p.thickness/2
     y0=-p.thickness/2;y1=walls['back']['origin'][1]+p.thickness/2
     z=p.height;t=min(6,p.thickness);joint=.12
-    bounds=(x0+p.thickness-.6,x1-p.thickness+.6,y0+p.thickness-.6,y1-p.thickness+.6)
-    settings,access=stairs.terrace_plan(p,bounds);hole=None
     from . import construction_plan
-    access=construction_plan.stair(scene,'terrace')
+    # Productor único: la reserva del plan; aquí solo se derivan los ajustes locales.
+    settings=stairs.terrace_settings(p);access=construction_plan.stair(scene,'terrace');hole=None
     if access and 'error' not in access:
         opening=access['opening'];landing=access['landing']
         hole=[min(opening[0],landing[0]),max(opening[1],landing[1]),opening[2],opening[3]]

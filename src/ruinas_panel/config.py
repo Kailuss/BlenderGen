@@ -208,3 +208,5 @@ REGIME_SUBSTEPS=(40,400)
 # equivale a una unión más fuerte (×10 a 400). El trabajador lo escala por 40/subpasos.
 THRESHOLD_REFERENCE_SUBSTEPS=40
 PHYSICS_MIN_CUT_FRAGMENT_MM=.2
+
+CACHE_METADATA=CACHE_METADATA+('construction_reservations','removal_ledger')

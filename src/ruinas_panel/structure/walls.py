@@ -12,6 +12,7 @@ from ..geometry import timber
 from ..geometry import weather
 from ..structure import layout
 from ..structure import openings
+from ..construction_core import identifiers
 import bpy
 import math
 import random
@@ -47,12 +48,14 @@ def segment_wall(coll,p,wall_id,start,end,origin,axis,height,edges):
         for j,(a,b) in enumerate(pieces):
             # El núcleo solo entra en un pilar real; el extremo libre queda retirado.
             core_end=b+.9 if p.layout_mode=='ROOM' and j==len(pieces)-1 else b-(1.1 if j==len(pieces)-1 else -.05)
-            primitives.block('Mortero · '+wall_id,a-(1.4 if j==0 else .05),core_end,-p.thickness*.32,p.thickness*.32,z0-.85,z1-.7,coll,coremat)
+            core=primitives.block('Mortero · '+wall_id,a-(1.4 if j==0 else .05),core_end,-p.thickness*.32,p.thickness*.32,z0-.85,z1-.7,coll,coremat)
+            identifiers.tag(core,'mortar',row,j)
             rr=random.Random(p.seed+row*7919+j*31+{'left':101,'right':211,'back':307}.get(wall_id,0))
             at_end=j in (0,len(pieces)-1)
             front=p.thickness/2+p.projection*(.75 if at_end else .75+p.randomness*rr.uniform(-.15,.15))
             back=p.thickness/2+p.projection*(.75 if at_end else .75+p.randomness*rr.uniform(-.15,.15))
             ob=primitives.block('Piedra · %s.%s.%s'%(wall_id,row,j),a+masonry.RETURN_STONE_INSET,b-masonry.RETURN_STONE_INSET,-front,back,z0,z1,coll,stone)
+            identifiers.tag(ob,'stone',row,j)
             weather.weather_stone(ob,p.wear,p.seed+191+row*31+j+len(wall_id))
     for ob in set(coll.objects)-before:
         co=primitives.coords(ob)
@@ -150,6 +153,7 @@ def _build_wall(context, p):
                                  'open_left':open_left,'open_right':open_right})
             core=primitives.block('Mortero · hilada %02d.%02d'%(row,index),mx0,mx1,
                   -T*.36,T*.36,max(.8,z0-1.0),coretop,coll,mortar)
+            identifiers.tag(core,'mortar',row,index)
             if fractured:
                 ob=fracture.fractured_block('Piedra fracturada · hilada %02d.%02d'%(row,index),
                                    bx0,bx1,-front,back,z0,z1,coll,stone,p.seed+row*701+index)
@@ -158,6 +162,7 @@ def _build_wall(context, p):
                 ob=primitives.block('Piedra entera · hilada %02d.%02d'%(row,index),bx0,bx1,
                          -front,back,z0,z1,coll,stone,detail,0 if at_end else (.025+p.wear*.08)*p.randomness)
                 weather.weather_stone(ob,p.wear,p.seed+row*701+index)
+            identifiers.tag(ob,'stone',row,index)
             audit.append({'row':row,'x0':x,'x1':end,'z0':z0,'z1':z1,'fractured':fractured})
     meta.put(context.scene,'aparejo_escalonado',audit)
     meta.put(context.scene,'mortero_retranqueado',mortar_audit)
@@ -179,6 +184,7 @@ def _build_wall(context, p):
             ob=primitives.block('Pilar %s · sillar %02d'%(i,j),cx-half,cx+half,
                      -reach,reach,pier_edges[j]+masonry.RETURN_STONE_INSET,pier_edges[j+1]-masonry.RETURN_STONE_INSET,
                      coll,stone,None if pier.get("connection") else rr,0 if pier.get("connection") else .05)
+            identifiers.tag(ob,'pier%s'%i,0,j)
             if not pier.get('connection'):
                 weather.weather_stone(ob,p.wear,p.seed+i*19+j)
             else:

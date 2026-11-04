@@ -1,6 +1,6 @@
 """Plan puro B1: primer camino de carga localizado, todavía sin consumidores de malla."""
 import math
-from ..construction_core import adapter,graph,schema,units
+from ..construction_core import adapter,graph,schema,units,identifiers
 from .. import config_masonry as masonry
 
 
@@ -56,19 +56,55 @@ def beam_skeleton(axis,bands,wall_y,seat_width_mm,seat_depth_mm,margin_world_mm,
         parent='wall.'+wall;elements.append(schema.element(parent,'WALL','MASONRY_LIME'))
         below='foundation'
         for level,(z0,z1) in enumerate(bands):
-            key=f'seg.{wall}.{level}.{ordinal}'
+            key=identifiers.segment(wall,len(bands),level,ordinal)
             segment=schema.element(key,'WALL_SEGMENT','MASONRY_LIME',wall=wall,interval_model_mm=[x-half,x+half],band_model_mm=[z0,z1])
             segment['minimum_supports']=1;elements.append(segment)
             relations.append(adapter.relation(key,parent,'HOSTED_BY'))
             contact(key,below,x,wall_y[wall],z0,1);below=key
         ends.append(below)
-    key=f'beam.{len(bands)}.{ordinal}';beam=schema.element(key,'BEAM','TIMBER_SOFT')
+    key=identifiers.beam(len(bands),ordinal);beam=schema.element(key,'BEAM','TIMBER_SOFT')
     beam['support_groups']=[{'id':wall,'members':[end],'minimum':1} for wall,end in zip(('front','back'),ends)]
     elements.append(beam)
     for wall,end in zip(('front','back'),ends):contact(key,end,x,wall_y[wall],bands[-1][1],.5)
     model={'schema':schema.VERSION,'units':dict(schema.UNITS),'elements':elements,'relations':adapter.merge_relations(relations),
            'scope':'single beam skeleton; unknown volumes and capacities; no mesh integration',
            'segment_count':2*len(bands),'beam_id':key}
+    schema.synchronise_supports(model)
+    issues=graph.validate(model)+schema.validate(model)
+    if issues:raise ValueError(issues)
+    return model
+
+
+def frame_skeleton(axes,bands,wall_y,opening_band,seat_width_mm,seat_depth_mm,margin_world_mm,min_seat_world_mm,model_scale,wall='front'):
+    'IA: Dos vigas sobre ejes distintos y un dintel que salva el hueco entre ellas en una banda (C5-6); el dintel apoya en las dos jambas, una por grupo; sin capacidades.'
+    if len(axes)!=2 or axes[0]['ordinal']==axes[1]['ordinal']:raise ValueError('El esqueleto de dintel necesita dos ejes distintos')
+    if not 0<=opening_band<len(bands):raise ValueError('Banda de hueco fuera del esqueleto')
+    axes=sorted(axes,key=lambda a:a['x_mm'])
+    parts=[beam_skeleton(a,bands,wall_y,seat_width_mm,seat_depth_mm,margin_world_mm,min_seat_world_mm,model_scale) for a in axes]
+    elements={};relations=[]
+    for part in parts:
+        for element in part['elements']:elements.setdefault(element['id'],element)
+        for relation in part['relations']:
+            if relation['source']=='foundation':
+                # La cimentación es común: cada esqueleto aporta su parte de la carga.
+                relation=dict(relation,contacts=[dict(c,load_share=c['load_share']/len(parts)) for c in relation['contacts']])
+            relations.append(relation)
+    floor=len(bands);left,right=(a['ordinal'] for a in axes)
+    jambs=[identifiers.segment(wall,floor,opening_band,a['ordinal']) for a in axes]
+    hole=identifiers.opening(wall,floor,opening_band,left,right)
+    lintel=identifiers.lintel(wall,floor,opening_band,left,right)
+    z0,z1=bands[opening_band]
+    elements[hole]=schema.element(hole,'OPENING',None,wall=wall,interval_model_mm=[axes[0]['x_mm'],axes[1]['x_mm']],band_model_mm=[z0,z1])
+    relations.append(adapter.relation(hole,'wall.'+wall,'HOSTED_BY'))
+    element=schema.element(lintel,'LINTEL','STONE_BLOCK',wall=wall,interval_model_mm=[axes[0]['x_mm'],axes[1]['x_mm']])
+    element['support_groups']=[{'id':side,'members':[jamb],'minimum':1} for side,jamb in zip(('left','right'),jambs)]
+    elements[lintel]=element
+    for jamb,a in zip(jambs,axes):
+        point=[math.copysign(units.to_world(abs(v),1,model_scale),v) for v in (a['x_mm'],wall_y[wall],z1)]
+        relations.append(adapter.relation(lintel,jamb,'SUPPORTED_BY',[{'point_mm':point,'area_mm2':None,'seat_mm':None,'load_share':.5}]))
+    model={'schema':schema.VERSION,'units':dict(schema.UNITS),'elements':list(elements.values()),'relations':adapter.merge_relations(relations),
+           'scope':'two-beam skeleton with lintel over one opening; unknown volumes, seats of lintel and capacities; no mesh integration',
+           'segment_count':sum(p['segment_count'] for p in parts),'beam_ids':[p['beam_id'] for p in parts],'lintel_id':lintel,'opening_id':hole}
     schema.synchronise_supports(model)
     issues=graph.validate(model)+schema.validate(model)
     if issues:raise ValueError(issues)

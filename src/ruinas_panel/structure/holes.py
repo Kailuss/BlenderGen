@@ -4,6 +4,7 @@ import zlib
 import numpy as np
 from mathutils import Vector
 from .. import meta
+from ..services import removal_events
 from ..geometry import primitives
 from . import openings
 
@@ -54,9 +55,9 @@ def apply(coll,p,scene,walls):
                 direction.normalize()
                 center=Vector(openings.wall_point(w,float(m[0]),float(m[1]),float(m[2])))
                 distance=min(b[0]-a[0],b[2]-a[2])*(.48-.3*p.hole_damage)
-                primitives.clip_closed(obj,center+direction*distance,direction)
+                removal_events.clip(obj,center+direction*distance,direction,'HOLE_BORDER')
                 obj['borde_agujero']=True;used.add(obj.as_pointer())
             item={'wall':w['id'],'x':cx,'z':cz,'x0':cx-rx,'x1':cx+rx,'z0':cz-rz,'z1':cz+rz,'removed':len(selected),'border':len(border)}
             made.append(item);records.append(item)
-    primitives.remove_objects(discard)
+    removal_events.remove(discard,'HOLE_INTERIOR')
     meta.put(scene,'huecos_generados',records);meta.put(scene,'huecos_solicitados',p.hole_count*len(walls))

@@ -274,3 +274,11 @@ La prueba histórica `blender_fragile_physics.py` no cumple reposo con la config
 ## 0.32.25 — coste de prefractura
 
 Los cuerpos de las mitades se copian con configuraciones independientes y las uniones se crean desde una plantilla del lote. Diez piezas del laboratorio grande pasan a veinte fragmentos cerrados en 12,32 s, conservando masa. Regresión de impactos y `dev.py test` aprobados. El ejercicio de metralla todavía no está aceptado: se recalcula tras movimiento prematuro y una pieza expulsada fuera del suelo. Ver `V03225.md`.
+
+## B1-C4, primer control causal — 2026-10-26
+
+Rama limpia separada de física/render. Ledger de operaciones posteriores a fábrica,
+replay conservador y criterio compartido de rayos para asiento frontal/trasero.
+51 pruebas puras y regresión de cuatro digests sin cambios. El control geométrico
+causal no equivale a Bullet ni a T1 completo: faltan las omisiones de layout y los
+IDs semánticos anteriores al filtrado. Alcance en `B1_C4_CONTROL1.md`.
