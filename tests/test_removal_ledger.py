@@ -70,8 +70,8 @@ class LedgerTests(unittest.TestCase):
         with self.assertRaises(ValueError):causal_support.replay(model,ledger)
 
     def test_shared_seat(self):
-        'IA: La regla mantiene el umbral histórico y rechaza auditorías con muestras omitidas.'
-        self.assertEqual(seat.samples(10,20),[(8.5,17.3),(10,17.3),(11.5,17.3)])
+        'IA: Dos de tres rayos, ahora en el centro de la banda de piedra (−3,6 mm, C5-2); rechaza auditorías con muestras omitidas.'
+        self.assertEqual(seat.samples(10,20),[(8.5,20-3.6),(10,20-3.6),(11.5,20-3.6)])
         self.assertTrue(seat.supported([True,False,True]))
         self.assertFalse(seat.supported([False,False,True]))
         with self.assertRaises(ValueError):seat.supported([True,True])

@@ -48,7 +48,8 @@ def segment_wall(coll,p,wall_id,start,end,origin,axis,height,edges):
         for j,(a,b) in enumerate(pieces):
             # El núcleo solo entra en un pilar real; el extremo libre queda retirado.
             core_end=b+.9 if p.layout_mode=='ROOM' and j==len(pieces)-1 else b-(1.1 if j==len(pieces)-1 else -.05)
-            primitives.block('Mortero · '+wall_id,a-(1.4 if j==0 else .05),core_end,-p.thickness*.32,p.thickness*.32,z0-.85,z1-.7,coll,coremat)
+            core=primitives.block('Mortero · '+wall_id,a-(1.4 if j==0 else .05),core_end,-p.thickness*.32,p.thickness*.32,z0-.85,z1-.7,coll,coremat)
+            identifiers.tag(core,'mortar',row,j)
             rr=random.Random(p.seed+row*7919+j*31+{'left':101,'right':211,'back':307}.get(wall_id,0))
             at_end=j in (0,len(pieces)-1)
             front=p.thickness/2+p.projection*(.75 if at_end else .75+p.randomness*rr.uniform(-.15,.15))

@@ -124,16 +124,16 @@ def carve_rectangle(coll,w,x0,x1,z0,z1,T,name):
     return changed
 
 
-def wall_tree(coll,w):
-    'IA: BVH de mampostería del tramo para apoyos; excluye escombros y otros muros.'
+def wall_tree(coll,w,bearing=False):
+    'IA: BVH de mampostería del tramo para apoyos; excluye escombros y otros muros. bearing=True deja solo sillares (asiento de viga, C5-2): el mortero no cuenta como apoyo.'
     from mathutils.bvhtree import BVHTree
     verts=[]
     tris=[]
     offset=0
     for ob in coll.objects:
-        is_wall=ob.get('wall_id','front')==w['id'] and ob.name.startswith(('Piedra','Mortero'))
+        is_wall=ob.get('wall_id','front')==w['id'] and ob.name.startswith(('Piedra',) if bearing else ('Piedra','Mortero'))
         is_pillar=False
-        if ob.name.startswith('Pilar'):
+        if ob.name.startswith('Pilar') and (not bearing or 'sillar' in ob.name):
             co=primitives.coords(ob)
             local=numpy.array([wall_local(w,v) for v in co])
             # Solape real del sillar: el margen fijo de 12 mm excluía esquinas de Muralla.
@@ -315,7 +315,7 @@ def architectural_openings(coll,p,walls,door,edges):
         size=2*seat.POCKET_HALF_HEIGHT_MM
         targets=[w for w in walls if w['id']=='front'] if p.layout_mode=='ROOM' else walls
         # Congelar apoyos antes del primer alojamiento: un recorte no cambia la decisión del siguiente.
-        support_trees={w['id']:wall_tree(coll,w) for w in walls}
+        support_trees={w['id']:wall_tree(coll,w,bearing=True) for w in walls}
         for w in targets:
             support_tree=support_trees[w['id']]
             rear_wall=next((q for q in walls if q['id']=='back'),None) if p.layout_mode=='ROOM' else None

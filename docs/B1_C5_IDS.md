@@ -79,3 +79,17 @@ agujeros de 30 mm, rotura de bordes 0,6) con las mismas tres semillas y exige qu
 `UNSUPPORTED` o `REQUIRES_REVIEW`. Cada caso informa estados, discrepancias frente a los rayos medidos y el papel
 de fábrica de los contactos (SILLAR, NUCLEO, CIMENTACION) leído del registro de entrada. Las discrepancias se
 informan sin aprobarse. El control negativo usa el primer asiento frontal que el replay da por apoyado.
+
+## C5-2: el asiento de viga solo tocaba mortero (Claude, 4 de noviembre de 2026)
+
+El T1 de estrés solo llevó un asiento de 114 a revisión. El recuento por papel mostró por qué: los 63 contactos por
+semilla eran núcleo de mortero (frente) o núcleo del muro trasero, ningún sillar. Una sonda en rejilla bajo tres
+ejes (semilla 1) lo explica: con el eje en z = 53,4 mm, la hilada 8 empieza en 51,1 mm y la 7 acaba en 50,65 mm;
+los rayos a z − 2,7 = 50,7 mm caen justo en el lecho de mortero entre ambas y solo encuentran núcleo. A −3,2 o −3,6
+mm todos los rayos tocan piedra.
+
+Cambio de criterio: los rayos de asiento van al centro de la banda de piedra (`seat.VERTICAL_OFFSET_MM = −3,6`) y se
+lanzan contra un árbol solo de sillares (`openings.wall_tree(..., bearing=True)`): el mortero ya no cuenta como apoyo
+de viga. Constructor, ensayo causal y ensayo de daño usan el mismo árbol. Puede cambiar qué vigas se generan en muros
+dañados; los digests lo dirán. También se marcan los núcleos de los muros de retorno (`mortar`, hilada, índice), que
+quedaban sin papel en el registro.

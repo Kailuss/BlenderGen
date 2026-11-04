@@ -28,7 +28,7 @@ def capture(coll,p,scene):
     for wall in ('front','back'):
         w=descriptors[wall];selected=[r for r in records if r['wall']==wall]
         for ob in coll.objects:
-            tree=openings.wall_tree(SimpleNamespace(objects=[ob]),w)
+            tree=openings.wall_tree(SimpleNamespace(objects=[ob]),w,bearing=True)
             for record in selected:
                 for i,(x,z) in enumerate(seat.samples(record['x'],record['z'])):
                     if openings.wall_hit(tree,w,p,x,z):record['contacts'][i].append(ob['construction_id'])
@@ -93,7 +93,7 @@ def run():
             model,records,descriptors=captured[0]
             ledger=RemovalLedger.load(meta.get(bpy.context.scene,'removal_ledger'))
             prediction=causal_support.replay(model,ledger)
-            trees={wall:openings.wall_tree(coll,w) for wall,w in descriptors.items()}
+            trees={wall:openings.wall_tree(coll,w,bearing=True) for wall,w in descriptors.items()}
             for record in records:
                 key=record['id']
                 state='INITIAL_CONTACT_ABSENT' if not record['initial_supported'] else 'UNSUPPORTED' if key in prediction['unsupported'] else 'REQUIRES_REVIEW' if key in prediction['requires_review'] else 'SUPPORTED'
@@ -124,7 +124,7 @@ def run():
                 for ob in removed:control.record(ob['construction_id'],'REMOVE','CONTROL_REMOVE_CONTACT')
                 primitives.remove_objects(removed)
                 control_prediction=causal_support.replay(model,control)
-                tree=openings.wall_tree(coll,descriptors['front'])
+                tree=openings.wall_tree(coll,descriptors['front'],bearing=True)
                 measured=seat.supported(openings.wall_hit(tree,descriptors['front'],q,x,z) for x,z in seat.samples(target['x'],target['z']))
                 beam_id=identifiers.beam(target['level'],target['axis'])
                 assert target_id in control_prediction['unsupported'] and beam_id in control_prediction['unsupported'] and not measured

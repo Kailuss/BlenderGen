@@ -62,7 +62,7 @@ def run():
                 records.append(dict(probe,remaining=measured,axis_state='BLOQUEADO_POR_VANO' if blocked else 'CANDIDATO',
                     sensitivity=[{'threshold':t,'measured_supported':measured['seat_fraction']>=t} for t in (.06,.12,.24)],
                     graph_state=None,discrepancy=None,cause='MISSING_PURE_DAMAGE_EVENTS: graph has no independent per-stone removal input'))
-            floating=0;beam_count=0;front_tree=openings.wall_tree(coll,descriptors['front'])
+            floating=0;beam_count=0;front_tree=openings.wall_tree(coll,descriptors['front'],bearing=True)
             for beam in meta.get(bpy.context.scene,'vigas_generadas',[]):
                 if beam['wall']!='front':continue
                 beam_count+=1

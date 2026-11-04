@@ -5,7 +5,9 @@ plan (`floor_frame.beam_skeleton`, 4,2 × 3 mm fijos) y la banda de piedra del e
 de daño. Todas leen ahora este módulo. Es un criterio geométrico, no una ley resistente.
 """
 OFFSETS_MM=(-1.5,0.0,1.5)
-VERTICAL_OFFSET_MM=-2.7
+# Los rayos van al centro de la banda de piedra bajo el asiento. A −2,7 mm caían en el lecho de mortero
+# entre hiladas y solo tocaban núcleo (C5-2, sonda del 4-11-2026); ahora se lanzan contra sillares.
+VERTICAL_OFFSET_MM=-3.6
 MINIMUM_HITS=2
 # Sección de las vigas de planta y forjado (ancho × canto en mm de modelo).
 BEAM_WIDTH_MM=4.2
