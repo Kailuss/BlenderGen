@@ -212,5 +212,8 @@ THRESHOLD_REFERENCE_SUBSTEPS=40
 PHYSICS_SLEEP_LINEAR_M_S=.002
 PHYSICS_SLEEP_ANGULAR_RAD_S=.1
 PHYSICS_MIN_CUT_FRAGMENT_MM=.2
+# Un fragmento recortado más fino que un píxel de la impresora (24,8 µm) no es imprimible ni estable en Bullet:
+# una tabla de 0,27 × 0,03 × 0,003 mm atravesaba el suelo de seguridad (4-11-2026).
+PHYSICS_MIN_CUT_THICKNESS_MM=.025
 
 CACHE_METADATA=CACHE_METADATA+('construction_reservations','removal_ledger')
