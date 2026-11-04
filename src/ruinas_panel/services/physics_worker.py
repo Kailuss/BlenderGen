@@ -49,6 +49,9 @@ def run(output,path,name):
         low,high=settings_config.REGIME_SUBSTEPS
         world.substeps_per_frame=int(min(high,max(low,scene.get('impact_substeps_required',low))));world.solver_iterations=60
     else:world.substeps_per_frame=80;world.solver_iterations=60
+    # Corrección de penetración separada de la velocidad (como los bancos E-9 y de panel): sin ella,
+    # Bullet expulsa las piezas solapadas a ERP·profundidad/Δt de subpaso y la energía crece con los subpasos.
+    world.use_split_impulse=True
     objects=[o for o in scene.objects if o.type=='MESH' and not o.get('lab_decor')]
     if not scene.get('ruinas_physics_lab') or not objects:raise ValueError('Laboratorio vacío o inválido.')
     from ruinas_panel import config
@@ -131,7 +134,7 @@ def run(output,path,name):
                         for curve in bag.fcurves:
                             for key in curve.keyframe_points:key.interpolation='CONSTANT' if curve.data_path in ('hide_viewport','hide_render') else 'LINEAR'
         if index%100==0:progress(path,stage='Guardando reproducción',objects=index,total=len(objects))
-    result['simulation_report']=json.dumps({'objects':len(objects),'moving':moving,'seconds':time.perf_counter()-started,'sample_step':1,'static_constraints_omitted':pruned,'solver_scale':factor,'collision_dust_omitted':dust,'time_scale':world.time_scale,'substeps':world.substeps_per_frame,'threshold_substep_scale':substep_scale,'duration_seconds':(scene.frame_end-1)*scene.render.fps_base/scene.render.fps})
+    result['simulation_report']=json.dumps({'objects':len(objects),'moving':moving,'seconds':time.perf_counter()-started,'sample_step':1,'static_constraints_omitted':pruned,'solver_scale':factor,'collision_dust_omitted':dust,'time_scale':world.time_scale,'substeps':world.substeps_per_frame,'split_impulse':world.use_split_impulse,'threshold_substep_scale':substep_scale,'duration_seconds':(scene.frame_end-1)*scene.render.fps_base/scene.render.fps})
     from ruinas_panel.services import lab_cameras
     lab_cameras.copy_to_replay(scene,result)
     result.frame_set(1);bpy.data.libraries.write(str(output),{result},fake_user=True)
