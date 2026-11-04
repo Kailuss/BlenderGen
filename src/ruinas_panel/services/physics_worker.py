@@ -10,56 +10,55 @@ from mathutils import Quaternion,Matrix,Vector
 
 
 def overlapping_pairs(scene,min_depth):
-    'IA: Pares (activo, otro cuerpo) con vértices del activo dentro del otro a más de min_depth (unidades de escena, antes del escalado).'
+    'IA: Pares (activo, otro cuerpo) con vértices del activo dentro del otro a más de min_depth (unidades de escena, antes del escalado). Barrido en X, filtro BVH de intersección y paridad de rayos solo en candidatos.'
     from mathutils.bvhtree import BVHTree
     bodies=[o for o in scene.objects if o.type=='MESH' and o.rigid_body and not o.get('lab_decor') and not o.get('collision_floor') and not o.get('impactor')]
-    def box(o):
-        'IA: Caja mundial por bound_box.'
-        pts=[o.matrix_world@Vector(c) for c in o.bound_box]
-        return Vector([min(p[i] for p in pts) for i in range(3)]),Vector([max(p[i] for p in pts) for i in range(3)])
-    active=[box(o) for o in bodies if o.rigid_body.type=='ACTIVE']
-    if not active:return {}
-    zlo=Vector([min(b[0][i] for b in active) for i in range(3)]);zhi=Vector([max(b[1][i] for b in active) for i in range(3)])
     data={}
     for o in bodies:
-        lo,hi=box(o)
-        if any(hi[i]<zlo[i] or lo[i]>zhi[i] for i in range(3)):continue
-        verts=[o.matrix_world@v.co for v in o.data.vertices]
-        if not verts:continue
-        lo=Vector([min(v[i] for v in verts) for i in range(3)]);hi=Vector([max(v[i] for v in verts) for i in range(3)])
-        data[o.name]=(o,verts,lo,hi)
+        count=len(o.data.vertices)
+        if not count:continue
+        co=np.empty(count*3,dtype=np.float64);o.data.vertices.foreach_get('co',co);co=co.reshape(-1,3)
+        m=np.array(o.matrix_world,dtype=np.float64);world=co@m[:3,:3].T+m[:3,3]
+        data[o.name]=(o,world,world.min(axis=0),world.max(axis=0))
     trees={}
     def tree(name):
         'IA: BVH mundial perezoso de un cuerpo.'
         if name not in trees:
-            o,verts,_,_=data[name];trees[name]=BVHTree.FromPolygons(verts,[p.vertices[:] for p in o.data.polygons])
+            o,world,_,_=data[name];trees[name]=BVHTree.FromPolygons(world.tolist(),[p.vertices[:] for p in o.data.polygons])
         return trees[name]
     def inside(t,p):
         'IA: Paridad de cruces en una dirección fija ligeramente inclinada; malla cerrada.'
-        n=0;origin=p.copy();d=Vector((1,.0013,.0007)).normalized()
+        n=0;origin=Vector(p);d=Vector((1,.0013,.0007)).normalized()
         for _ in range(64):
             hit=t.ray_cast(origin,d)
             if hit[0] is None:break
             n+=1;origin=hit[0]+d*1e-7
         return n%2==1
-    pairs={}
-    for name,(o,verts,la,ha) in data.items():
-        if o.rigid_body.type!='ACTIVE':continue
-        for other,(ob,_,lb,hb) in data.items():
-            if other==name or any(ha[i]<lb[i] or hb[i]<la[i] for i in range(3)):continue
-            key=tuple(sorted((name,other)))
-            if key in pairs:continue
-            depth=0.
-            for p in verts:
-                if all(lb[i]<=p[i]<=hb[i] for i in range(3)) and inside(tree(other),p):
-                    near=tree(other).find_nearest(p)
-                    if near[0] is not None:depth=max(depth,near[3])
-            if depth>min_depth:pairs[key]=depth
+    def depth(a,b):
+        'IA: Mayor distancia a la superficie de b de los vértices de a que quedan dentro de b.'
+        _,world,_,_=data[a];_,_,lb,hb=data[b];result=0.
+        for p in world[np.all((world>=lb)&(world<=hb),axis=1)]:
+            if inside(tree(b),p):
+                near=tree(b).find_nearest(Vector(p))
+                if near[0] is not None:result=max(result,near[3])
+        return result
+    order=sorted(data,key=lambda k:data[k][2][0]);pairs={};active_end=[]
+    for name in order:
+        o,_,lo,hi=data[name]
+        active_end=[k for k in active_end if data[k][3][0]>=lo[0]]
+        for other in active_end:
+            ob,_,lb,hb=data[other]
+            if o.rigid_body.type!='ACTIVE' and ob.rigid_body.type!='ACTIVE':continue
+            if np.any(hi<lb) or np.any(hb<lo):continue
+            if not tree(name).overlap(tree(other)):continue
+            d=max(depth(name,other) if o.rigid_body.type=='ACTIVE' else 0.,depth(other,name) if ob.rigid_body.type=='ACTIVE' else 0.)
+            if d>min_depth:pairs[tuple(sorted((name,other)))]=d
+        active_end.append(name)
     return pairs
 
 
 def lab_experiments(scene):
-    'IA: Ajustes de ensayo por escena (lab_*): forma de colisión de activos y desactivar colisión entre pares solapados al inicio. Sin claves, no cambia nada.'
+    'IA: Preparación por defecto: desactiva la colisión entre pares que empiezan solapados entre PHYSICS_OVERLAP_DISABLE_MM y PHYSICS_OVERLAP_MAX_MM, salvo con el terreno (lab_overlap_disable_m sustituye el mínimo; negativo lo apaga). lab_active_shape es solo de ensayo.'
     report={}
     shape=scene.get('lab_active_shape')
     if shape:
@@ -68,9 +67,14 @@ def lab_experiments(scene):
             if o.type=='MESH' and o.rigid_body and o.rigid_body.type=='ACTIVE' and not o.get('impactor') and o.rigid_body.collision_shape!=shape:
                 o.rigid_body.collision_shape=shape;count+=1
         report['active_shape']=[shape,count]
-    depth=scene.get('lab_overlap_disable_m')
-    if depth is not None:
-        pairs=overlapping_pairs(scene,float(depth));made=0
+    from ruinas_panel import config
+    depth=scene.get('lab_overlap_disable_m',config.PHYSICS_OVERLAP_DISABLE_MM/1000)
+    if depth is not None and float(depth)>=0:
+        started=time.perf_counter();found=overlapping_pairs(scene,float(depth));made=0
+        # Solo solapes pequeños entre piezas, nunca con el terreno: sin colisión con él una pieza se hundiría.
+        ground=lambda name:scene.objects[name].get('physical_role')=='ground'
+        limit=config.PHYSICS_OVERLAP_MAX_MM/1000
+        pairs={k:d for k,d in found.items() if d<=limit and not ground(k[0]) and not ground(k[1])}
         for (a,b),d in pairs.items():
             joint=bpy.data.objects.new('Sin colisión de solape %d'%made,None);scene.collection.objects.link(joint)
             joint.location=(scene.objects[a].matrix_world.translation+scene.objects[b].matrix_world.translation)/2
@@ -80,7 +84,7 @@ def lab_experiments(scene):
             c.disable_collisions=True;c.use_breaking=False
             for axis in ('lin_x','lin_y','lin_z','ang_x','ang_y','ang_z'):setattr(c,'use_limit_'+axis,False)
             made+=1
-        report['overlap_disabled']={'min_depth_m':float(depth),'pairs':made,'max_depth_m':max(pairs.values(),default=0)}
+        report['overlap_disabled']={'min_depth_m':float(depth),'pairs':made,'max_depth_m':max(pairs.values(),default=0),'kept_colliding':len(found)-len(pairs),'seconds':round(time.perf_counter()-started,2)}
     return report
 
 

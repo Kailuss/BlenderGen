@@ -315,6 +315,8 @@ def draw_lab_solver(self, context):
             layout.label(text='Experimental: en edificios puede exagerar los lanzamientos')
         elif current<need:layout.label(text='El impacto pediría %d subpasos; en edificios, Equilibrada sigue siendo la recomendada'%need,icon='INFO')
         else:layout.label(text='Subpasos suficientes para los impactos (%d ≥ %d)'%(current,need),icon='CHECKMARK')
+    seconds=(context.scene.frame_end-context.scene.frame_start)*context.scene.render.fps_base/context.scene.render.fps
+    if seconds<8:layout.label(text='%.1f s: los escombros suelen tardar unos 8 s en asentarse'%seconds,icon='INFO')
     layout.operator('ruin.physics_ten_seconds',icon='TIME')
 
 

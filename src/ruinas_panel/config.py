@@ -4,7 +4,7 @@
 
 
 COLLECTION = 'MURO · fuente procedural'
-BUILD_ID = '0.32.29'
+BUILD_ID = '0.32.30'
 FACADE_ACCESSORY_CLEARANCE_MM = 18.0
 FACADE_CANOPY_HALF_OVERHANG_MM = 4.3
 ROOF_DAMAGE_SAMPLE_MM = 1.0
@@ -215,5 +215,11 @@ PHYSICS_MIN_CUT_FRAGMENT_MM=.2
 # Un fragmento recortado más fino que un píxel de la impresora (24,8 µm) no es imprimible ni estable en Bullet:
 # una tabla de 0,27 × 0,03 × 0,003 mm atravesaba el suelo de seguridad (4-11-2026).
 PHYSICS_MIN_CUT_THICKNESS_MM=.025
+# Piezas que empiezan solapadas más de esto (hierros del balcón, hasta 0,48 mm) no colisionan entre sí: Bullet
+# las separaba con energía que crece con los subpasos ("hierros bailarines"). Con 0,02 mm, en la zona del 32.28:
+# η 0,20 → 0,015 y ninguna pieza por encima de 1,5 veces la bola (Equilibrada, 4-11-2026).
+PHYSICS_OVERLAP_DISABLE_MM=.02
+# Solapes mayores son de diseño (piezas embebidas, hasta 12 mm en la casa 32.28) o con el terreno: conservan la colisión.
+PHYSICS_OVERLAP_MAX_MM=1.0
 
 CACHE_METADATA=CACHE_METADATA+('construction_reservations','removal_ledger')
