@@ -203,4 +203,8 @@ PHYSICS_JOB_SECONDS=1200
 PHYSICS_SOLVER_SCALE=100.0
 # Límites de la precisión «Por régimen»: subpasos mínimos y máximos del cálculo aislado.
 REGIME_SUBSTEPS=(40,400)
+# Los umbrales de rotura se calibran como impulso de un fotograma con 40 subpasos (BALANCED).
+# Bullet compara el umbral con el impulso de cada subpaso: con más subpasos, el mismo umbral
+# equivale a una unión más fuerte (×10 a 400). El trabajador lo escala por 40/subpasos.
+THRESHOLD_REFERENCE_SUBSTEPS=40
 PHYSICS_MIN_CUT_FRAGMENT_MM=.2
