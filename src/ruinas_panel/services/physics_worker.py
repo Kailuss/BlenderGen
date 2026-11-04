@@ -78,7 +78,7 @@ def lab_experiments(scene):
                 bpy.ops.rigidbody.constraint_add(type='GENERIC')
             c=joint.rigid_body_constraint;c.object1,c.object2=scene.objects[a],scene.objects[b]
             c.disable_collisions=True;c.use_breaking=False
-            for axis in ('x','y','z','ang_x','ang_y','ang_z'):setattr(c,'use_limit_'+axis,False)
+            for axis in ('lin_x','lin_y','lin_z','ang_x','ang_y','ang_z'):setattr(c,'use_limit_'+axis,False)
             made+=1
         report['overlap_disabled']={'min_depth_m':float(depth),'pairs':made,'max_depth_m':max(pairs.values(),default=0)}
     return report
