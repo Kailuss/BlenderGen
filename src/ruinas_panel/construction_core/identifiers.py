@@ -17,3 +17,16 @@ def segment(wall,floor,band,axis):
 def beam(level,axis):
     'IA: Identidad de viga por forjado y candidato previo a vanos/espaciado.'
     return f'beam.{level}.{axis}'
+
+
+def layout_key(kind,course,index):
+    'IA: Clave de construcción desde el aparejo (tipo, hilada, índice), independiente del nombre de Blender (C5-5).'
+    if not kind or any(type(v) is not int or v < 0 for v in (course,index)):
+        raise ValueError('Tipo, hilada o índice inválido')
+    return f'{quote(str(kind),safe=chr(95))}.c{course}.i{index}'
+
+
+def tag(ob,kind,course,index):
+    'IA: Guarda en el objeto su posición de aparejo para que el registro causal no dependa del nombre.'
+    ob['layout_kind']=kind;ob['layout_course']=int(course);ob['layout_index']=int(index)
+    return ob

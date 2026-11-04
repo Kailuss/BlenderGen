@@ -6,12 +6,20 @@ from ..construction_core import identifiers
 from ..construction_core.removal_ledger import RemovalLedger
 
 
+def source_key(ob):
+    'IA: Clave de aparejo (tipo, hilada, índice) si la pieza la lleva; si no, el nombre de Blender como respaldo (C5-5).'
+    if 'layout_kind' in ob:
+        return identifiers.layout_key(str(ob['layout_kind']),int(ob['layout_course']),int(ob['layout_index']))
+    return ob.name
+
+
 def begin(coll,scene):
     'IA: Inventaría fuente al entrar en assembly, antes de derrumbe/huecos; no identifica retrospectivamente retiradas por diferencias de malla final.'
     ledger=RemovalLedger()
     for ob in coll.objects:
-        key=identifiers.piece(ob.get('wall_id','front'),ob.name)
-        ledger.register(key,{'source_name':ob.name,'source_key':primitives.piece_key(ob),'wall':ob.get('wall_id','front')})
+        key=identifiers.piece(ob.get('wall_id','front'),source_key(ob))
+        ledger.register(key,{'source_name':ob.name,'source_key':primitives.piece_key(ob),'wall':ob.get('wall_id','front'),
+                             'layout':'layout_kind' in ob})
         ob['construction_id']=key
     runtime.removal_ledger=ledger;runtime.removal_scene=scene
     flush()

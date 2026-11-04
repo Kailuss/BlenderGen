@@ -13,6 +13,30 @@ class LedgerTests(unittest.TestCase):
         for values in ((0,0,1),(1,-1,1),(1,0,-1),(1,0,1.5)):
             with self.assertRaises(ValueError):identifiers.segment('front',*values)
 
+    def test_layout_key_identity(self):
+        'IA: La clave de aparejo no depende del nombre de Blender; tipos, hiladas e índices distintos no colisionan (C5-5).'
+        self.assertEqual(identifiers.layout_key('stone',3,7),'stone.c3.i7')
+        keys={identifiers.piece(w,identifiers.layout_key(k,c,i)) for w in ('front','left') for k in ('stone','mortar','pier0')
+              for c in range(3) for i in range(3)}
+        self.assertEqual(len(keys),2*3*9)
+        self.assertNotEqual(identifiers.layout_key('pier1',0,12),identifiers.layout_key('pier11',0,2))
+        for values in (('',0,0),('stone',-1,0),('stone',0,1.5),('stone','1',0)):
+            with self.assertRaises(ValueError):identifiers.layout_key(*values)
+
+    def test_layout_key_fallback(self):
+        'IA: removal_events usa la clave de aparejo si la pieza la lleva y el nombre en caso contrario.'
+        import sys,types
+        sys.modules.setdefault('bpy',types.ModuleType('bpy'))
+        try:
+            from ruinas_panel.services import removal_events
+        except Exception as error:
+            self.skipTest('removal_events necesita Blender: %s'%error)
+        class Fake(dict):
+            name='Piedra · 01.02.001'
+        tagged=identifiers.tag(Fake(),'stone',1,2)
+        self.assertEqual(removal_events.source_key(tagged),'stone.c1.i2')
+        self.assertEqual(removal_events.source_key(Fake()),'Piedra · 01.02.001')
+
     def test_cut_outside_contact(self):
         'IA: Un alojamiento sobre el rayo no invalida asiento; un corte que toca el rayo permanece incierto, y REMOVE siempre propaga.'
         ledger=RemovalLedger();ledger.register('stone',{})
