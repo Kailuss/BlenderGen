@@ -25,6 +25,25 @@ def boxes(coll):
     return stones,mortar
 
 
+def controlled_loss(coll):
+    'IA: Pérdida controlada SOLO en la escena de ensayo: quita las piedras bajas del centro del frente y compara poda real con predicción.'
+    stones,mortar=boxes(coll)
+    centre=sum((lo[0]+hi[0])/2 for _,lo,hi,_ in stones)/max(1,len(stones))
+    front=[key for key,lo,hi,_ in stones if bpy.data.objects[key].get('wall_id','front')=='front' and abs((lo[0]+hi[0])/2-centre)<8 and lo[2]<=stacking.GROUND_Z_MM+10]
+    predicted=set(stacking.predict(stones,mortar,front))
+    primitives.remove_objects([bpy.data.objects[k] for k in front])
+    captured=[];remove0=removal_events.remove
+    def remove(objects,cause):
+        'IA: Instrumentación: nombres podados.'
+        objects=list(objects);captured.extend(ob.name for ob in objects);return remove0(objects,cause)
+    removal_events.remove=remove
+    try:destruction.prune_support(coll)
+    finally:removal_events.remove=remove0
+    actual=set(captured)
+    assert front and actual==predicted,(len(front),sorted(actual^predicted)[:10])
+    return {'removed':len(front),'pruned':len(actual),'predicted':len(predicted),'stones_pruned':sum(1 for k in actual if not k.startswith('Mortero'))}
+
+
 def run():
     'IA: Tres semillas; exige paridad exacta de la regla extraída y mide, sin aprobar, el acierto de la predicción desde el aparejo.'
     addon.register();runtime.busy=True;runtime.preview=True;runtime.instance_build=False
@@ -57,11 +76,12 @@ def run():
             parity=set(stacking.prune(*snap['before_prune'])[1])
             assert parity==actual,(seed,collapse,sorted(parity^actual)[:10])
             predicted=set(stacking.predict(*snap['layout'],removed.get('GLOBAL_COLLAPSE',[])))
+            control=controlled_loss(coll)
             cases.append({'seed':seed,'collapse':collapse,'global_removed':len(removed.get('GLOBAL_COLLAPSE',[])),
                           'pruned':len(actual),'predicted':len(predicted),'matched':len(actual&predicted),
-                          'missed':sorted(actual-predicted),'extra':sorted(predicted-actual),
+                          'missed':sorted(actual-predicted),'extra':sorted(predicted-actual),'controlled_loss':control,
                           'seconds':round(time.perf_counter()-started,2)})
-            print('C5_4',json.dumps({k:v for k,v in cases[-1].items() if k not in ('missed','extra')}),'missed',len(actual-predicted),'extra',len(predicted-actual))
+            print('C5_4',json.dumps({k:v for k,v in cases[-1].items() if k not in ('missed','extra')}),'missed',len(actual-predicted),'extra',len(predicted-actual),flush=True)
     report={'scope':'C5-4 pieza sobre pieza: regla extraída (paridad exacta) y predicción desde aparejo previo a la destrucción',
             'criterion':'stacking.prune; los recortes COLLAPSE_EDGE no se modelan en la predicción','cases':cases}
     (ROOT/'reports/b1_c5_stacking.json').write_text(json.dumps(report,indent=2),encoding='utf8')
