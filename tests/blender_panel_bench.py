@@ -118,8 +118,8 @@ def ball(scene, release_frame, contact_frame):
     return ob
 
 
-def variant(label, substeps, release_offset):
-    """IA: Construye la escena, simula y mide deriva en reposo, lanzamientos, eta, fugas y tiempo; release_offset < 0 suelta antes del contacto."""
+def variant(label, substeps, release_offset, split=True, setup=None):
+    """IA: Construye la escena, simula y mide deriva en reposo, lanzamientos, eta, fugas y tiempo; release_offset < 0 suelta antes del contacto; split y setup(scene, stones) permiten sondas."""
     scene = bpy.data.scenes.new('Banco panel ' + label)
     bpy.context.window.scene = scene
     scene.render.fps = FPS
@@ -129,11 +129,12 @@ def variant(label, substeps, release_offset):
     world = scene.rigidbody_world
     world.substeps_per_frame = substeps
     world.solver_iterations = 60
-    world.use_split_impulse = True
+    world.use_split_impulse = split
     world.point_cache.frame_start, world.point_cache.frame_end = 1, FRAMES
     stones = build(scene)
     contact = SETTLE + 8
     projectile = ball(scene, contact + release_offset, contact)
+    extra = setup(scene, stones, substeps) if setup else {}
     started = time.monotonic()
     track = stones + [projectile]
     xs = []
@@ -166,7 +167,7 @@ def variant(label, substeps, release_offset):
     report = dict(variant=label, substeps=substeps, release_frame=contact + release_offset, contact_frame=contact,
                   settle_drift_mm=drift, settle_drift_p99_mm=drift_p99, moved=moved, launch_p99_over_v=p99 / BALL_SPEED,
                   launch_max_over_v=(speeds[-1] / BALL_SPEED) if speeds else 0., upward_faster_than_ball=up,
-                  eta_horizontal=eta, escaped=escaped, seconds=seconds, ball_regime=regime)
+                  eta_horizontal=eta, escaped=escaped, seconds=seconds, ball_regime=regime, split=split, **extra)
     bpy.data.batch_remove(ids=tuple(scene.objects))
     bpy.data.scenes.remove(scene)
     return report
