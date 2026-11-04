@@ -148,8 +148,9 @@ class RUIN_OT_physics_release(bpy.types.Operator):
     def execute(self,context):
         'IA: Suelta uniones de la selección en el laboratorio de edificio; nunca altera la generación normal.'
         from ..services import physics
-        try:physics.release_support(context.scene,context.selected_objects)
+        try:result=physics.release_support(context.scene,context.selected_objects)
         except Exception as exc:return fail(self,context,exc)
+        if result:self.report({'INFO'},'Sueltas %d uniones más; %d piezas liberadas en total'%(result['released_joints'],result['pieces']))
         return {'FINISHED'}
 
 

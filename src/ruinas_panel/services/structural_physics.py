@@ -581,25 +581,33 @@ def prepare(source_scene):
 
 
 def release(scene,ob,frame=13):
-    'IA: Suelta uniones en frame y reactiva colisiones entre sus cuerpos; comparte acción booleana y conserva cuerpos y trayectorias.'
+    'IA: Suelta uniones en frame y reactiva colisiones entre sus cuerpos; acumulable: cada llamada añade piezas sin tocar las ya liberadas. Comparte acción booleana por tanda y conserva cuerpos y trayectorias.'
     chosen=[ob] if isinstance(ob,bpy.types.Object) else list(ob or [])
     chosen={o for o in chosen if o.name in scene.objects and o.rigid_body and o.rigid_body.type=='ACTIVE'}
     if not chosen:raise ValueError('Selecciona piezas móviles del edificio.')
-    if scene.get('support_release'):raise ValueError('Prepara otro ensayo para cambiar la pieza liberada.')
-    scene.frame_set(1);affected=[]
+    previous=set(json.loads(scene.get('support_release','[]')))
+    scene.frame_set(1);affected=[];already=0
     for other in scene.objects:
         c=other.rigid_body_constraint
-        if c and chosen.intersection((c.object1,c.object2)):affected.append(other)
-    if not affected:raise ValueError('La pieza no tiene uniones; ya está libre.')
-    first=affected[0];first.animation_data_clear();c=first.rigid_body_constraint
+        if not c or not chosen.intersection((c.object1,c.object2)):continue
+        # Una unión ya animada pertenece a una tanda anterior: no se reescribe su fotograma.
+        if other.animation_data and other.animation_data.action:already+=1;continue
+        affected.append(other)
+    if not affected:
+        if already:raise ValueError('Las piezas seleccionadas ya están sueltas.')
+        raise ValueError('La pieza no tiene uniones; ya está libre.')
+    first=affected[0];c=first.rigid_body_constraint
     c.enabled=True;c.keyframe_insert(data_path='enabled',frame=1);c.keyframe_insert(data_path='enabled',frame=frame-1)
     c.enabled=False;c.keyframe_insert(data_path='enabled',frame=frame)
     c.disable_collisions=True;c.keyframe_insert(data_path='disable_collisions',frame=1);c.keyframe_insert(data_path='disable_collisions',frame=frame-1)
     c.disable_collisions=False;c.keyframe_insert(data_path='disable_collisions',frame=frame)
-    # La misma curva booleana sirve para todas las uniones seleccionadas.
+    # La misma curva booleana sirve para todas las uniones de esta tanda.
     # Evita evaluar miles de cuerpos al insertar cada fotograma por separado.
     for other in affected[1:]:
         animation=other.animation_data_create();animation.action=first.animation_data.action
         animation.action_slot=first.animation_data.action_slot
-    scene['support_release']=json.dumps(sorted(o.name for o in chosen));scene['physics_simulated']=0;runtime.physics_simulations.discard(scene.as_pointer())
-    scene.timeline_markers.new('Soltar uniones; caída sin trayectoria impuesta',frame=frame);scene.frame_set(1)
+    scene['support_release']=json.dumps(sorted(previous|{o.name for o in chosen}));scene['physics_simulated']=0;runtime.physics_simulations.discard(scene.as_pointer())
+    if not any(m.frame==frame and m.name.startswith('Soltar uniones') for m in scene.timeline_markers):
+        scene.timeline_markers.new('Soltar uniones; caída sin trayectoria impuesta',frame=frame)
+    scene.frame_set(1)
+    return {'released_joints':len(affected),'already_released_joints':already,'pieces':len(previous|{o.name for o in chosen})}

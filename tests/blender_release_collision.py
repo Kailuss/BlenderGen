@@ -15,7 +15,7 @@ def cube(name,z,kind):
 
 
 def run():
-    'IA: Libera una caja unida sobre apoyo pasivo y exige que se asiente sin atravesarlo; comprueba zona, acumulación y familia sin tocar uniones.'
+    'IA: Libera una caja unida sobre apoyo pasivo y exige que se asiente sin atravesarlo; comprueba zona, acumulación de selección y de liberaciones sin reescribir tandas previas.'
     bpy.ops.wm.read_factory_settings(use_empty=True);addon.register();scene=bpy.context.scene
     floor=cube('Apoyo',-.5,'PASSIVE');brick=cube('Ladrillo',2,'ACTIVE');other=cube('Lejano',5,'ACTIVE');other.location.x=10
     scene['structural_physics']=True
@@ -29,6 +29,14 @@ def run():
     p.physics_selection_mode='CURSOR';scene.cursor.location=other.location;p.physics_selection_add=True
     assert set(height_selection.choose(scene))=={brick,other}
     structural_physics.release(scene,[brick],frame=13)
+    # Acumulable: una segunda tanda no reescribe la primera y repetirla avisa sin fallar en silencio.
+    bpy.ops.object.empty_add();joint2=bpy.context.object;bpy.ops.rigidbody.constraint_add()
+    c2=joint2.rigid_body_constraint;c2.type='FIXED';c2.object1=floor;c2.object2=other;c2.disable_collisions=True
+    second=structural_physics.release(scene,[other],frame=13)
+    assert second=={'released_joints':1,'already_released_joints':0,'pieces':2},second
+    assert sorted(json.loads(scene['support_release']))==sorted([brick.name,other.name])
+    try:structural_physics.release(scene,[brick],frame=13);raise AssertionError('Debía avisar de piezas ya sueltas')
+    except ValueError as exc:assert 'ya están sueltas' in str(exc)
     legacy='--legacy' in sys.argv
     if legacy:
         for frame in (1,12,13):
