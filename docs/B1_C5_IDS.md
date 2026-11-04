@@ -49,4 +49,16 @@ escalera y los tres ensayos Blender la leen. Los valores son los mismos literale
 que la viga atraviesa (12 mm de modelo, 720 mm de mundo por defecto), en lugar de 3 mm. `b1_joint_baseline.json`
 cambiará en `seat_mm` y `area_mm2` al regenerarse. El asiento sigue siendo geométrico: no es capacidad resistente.
 
+## C5-4: apoyo pieza sobre pieza (Claude, 4 de noviembre de 2026)
+
+La regla de `destruction.prune_support` (huella apoyada ≥ 12 %, ventana de contacto de −1,8 a +1,2 mm,
+suelo a 3 mm, dintel anclado y juntas sin piedra) pasa a `construction_core/stacking.py` como función pura
+`prune`, con los mismos umbrales y el mismo orden. `prune_support` solo recoge cajas y llama a esa función.
+`predict(piedras, juntas, retiradas)` aplica la regla al aparejo previo a la destrucción y devuelve las caídas
+inducidas; `support_relations` publica los apoyos con su fracción de área.
+
+`tests/blender_b1_c5_stacking.py` (tres semillas, derrumbe 0,18 y 0,45) exige paridad exacta entre la regla
+extraída y la poda real, y mide sin aprobar el acierto de la predicción desde el aparejo. Esa predicción no
+modela los recortes de borde `COLLAPSE_EDGE`; las diferencias se informan en `reports/b1_c5_stacking.json`.
+
 Pendiente de C5-2: el T1 de estrés con pérdida.

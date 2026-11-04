@@ -6,6 +6,7 @@ from mathutils import Vector
 from ..geometry import primitives
 from .. import meta
 from ..services import removal_events
+from ..construction_core import stacking
 from . import spatial
 
 
@@ -56,30 +57,18 @@ def apply(coll,p,scene):
 
 
 def prune_support(coll):
-    'IA: Tras bajar pilares, retira piedras de fachada sin apoyo vertical y sus juntas; conserva escombros y al menos 12% de huella apoyada.'
-    stones=[];mortar=[]
+    'IA: Tras bajar pilares, retira piedras de fachada sin apoyo vertical y sus juntas; la regla vive en construction_core.stacking (C5-4).'
+    stones=[];mortar=[];objects={}
     for ob in coll.objects:
         name=primitives.piece_key(ob)
         if ob.get('escombro'):continue
         stone=name.startswith('Piedra') or (name.startswith('Pilar') and 'sillar' in name)
         if not stone and not name.startswith('Mortero'):continue
         co=primitives.coords(ob);lo=tuple(co.min(axis=0));hi=tuple(co.max(axis=0))
-        (stones if stone else mortar).append((ob,lo,hi))
-    kept=[];discard=[]
-    for ob,lo,hi in sorted(stones,key=lambda item:item[1][2]):
-        area=(hi[0]-lo[0])*(hi[1]-lo[1])
-        support=0
-        if lo[2]>3:
-            for other,a,b in kept:
-                if not lo[2]-1.8<=b[2]<=lo[2]+1.2:continue
-                support+=max(0,min(hi[0],b[0])-max(lo[0],a[0]))*max(0,min(hi[1],b[1])-max(lo[1],a[1]))
+        objects[ob.name]=ob
         # El dintel de puerta se apoya en sus jambas de madera, fuera de esta lista de piedra.
-        if lo[2]<=3 or support>=area*.12 or 'dintel' in primitives.piece_key(ob):
-            kept.append((ob,lo,hi))
-        else:discard.append(ob)
-    for ob,lo,hi in mortar:
-        mid=tuple((a+b)/2 for a,b in zip(lo,hi))
-        if not any(a[2]-1<=mid[2]<=b[2] and a[0]-1<=mid[0]<=b[0]+1 and a[1]-1<=mid[1]<=b[1]+1 for other,a,b in kept):
-            discard.append(ob)
+        (stones if stone else mortar).append((ob.name,lo,hi,'dintel' in name))
+    _,discard=stacking.prune(stones,mortar)
+    discard=[objects[key] for key in discard]
     removal_events.remove(discard,'PRUNE_SUPPORT')
     return len(discard)
