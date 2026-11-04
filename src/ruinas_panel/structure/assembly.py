@@ -16,6 +16,8 @@ def finish(coll,p,scene):
         bounds=(lookup['left']['origin'][0]+p.thickness/2-.6,lookup['right']['origin'][0]-p.thickness/2+.6,p.thickness/2-.6,lookup['back']['origin'][1]-p.thickness/2+.6)
         plan=floor_plan.plan(p,bounds,door,construction_plan.stair(scene,1))
     meta.put(scene,'plano_interior',plan)
+    from ..services import removal_events
+    removal_events.begin(coll,scene)
     destruction.apply(coll,p,scene)
     timber.wooden_frame(coll,p,door);timber.wooden_door(coll,p,door)
     openings.architectural_openings(coll,p,walls,door,edges)
@@ -33,3 +35,4 @@ def finish(coll,p,scene):
         rubble.build_rubble(coll,stone,mortar,p,door,rh)
     from . import foundations
     foundations.build(coll,p,scene)
+    removal_events.end()

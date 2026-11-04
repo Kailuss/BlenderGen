@@ -38,6 +38,8 @@ def generate(context,p,quality=None,units=True):
             set_units(context.scene)
         return build(context,p,quality)
     finally:
+        from . import removal_events
+        removal_events.end()
         runtime.instance_build=False
         primitives.drop_stage()
 

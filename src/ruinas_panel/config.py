@@ -204,3 +204,5 @@ PHYSICS_SOLVER_SCALE=100.0
 # Límites de la precisión «Por régimen»: subpasos mínimos y máximos del cálculo aislado.
 REGIME_SUBSTEPS=(40,400)
 PHYSICS_MIN_CUT_FRAGMENT_MM=.2
+
+CACHE_METADATA=CACHE_METADATA+('construction_reservations','removal_ledger')
