@@ -9,6 +9,81 @@ import numpy as np
 from mathutils import Quaternion,Matrix,Vector
 
 
+def overlapping_pairs(scene,min_depth):
+    'IA: Pares (activo, otro cuerpo) con vértices del activo dentro del otro a más de min_depth (unidades de escena, antes del escalado).'
+    from mathutils.bvhtree import BVHTree
+    bodies=[o for o in scene.objects if o.type=='MESH' and o.rigid_body and not o.get('lab_decor') and not o.get('collision_floor') and not o.get('impactor')]
+    def box(o):
+        'IA: Caja mundial por bound_box.'
+        pts=[o.matrix_world@Vector(c) for c in o.bound_box]
+        return Vector([min(p[i] for p in pts) for i in range(3)]),Vector([max(p[i] for p in pts) for i in range(3)])
+    active=[box(o) for o in bodies if o.rigid_body.type=='ACTIVE']
+    if not active:return {}
+    zlo=Vector([min(b[0][i] for b in active) for i in range(3)]);zhi=Vector([max(b[1][i] for b in active) for i in range(3)])
+    data={}
+    for o in bodies:
+        lo,hi=box(o)
+        if any(hi[i]<zlo[i] or lo[i]>zhi[i] for i in range(3)):continue
+        verts=[o.matrix_world@v.co for v in o.data.vertices]
+        if not verts:continue
+        lo=Vector([min(v[i] for v in verts) for i in range(3)]);hi=Vector([max(v[i] for v in verts) for i in range(3)])
+        data[o.name]=(o,verts,lo,hi)
+    trees={}
+    def tree(name):
+        'IA: BVH mundial perezoso de un cuerpo.'
+        if name not in trees:
+            o,verts,_,_=data[name];trees[name]=BVHTree.FromPolygons(verts,[p.vertices[:] for p in o.data.polygons])
+        return trees[name]
+    def inside(t,p):
+        'IA: Paridad de cruces en una dirección fija ligeramente inclinada; malla cerrada.'
+        n=0;origin=p.copy();d=Vector((1,.0013,.0007)).normalized()
+        for _ in range(64):
+            hit=t.ray_cast(origin,d)
+            if hit[0] is None:break
+            n+=1;origin=hit[0]+d*1e-7
+        return n%2==1
+    pairs={}
+    for name,(o,verts,la,ha) in data.items():
+        if o.rigid_body.type!='ACTIVE':continue
+        for other,(ob,_,lb,hb) in data.items():
+            if other==name or any(ha[i]<lb[i] or hb[i]<la[i] for i in range(3)):continue
+            key=tuple(sorted((name,other)))
+            if key in pairs:continue
+            depth=0.
+            for p in verts:
+                if all(lb[i]<=p[i]<=hb[i] for i in range(3)) and inside(tree(other),p):
+                    near=tree(other).find_nearest(p)
+                    if near[0] is not None:depth=max(depth,near[3])
+            if depth>min_depth:pairs[key]=depth
+    return pairs
+
+
+def lab_experiments(scene):
+    'IA: Ajustes de ensayo por escena (lab_*): forma de colisión de activos y desactivar colisión entre pares solapados al inicio. Sin claves, no cambia nada.'
+    report={}
+    shape=scene.get('lab_active_shape')
+    if shape:
+        count=0
+        for o in scene.objects:
+            if o.type=='MESH' and o.rigid_body and o.rigid_body.type=='ACTIVE' and not o.get('impactor') and o.rigid_body.collision_shape!=shape:
+                o.rigid_body.collision_shape=shape;count+=1
+        report['active_shape']=[shape,count]
+    depth=scene.get('lab_overlap_disable_m')
+    if depth is not None:
+        pairs=overlapping_pairs(scene,float(depth));made=0
+        for (a,b),d in pairs.items():
+            joint=bpy.data.objects.new('Sin colisión de solape %d'%made,None);scene.collection.objects.link(joint)
+            joint.location=(scene.objects[a].matrix_world.translation+scene.objects[b].matrix_world.translation)/2
+            with bpy.context.temp_override(object=joint,active_object=joint,selected_objects=[joint]):
+                bpy.ops.rigidbody.constraint_add(type='GENERIC')
+            c=joint.rigid_body_constraint;c.object1,c.object2=scene.objects[a],scene.objects[b]
+            c.disable_collisions=True;c.use_breaking=False
+            for axis in ('x','y','z','ang_x','ang_y','ang_z'):setattr(c,'use_limit_'+axis,False)
+            made+=1
+        report['overlap_disabled']={'min_depth_m':float(depth),'pairs':made,'max_depth_m':max(pairs.values(),default=0)}
+    return report
+
+
 def threshold_substep_scale(substeps):
     'IA: Factor que mantiene la resistencia de las uniones independiente de los subpasos: Bullet compara el umbral con el impulso de cada subpaso.'
     from ruinas_panel import config
@@ -41,6 +116,7 @@ def run(output,path,name):
     if scene.ruin_settings.physics_sparse_constraints:structural_physics.sparsify_constraints(scene)
     from ruinas_panel.services import material_strength
     material_strength.apply(scene)
+    experiment=lab_experiments(scene)
     world=scene.rigidbody_world
     precision=scene.ruin_settings.physics_precision
     if precision=='BALANCED':world.substeps_per_frame=40;world.solver_iterations=30
@@ -133,7 +209,7 @@ def run(output,path,name):
                         for curve in bag.fcurves:
                             for key in curve.keyframe_points:key.interpolation='CONSTANT' if curve.data_path in ('hide_viewport','hide_render') else 'LINEAR'
         if index%100==0:progress(path,stage='Guardando reproducción',objects=index,total=len(objects))
-    result['simulation_report']=json.dumps({'objects':len(objects),'moving':moving,'seconds':time.perf_counter()-started,'sample_step':1,'static_constraints_omitted':pruned,'solver_scale':factor,'collision_dust_omitted':dust,'time_scale':world.time_scale,'substeps':world.substeps_per_frame,'threshold_substep_scale':substep_scale,'sleep_linear_m_s':sleep_linear,'sleep_angular_rad_s':sleep_angular,'duration_seconds':(scene.frame_end-1)*scene.render.fps_base/scene.render.fps})
+    result['simulation_report']=json.dumps({'objects':len(objects),'moving':moving,'seconds':time.perf_counter()-started,'sample_step':1,'static_constraints_omitted':pruned,'solver_scale':factor,'collision_dust_omitted':dust,'time_scale':world.time_scale,'substeps':world.substeps_per_frame,'threshold_substep_scale':substep_scale,'sleep_linear_m_s':sleep_linear,'experiment':experiment,'sleep_angular_rad_s':sleep_angular,'duration_seconds':(scene.frame_end-1)*scene.render.fps_base/scene.render.fps})
     from ruinas_panel.services import lab_cameras
     lab_cameras.copy_to_replay(scene,result)
     result.frame_set(1);bpy.data.libraries.write(str(output),{result},fake_user=True)
