@@ -8,6 +8,8 @@ from . import structural_physics, impact_spec
 
 # Holgura entre la bola y la caja de los blancos al soltarla (m de modelo).
 RELEASE_GAP_M=.005
+# Fotogramas guiados mínimos antes de soltar la bola.
+GUIDED_FRAMES=4
 
 
 def reset(scene):
@@ -52,7 +54,12 @@ def launch(scene,selected,specification=None):
     points=[o.matrix_world@Vector(v) for o in targets for v in o.bound_box]
     center=Vector([(min(v[k] for v in points)+max(v[k] for v in points))/2 for k in range(3)])
     radius=specified['radius_model_m'] if specified else p.impact_radius*.001
-    distance=max(abs((v-center).dot(direction)) for v in points)+radius+.025
+    speed=specified['speed_model_m_s'] if specified else p.impact_speed*.001
+    fps=scene.render.fps/scene.render.fps_base;step=speed*scene.rigidbody_world.time_scale/fps
+    # Tramo de aproximación: al menos GUIDED_FRAMES fotogramas guiados antes de soltarla,
+    # para que Blender transfiera la velocidad del tramo animado al cuerpo dinámico.
+    reach=max(abs((v-center).dot(direction)) for v in points)
+    distance=reach+radius+max(.025,RELEASE_GAP_M+GUIDED_FRAMES*step)
     start=center-direction*distance
     floors=[o for o in scene.objects if o.rigid_body and o.rigid_body.type=='PASSIVE' and o.get('collision_floor')]
     if floors:
@@ -76,9 +83,7 @@ def launch(scene,selected,specification=None):
     # El tramo guiado solo recorre el espacio vacío: en lanzamiento la bola se suelta a
     # RELEASE_GAP_M de la caja de los blancos y vuela libre hasta el contacto (banco de
     # panel, variante B). Guiarla a través de las piezas inyecta energía sin límite.
-    speed=specified['speed_model_m_s'] if specified else p.impact_speed*.001
-    fps=scene.render.fps/scene.render.fps_base;step=speed*scene.rigidbody_world.time_scale/fps
-    free=max(0.,distance-max(abs((v-center).dot(direction)) for v in points)-radius-RELEASE_GAP_M)
+    free=max(0.,distance-reach-radius-RELEASE_GAP_M)
     release=max(2,min(scene.frame_end-1,int(free/step)+1))
     end=scene.frame_end if p.impact_mode=='PRESS' else release
     ob.location=start;ob.keyframe_insert(data_path='location',frame=1)
