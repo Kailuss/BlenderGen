@@ -55,11 +55,13 @@ def run(output,path,name):
     factor=config.PHYSICS_SOLVER_SCALE
     substep_scale=threshold_substep_scale(world.substeps_per_frame)
     scale_solver(scene,factor)
+    sleep_linear=float(scene.get('lab_sleep_linear_m_s',config.PHYSICS_SLEEP_LINEAR_M_S))
+    sleep_angular=float(scene.get('lab_sleep_angular_rad_s',config.PHYSICS_SLEEP_ANGULAR_RAD_S))
     for ob in objects:
         if ob.rigid_body and ob.rigid_body.type=='ACTIVE':
             ob.rigid_body.use_deactivation=True
-            ob.rigid_body.deactivate_linear_velocity=.002*factor
-            ob.rigid_body.deactivate_angular_velocity=.1
+            ob.rigid_body.deactivate_linear_velocity=sleep_linear*factor
+            ob.rigid_body.deactivate_angular_velocity=sleep_angular
     bpy.context.view_layer.update()
     scene.frame_set(0)
     samples=range(1,scene.frame_end+1)
@@ -131,7 +133,7 @@ def run(output,path,name):
                         for curve in bag.fcurves:
                             for key in curve.keyframe_points:key.interpolation='CONSTANT' if curve.data_path in ('hide_viewport','hide_render') else 'LINEAR'
         if index%100==0:progress(path,stage='Guardando reproducción',objects=index,total=len(objects))
-    result['simulation_report']=json.dumps({'objects':len(objects),'moving':moving,'seconds':time.perf_counter()-started,'sample_step':1,'static_constraints_omitted':pruned,'solver_scale':factor,'collision_dust_omitted':dust,'time_scale':world.time_scale,'substeps':world.substeps_per_frame,'threshold_substep_scale':substep_scale,'duration_seconds':(scene.frame_end-1)*scene.render.fps_base/scene.render.fps})
+    result['simulation_report']=json.dumps({'objects':len(objects),'moving':moving,'seconds':time.perf_counter()-started,'sample_step':1,'static_constraints_omitted':pruned,'solver_scale':factor,'collision_dust_omitted':dust,'time_scale':world.time_scale,'substeps':world.substeps_per_frame,'threshold_substep_scale':substep_scale,'sleep_linear_m_s':sleep_linear,'sleep_angular_rad_s':sleep_angular,'duration_seconds':(scene.frame_end-1)*scene.render.fps_base/scene.render.fps})
     from ruinas_panel.services import lab_cameras
     lab_cameras.copy_to_replay(scene,result)
     result.frame_set(1);bpy.data.libraries.write(str(output),{result},fake_user=True)

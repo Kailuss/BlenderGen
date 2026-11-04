@@ -207,6 +207,10 @@ REGIME_SUBSTEPS=(40,400)
 # Bullet compara el umbral con el impulso de cada subpaso: con más subpasos, el mismo umbral
 # equivale a una unión más fuerte (×10 a 400). El trabajador lo escala por 40/subpasos.
 THRESHOLD_REFERENCE_SUBSTEPS=40
+# Reposo de Bullet en el laboratorio (unidades reales, antes de PHYSICS_SOLVER_SCALE). Una escena
+# puede sustituirlos con 'lab_sleep_linear_m_s' y 'lab_sleep_angular_rad_s' para ensayos.
+PHYSICS_SLEEP_LINEAR_M_S=.002
+PHYSICS_SLEEP_ANGULAR_RAD_S=.1
 PHYSICS_MIN_CUT_FRAGMENT_MM=.2
 
 CACHE_METADATA=CACHE_METADATA+('construction_reservations','removal_ledger')
