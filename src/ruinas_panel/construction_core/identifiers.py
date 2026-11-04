@@ -30,3 +30,12 @@ def tag(ob,kind,course,index):
     'IA: Guarda en el objeto su posición de aparejo para que el registro causal no dependa del nombre.'
     ob['layout_kind']=kind;ob['layout_course']=int(course);ob['layout_index']=int(index)
     return ob
+
+
+MASONRY_ROLES={'stone':'SILLAR','mortar':'NUCLEO','pier':'SILLAR','found':'CIMENTACION','step':'CIMENTACION'}
+
+
+def role(kind):
+    'IA: Papel de fábrica (C5-3) desde el tipo de aparejo: sillar, núcleo o cimentación; None si el tipo no es de fábrica.'
+    kind=str(kind or '')
+    return next((value for prefix,value in MASONRY_ROLES.items() if kind.startswith(prefix)),None)

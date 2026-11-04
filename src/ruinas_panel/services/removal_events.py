@@ -19,7 +19,7 @@ def begin(coll,scene):
     for ob in coll.objects:
         key=identifiers.piece(ob.get('wall_id','front'),source_key(ob))
         ledger.register(key,{'source_name':ob.name,'source_key':primitives.piece_key(ob),'wall':ob.get('wall_id','front'),
-                             'layout':'layout_kind' in ob})
+                             'layout':'layout_kind' in ob,'role':identifiers.role(ob.get('layout_kind'))})
         ob['construction_id']=key
     runtime.removal_ledger=ledger;runtime.removal_scene=scene
     flush()

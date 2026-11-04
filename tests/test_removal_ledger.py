@@ -23,6 +23,11 @@ class LedgerTests(unittest.TestCase):
         for values in (('',0,0),('stone',-1,0),('stone',0,1.5),('stone','1',0)):
             with self.assertRaises(ValueError):identifiers.layout_key(*values)
 
+    def test_masonry_roles(self):
+        'IA: Sillares, núcleo de mortero y cimentación se distinguen por el tipo de aparejo; otras piezas no tienen papel.'
+        self.assertEqual([identifiers.role(k) for k in ('stone','pier3','mortar','found2','step',None,'beam')],
+                         ['SILLAR','SILLAR','NUCLEO','CIMENTACION','CIMENTACION',None,None])
+
     def test_layout_key_fallback(self):
         'IA: removal_events usa la clave de aparejo si la pieza la lleva y el nombre en caso contrario.'
         import sys,types

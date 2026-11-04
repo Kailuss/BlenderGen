@@ -3,6 +3,7 @@ import math
 from mathutils import Matrix
 from .. import meta
 from ..geometry import primitives,timber
+from ..construction_core import identifiers
 
 
 def build(coll,p,scene):
@@ -29,14 +30,16 @@ def build(coll,p,scene):
             count=max(1,math.ceil((b-a)/14));pitch=(b-a)/count
             for row in range(rows):
                 cuts=sorted({a,b,*[a+(i+(.5 if row%2 else 0))*pitch for i in range(count+1) if a<a+(i+(.5 if row%2 else 0))*pitch<b]})
-                for lo,hi in zip(cuts,cuts[1:]):
+                for index,(lo,hi) in enumerate(zip(cuts,cuts[1:])):
                     xy=(c+.06,d-.06,lo+.06,hi-.06) if swap else (lo+.06,hi-.06,c+.06,d-.06)
                     ob=primitives.block('Piedra · cimiento %s'%side,*xy,row*rh,(row+1)*rh-.06,coll,stone);ob['foundation']=True
+                    identifiers.tag(ob,'found%s'%side,row,index)
         if door:
             count=max(1,math.ceil(height/4));run=count*p.entrance_tread
             for i in range(count):
                 top=height*(i+1)/count
                 ob=primitives.block('Piedra · escalón de entrada',cx-width/2,cx+width/2,y0-run+i*p.entrance_tread,y0-run+(i+1)*p.entrance_tread,0,top,coll,stone);ob['foundation']=True
+                identifiers.tag(ob,'step',0,i)
         # Metadatos publicados: cotas mundiales, sin volver a alimentar reglas locales de construcción.
         for key,fields in (('ventanas_generadas',('z0','z1')),('vigas_generadas',('z',)),('suelos_generados',('top_mm',)),('cubierta_generada',('z','ridge'))):
             records=meta.get(scene,key,[])
