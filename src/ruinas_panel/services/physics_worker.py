@@ -9,6 +9,12 @@ import numpy as np
 from mathutils import Quaternion,Matrix,Vector
 
 
+def threshold_substep_scale(substeps):
+    'IA: Factor que mantiene la resistencia de las uniones independiente de los subpasos: Bullet compara el umbral con el impulso de cada subpaso.'
+    from ruinas_panel import config
+    return config.THRESHOLD_REFERENCE_SUBSTEPS/max(1,int(substeps))
+
+
 def progress(path,**values):
     'IA: Sustituye atómicamente el progreso; reintenta bloqueos breves de lectores Windows sin abortar la simulación por una actualización de estado.'
     temporary=path.with_suffix('.tmp');temporary.write_text(json.dumps(values),encoding='utf8')
@@ -47,6 +53,7 @@ def run(output,path,name):
     if not scene.get('ruinas_physics_lab') or not objects:raise ValueError('Laboratorio vacío o inválido.')
     from ruinas_panel import config
     factor=config.PHYSICS_SOLVER_SCALE
+    substep_scale=threshold_substep_scale(world.substeps_per_frame)
     scale_solver(scene,factor)
     for ob in objects:
         if ob.rigid_body and ob.rigid_body.type=='ACTIVE':
@@ -124,7 +131,7 @@ def run(output,path,name):
                         for curve in bag.fcurves:
                             for key in curve.keyframe_points:key.interpolation='CONSTANT' if curve.data_path in ('hide_viewport','hide_render') else 'LINEAR'
         if index%100==0:progress(path,stage='Guardando reproducción',objects=index,total=len(objects))
-    result['simulation_report']=json.dumps({'objects':len(objects),'moving':moving,'seconds':time.perf_counter()-started,'sample_step':1,'static_constraints_omitted':pruned,'solver_scale':factor,'collision_dust_omitted':dust,'time_scale':world.time_scale,'duration_seconds':(scene.frame_end-1)*scene.render.fps_base/scene.render.fps})
+    result['simulation_report']=json.dumps({'objects':len(objects),'moving':moving,'seconds':time.perf_counter()-started,'sample_step':1,'static_constraints_omitted':pruned,'solver_scale':factor,'collision_dust_omitted':dust,'time_scale':world.time_scale,'substeps':world.substeps_per_frame,'threshold_substep_scale':substep_scale,'duration_seconds':(scene.frame_end-1)*scene.render.fps_base/scene.render.fps})
     from ruinas_panel.services import lab_cameras
     lab_cameras.copy_to_replay(scene,result)
     result.frame_set(1);bpy.data.libraries.write(str(output),{result},fake_user=True)
@@ -135,6 +142,7 @@ def run(output,path,name):
 
 def scale_solver(scene,factor):
     'IA: Amplía mallas, traslaciones, trayectorias, gravedad e impulsos por el mismo factor; conserva masas, tiempos y escalas de objeto. Solo para copias aisladas sin padres ni modificadores.'
+    substep_scale=threshold_substep_scale(scene.rigidbody_world.substeps_per_frame)
     objects=[o for o in scene.objects if (o.type=='MESH' or o.rigid_body_constraint) and not o.get('lab_decor')]
     if any(o.parent for o in objects):raise ValueError('El laboratorio físico debe contener piezas sin padres.')
     if any(o.type=='MESH' and o.modifiers for o in objects):raise ValueError('El laboratorio físico debe tener sus modificadores aplicados.')
@@ -150,7 +158,7 @@ def scale_solver(scene,factor):
             ob.rigid_body.collision_shape=ob.rigid_body.collision_shape
             ob.rigid_body.type=ob.rigid_body.type
             ob.data.update();ob.update_tag(refresh={'OBJECT','DATA'})
-        if ob.rigid_body_constraint:ob.rigid_body_constraint.breaking_threshold*=factor
+        if ob.rigid_body_constraint:ob.rigid_body_constraint.breaking_threshold*=factor*substep_scale
     actions={o.animation_data.action for o in objects if o.animation_data and o.animation_data.action}
     for action in actions:
         for layer in action.layers:
