@@ -6,6 +6,9 @@ from mathutils import Vector,Matrix
 from .. import config,runtime
 from . import structural_physics, impact_spec
 
+# Holgura entre la bola y la caja de los blancos al soltarla (m de modelo).
+RELEASE_GAP_M=.005
+
 
 def reset(scene):
     'IA: Invalida el ensayo al editar cuerpos y vuelve al inicio; no modifica las reproducciones horneadas.'
@@ -70,10 +73,13 @@ def launch(scene,selected,specification=None):
         import json
         ob['impact_specification']=json.dumps(specified,sort_keys=True)
     rb.friction=1;rb.restitution=0;rb.use_margin=True;rb.collision_margin=.00001
-    # El tramo de lanzamiento recorre el espacio vacío hasta cerca del blanco.
+    # El tramo guiado solo recorre el espacio vacío: en lanzamiento la bola se suelta a
+    # RELEASE_GAP_M de la caja de los blancos y vuela libre hasta el contacto (banco de
+    # panel, variante B). Guiarla a través de las piezas inyecta energía sin límite.
     speed=specified['speed_model_m_s'] if specified else p.impact_speed*.001
     fps=scene.render.fps/scene.render.fps_base;step=speed*scene.rigidbody_world.time_scale/fps
-    release=max(3,min(scene.frame_end-1,int(max(.001,distance-radius-.01)/step)+1))
+    free=max(0.,distance-max(abs((v-center).dot(direction)) for v in points)-radius-RELEASE_GAP_M)
+    release=max(2,min(scene.frame_end-1,int(free/step)+1))
     end=scene.frame_end if p.impact_mode=='PRESS' else release
     ob.location=start;ob.keyframe_insert(data_path='location',frame=1)
     ob.location=start+direction*step*(end-1);ob.keyframe_insert(data_path='location',frame=end)
@@ -93,7 +99,20 @@ def launch(scene,selected,specification=None):
                 for curve in bag.fcurves:
                     for key in curve.keyframe_points:key.interpolation='LINEAR' if curve.data_path=='location' else 'CONSTANT'
     ob['release_frame']=end+1;reset(scene);direction_guide(scene,ob,direction)
+    record_regime(scene,ob,targets,speed)
     return ob
+
+
+def record_regime(scene,projectile,targets,speed):
+    'IA: Guarda en el proyectil y en la escena los subpasos que pide contact_regime para su velocidad y el radio envolvente de las piezas pequeñas (semidiagonal de su caja, percentil 10 de los blancos); la escena conserva el mayor de todos los impactos.'
+    radii=sorted(max(o.dimensions.length/2,1e-6) for o in targets) or [1e-6]
+    small=radii[int(.1*(len(radii)-1))]
+    fps=scene.render.fps/scene.render.fps_base
+    regime=impact_spec.contact_regime(max(speed,1e-9),max(small,1e-6),fps,1,scene.rigidbody_world.time_scale,shapes=('CONVEX_HULL','CONVEX_HULL'))
+    projectile['impact_substeps_required']=regime['substeps_required']
+    projectile['impact_small_radius_mm']=small*1000
+    scene['impact_substeps_required']=max(regime['substeps_required'],max((o.get('impact_substeps_required',0) for o in scene.objects if o.get('impactor')),default=0))
+    return regime['substeps_required']
 
 
 def halves(mesh):

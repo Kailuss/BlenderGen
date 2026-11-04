@@ -3,6 +3,7 @@ import json
 import sys
 from pathlib import Path
 import bpy
+from mathutils import Vector
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'src'))
 import ruinas_panel as addon
@@ -30,6 +31,14 @@ def run():
     assert json.loads(ob['impact_specification'])==expected
     scene.frame_set(ob['release_frame'])
     assert not ob.rigid_body.kinematic
+    # Se suelta antes del contacto: en el último fotograma guiado la bola no alcanza la caja del blanco.
+    scene.frame_set(ob['release_frame']-1)
+    assert ob.rigid_body.kinematic
+    direction=Vector(p.impact_direction).normalized()
+    face=min((target.matrix_world@Vector(v)).dot(direction) for v in target.bound_box)
+    front=(ob.matrix_world.translation).dot(direction)+expected['radius_model_m']
+    assert front<face,(front,face)
+    assert scene['impact_substeps_required']>0 and ob['impact_substeps_required']>0
     scene.frame_set(1)
     count=len(scene.objects)
     p.impact_mode='PRESS'

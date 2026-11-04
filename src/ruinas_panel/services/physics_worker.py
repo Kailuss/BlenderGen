@@ -36,7 +36,12 @@ def run(output,path,name):
     from ruinas_panel.services import material_strength
     material_strength.apply(scene)
     world=scene.rigidbody_world
-    if scene.ruin_settings.physics_precision=='BALANCED':world.substeps_per_frame=40;world.solver_iterations=30
+    precision=scene.ruin_settings.physics_precision
+    if precision=='BALANCED':world.substeps_per_frame=40;world.solver_iterations=30
+    elif precision=='REGIME':
+        from ruinas_panel import config as settings_config
+        low,high=settings_config.REGIME_SUBSTEPS
+        world.substeps_per_frame=int(min(high,max(low,scene.get('impact_substeps_required',low))));world.solver_iterations=60
     else:world.substeps_per_frame=80;world.solver_iterations=60
     objects=[o for o in scene.objects if o.type=='MESH' and not o.get('lab_decor')]
     if not scene.get('ruinas_physics_lab') or not objects:raise ValueError('Laboratorio vacío o inválido.')

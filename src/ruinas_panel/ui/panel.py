@@ -306,6 +306,12 @@ def draw_lab_solver(self, context):
     layout=self.layout;layout.use_property_split=True;layout.use_property_decorate=False
     p=context.scene.ruin_settings
     for field in ('physics_precision','physics_adaptive_collisions','physics_sparse_constraints','physics_memory_mb','physics_timeout_seconds'):layout.prop(p,field)
+    need=context.scene.get('impact_substeps_required')
+    if need:
+        current={'BALANCED':40,'HIGH':80}.get(p.physics_precision)
+        if p.physics_precision=='REGIME':layout.label(text='Subpasos por régimen: %d'%min(config.REGIME_SUBSTEPS[1],max(config.REGIME_SUBSTEPS[0],need)),icon='CHECKMARK')
+        elif current<need:layout.label(text='Los impactos piden %d subpasos; esta precisión usa %d'%(need,current),icon='ERROR')
+        else:layout.label(text='Subpasos suficientes para los impactos (%d ≥ %d)'%(current,need),icon='CHECKMARK')
     layout.operator('ruin.physics_ten_seconds',icon='TIME')
 
 
