@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.29 — 2026-11-04
+
+Integra la vía causal B1-C4 y C5 (IDs por aparejo, asiento único contra sillares, poda pura, productor único de escaleras, esqueleto con dintel) y el umbral de rotura escalado por subpasos. «Por régimen» queda como experimental: en edificios completos es caótico. Digests sin cambio. Detalle en `V03229.md` y `B1_C5_IDS.md`.
+
 ## Ejercicio 02 de render — 2026-11-02
 
 Reproducción completa de tres impactos y diez segundos, gas Mantaflow horneado, acabado Cycles/OptiX y lanzador de vídeo. Reapertura, cachés, render visual y vídeo breve del lanzador verificados. Detalles, métricas y límites en `EJERCICIO02_ENTREGA.md`. No implica cierre del modelo causal B1 ni calibración estructural general.

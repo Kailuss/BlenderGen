@@ -310,8 +310,10 @@ def draw_lab_solver(self, context):
     need=context.scene.get('impact_substeps_required')
     if need:
         current={'BALANCED':40,'HIGH':80}.get(p.physics_precision)
-        if p.physics_precision=='REGIME':layout.label(text='Subpasos por régimen: %d'%min(config.REGIME_SUBSTEPS[1],max(config.REGIME_SUBSTEPS[0],need)),icon='CHECKMARK')
-        elif current<need:layout.label(text='Los impactos piden %d subpasos; esta precisión usa %d'%(need,current),icon='ERROR')
+        if p.physics_precision=='REGIME':
+            layout.label(text='Subpasos por régimen: %d'%min(config.REGIME_SUBSTEPS[1],max(config.REGIME_SUBSTEPS[0],need)),icon='ERROR')
+            layout.label(text='Experimental: en edificios puede exagerar los lanzamientos')
+        elif current<need:layout.label(text='El impacto pediría %d subpasos; en edificios, Equilibrada sigue siendo la recomendada'%need,icon='INFO')
         else:layout.label(text='Subpasos suficientes para los impactos (%d ≥ %d)'%(current,need),icon='CHECKMARK')
     layout.operator('ruin.physics_ten_seconds',icon='TIME')
 
