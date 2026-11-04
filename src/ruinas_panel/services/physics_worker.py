@@ -142,6 +142,7 @@ def run(output,path,name):
 
 def scale_solver(scene,factor):
     'IA: Amplía mallas, traslaciones, trayectorias, gravedad e impulsos por el mismo factor; conserva masas, tiempos y escalas de objeto. Solo para copias aisladas sin padres ni modificadores.'
+    substep_scale=threshold_substep_scale(scene.rigidbody_world.substeps_per_frame)
     objects=[o for o in scene.objects if (o.type=='MESH' or o.rigid_body_constraint) and not o.get('lab_decor')]
     if any(o.parent for o in objects):raise ValueError('El laboratorio físico debe contener piezas sin padres.')
     if any(o.type=='MESH' and o.modifiers for o in objects):raise ValueError('El laboratorio físico debe tener sus modificadores aplicados.')
