@@ -22,6 +22,23 @@ class FloorFrameTests(unittest.TestCase):
         result=graph.loss(model,['seg.front.f2.b0.0'])
         self.assertEqual(result['unsupported'],['beam.2.0','seg.front.f2.b1.0'])
 
+    def test_lintel_skeleton(self):
+        'IA: El dintel cae si pierde cualquiera de sus dos jambas; la otra viga sigue apoyada (C5-6).'
+        axes=[{'x_mm':20,'ordinal':1},{'x_mm':-20,'ordinal':0}]
+        model=floor_frame.frame_skeleton(axes,[(2,25),(25,50)],{'front':0,'back':100},1,4.2,12,30,120,60)
+        self.assertEqual(model['lintel_id'],'lintel.front.f2.b1.0-1')
+        self.assertEqual(model['beam_ids'],['beam.2.0','beam.2.1'])
+        lost=graph.loss(model,['seg.front.f2.b1.0'])
+        self.assertIn(model['lintel_id'],lost['unsupported'])
+        self.assertIn('beam.2.0',lost['unsupported'])
+        self.assertNotIn('beam.2.1',lost['unsupported'])
+        lost=graph.loss(model,['seg.front.f2.b0.1'])
+        self.assertIn(model['lintel_id'],lost['unsupported'])
+        self.assertNotIn('beam.2.0',lost['unsupported'])
+        self.assertEqual(graph.loss(model,['seg.back.f2.b1.0'])['unsupported'],['beam.2.0'])
+        with self.assertRaises(ValueError):
+            floor_frame.frame_skeleton(axes[:1]*2,[(2,25)],{'front':0,'back':100},0,4.2,12,30,120,60)
+
     def test_insufficient_seat(self):
         'IA: Rechaza un asiento inferior al mínimo explícito sin inventar relación de apoyo.'
         with self.assertRaises(ValueError):

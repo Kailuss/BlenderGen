@@ -19,6 +19,16 @@ def beam(level,axis):
     return f'beam.{level}.{axis}'
 
 
+def opening(wall,floor,band,left_axis,right_axis):
+    'IA: Hueco entre dos ejes de viga de un muro, en una banda de segmentos (C5-6).'
+    return segment(wall,floor,band,left_axis).replace('seg.','opening.',1)+'-'+str(int(right_axis))
+
+
+def lintel(wall,floor,band,left_axis,right_axis):
+    'IA: Dintel que salva el hueco entre dos ejes; apoya en las jambas de esos ejes (C5-6).'
+    return opening(wall,floor,band,left_axis,right_axis).replace('opening.','lintel.',1)
+
+
 def layout_key(kind,course,index):
     'IA: Clave de construcción desde el aparejo (tipo, hilada, índice), independiente del nombre de Blender (C5-5).'
     if not kind or any(type(v) is not int or v < 0 for v in (course,index)):

@@ -69,7 +69,13 @@ cabecero de escalera y una reserva muerta en `placement`), y la terraza la recal
 escalera y nadie llamaba, se elimina. `build_upper` y la cubierta de torreón ya no vuelven a planificar el tramo
 para obtener sus ajustes: usan `stairs.upper_settings`/`terrace_settings` y leen la reserva de
 `construction_plan`, que queda como único productor. Solo `beam_end` sin escena (ensayos aislados) replanifica.
-Sin cambio de geometría esperado. Pendiente de C5-6: huecos y esqueleto de dos vigas con dintel.
+Sin cambio de geometría esperado.
+
+**C5-6, segundo paso (plan puro):** `floor_frame.frame_skeleton` une dos esqueletos de viga sobre ejes distintos
+(cimentación común, con la carga repartida) y añade un hueco (`OPENING`, alojado en el muro) y un dintel (`LINTEL`,
+`STONE_BLOCK`) que apoya en las dos jambas de la banda del hueco, una por grupo de apoyo. IDs `opening.<muro>.f<p>.b<b>.<i>-<d>`
+y `lintel.…`. Perder cualquier jamba deja el dintel sin apoyo; la viga del otro eje sigue apoyada. Asiento del dintel y
+capacidades desconocidos (None). Falta consumirlo desde la geometría real de vanos.
 
 ## C5-2: T1 de estrés con pérdida (Claude, 4 de noviembre de 2026)
 
