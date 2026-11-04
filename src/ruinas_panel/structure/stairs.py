@@ -31,12 +31,27 @@ def plan(p,bounds):
             'usable_tread_mm':min(20,pitch),'pitch_mm':pitch,'riser_mm':(layout.upper_floor(p)-bottom)/steps,'width_mm':yb-ya,'approach_mm':approach,'approach':[right+1.5,right+approach+1.5,ya,yb] if reverse else [left-approach-1.5,left-1.5,ya,yb]}
 
 
-def upper_plan(p,bounds):
-    'IA: Plan local único del segundo tramo; piedra con intradós hueco para no cegar la llegada inferior, forjado y construcción comparten reserva.'
+def local_settings(p,storey_height):
+    'IA: Ajustes locales de un tramo alto como si fuera planta baja de altura dada; no dependen de la caja interior.'
     from types import SimpleNamespace
     values={key:getattr(p,key) for key in config.FIELDS}
-    values.update(height_type='TWO',ground_storey_height=p.upper_storey_height,ground_floor=True)
-    settings=SimpleNamespace(**values);upper=plan(settings,bounds)
+    values.update(height_type='TWO',ground_storey_height=storey_height,ground_floor=True)
+    return SimpleNamespace(**values)
+
+
+def upper_settings(p):
+    'IA: Ajustes del segundo tramo; los comparten plan y construcción sin volver a planificar.'
+    return local_settings(p,p.upper_storey_height)
+
+
+def terrace_settings(p):
+    'IA: Ajustes del tramo de terraza; los comparten plan y construcción sin volver a planificar.'
+    return local_settings(p,layout.level_spans(p)[-1]+7)
+
+
+def upper_plan(p,bounds):
+    'IA: Plan local único del segundo tramo; piedra con intradós hueco para no cegar la llegada inferior, forjado y construcción comparten reserva.'
+    settings=upper_settings(p);upper=plan(settings,bounds)
     if upper and 'error' not in upper:
         upper['bottom']=2.0;upper['riser_mm']=(upper['top']-upper['bottom'])/upper['steps']
         upper['hollow']=True
@@ -46,9 +61,9 @@ def upper_plan(p,bounds):
 def build_upper(coll,p,scene,bounds,first):
     'IA: Construye segundo tramo con el mismo plano que reserva su forjado; lo eleva a primera planta y conserva ambos registros.'
     from mathutils import Matrix
-    settings,upper=upper_plan(p,bounds)
     from . import construction_plan
-    upper=construction_plan.stair(scene,2)
+    # Productor único: la reserva del plan; aquí solo se derivan los ajustes locales.
+    settings=upper_settings(p);upper=construction_plan.stair(scene,2)
     before=set(coll.objects);build(coll,settings,scene,upper)
     shift=p.ground_storey_height
     for ob in set(coll.objects)-before:ob.data.transform(Matrix.Translation((0,0,shift)))
@@ -62,11 +77,12 @@ def beam_end(p,walls,x,base,scene=None):
     'IA: Devuelve el cabecero de escalera para una viga de planta o None si llega al muro trasero; decide antes de cortar alojamientos.'
     lookup={w['id']:w for w in walls}
     if p.layout_mode!='ROOM' or not all(k in lookup for k in ('left','right','back')):return None
-    bounds=(lookup['left']['origin'][0]+p.thickness/2-.6,lookup['right']['origin'][0]-p.thickness/2+.6,p.thickness/2-.6,lookup['back']['origin'][1]-p.thickness/2+.6)
+    from . import construction_plan
+    bounds=construction_plan.interior_bounds(p,lookup)
     bases=layout.floor_bases(p)
     level=min(range(1,len(bases)),key=lambda i:abs(bases[i]-base))
+    # Sin escena (solo ensayos aislados) se replanifica con la misma caja interior.
     if scene is not None:
-        from . import construction_plan
         stair=construction_plan.stair(scene,level)
     else:stair=upper_plan(p,bounds)[1] if level==2 else plan(p,bounds)
     if not stair or 'error' in stair:return None
@@ -76,10 +92,7 @@ def beam_end(p,walls,x,base,scene=None):
 
 def terrace_plan(p,bounds):
     'IA: Planifica acceso a terraza desde la última planta, con huella común y desembarco en la cara superior de las losas; no crea acceso si se desactivan escaleras.'
-    from types import SimpleNamespace
-    values={key:getattr(p,key) for key in config.FIELDS}
-    values.update(height_type='TWO',ground_storey_height=layout.level_spans(p)[-1]+7,ground_floor=True)
-    settings=SimpleNamespace(**values);access=plan(settings,bounds)
+    settings=terrace_settings(p);access=plan(settings,bounds)
     if access and 'error' not in access:
         access['bottom']=2.0;access['riser_mm']=(access['top']-2)/access['steps']
         access['hollow']=True

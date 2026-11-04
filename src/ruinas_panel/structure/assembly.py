@@ -13,7 +13,7 @@ def finish(coll,p,scene):
     plan={}
     if p.layout_mode=='ROOM':
         lookup={w['id']:w for w in walls}
-        bounds=(lookup['left']['origin'][0]+p.thickness/2-.6,lookup['right']['origin'][0]-p.thickness/2+.6,p.thickness/2-.6,lookup['back']['origin'][1]-p.thickness/2+.6)
+        bounds=construction_plan.interior_bounds(p,lookup)
         plan=floor_plan.plan(p,bounds,door,construction_plan.stair(scene,1))
     meta.put(scene,'plano_interior',plan)
     from ..services import removal_events

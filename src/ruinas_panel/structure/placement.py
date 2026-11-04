@@ -1,14 +1,6 @@
 """Reservas espaciales compartidas por ventanas y accesorios."""
 
 
-def stair_reservation(p,walls):
-    'IA: Usa exactamente el plan del forjado antes de perforar ventanas; evita que el macizo aparezca en el hueco trasero.'
-    if p.layout_mode!='ROOM':return None
-    from . import stairs
-    w={q['id']:q for q in walls}
-    return stairs.plan(p,(w['left']['origin'][0]+p.thickness/2-.6,w['right']['origin'][0]-p.thickness/2+.6,p.thickness/2-.6,w['back']['origin'][1]-p.thickness/2+.6))
-
-
 def blocks_stair(w,a,b,z,stair,p):
     'IA: Rechaza vanos bajos cuyo espacio interior inmediato cruza la escalera o el desembarco; no modifica la escalera.'
     if not stair or 'error' in stair:return False

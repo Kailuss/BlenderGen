@@ -61,4 +61,14 @@ inducidas; `support_relations` publica los apoyos con su fracción de área.
 extraída y la poda real, y mide sin aprobar el acierto de la predicción desde el aparejo. Esa predicción no
 modela los recortes de borde `COLLAPSE_EDGE`; las diferencias se informan en `reports/b1_c5_stacking.json`.
 
+## C5-6, primer paso: un único productor de escaleras (Claude, 4 de noviembre de 2026)
+
+La caja interior de la habitación se calculaba con la misma fórmula en cinco sitios (plan, ensamblado, forjado,
+cabecero de escalera y una reserva muerta en `placement`), y la terraza la recalculaba por otra vía aritmética.
+`construction_plan.interior_bounds` es ahora la única. `placement.stair_reservation`, que replanificaba la
+escalera y nadie llamaba, se elimina. `build_upper` y la cubierta de torreón ya no vuelven a planificar el tramo
+para obtener sus ajustes: usan `stairs.upper_settings`/`terrace_settings` y leen la reserva de
+`construction_plan`, que queda como único productor. Solo `beam_end` sin escena (ensayos aislados) replanifica.
+Sin cambio de geometría esperado. Pendiente de C5-6: huecos y esqueleto de dos vigas con dintel.
+
 Pendiente de C5-2: el T1 de estrés con pérdida.

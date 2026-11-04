@@ -59,11 +59,9 @@ def build(coll,p,scene):
     if p.layout_mode!='ROOM':return
     walls={w['id']:w for w in meta.get(scene,'paredes_generadas',[])}
     if not all(k in walls for k in ('left','right','back')):return
-    xmin=walls['left']['origin'][0]+p.thickness/2-.6
-    xmax=walls['right']['origin'][0]-p.thickness/2+.6
-    ymin=p.thickness/2-.6;ymax=walls['back']['origin'][1]-p.thickness/2+.6
-    from . import stairs
     from . import construction_plan
+    xmin,xmax,ymin,ymax=construction_plan.interior_bounds(p,walls)
+    from . import stairs
     first=construction_plan.stair(scene,1);plans={1:first}
     if p.height_type=='THREE':plans[2]=construction_plan.stair(scene,2)
     def reservation(stair):
