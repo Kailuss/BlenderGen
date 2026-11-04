@@ -377,12 +377,15 @@ def attach_collision_slivers(scene):
 
 
 def discard_collision_dust(scene):
-    'IA: En un laboratorio en metros elimina residuos de piedra recortada menores de 0,2 mm en todos los ejes y sus uniones; conserva piezas diseñadas y fragmentos mayores.'
+    'IA: En un laboratorio en metros elimina residuos recortados: piedra menor de 0,2 mm en todos los ejes, o cualquier fragmento más fino que un píxel de impresión en su eje menor; y sus uniones. Conserva piezas diseñadas.'
     dust=[]
     for ob in scene.objects:
-        if ob.type!='MESH' or ob.get('physical_role')!='stone' or 'cut_component' not in ob:continue
+        if ob.type!='MESH' or 'cut_component' not in ob:continue
         points=[ob.matrix_basis@v.co for v in ob.data.vertices]
-        if points and max(max(p[k] for p in points)-min(p[k] for p in points) for k in range(3))<config.PHYSICS_MIN_CUT_FRAGMENT_MM/1000:dust.append(ob)
+        if not points:continue
+        extents=sorted(max(p[k] for p in points)-min(p[k] for p in points) for k in range(3))
+        tiny_stone=ob.get('physical_role')=='stone' and extents[-1]<config.PHYSICS_MIN_CUT_FRAGMENT_MM/1000
+        if tiny_stone or extents[0]<config.PHYSICS_MIN_CUT_THICKNESS_MM/1000:dust.append(ob)
     members=set(dust);names=[o.name for o in dust]
     joints=[o for o in scene.objects if o.rigid_body_constraint and (o.rigid_body_constraint.object1 in members or o.rigid_body_constraint.object2 in members)]
     bpy.data.batch_remove(ids=tuple(joints))
