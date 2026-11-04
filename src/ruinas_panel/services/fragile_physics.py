@@ -94,7 +94,7 @@ def _split_once(mesh,axis,seed,preserve_axis=None):
 
 
 def fragment(objects,coll,report,size=20):
-    'IA: Sustituye solo copias de paños grandes por sólidos cerrados con IDs derivados; límite global explícito, sin dejar bloques gigantes silenciosamente.'
+    'IA: Sustituye solo copias de paños grandes por sólidos cerrados con IDs derivados; límite global explícito. Una pieza que no admite corte cerrado queda entera y se declara en report["fragile_unsplit"], sin abortar la preparación.'
     created=0
     for ob in list(objects):
         name=ob.get('source_piece',ob.name);key=name.lower()
@@ -115,7 +115,12 @@ def fragment(objects,coll,report,size=20):
                 open_ring=not lineage and any(s in key for s in ('conducto','campana','remate chimenea'))
                 axis=0 if open_ring else max(range(3),key=lambda k:spans[k])
                 try:children=split(mesh,axis,seed+sum((i+1)*ord(c) for i,c in enumerate(lineage)),preserve_axis=2 if open_ring else None)
-                finally:bpy.data.meshes.remove(mesh)
+                except ValueError as error:
+                    # Una pieza que no admite un corte cerrado se conserva entera y se
+                    # declara en el informe; no aborta la preparación de toda la casa.
+                    report.setdefault('fragile_unsplit',[]).append({'piece':name,'lineage':lineage,'span_mm':max(spans),'reason':str(error)})
+                    finished.append((mesh,lineage));continue
+                bpy.data.meshes.remove(mesh)
                 pending.extend((child,lineage+str(i)) for i,child in enumerate(children))
             if len(finished)==1:
                 bpy.data.meshes.remove(finished[0][0]);ob['fragile_material']='plaster' if plaster else 'chimney';continue

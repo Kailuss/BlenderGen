@@ -82,6 +82,7 @@ class RUIN_PT_panel(bpy.types.Panel):
                 report=parsed(context.scene.get('preparation_report','{}'),{})
                 col.label(text='%s cuerpos móviles · %s uniones'%(sum(bool(o.rigid_body and o.rigid_body.type=='ACTIVE') for o in context.scene.objects),sum(o.rigid_body_constraint is not None for o in context.scene.objects)))
                 if report.get('unconnected'):col.label(text='%s piezas sin unión inicial'%len(report['unconnected']),icon='ERROR')
+                if report.get('fragile_unsplit'):col.label(text='%s piezas frágiles enteras: su corte no cierra'%len(report['fragile_unsplit']),icon='INFO')
             col.label(text='Duración: %.1f s · tiempo físico ×%.2f'%((context.scene.frame_end-context.scene.frame_start)*context.scene.render.fps_base/context.scene.render.fps,context.scene.rigidbody_world.time_scale))
             row=layout.row(align=True);row.scale_y=1.3
             row.operator('ruin.physics_simulate',icon='PLAY')
