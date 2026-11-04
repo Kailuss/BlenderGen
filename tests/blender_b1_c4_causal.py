@@ -53,63 +53,93 @@ def capture(coll,p,scene):
     return model,records,descriptors
 
 
+PHASES=(('T1',{'collapse':.18,'hole_count':1,'hole_size':20,'hole_damage':.3}),
+        ('T1_ESTRES',{'collapse':.45,'hole_count':4,'hole_size':30,'hole_damage':.6}))
+
+
+def contact_roles(ledger,records):
+    'IA: Cuenta contactos de asiento por papel de fábrica (C5-3) desde el registro de entrada; verifica que el T1 no se apoya solo en mortero.'
+    counts={}
+    for record in records:
+        for contacts in record['contacts']:
+            for key in contacts:
+                role=(ledger.elements.get(key) or {}).get('role') or 'SIN_PAPEL'
+                counts[role]=counts.get(role,0)+1
+    return counts
+
+
 def run():
-    'IA: Tres semillas T1, sin vanos ni escaleras; reporta incertidumbres y ejes no mapeados sin confundirlas con coincidencias.'
+    'IA: Tres semillas en T1 y en T1 de estrés (C5-2), sin vanos ni escaleras; el estrés debe ejercitar pérdida; reporta incertidumbres y discrepancias sin aprobarlas.'
     addon.register();runtime.busy=True;runtime.preview=True;runtime.instance_build=False
     p=bpy.context.scene.ruin_settings
     p.layout_mode='ROOM';p.height_type='THREE';p.length=190;p.building_depth=100
     p.lock_distribution=False;p.door_enabled=False;p.floor_beams=True;p.upper_floor=False;p.ground_floor=False;p.stair_type='NONE'
     p.roof_frame=False;p.roof_tiles=False;p.roof_gables=False;p.chimneys=False;p.balconies=False;p.windows_enabled=False
-    p.collapse=.18;p.hole_count=1;p.hole_size=20;p.hole_damage=.3;p.wear_level='CUSTOM';p.wear=0;p.cracks=0;p.rubble_amount=0;p.damage_enabled=True
+    p.wear_level='CUSTOM';p.wear=0;p.cracks=0;p.rubble_amount=0;p.damage_enabled=True
     cases=[];original=removal_events.begin
-    for seed in (1,20,73):
-        started=time.perf_counter();p.seed=seed;layout.apply_profiles(p);q=damage.effective_settings(p)
-        runtime.settings=q;runtime.quality='DRAFT';runtime.timings={};captured=[]
-        def begin(coll,scene):
-            'IA: Instrumentación de ensayo antes de cualquier evento de assembly.'
-            original(coll,scene);captured.append(capture(coll,q,scene))
-        removal_events.begin=begin
-        try:
-            coll=walls._build_wall(bpy.context,q);assembly.finish(coll,q,bpy.context.scene)
-        finally:removal_events.begin=original
-        model,records,descriptors=captured[0]
-        ledger=RemovalLedger.load(meta.get(bpy.context.scene,'removal_ledger'))
-        prediction=causal_support.replay(model,ledger)
-        trees={wall:openings.wall_tree(coll,w) for wall,w in descriptors.items()}
-        for record in records:
-            key=record['id']
-            state='INITIAL_CONTACT_ABSENT' if not record['initial_supported'] else 'UNSUPPORTED' if key in prediction['unsupported'] else 'REQUIRES_REVIEW' if key in prediction['requires_review'] else 'SUPPORTED'
-            actual=seat.supported(openings.wall_hit(trees[record['wall']],descriptors[record['wall']],q,x,z) for x,z in seat.samples(record['x'],record['z']))
-            record.update(graph_state=state,measured_supported=actual,discrepancy=(actual!=(state=='SUPPORTED')) if state in ('SUPPORTED','UNSUPPORTED') else None)
-        beam_map=[]
-        for beam in meta.get(bpy.context.scene,'vigas_generadas',[]):
-            ends=[]
-            for wall in ('front','back'):
-                matches=[r for r in records if r['wall']==wall and abs(r['x']-beam['x'])<=.05 and abs(r['z']-beam['z'])<=.001]
-                actual=seat.supported(openings.wall_hit(trees[wall],descriptors[wall],q,x,z) for x,z in seat.samples(beam['x'],beam['z']))
-                ends.append({'wall':wall,'segment_id':matches[0]['id'] if len(matches)==1 else None,'axis':matches[0]['axis'] if len(matches)==1 else None,'map_state':'MATCHED' if len(matches)==1 else 'UNMAPPED','measured_supported':actual})
-            beam_map.append(dict(beam,ends=ends))
-        causes={}
-        for event in ledger.events:causes[event['cause']]=causes.get(event['cause'],0)+1
-        # Control destructivo SOLO en la escena de ensayo: quitar un asiento
-        # completo debe producir pérdida causal y ausencia geométrica real.
-        target_id=beam_map[0]['ends'][0]['segment_id']
-        target=next(r for r in records if r['id']==target_id)
-        keys={key for contacts in target['contacts'] for key in contacts}
-        removed=[ob for ob in coll.objects if ob.get('construction_id') in keys]
-        control=RemovalLedger.load(ledger.dump())
-        for ob in removed:control.record(ob['construction_id'],'REMOVE','CONTROL_REMOVE_CONTACT')
-        primitives.remove_objects(removed)
-        control_prediction=causal_support.replay(model,control)
-        tree=openings.wall_tree(coll,descriptors['front'])
-        measured=seat.supported(openings.wall_hit(tree,descriptors['front'],q,x,z) for x,z in seat.samples(target['x'],target['z']))
-        beam_id=identifiers.beam(target['level'],target['axis'])
-        assert target_id in control_prediction['unsupported'] and beam_id in control_prediction['unsupported'] and not measured
-        assert target_id not in prediction['unsupported'] and target_id not in prediction['requires_review']
-        negative={'segment_id':target_id,'beam_id':beam_id,'removed_ids':sorted(keys),'predicted_unsupported':True,'measured_supported':measured,'missing_event_detected':True}
-        cases.append({'seed':seed,'seconds':time.perf_counter()-started,'events_by_cause':causes,'ledger':ledger.dump(),'graph':model,'prediction':prediction,'segments':records,'beam_axis_map':beam_map,'negative_control':negative})
-        primitives.drop_stage();print('C4_T1_CASE',seed,len(ledger.events),flush=True)
-    report={'scope':'assembly-entry contacts measured before operations; NOT pure layout or full T1 acceptance','B1_0_closed':False,'cases':cases}
+    # C5-2: T1 nominal y T1 de estrés, cuyo daño debe llegar a los asientos y ejercitar pérdida.
+    for phase,overrides in PHASES:
+        for key,value in overrides.items():setattr(p,key,value)
+        for seed in (1,20,73):
+            started=time.perf_counter();p.seed=seed;layout.apply_profiles(p);q=damage.effective_settings(p)
+            runtime.settings=q;runtime.quality='DRAFT';runtime.timings={};captured=[]
+            def begin(coll,scene):
+                'IA: Instrumentación de ensayo antes de cualquier evento de assembly.'
+                original(coll,scene);captured.append(capture(coll,q,scene))
+            removal_events.begin=begin
+            try:
+                coll=walls._build_wall(bpy.context,q);assembly.finish(coll,q,bpy.context.scene)
+            finally:removal_events.begin=original
+            model,records,descriptors=captured[0]
+            ledger=RemovalLedger.load(meta.get(bpy.context.scene,'removal_ledger'))
+            prediction=causal_support.replay(model,ledger)
+            trees={wall:openings.wall_tree(coll,w) for wall,w in descriptors.items()}
+            for record in records:
+                key=record['id']
+                state='INITIAL_CONTACT_ABSENT' if not record['initial_supported'] else 'UNSUPPORTED' if key in prediction['unsupported'] else 'REQUIRES_REVIEW' if key in prediction['requires_review'] else 'SUPPORTED'
+                actual=seat.supported(openings.wall_hit(trees[record['wall']],descriptors[record['wall']],q,x,z) for x,z in seat.samples(record['x'],record['z']))
+                record.update(graph_state=state,measured_supported=actual,discrepancy=(actual!=(state=='SUPPORTED')) if state in ('SUPPORTED','UNSUPPORTED') else None)
+            beam_map=[]
+            for beam in meta.get(bpy.context.scene,'vigas_generadas',[]):
+                ends=[]
+                for wall in ('front','back'):
+                    matches=[r for r in records if r['wall']==wall and abs(r['x']-beam['x'])<=.05 and abs(r['z']-beam['z'])<=.001]
+                    actual=seat.supported(openings.wall_hit(trees[wall],descriptors[wall],q,x,z) for x,z in seat.samples(beam['x'],beam['z']))
+                    ends.append({'wall':wall,'segment_id':matches[0]['id'] if len(matches)==1 else None,'axis':matches[0]['axis'] if len(matches)==1 else None,'map_state':'MATCHED' if len(matches)==1 else 'UNMAPPED','measured_supported':actual})
+                beam_map.append(dict(beam,ends=ends))
+            causes={}
+            for event in ledger.events:causes[event['cause']]=causes.get(event['cause'],0)+1
+            # Control destructivo SOLO en la escena de ensayo: quitar un asiento
+            # completo debe producir pérdida causal y ausencia geométrica real.
+            # El control usa el primer asiento frontal mapeado que el replay aún da por apoyado.
+            target=next((r for b in beam_map for e in b['ends'] if e['wall']=='front' and e['segment_id']
+                         for r in records if r['id']==e['segment_id'] and r['graph_state']=='SUPPORTED'),None)
+            target_id=target['id'] if target else None
+            roles=contact_roles(ledger,records)
+            negative=None
+            if target:
+                keys={key for contacts in target['contacts'] for key in contacts}
+                removed=[ob for ob in coll.objects if ob.get('construction_id') in keys]
+                control=RemovalLedger.load(ledger.dump())
+                for ob in removed:control.record(ob['construction_id'],'REMOVE','CONTROL_REMOVE_CONTACT')
+                primitives.remove_objects(removed)
+                control_prediction=causal_support.replay(model,control)
+                tree=openings.wall_tree(coll,descriptors['front'])
+                measured=seat.supported(openings.wall_hit(tree,descriptors['front'],q,x,z) for x,z in seat.samples(target['x'],target['z']))
+                beam_id=identifiers.beam(target['level'],target['axis'])
+                assert target_id in control_prediction['unsupported'] and beam_id in control_prediction['unsupported'] and not measured
+                negative={'segment_id':target_id,'beam_id':beam_id,'removed_ids':sorted(keys),'predicted_unsupported':True,'measured_supported':measured,'missing_event_detected':True}
+            assert phase!='T1' or negative,'El control negativo de T1 necesita un asiento apoyado'
+            states={}
+            for record in records:states[record['graph_state']]=states.get(record['graph_state'],0)+1
+            disagreements=sum(1 for r in records if r['discrepancy'])
+            cases.append({'phase':phase,'states':states,'discrepancies':disagreements,'contact_roles':roles,'seed':seed,'seconds':time.perf_counter()-started,'events_by_cause':causes,'ledger':ledger.dump(),'graph':model,'prediction':prediction,'segments':records,'beam_axis_map':beam_map,'negative_control':negative})
+            primitives.drop_stage();print('C4_T1_CASE',phase,seed,len(ledger.events),json.dumps(states),'discrepancias',disagreements,json.dumps(roles),flush=True)
+    stress=[c for c in cases if c['phase']=='T1_ESTRES']
+    exercised=sum(c['states'].get('UNSUPPORTED',0)+c['states'].get('REQUIRES_REVIEW',0) for c in stress)
+    assert exercised,'El T1 de estrés no llegó a ningún asiento: no ejercita pérdida'
+    report={'scope':'assembly-entry contacts measured before operations; NOT pure layout or full T1 acceptance','B1_0_closed':False,
+            'stress_loss_exercised':exercised,'cases':cases}
     (ROOT/'reports/b1_c4_t1.json').write_text(json.dumps(report,indent=2),encoding='utf8')
     print('C4_T1_REPLAY_COMPLETED',flush=True)
 

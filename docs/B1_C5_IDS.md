@@ -71,4 +71,11 @@ para obtener sus ajustes: usan `stairs.upper_settings`/`terrace_settings` y leen
 `construction_plan`, que queda como único productor. Solo `beam_end` sin escena (ensayos aislados) replanifica.
 Sin cambio de geometría esperado. Pendiente de C5-6: huecos y esqueleto de dos vigas con dintel.
 
-Pendiente de C5-2: el T1 de estrés con pérdida.
+## C5-2: T1 de estrés con pérdida (Claude, 4 de noviembre de 2026)
+
+En el T1 nominal (derrumbe 0,18, un agujero de 20 mm) los 38 asientos de cada semilla quedaban `SUPPORTED`:
+no se ejercitaba ninguna pérdida. `blender_b1_c4_causal.py` añade la fase `T1_ESTRES` (derrumbe 0,45, cuatro
+agujeros de 30 mm, rotura de bordes 0,6) con las mismas tres semillas y exige que al menos un asiento pase a
+`UNSUPPORTED` o `REQUIRES_REVIEW`. Cada caso informa estados, discrepancias frente a los rayos medidos y el papel
+de fábrica de los contactos (SILLAR, NUCLEO, CIMENTACION) leído del registro de entrada. Las discrepancias se
+informan sin aprobarse. El control negativo usa el primer asiento frontal que el replay da por apoyado.
