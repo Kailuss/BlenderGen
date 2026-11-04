@@ -7,6 +7,7 @@ import ruinas_panel as addon
 from ruinas_panel import runtime,meta
 from ruinas_panel.structure import layout,damage,walls,assembly,openings,floor_frame
 from ruinas_panel.geometry import primitives
+from ruinas_panel.construction_core import seat
 
 
 def snapshot(coll):
@@ -19,10 +20,10 @@ def snapshot(coll):
     return result
 
 
-def measure(stones,wall,x,z,half=2.6):
+def measure(stones,wall,x,z,half=seat.AUDIT_HALF_WIDTH_MM):
     'IA: Fracción proyectada en X de piedras en la banda bajo asiento [z-4.5,z-2.7]; evita muestrear solo una junta horizontal de mortero.'
     selected=[s for s in stones if s['wall']==wall and s['hi'][0]>x-half and s['lo'][0]<x+half and s['hi'][2]>2 and s['lo'][2]<z]
-    spans=sorted((max(x-half,s['lo'][0]),min(x+half,s['hi'][0])) for s in selected if s['lo'][2]<z-2.7 and s['hi'][2]>z-4.5)
+    spans=sorted((max(x-half,s['lo'][0]),min(x+half,s['hi'][0])) for s in selected if seat.bearing_overlap(s['lo'][2],s['hi'][2],z))
     length=0;end=x-half
     for a,b in spans:
         length+=max(0,b-max(a,end));end=max(end,b)
@@ -46,7 +47,7 @@ def run():
             coll=walls._build_wall(bpy.context,q);initial=snapshot(coll)
             descriptors={w['id']:w for w in meta.get(bpy.context.scene,'paredes_generadas')}
             probes=[]
-            for role,level,z in [('floor_beam',1,layout.floor_bases(q)[1]-3.6),('floor_beam',2,layout.floor_bases(q)[2]-3.6),('wall_top_probe',None,q.height-3.6)]:
+            for role,level,z in [('floor_beam',1,seat.beam_z(layout.floor_bases(q)[1])),('floor_beam',2,seat.beam_z(layout.floor_bases(q)[2])),('wall_top_probe',None,seat.beam_z(q.height))]:
                 axes=floor_frame.aligned_axes(*[layout.masonry_joints(layout.masonry_intervals(q,descriptors[w],z)) for w in ('front','back')])
                 for a in axes['axes']:
                     for wall in ('front','back'):

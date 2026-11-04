@@ -311,8 +311,8 @@ def architectural_openings(coll,p,walls,door,edges):
             if totals[family]<quota:warnings.append({'wall':w['id'],'family':'balcony' if family else 'window','reason':'capacity_or_support','requested':quota,'generated':totals[family]})
     meta.put(bpy.context.scene,'vanos_limitaciones',warnings)
     for base in (layout.floor_bases(p)[1:] if p.floor_beams else []):
-        z=base-(3.6 if p.layout_mode=='ROOM' else 2.5)
-        size=4.5
+        z=seat.beam_z(base,p.layout_mode)
+        size=2*seat.POCKET_HALF_HEIGHT_MM
         targets=[w for w in walls if w['id']=='front'] if p.layout_mode=='ROOM' else walls
         # Congelar apoyos antes del primer alojamiento: un recorte no cambia la decisión del siguiente.
         support_trees={w['id']:wall_tree(coll,w) for w in walls}
@@ -334,17 +334,17 @@ def architectural_openings(coll,p,walls,door,edges):
                         continue
                     if not seat.supported(wall_hit(support_trees['back'],rear,p,sx,sz) for sx,sz in seat.samples(x,z)):
                         continue
-                carve_rectangle(coll,w,x-2.5,x+2.5,z-2,z+size/2,p.thickness+6,'Alojamiento de viga')
-                length=p.thickness/2+4
+                carve_rectangle(coll,w,*seat.pocket(x,z),p.thickness+6,'Alojamiento de viga')
+                length=seat.embed_length(p.thickness)
                 if p.layout_mode=='ROOM':
                     from . import stairs
                     stop=stairs.beam_end(p,walls,x,base,bpy.context.scene)
                     if stop is None:
-                        carve_rectangle(coll,rear,x-2.5,x+2.5,z-2,z+size/2,p.thickness+6,'Apoyo trasero de viga')
+                        carve_rectangle(coll,rear,*seat.pocket(x,z),p.thickness+6,'Apoyo trasero de viga')
                     end=(x,rear['origin'][1]+length if stop is None else stop,z)
                 else:
                     end=wall_point(w,x,length,z)
-                ob=timber.timber_beam(coll,wood,'Madera · viga de planta',wall_point(w,x,-length,z),end,4.2,size+.2,p.seed+461+i)
+                ob=timber.timber_beam(coll,wood,'Madera · viga de planta',wall_point(w,x,-length,z),end,seat.BEAM_WIDTH_MM,seat.BEAM_HEIGHT_MM,p.seed+461+i)
                 beams.append({'wall':w['id'],'x':x,'z':z,'span':list(end)})
                 # Clavos en una abrazadera de frente; unidos al extremo de la viga.
                 if w['id']=='front':

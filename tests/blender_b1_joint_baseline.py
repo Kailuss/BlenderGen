@@ -9,7 +9,7 @@ import ruinas_panel as addon
 from ruinas_panel import meta,runtime
 from ruinas_panel.geometry import primitives
 from ruinas_panel.structure import damage,layout,openings,walls,floor_frame
-from ruinas_panel.construction_core import graph
+from ruinas_panel.construction_core import graph,seat
 
 AXIS_TOLERANCES_MM={'front':.05,'back':.001}
 
@@ -36,7 +36,7 @@ def run():
         samples=[(level,base,'floor_beam') for level,base in enumerate(layout.floor_bases(effective)[1:],1)]
         samples.append((None,effective.height,'wall_top_probe'))
         for level,base,role in samples:
-            z=base-3.6
+            z=seat.beam_z(base)
             for wall_id in ('front','back'):
                 w=descriptors[wall_id]
                 intervals=layout.masonry_intervals(effective,w,z,edges)
@@ -47,11 +47,11 @@ def run():
                 rows.append({'seed':seed,'level':level,'sample_role':role,'base_mm':base,'wall':wall_id,'z_mm':z,'source':source,
                              'nominal_count':len(nominal),'measured_count':len(measured),
                              'tolerance_mm':tolerance,'max_axis_error_mm':delta,'pass':len(nominal)==len(measured) and delta<=tolerance})
-        z=layout.floor_bases(effective)[1]-3.6
+        z=seat.beam_z(layout.floor_bases(effective)[1])
         axes=floor_frame.aligned_axes(*[layout.masonry_joints(layout.masonry_intervals(effective,descriptors[k],z,edges)) for k in ('front','back')])
         assert axes['axes'],axes
         model=floor_frame.beam_skeleton(axes['axes'][0],[(2,z)],{'front':0,'back':descriptors['back']['origin'][1]},
-                                        seat_width_mm=4.2,seat_depth_mm=3,margin_world_mm=30,min_seat_world_mm=120,model_scale=60)
+                                        **seat.plan_seat(effective.thickness),margin_world_mm=30,min_seat_world_mm=120,model_scale=60)
         coverage=[]
         for element in model['elements']:
             if element['kind']!='WALL_SEGMENT':continue

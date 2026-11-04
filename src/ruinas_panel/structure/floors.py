@@ -4,6 +4,7 @@ import random
 from .. import meta,runtime,config
 from ..geometry import primitives,timber
 from . import openings,spatial,layout
+from ..construction_core import seat
 
 
 def support_positions(targets,anchors,bounds,windows,door,z0,z1):
@@ -75,7 +76,7 @@ def build(coll,p,scene):
     for ob in coll.objects:
         if primitives.piece_key(ob)=='Madera · viga de planta':
             co=primitives.coords(ob);cx=(co[:,0].min()+co[:,0].max())/2;cz=(co[:,2].min()+co[:,2].max())/2
-            level=min(range(1,len(bases)),key=lambda i:abs(cz-(bases[i]-3.6))) if len(bases)>1 else 0
+            level=min(range(1,len(bases)),key=lambda i:abs(cz-seat.beam_z(bases[i]))) if len(bases)>1 else 0
             stair=plans.get(level);opening=reservation(stair)
             if opening and opening[0]-2.5<cx<opening[1]+2.5:
                 primitives.clip_closed(ob,(0,stair['y0']-2.4,0),(0,1,0))
@@ -92,19 +93,19 @@ def build(coll,p,scene):
                 ob=timber.timber_beam(coll,wood,'Madera · rastrel de planta baja',(x,ymin,.975),(x,ymax,.975),1.55,2.4,p.seed+round(x*10))
                 ob['wood_floor']=True
         else:
-            anchors=sorted(b['x'] for b in meta.get(scene,'vigas_generadas',[]) if b['wall']=='front' and abs(b['z']-(top-3.6))<.01)
+            anchors=sorted(b['x'] for b in meta.get(scene,'vigas_generadas',[]) if b['wall']=='front' and abs(b['z']-seat.beam_z(top))<.01)
             if len(anchors)<2 or anchors[-1]-anchors[0]<(xmax-xmin)*.7:
                 # Bastidor interior autoportante cuando los muros han perdido sus alojamientos.
                 extra=[xmin+2+(xmax-xmin-4)*i/4 for i in range(5)]
-                extra=support_positions(extra,anchors,(xmin+2,xmax-2),meta.get(scene,'ventanas_generadas',[]),meta.get(scene,'puerta_generada'),layout.floor_bases(p)[level-1]-1.3,top-3.6)
+                extra=support_positions(extra,anchors,(xmin+2,xmax-2),meta.get(scene,'ventanas_generadas',[]),meta.get(scene,'puerta_generada'),layout.floor_bases(p)[level-1]-1.3,seat.beam_z(top))
                 anchors=sorted(anchors+extra)
                 if len(anchors)<2:raise ValueError('No caben dos apoyos de forjado fuera de los vanos: amplía la casa o reduce los huecos.')
                 for j,x in enumerate(extra):
                     end=stair['y0']-2.8 if opening and min(opening[0]-2,stair['approach'][0],stair['landing'][0]-2.5)<x<max(opening[1]+2,stair['approach'][1],stair['landing'][1]+2.5) else ymax-4
                     # Este bastidor carga sobre postes propios, no sobre alojamientos en la fábrica.
                     for y in (ymin+4,end):
-                        timber.timber_beam(coll,wood,'Madera · poste forjado',(x,y,layout.floor_bases(p)[level-1]-1.3),(x,y,top-3.6),3.6,3.6,p.seed+29100+j)
-                    timber.timber_beam(coll,wood,'Madera · viga forjado',(x,ymin+2.5,top-3.6),(x,end+.3,top-3.6),4.2,4.7,p.seed+29200+j)
+                        timber.timber_beam(coll,wood,'Madera · poste forjado',(x,y,layout.floor_bases(p)[level-1]-1.3),(x,y,seat.beam_z(top)),3.6,3.6,p.seed+29100+j)
+                    timber.timber_beam(coll,wood,'Madera · viga forjado',(x,ymin+2.5,seat.beam_z(top)),(x,end+.3,seat.beam_z(top)),seat.BEAM_WIDTH_MM,seat.BEAM_HEIGHT_MM,p.seed+29200+j)
         rows=max(2,math.ceil((ymax-ymin)/5.5));pitch=(ymax-ymin)/rows
         left_tree=openings.wall_tree(coll,walls['left']);right_tree=openings.wall_tree(coll,walls['right'])
         made=0;broken_count=0

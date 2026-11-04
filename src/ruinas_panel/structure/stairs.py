@@ -5,6 +5,7 @@ import bmesh
 from .. import meta,config,runtime
 from ..geometry import primitives,timber,weather
 from . import floors,layout
+from ..construction_core import seat
 
 
 def plan(p,bounds):
@@ -226,7 +227,7 @@ def build(coll,p,scene,plan):
     for x in (header_left-1.8,header_right+1.8):
         ob=timber.timber_beam(coll,wood,'Madera · poste hueco escalera',(x,hy,.7),(x,hy,s['top']-3.5),3.8,3.8,p.seed+round(x*11))
         ob['stair']=True
-    ob=timber.timber_beam(coll,wood,'Madera · cabecero escalera',(header_left-3,hy,(layout.upper_floor(p)-3.6)),(header_right+3,hy,(layout.upper_floor(p)-3.6)),4.2,4.7,p.seed+27400);ob['stair']=True
+    ob=timber.timber_beam(coll,wood,'Madera · cabecero escalera',(header_left-3,hy,seat.beam_z(layout.upper_floor(p))),(header_right+3,hy,seat.beam_z(layout.upper_floor(p))),seat.BEAM_WIDTH_MM,seat.BEAM_HEIGHT_MM,p.seed+27400);ob['stair']=True
     for x in (s['landing'][0]+2.2,s['landing'][1]-2.2):
         # Fuera de las huellas de TODOS los tramos, también cuando cambia
         # la longitud de la escalera superior por la altura de planta.

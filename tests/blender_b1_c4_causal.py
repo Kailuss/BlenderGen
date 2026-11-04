@@ -20,7 +20,7 @@ def capture(coll,p,scene):
     descriptors={w['id']:w for w in meta.get(scene,'paredes_generadas')}
     records=[]
     for level,base in enumerate(layout.floor_bases(p)[1:],1):
-        z=base-3.6
+        z=seat.beam_z(base)
         axes=floor_frame.aligned_axes(*[layout.masonry_joints(layout.masonry_intervals(p,descriptors[w],z)) for w in ('front','back')])
         for axis in axes['axes']:
             for wall in ('front','back'):

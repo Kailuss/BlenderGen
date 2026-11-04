@@ -29,4 +29,24 @@ nombre las piezas sin aparejo (tierra, maderas, tejas, decoración). No cambian 
 ni digests (las propiedades personalizadas no entran en el digest). Los informes `b1_c4_t1.json` previos
 usan el formato anterior y no son comparables clave a clave.
 
-Pendiente de C5-3: unificar las tres definiciones de asiento; de C5-2, el T1 de estrés con pérdida.
+## C5-3: definición única de asiento (Claude, 4 de noviembre de 2026)
+
+Había tres definiciones de asiento de viga que no se leían entre sí:
+
+1. Constructor y auditoría (`openings`, ensayo causal): tres rayos a ±1,5 mm, 2,7 mm bajo el eje, dos aciertos.
+   La caja del alojamiento, la cota 3,6/2,5 mm, la sección 4,2 × 4,7 mm y el vuelo de 4 mm eran literales repetidos
+   en `openings`, `floors` y `stairs`.
+2. Plan (`floor_frame.beam_skeleton`): contacto nominal fijo de 4,2 × 3 mm de modelo (180 mm de mundo),
+   pasado a mano por el ensayo de base y sin relación con la viga construida, que atraviesa el muro entero.
+3. Ensayo de daño (`blender_b1_c3_damage`): banda de piedra [z−4,5, z−2,7] y semiancho 2,6 mm propios.
+
+`construction_core/seat.py` es ahora la única fuente: `beam_z`, `pocket`, `embed_length`, `BEAM_WIDTH_MM`,
+`BEAM_HEIGHT_MM`, `samples`/`supported`, `bearing_overlap` y `plan_seat`. Constructor, forjado, cabecero de
+escalera y los tres ensayos Blender la leen. Los valores son los mismos literales: la geometría no debe cambiar
+(pendiente de confirmar con los cuatro digests de `dev.py test` en el PC).
+
+Único cambio de criterio: `plan_seat(grosor)` da al plan una profundidad de asiento igual al grosor del muro
+que la viga atraviesa (12 mm de modelo, 720 mm de mundo por defecto), en lugar de 3 mm. `b1_joint_baseline.json`
+cambiará en `seat_mm` y `area_mm2` al regenerarse. El asiento sigue siendo geométrico: no es capacidad resistente.
+
+Pendiente de C5-2: el T1 de estrés con pérdida.
