@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.38 — 2026-11-05
+
+Cubierta inclinada con apoyo real tras el derrumbe: se retiran durmientes de alero con menos de la mitad sobre sillar y tirantes de cercha sin ninguna cabeza apoyada (`roof.unsupported_timber`). Experimentos de reposo y régimen archivados. Detalle en `V03238.md` y `EXPERIMENTOS_ARCHIVADOS.md`.
+
 ## v0.32.37 — 2026-11-05
 
 Torreón: almenas en el pretil (2 hiladas, merlón entero en las esquinas de la cuadrada, sujetas a la regla de apoyo) y maderos del montón del pie sin cruzarse con piedras ni entre sí. Detalle en `V03237.md` y `TORREON.md`.
