@@ -25,7 +25,8 @@ def run():
     for key,value in dict(layout_mode='ROOM',height_type='THREE',build_type='FORTRESS',roof_type='TOWER',roof_frame=True,stair_type='NONE',
                           windows_enabled=False,cracks=0,rubble_amount=0,ground_roughness=0,batch_preview=False,use_instances=False).items():setattr(p,key,value)
     cases=[]
-    for seed,collapse in ((17,0.),(17,.30),(17,.60),(3,.30),(29,.30),(41,.45),(53,.60)):
+    # Derrumbes pequeños (0,05–0,15): parte de la terraza debe poder quedarse; los grandes la pierden entera.
+    for seed,collapse in ((17,0.),(17,.05),(17,.10),(3,.15),(17,.30),(17,.60),(3,.30),(29,.30),(41,.45),(53,.60)):
         p.seed=seed;p.collapse=collapse
         coll=addon.generate(bpy.context,p,'DRAFT')
         left,total=floating(coll,p)

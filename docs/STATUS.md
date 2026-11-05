@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.32 — 2026-11-05
+
+Torreón de prueba (circular o cuadrado) con aparejo trabado, saeteras, coronación en ruina con apoyo verificado y escombro al pie, desde su propio subpanel. Detalle en `V03232.md` y `TORREON.md`.
+
 ## v0.32.31 — 2026-11-05
 
 La terraza del torreón se sostiene con la geometría real que queda tras el derrumbe (vigas con asiento en las dos cabezas, losas sin vuelco, parapetos con área mínima), hasta punto fijo. Corrige `imposible.blend`. Detalle en `V03231.md`.
