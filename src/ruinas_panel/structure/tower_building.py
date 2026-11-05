@@ -210,7 +210,10 @@ def generate(scene,p):
     coll=bpy.data.collections.new(COLLECTION);scene.collection.children.link(coll)
     runtime.quality=p.preview_quality
     stone=primitives.material('Piedra · neutro',(.52,.52,.52));core=primitives.material('Núcleo · neutro',(.44,.44,.44))
-    thickness=min(p.thickness,p.tower_size*.3);geo=tower_floors.geometry(p.tower_shape,p.tower_size,thickness)
+    thickness=min(p.thickness,p.tower_size*.3)
+    # En torres pequeñas el muro adelgaza para dejar al menos MIN_INNER_MM de radio interior (forjado y escalera de mano).
+    if p.tower_size/2-thickness<tower_floors.MIN_INNER_MM:thickness=max(4.,p.tower_size/2-tower_floors.MIN_INNER_MM)
+    geo=tower_floors.geometry(p.tower_shape,p.tower_size,thickness)
     wood=primitives.material('Madera · neutro',(.42,.32,.22));parapet=tower_floors.PARAPET_COURSES if p.tower_terrace else 0
     if p.tower_shape=='ROUND':
         intact=tower_plan.round_plan(p.tower_size/2,thickness,p.tower_height,p.stone_size,seed=p.seed,variation=p.stone_variation,slits=p.tower_slits,floors=p.tower_floors,parapet=parapet)

@@ -422,6 +422,7 @@ def interior(geo,plan,floors,terrace=False):
 
 
 LADDER_BELOW_MM=16.     # radio o semilado interior por debajo del cual va escalera de mano
+MIN_INNER_MM=12.        # radio o semilado interior mínimo: el muro de torres pequeñas adelgaza hasta dejarlo
 HATCH_W=6.              # ancho de la trampilla (y de la escalera con holgura)
 HATCH_L=7.              # largo de la trampilla junto al muro +Y
 LADDER_HALF=2.          # semiancho entre ejes de largueros

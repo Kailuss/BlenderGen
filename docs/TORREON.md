@@ -123,6 +123,8 @@ Dos variantes: **circular** y **cuadrada**.
 - **Tras la ruina:** se sostiene si sigue su viga y hay tabla bajo el pie (`ladder_alive`). Si no, sus largueros caen
   con el resto del escombro.
 - **Pruebas:** `test_narrow_tower_ladders` y la torre circular de 40 mm en `blender_tower_interior`.
+- **Muro en torres pequeñas:** adelgaza hasta dejar al menos 12 mm de radio interior (`MIN_INNER_MM`). Con el grosor
+  nominal de 12 mm, una torre de 40 mm se quedaba con 8 mm de radio interior y sin forjados.
 
 ## Siguiente
 1. Desagüe de la terraza.
