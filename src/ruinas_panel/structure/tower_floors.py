@@ -541,10 +541,11 @@ def fallen(geo,frames,kept,steps,alive,seed=0,lost_ladders=()):
         return [],cleared
     for lv,_,stay,rest in kept:
         for t in stay:
-            for c in cells_under(footprint(geo,sum(t['x'])/2,sum(t['y'])/2,0.,t['x'][1]-t['x'][0],t['y'][1]-t['y'][0])):tops.setdefault(c,[]).append(lv['board_top'])
+            for c in cells_under(footprint(geo,sum(t['x'])/2,sum(t['y'])/2,0.,t['x'][1]-t['x'][0],t['y'][1]-t['y'][0])):tops.setdefault(c,[]).append((lv['board_top'],lv['board_top']))
         for t in rest:
-            for c in cells_under(footprint(geo,sum(t['x'])/2,sum(t['y'])/2,0.,t['x'][1]-t['x'][0],t['y'][1]-t['y'][0])):tops.setdefault(c,[]).append(lv['top'])
-    floors={k:list(v) for k,v in tops.items()}
+            for c in cells_under(footprint(geo,sum(t['x'])/2,sum(t['y'])/2,0.,t['x'][1]-t['x'][0],t['y'][1]-t['y'][0])):tops.setdefault(c,[]).append((lv['top'],lv['top']))
+    # Cada celda guarda (piso de apoyo, cota superior): un piso vivo es (cota, cota); el escombro, (piso sobre el que
+    # reposa, su techo). Cuenta todo lo que reposa en un piso por debajo del origen, aunque el montón sea más alto.
     ceilings=sorted(lv['beam_z0'] for lv,live,_,_ in kept if live)
     for p in lost_pieces(geo,frames,kept,steps,alive,lost_ladders):
         length,width,height=p['size'];parts=max(1,math.ceil(length/(1.6*r)))
@@ -563,17 +564,18 @@ def fallen(geo,frames,kept,steps,alive,seed=0,lost_ladders=()):
                 # Huella inflada una celda: dos piezas que no comparten celda tampoco se tocan entre centros de celda.
                 cells=cells_under(footprint(geo,cx,cy,yaw,part+FALL_CELL*1.5,width+FALL_CELL*1.5))
                 if not cells:continue
-                # Solo superficies estrictamente por debajo: una losa sin apoyo no se queda en su propio piso.
-                z=max(max([t for t in tops.get(cell,[]) if t<p['z0']-1e-6],default=0.) for cell in cells)
-                base=max(max([t for t in floors.get(cell,[]) if t<p['z0']-1e-6],default=0.) for cell in cells)
-                if z-base>PILE_MAX:continue
+                # Solo pisos estrictamente por debajo: una losa sin apoyo no se queda en su propio piso.
+                under={cell:[t for b,t in tops.get(cell,[]) if b<p['z0']-1e-6] for cell in cells}
+                z=max(max(v,default=0.) for v in under.values())
+                base=max(max([b for b,t in tops.get(cell,[]) if b==t and b<p['z0']-1e-6],default=0.) for cell in cells)
+                if z-base>PILE_MAX or z>p['z0']+1e-6:continue
                 # Apoyo real: al menos FALL_SUPPORT de la huella sobre la superficie donde se posa (no colgando de un borde).
-                level=sum(1 for cell in cells if any(abs(t-z)<.05 for t in tops.get(cell,[]) if t<p['z0']-1e-6) or (z==0. and not tops.get(cell)))
+                level=sum(1 for cell in cells if any(abs(t-z)<.05 for t in under[cell]) or (z==0. and not under[cell]))
                 if level<FALL_SUPPORT*len(cells):continue
                 if any(z<ceiling<z+height+.2 for ceiling in ceilings):continue
-                if placed is None or z<placed[3]-1e-6:placed=(cx,cy,yaw,z,cells)
+                if placed is None or z<placed[3]-1e-6:placed=(cx,cy,yaw,z,cells,base)
             if placed is None:cleared['wood' if p['wood'] else 'stone']+=1;continue
-            cx,cy,yaw,z,cells=placed
-            for cell in cells:tops.setdefault(cell,[]).append(z+height)
+            cx,cy,yaw,z,cells,base=placed
+            for cell in cells:tops.setdefault(cell,[]).append((base,z+height))
             pieces.append({'kind':p['kind'],'wood':p['wood'],'x':cx,'y':cy,'yaw':yaw,'size':(part,width,height),'z0':z,'from':p['z0']})
     return pieces,cleared

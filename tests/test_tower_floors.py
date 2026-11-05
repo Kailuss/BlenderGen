@@ -166,7 +166,8 @@ class TowerFloorsTests(unittest.TestCase):
             for amount in (.35,.85):
                 kept=ruin(plan,120,seed=7,amount=amount)[0]
                 floors,alive,lost=tf.settle(geo,kept,frames,steps)
-                pieces,cleared=tf.fallen(geo,frames,floors,steps,alive,7)
+                dead=[l for l in tf.ladders(geo,frames) if not tf.ladder_alive(geo,l,floors)]
+                pieces,cleared=tf.fallen(geo,frames,floors,steps,alive,7,dead)
                 total+=len(pieces)
                 self.assertLessEqual(len(pieces),tf.FALL_LIMIT)
                 surfaces={0.}|{lv['board_top'] for lv,_,b,_ in floors if b}|{lv['top'] for lv,_,_,sl in floors if sl}
