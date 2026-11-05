@@ -201,9 +201,47 @@ def settled_tile(start,end,patches):
     return tuple(center-direction*length*.5),tuple(center+direction*length*.5)
 
 
+PLATE_SEAT=.5        # fracción mínima de un durmiente de alero apoyada en piedra
+TIE_SEAT=.25         # fracción mínima de la cabeza de un tirante de cercha (basta una cabeza)
+SEAT_GAP=.6          # piedra a menos de esta distancia bajo la base
+
+
+def seat_fraction(trees,points,gap=SEAT_GAP):
+    'IA: Fracción de puntos (base de pieza) con sillar a menos de gap mm por debajo en alguno de los árboles; el rayo parte 3 mm por encima para contar también lo embebido.'
+    hit=0
+    for x,y,z in points:
+        hit+=any(tree.ray_cast(Vector((x,y,z+3)),Vector((0,0,-1)),3+gap)[0] is not None for tree in trees)
+    return hit/max(1,len(points))
+
+
+def unsupported_timber(coll,p,walls,x0,x1):
+    'IA: Tras asentar la cubierta: durmientes de alero con menos de PLATE_SEAT de su base sobre sillar y tirantes de cercha sin ninguna cabeza con TIE_SEAT; se miden contra la fábrica final (sillares y pilares).'
+    import numpy
+    trees=[openings.wall_tree(coll,walls[k],bearing=True) for k in ('left','right')];t=p.thickness;out=[]
+    for ob in list(coll.objects):
+        key=primitives.piece_key(ob)
+        if not key.startswith(('Madera · durmiente de alero','Madera · cercha cubierta')):continue
+        co=primitives.coords(ob)
+        if not len(co):continue
+        zb=float(co[:,2].min())
+        if key.startswith('Madera · durmiente'):
+            x=float(co[:,0].mean());ys=numpy.linspace(co[:,1].min()+.3,co[:,1].max()-.3,12)
+            if seat_fraction(trees,[(x,y,zb) for y in ys])<PLATE_SEAT:out.append(ob)
+            continue
+        if co[:,2].max()-co[:,2].min()>6:continue   # pendolón: cuelga de los pares, no apoya en muro
+        xa,xb=float(co[:,0].min()),float(co[:,0].max());ya,yb=float(co[:,1].min()),float(co[:,1].max())
+        ends=[]
+        for wall_x in (x0,x1):
+            lo,hi=max(xa,wall_x-t/2),min(xb,wall_x+t/2)
+            if hi-lo<.6:continue
+            ends.append(seat_fraction(trees,[(x,y,zb) for x in numpy.linspace(lo+.2,hi-.2,4) for y in numpy.linspace(ya+.3,yb-.3,3)]))
+        if not ends or max(ends)<TIE_SEAT:out.append(ob)
+    return out
+
+
 def build(coll,p,scene):
     'IA: Cerchas sobre cotas reales de dos paredes, con descenso máximo de 32 mm o 55% de planta; excluye apoyos aislados y recorta madera y tejas individuales mediante regiones compartidas.'
-    meta.put(scene,'cubierta_generada',[]);meta.put(scene,'cubierta_detalles',{})
+    meta.put(scene,'cubierta_generada',[]);meta.put(scene,'cubierta_detalles',{});meta.put(scene,'cubierta_sin_apoyo',[])
     for key in ('cubierta_roturas','chimeneas_generadas','bajantes_generadas'):meta.put(scene,key,[])
     meta.put(scene,'escombros_cubierta',{})
     if not p.roof_frame or p.layout_mode!='ROOM':return
@@ -333,6 +371,10 @@ def build(coll,p,scene):
             if 'timber_path' in ob:ob['timber_path']=[[x,y,h-settlement(x,y)] for x,y,h in ob['timber_path']]
         for record in records:
             drop=sum(drops[record['index']])/2;record['z']-=drop;record['ridge']-=drop
+        # Apoyo real tras asentar (como la terraza en 0.32.31): fuera durmientes y tirantes que quedan sobre huecos.
+        loose=unsupported_timber(coll,p,walls,x0,x1)
+        meta.put(scene,'cubierta_sin_apoyo',sorted(o.name for o in loose))
+        primitives.remove_objects(loose)
     roof_damage.debris(coll,p,scene,bounds,missing)
     meta.put(scene,'cubierta_generada',records)
     meta.put(scene,'cubierta_detalles',{**deformation,'curve':p.roof_curve,'sweep':p.roof_sweep,'sweep_bias':p.roof_sweep_bias,'ridge_x':xm,'tiles':tiles,'courses':rows,'supported_trusses':len(records),'profile':'concave' if p.roof_curve else 'straight','bounds':bounds,'eave_height':z,'overhang_mm':4,'missing_tiles':len(missing)})
