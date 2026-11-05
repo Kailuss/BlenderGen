@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.39 — 2026-11-05
+
+Torreón estrecho (interior < 16 mm): escalera de mano y trampilla por planta en vez de caracol; la escalera cae si pierde su viga o el piso de abajo. El muro de torres pequeñas adelgaza hasta dejar 12 mm de radio interior. Corregido el escombro interior que podía cruzarse cuando el montón superaba el origen de la pieza. Detalle en `V03239.md` y `TORREON.md`.
+
 ## v0.32.38 — 2026-11-05
 
 Cubierta inclinada con apoyo real tras el derrumbe: se retiran durmientes de alero con menos de la mitad sobre sillar y tirantes de cercha sin ninguna cabeza apoyada (`roof.unsupported_timber`). Experimentos de reposo y régimen archivados. Detalle en `V03238.md` y `EXPERIMENTOS_ARCHIVADOS.md`.
