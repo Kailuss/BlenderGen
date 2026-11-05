@@ -3,6 +3,8 @@ import sys,time,json
 from pathlib import Path
 import bpy
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'))
+# Destino propio de la prueba: no sobrescribir los .blend de entrega de dist/ (archivos del usuario).
+OUT=ROOT/'dist/pruebas';OUT.mkdir(parents=True,exist_ok=True)
 import ruinas_panel as addon
 from ruinas_panel.services import physics_jobs,structural_physics,height_selection,impact_physics,physics
 
@@ -39,7 +41,7 @@ def run():
     report['preparation']['timber_fracture_joints']=sum(bool(o.get('timber_fracture_joint')) for o in lab.objects)
     lab['preparation_report']=json.dumps(report['preparation'])
     print('SYNERGY_PREPARED',report['preparation']['bodies'],'bodies; extra timber joints',report['timber_joints_added'],flush=True)
-    bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'dist/ruinas_v03211_preparada.blend'))
+    bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'synergy_preparada.blend'))
     structural_physics.merge_ground(lab);print('SYNERGY_GROUND_MERGED',flush=True)
     report['collisions']=structural_physics.optimise_collisions(lab)
     print('SYNERGY_COLLISIONS',report['collisions'],flush=True)
@@ -60,11 +62,11 @@ def run():
     report['constraints']=structural_physics.sparsify_constraints(lab)
     structural_physics.release(lab,chosen)
     lab.frame_end=72;lab.rigidbody_world.point_cache.frame_end=72
-    bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'dist/ruinas_v03211_laboratorio.blend'))
+    bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'synergy_laboratorio.blend'))
     (ROOT/'reports/synergy_physics.json').write_text(json.dumps(report,indent=2),encoding='utf8')
     result,cost=calculate(lab,'SIMULATE');bpy.context.window.scene=result;result.name='03 · Reproducción'
     report['simulation']=json.loads(result['simulation_report']);report['simulation_cost']=cost
-    bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'dist/ruinas_v03211_integrada.blend'))
+    bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'synergy_integrada.blend'))
     (ROOT/'reports/synergy_physics.json').write_text(json.dumps(report,indent=2),encoding='utf8')
     print('SYNERGY_PHYSICS_PASSED',report,flush=True)
 
