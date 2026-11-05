@@ -47,10 +47,12 @@ def run():
             if ruin<.5:
                 bpy.ops.wm.save_as_mainfile(filepath=str(out/('torreon_paso6_%s.blend'%shape.lower())),copy=True)
                 # Vista en corte: se ocultan las piezas de muro de la mitad delantera para ver forjados y escalera.
+                # Se ocultan todos los núcleos (anillos que taparían el corte) y escombro y piedras de la mitad delantera.
                 for ob in pieces:
-                    if not ob.name.startswith(('Madera','Piedra · peldaño')):
-                        ys=[v.co.y for v in ob.data.vertices];ob.hide_render=sum(ys)/len(ys)<-2
-                render(scene,ROOT/('reports/tower_interior_%s.png'%shape.lower()),focus=(0,0,55),location=(150,-260,170),scale=150)
+                    if ob.name.startswith(('Madera','Piedra · peldaño')):continue
+                    ys=[v.co.y for v in ob.data.vertices]
+                    ob.hide_render=ob.name.startswith('Mortero') or bool(ob.get('escombro')) or sum(ys)/len(ys)<0
+                render(scene,ROOT/('reports/tower_interior_%s.png'%shape.lower()),focus=(0,0,60),location=(60,-300,110),scale=140)
     (ROOT/'reports/tower_interior.json').write_text(json.dumps(report,indent=2),encoding='utf8')
     print('TOWER_INTERIOR_PASSED',flush=True)
 

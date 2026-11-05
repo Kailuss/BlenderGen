@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.33 — 2026-11-05
+
+Torreón con interior: forjados de vigas sobre ménsulas del aparejo, tablas y escalera de caracol volada de una vuelta por planta; el hueco de la escalera sale del choque y tras la ruina solo queda lo que se sostiene. La cuadrada ya no tapa las saeteras con el núcleo. Detalle en `V03233.md` y `TORREON.md`.
+
 ## v0.32.32 — 2026-11-05
 
 Torreón de prueba (circular o cuadrado) con aparejo trabado, saeteras, coronación en ruina con apoyo verificado y escombro al pie, desde su propio subpanel. Detalle en `V03232.md` y `TORREON.md`.
