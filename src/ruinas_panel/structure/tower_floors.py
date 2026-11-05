@@ -408,3 +408,112 @@ def interior(geo,plan,floors,terrace=False):
         beams,boards=frame(geo,l,steps,plan)
         add_corbels(plan,geo,l,beams);frames.append((l,beams,boards,slabs(geo,l,boards,steps)))
     return frames,steps
+
+
+FALL_LIMIT=40           # piezas caídas como máximo; el resto se da por retirado
+FALL_CELL=1.            # celda del mapa de alturas (mm)
+FALL_BREAK=.3           # hueco entre los trozos de una pieza partida
+PILE_MAX=10.            # altura máxima del montón de escombro sobre su piso
+FALL_SUPPORT=.4         # fracción mínima de la huella de una pieza caída que descansa a su cota
+
+
+def central(geo):
+    'IA: Medida (radio o semilado) de la zona central libre de escalera donde cae el escombro interior.'
+    return geo['inner']-stair_depth(geo)-.3
+
+
+def footprint(geo,cx,cy,yaw,length,width):
+    'IA: Esquinas XY de un rectángulo girado yaw alrededor de su centro.'
+    c,s=math.cos(yaw),math.sin(yaw);out=[]
+    for u,v in ((-1,-1),(1,-1),(1,1),(-1,1)):
+        x=u*length/2;y=v*width/2;out.append((cx+x*c-y*s,cy+x*s+y*c))
+    return out
+
+
+def in_central(geo,corners):
+    'IA: Indica si todas las esquinas caen en la zona central (círculo o cuadrado).'
+    r=central(geo)
+    if geo['shape']=='SQUARE':return all(abs(x)<=r and abs(y)<=r for x,y in corners)
+    return all(math.hypot(x,y)<=r for x,y in corners)
+
+
+def cells_under(corners):
+    'IA: Celdas del mapa de alturas cuyo centro cae dentro del rectángulo girado (convexo).'
+    xs=[x for x,_ in corners];ys=[y for _,y in corners];out=[]
+    for i in range(math.floor(min(xs)/FALL_CELL),math.ceil(max(xs)/FALL_CELL)+1):
+        for j in range(math.floor(min(ys)/FALL_CELL),math.ceil(max(ys)/FALL_CELL)+1):
+            px,py=(i+.5)*FALL_CELL,(j+.5)*FALL_CELL;inside=True
+            for k in range(4):
+                (ax,ay),(bx,by)=corners[k],corners[(k+1)%4]
+                if (bx-ax)*(py-ay)-(by-ay)*(px-ax)<0:inside=False;break
+            if inside:out.append((i,j))
+    return out
+
+
+def lost_pieces(geo,frames,kept,steps,alive):
+    'IA: Piezas que perdieron apoyo, con su caja original (centro, giro, medidas, cota de base) y material, de abajo arriba.'
+    out=[]
+    for (lv,beams,boards,tiles),(_,live,stay,rest) in zip(frames,kept):
+        ids={b['id'] for b in live}
+        for b in beams:
+            if b['id'] in ids:continue
+            out.append({'kind':'beam','wood':True,'x':0.,'y':sum(b['y'])/2,'yaw':0.,'size':(b['x'][1]-b['x'][0],BEAM_W,BEAM_H),'z0':lv['beam_z0']})
+        ids={t['id'] for t in stay}
+        for t in boards:
+            if t['id'] in ids:continue
+            out.append({'kind':'board','wood':True,'x':sum(t['x'])/2,'y':sum(t['y'])/2,'yaw':math.pi/2,'size':(t['y'][1]-t['y'][0],BOARD_W,BOARD_T),'z0':lv['beam_z1']})
+        ids={t['id'] for t in rest}
+        for t in tiles:
+            if t['id'] in ids:continue
+            out.append({'kind':'slab','wood':False,'x':sum(t['x'])/2,'y':sum(t['y'])/2,'yaw':0.,'size':(t['x'][1]-t['x'][0],t['y'][1]-t['y'][0],SLAB_T),'z0':lv['board_top']})
+    live={(s['flight'],s['index']) for s in alive}
+    for s in steps:
+        if (s['flight'],s['index']) in live:continue
+        mid=(s['a0']+s['a1'])/2;r=boundary(geo,mid,s['depth']/2);tread=max(2.,r*(s['a1']-s['a0'])/(1+STEP_OVERLAP))
+        out.append({'kind':'step','wood':False,'x':r*math.cos(mid),'y':r*math.sin(mid),'yaw':mid+math.pi/2,'size':(tread,s['depth']*.8,s['z1']-s['z0']),'z0':s['z0']})
+    return sorted(out,key=lambda p:p['z0'])
+
+
+def fallen(geo,frames,kept,steps,alive,seed=0):
+    'IA: Deja caer en vertical lo que perdió apoyo sobre la superficie más alta por debajo (tablas o losas vivas, otro escombro o el suelo), dentro de la zona central, en el sitio más bajo de varios sembrados y sin montones de más de PILE_MAX; las piezas largas se parten. Devuelve piezas caídas y cuántas se dan por retiradas.'
+    import random
+    rng=random.Random(seed*6151+29);r=central(geo);tops={};pieces=[];cleared=0
+    if r<3:return [],len(lost_pieces(geo,frames,kept,steps,alive))
+    for lv,_,stay,rest in kept:
+        for t in stay:
+            for c in cells_under(footprint(geo,sum(t['x'])/2,sum(t['y'])/2,0.,t['x'][1]-t['x'][0],t['y'][1]-t['y'][0])):tops.setdefault(c,[]).append(lv['board_top'])
+        for t in rest:
+            for c in cells_under(footprint(geo,sum(t['x'])/2,sum(t['y'])/2,0.,t['x'][1]-t['x'][0],t['y'][1]-t['y'][0])):tops.setdefault(c,[]).append(lv['top'])
+    floors={k:list(v) for k,v in tops.items()}
+    ceilings=sorted(lv['beam_z0'] for lv,live,_,_ in kept if live)
+    for p in lost_pieces(geo,frames,kept,steps,alive):
+        length,width,height=p['size'];parts=max(1,math.ceil(length/(1.6*r)))
+        part=(length-FALL_BREAK*(parts-1))/parts
+        for k in range(parts):
+            if len(pieces)>=FALL_LIMIT:cleared+=1;continue
+            off=(k-(parts-1)/2)*(part+FALL_BREAK);c,s=math.cos(p['yaw']),math.sin(p['yaw'])
+            placed=None
+            # Se prueban varios sitios y se queda el más bajo: el escombro se esparce en vez de apilarse en columna.
+            for attempt in range(16):
+                spread=1.5+attempt*.8;yaw=p['yaw']+rng.uniform(-.6,.6)
+                cx=p['x']+off*c+rng.uniform(-spread,spread);cy=p['y']+off*s+rng.uniform(-spread,spread)
+                scale=r/max(r,math.hypot(cx,cy)+part/2);cx,cy=cx*scale,cy*scale
+                corners=footprint(geo,cx,cy,yaw,part,width)
+                if not in_central(geo,corners):continue
+                # Huella inflada una celda: dos piezas que no comparten celda tampoco se tocan entre centros de celda.
+                cells=cells_under(footprint(geo,cx,cy,yaw,part+FALL_CELL*1.5,width+FALL_CELL*1.5))
+                if not cells:continue
+                # Solo superficies estrictamente por debajo: una losa sin apoyo no se queda en su propio piso.
+                z=max(max([t for t in tops.get(cell,[]) if t<p['z0']-1e-6],default=0.) for cell in cells)
+                base=max(max([t for t in floors.get(cell,[]) if t<p['z0']-1e-6],default=0.) for cell in cells)
+                if z-base>PILE_MAX:continue
+                # Apoyo real: al menos FALL_SUPPORT de la huella sobre la superficie donde se posa (no colgando de un borde).
+                level=sum(1 for cell in cells if any(abs(t-z)<.05 for t in tops.get(cell,[]) if t<p['z0']-1e-6) or (z==0. and not tops.get(cell)))
+                if level<FALL_SUPPORT*len(cells):continue
+                if any(z<ceiling<z+height+.2 for ceiling in ceilings):continue
+                if placed is None or z<placed[3]-1e-6:placed=(cx,cy,yaw,z,cells)
+            if placed is None:cleared+=1;continue
+            cx,cy,yaw,z,cells=placed
+            for cell in cells:tops.setdefault(cell,[]).append(z+height)
+            pieces.append({'kind':p['kind'],'wood':p['wood'],'x':cx,'y':cy,'yaw':yaw,'size':(part,width,height),'z0':z,'from':p['z0']})
+    return pieces,cleared

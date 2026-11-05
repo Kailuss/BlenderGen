@@ -88,6 +88,20 @@ def build_interior(coll,geo,frames,steps,stone,wood,origin=(0.,0.,0.)):
     return made
 
 
+def build_fallen(coll,pieces,stone,wood,origin=(0.,0.,0.)):
+    'IA: Escombro interior caído desde tower_floors.fallen: cajas cerradas giradas en planta, marcadas escombro y tower_fallen.'
+    ox,oy,oz=origin;made=[];names={'beam':'Madera · viga caída torreón','board':'Madera · tabla caída torreón','slab':'Piedra · losa caída torreón','step':'Piedra · peldaño caído torreón'}
+    for k,piece in enumerate(pieces):
+        length,width,height=piece['size'];corners=tower_floors.footprint(None,piece['x'],piece['y'],piece['yaw'],length,width)
+        z0=oz+piece['z0'];z1=z0+height
+        verts=[(x+ox,y+oy,z0) for x,y in corners]+[(x+ox,y+oy,z1) for x,y in corners]
+        faces=[(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]
+        ob=primitives.mesh_obj('%s %s'%(names[piece['kind']],k),verts,faces,coll,wood if piece['wood'] else stone)
+        identifiers.tag(ob,'fallen',0,k);ob['wall_id']='torreon';ob['escombro']=True;ob['tower_fallen']=True;made.append(ob)
+        if not piece['wood']:primitives.bevel(ob,min(.25,height*.15))
+    return made
+
+
 def stone_runs(stones,tolerance=1e-6):
     'IA: Tramos angulares contiguos de piedras vivas; None representa la vuelta completa.'
     if not stones:return []
@@ -186,12 +200,15 @@ def generate(scene,p):
         made=build_square(coll,plan,stone,core)
     kept,alive,lost=tower_floors.settle(geo,plan,frames,steps)
     inside=build_interior(coll,geo,kept,alive,stone,wood)
+    # Lo que pierde apoyo no desaparece: cae sobre el piso vivo de abajo o el suelo («dejar a la naturaleza hacer»).
+    debris,cleared=tower_floors.fallen(geo,frames,kept,steps,alive,p.seed)
+    inside+=build_fallen(coll,debris,stone,wood)
     if getattr(p,'wear',0)>0:
         from ..geometry import weather
         for i,ob in enumerate(o for o in made if o.name.startswith('Piedra')):weather.weather_stone(ob,p.wear,p.seed*977+i)
     heaps=tower_rubble(coll,p,stone,tower_plan.lost_angles(intact,plan,square=p.tower_shape!='ROUND'),removed)
     interior={'beams':sum(len(f[1]) for f in kept),'boards':sum(len(f[2]) for f in kept),'slabs':sum(len(f[3]) for f in kept),
-              'terrace':any(f[0]['terrace'] and f[3] for f in kept),'steps':len(alive),'lost':lost}
+              'terrace':any(f[0]['terrace'] and f[3] for f in kept),'steps':len(alive),'lost':lost,'fallen':len(debris),'cleared':cleared}
     return {'stones':sum(o.name.startswith('Piedra') for o in made),'removed':removed,'pieces':len(made)+len(inside),'heaps':heaps,'interior':interior}
 
 
