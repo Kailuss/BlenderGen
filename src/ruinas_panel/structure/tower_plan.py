@@ -188,3 +188,25 @@ def ruin_square(plan,height,seed=0,amount=.3,support=.5):
             stones.append(s)
         kept.append(dict(course,stones=stones));below=stones
     return kept,removed
+
+
+def lost_angles(before,after,square=False):
+    'IA: Ángulos (desde el centro) de las piedras que la ruina quitó, comparando planes; sirven para orientar el escombro.'
+    angles=[]
+    for b,a in zip(before,after):
+        kept=a['stones']
+        for st in b['stones']:
+            if st in kept:continue
+            if square:angles.append(math.atan2((st['y'][0]+st['y'][1])/2,(st['x'][0]+st['x'][1])/2))
+            else:angles.append(((st[0]+st[1])/2)%(2*math.pi))
+    return angles
+
+
+def heap_directions(angles,count=2,spread=.6):
+    'IA: Hasta count direcciones de montón: los centros de los grupos de ángulos perdidos más numerosos (ventana ±spread rad).'
+    picked=[];pool=list(angles)
+    while pool and len(picked)<count:
+        best=max(pool,key=lambda t:sum(1 for u in pool if abs((u-t+math.pi)%(2*math.pi)-math.pi)<spread))
+        group=[u for u in pool if abs((u-best+math.pi)%(2*math.pi)-math.pi)<spread]
+        picked.append((best,len(group)));pool=[u for u in pool if u not in group]
+    return picked

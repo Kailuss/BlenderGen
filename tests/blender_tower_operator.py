@@ -6,20 +6,23 @@ ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'));sys.
 import ruinas_panel as addon
 from ruinas_panel.structure import tower_building
 from blender_probe import closure
+from blender_v032 import render
 
 
 def run():
-    'IA: Genera torre circular y cuadrada con el operador, exige mallas cerradas, una sola colección y piedras retiradas por la ruina.'
+    'IA: Genera torre circular y cuadrada con el operador (con desgaste), exige mallas cerradas, una sola colección y escombro al pie; renderiza cada una.'
     bpy.ops.wm.read_factory_settings(use_empty=True);addon.register();scene=bpy.context.scene;p=scene.ruin_settings
     p.preview_quality='DRAFT';report={}
     for shape in ('ROUND','SQUARE'):
-        p.tower_shape=shape;p.tower_ruin=.4;p.seed=11
+        p.tower_shape=shape;p.tower_ruin=.45;p.seed=11;p.wear_level='CUSTOM';p.wear=.25
         assert bpy.ops.ruin.tower_generate()=={'FINISHED'}
         coll=bpy.data.collections[tower_building.COLLECTION]
         assert sum(c.name.startswith(tower_building.COLLECTION) for c in bpy.data.collections)==1
         sealed=closure(coll);assert not sealed['open_edges'],sealed
         stones=sum(o.name.startswith('Piedra') for o in coll.objects);assert stones>50,stones
-        report[shape]={'objects':len(coll.objects),'stones':stones}
+        rubble=sum(bool(o.get('escombro')) for o in coll.objects);assert rubble>0,rubble
+        report[shape]={'objects':len(coll.objects),'stones':stones,'rubble':rubble}
+        render(scene,ROOT/('reports/tower_operator_%s.png'%shape.lower()),focus=(0,0,50),location=(200,-230,190),scale=200)
         print('TOWER_OPERATOR',shape,report[shape],flush=True)
     print('TOWER_OPERATOR_PASSED',flush=True)
 

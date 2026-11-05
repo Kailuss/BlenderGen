@@ -125,11 +125,36 @@ def generate(scene,p):
     stone=primitives.material('Piedra · neutro',(.52,.52,.52));core=primitives.material('Núcleo · neutro',(.44,.44,.44))
     thickness=min(p.thickness,p.tower_size*.3)
     if p.tower_shape=='ROUND':
-        plan=tower_plan.round_plan(p.tower_size/2,thickness,p.tower_height,p.stone_size,seed=p.seed,variation=p.stone_variation,slits=p.tower_slits,floors=p.tower_floors)
-        plan,removed=tower_plan.ruin_round(plan,p.tower_height,seed=p.seed,amount=p.tower_ruin)
+        intact=tower_plan.round_plan(p.tower_size/2,thickness,p.tower_height,p.stone_size,seed=p.seed,variation=p.stone_variation,slits=p.tower_slits,floors=p.tower_floors)
+        plan,removed=tower_plan.ruin_round(intact,p.tower_height,seed=p.seed,amount=p.tower_ruin)
         made=build_round(coll,plan,stone,core)
     else:
-        plan=tower_plan.square_plan(p.tower_size,thickness,p.tower_height,p.stone_size,seed=p.seed,variation=p.stone_variation,slits=min(1,p.tower_slits),floors=p.tower_floors)
-        plan,removed=tower_plan.ruin_square(plan,p.tower_height,seed=p.seed,amount=p.tower_ruin)
+        intact=tower_plan.square_plan(p.tower_size,thickness,p.tower_height,p.stone_size,seed=p.seed,variation=p.stone_variation,slits=min(1,p.tower_slits),floors=p.tower_floors)
+        plan,removed=tower_plan.ruin_square(intact,p.tower_height,seed=p.seed,amount=p.tower_ruin)
         made=build_square(coll,plan,stone,core)
-    return {'stones':sum(o.name.startswith('Piedra') for o in made),'removed':removed,'pieces':len(made)}
+    if getattr(p,'wear',0)>0:
+        from ..geometry import weather
+        for i,ob in enumerate(o for o in made if o.name.startswith('Piedra')):weather.weather_stone(ob,p.wear,p.seed*977+i)
+    heaps=tower_rubble(coll,p,stone,tower_plan.lost_angles(intact,plan,square=p.tower_shape!='ROUND'),removed)
+    return {'stones':sum(o.name.startswith('Piedra') for o in made),'removed':removed,'pieces':len(made),'heaps':heaps}
+
+
+def tower_rubble(coll,p,stone,angles,removed):
+    'IA: Escombro al pie del torreón donde más coronación se perdió: montículo de tierra, piedras partidas asentadas y grava; una pieza por cada ~4 retiradas (máx. 14 por montón).'
+    import random
+    from ..geometry import terrain,fracture
+    if not removed or not angles:return []
+    soil=primitives.material('Tierra · arena',(.36,.31,.24));r=p.tower_size/2;h=p.stone_size;audit=[]
+    for k,(theta,count) in enumerate(tower_plan.heap_directions(angles)):
+        rr=random.Random(p.seed*7349+k);rx=h*(1.6+.08*min(count,30));ry=rx*.7
+        d=r+rx*.55;x,y=d*math.cos(theta),d*math.sin(theta)
+        pad,surface=terrain.earth_patch(coll,soil,'Tierra · cúmulo torreón %s'%k,x,y,rx,ry,1.2+h*.5,p.seed+5100+k,getattr(p,'ground_roughness',.3))
+        pieces=min(14,max(1,count//4))
+        for j in range(pieces):
+            before=set(coll.objects);a=rr.random()*math.tau;rad=.7*math.sqrt((j+.5)/pieces)
+            cx=x+rx*rad*math.cos(a);cy=y+ry*rad*math.sin(a);scale=rr.uniform(.6,1.0)
+            fracture.broken_stone(coll,stone,cx,cy,rr.uniform(-math.pi,math.pi),h*1.6*scale,h*.8*scale,h*.62*scale,p.seed+6200+k*131+j,getattr(p,'wear',0))
+            for ob in set(coll.objects)-before:terrain.settle_rubble(ob,surface);ob['escombro']=True
+        terrain.gravel_batch(coll,stone,'Grava · torreón %s'%k,x,y,rx,ry,surface,10+3*pieces,p.seed+9500+k)
+        audit.append({'angle':theta,'lost':count,'pieces':pieces})
+    return audit

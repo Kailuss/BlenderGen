@@ -78,6 +78,17 @@ class TowerPlanTests(unittest.TestCase):
         sq,removed=tp.ruin_square(tp.square_plan(56,12,120,6.5,seed=7),120,seed=7,amount=.4)
         self.assertGreater(removed,0)
 
+    def test_lost_angles_and_heaps(self):
+        'IA: Los ángulos perdidos coinciden con las retiradas y el primer montón cae donde más se perdió.'
+        plan=tp.round_plan(30,10,120,6.5,seed=7)
+        ruined,removed=tp.ruin_round(plan,120,seed=7,amount=.45)
+        angles=tp.lost_angles(plan,ruined)
+        self.assertEqual(len(angles),removed)
+        heaps=tp.heap_directions(angles)
+        self.assertTrue(heaps and heaps[0][1]>=heaps[-1][1])
+        sq=tp.square_plan(56,12,120,6.5,seed=7);sr,sremoved=tp.ruin_square(sq,120,seed=7,amount=.45)
+        self.assertEqual(len(tp.lost_angles(sq,sr,square=True)),sremoved)
+
     def test_invalid(self):
         'IA: Rechaza grosores imposibles.'
         with self.assertRaises(ValueError):tp.round_plan(10,12,50,6)

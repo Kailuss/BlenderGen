@@ -36,8 +36,14 @@ Dos variantes: **circular** y **cuadrada**.
   casa; grosor y altura de hilada salen del tipo de construcción, la semilla es la de la casa.
 - Prueba `tests/blender_tower_operator.py`.
 
+## Paso 5 (hecho): escombro y desgaste
+- `lost_angles` y `heap_directions`: el escombro cae donde más coronación se perdió (hasta dos montones).
+- Cada montón: tierra con `terrain.earth_patch`, piedras partidas (`fracture.broken_stone`) asentadas y grava;
+  una pieza por cada ~4 piedras retiradas (máximo 14 por montón).
+- Desgaste de la fábrica (`weather.weather_stone`) en las piedras del torreón según «Desgaste».
+
 ## Siguiente
-1. Desgaste y grietas de la fábrica actual en los sectores; escombro caído al pie desde las piedras retiradas.
+1. Grietas en los sectores; forjados interiores y escalera de caracol; terraza con `roof_support`.
 2. Interior: forjados de vigas radiales o paralelas con asiento en `seat.py`, escalera de caracol embebida o
    adosada, terraza con `roof_support` (ya exige apoyo real).
 3. Lúgubre: coronación rota con almenas perdidas, sillares caídos al pie, saeteras ensanchadas por el daño,
