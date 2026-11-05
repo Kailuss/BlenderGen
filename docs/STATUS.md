@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.36 — 2026-11-05
+
+Torreón: el escombro interior que no cabe dentro sale al montón del pie (piedras partidas y maderos asentados en la tierra) en vez de retirarse. Detalle en `V03236.md` y `TORREON.md`.
+
 ## v0.32.35 — 2026-11-05
 
 Torreón: lo que pierde apoyo tras la ruina (vigas, tablas, losas, peldaños) cae dentro sobre el piso vivo o el suelo, esparcido y sin cruces, en vez de desaparecer. Límite: máximo 40 piezas y montones de 10 mm; el resto se retira. Detalle en `V03235.md` y `TORREON.md`.
