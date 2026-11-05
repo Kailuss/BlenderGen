@@ -8,7 +8,7 @@ import bpy
 from .. import config_masonry as masonry
 from ..construction_core import identifiers
 from ..geometry import primitives
-from . import tower_plan
+from . import tower_plan,tower_floors
 
 SEGMENT_MM=1.6      # cuerda máxima de las caras curvas
 CORE_INSET=.18      # fracción del grosor que el núcleo queda dentro de cada paramento
@@ -47,6 +47,44 @@ def ring_mesh(r_in,r_out,z0,z1):
     return verts,faces
 
 
+def radial_prism(geo,depth,a0,a1,z0,z1,embed=0.):
+    'IA: Prisma cerrado entre el paramento interior (más embed) y depth hacia dentro en el arco [a0,a1]; sigue el círculo o el cuadrado y quiebra en las esquinas.'
+    reach=geo['inner'];n=arc_steps(reach,a0,a1);angles={a0+(a1-a0)*i/n for i in range(n+1)}
+    if geo['shape']=='SQUARE':
+        k=math.ceil((a0-math.pi/4)/(math.pi/2))
+        while math.pi/4+k*math.pi/2<a1:angles.add(math.pi/4+k*math.pi/2);k+=1
+    verts=[]
+    for a in sorted(angles):
+        c,s=math.cos(a),math.sin(a);r_in=tower_floors.boundary(geo,a,depth);r_out=tower_floors.boundary(geo,a)+embed
+        verts+=[(r_in*c,r_in*s,z0),(r_out*c,r_out*s,z0),(r_out*c,r_out*s,z1),(r_in*c,r_in*s,z1)]
+    m=len(verts)//4-1;faces=[]
+    for i in range(m):
+        q=4*i;r=q+4
+        faces+=[(q,r,r+1,q+1),(q+1,r+1,r+2,q+2),(q+2,r+2,r+3,q+3),(q+3,r+3,r,q)]
+    faces+=[(0,1,2,3),(4*m+3,4*m+2,4*m+1,4*m)]
+    return verts,faces
+
+
+def build_interior(coll,geo,frames,steps,stone,wood,origin=(0.,0.,0.)):
+    'IA: Forjados (vigas sobre ménsulas y tablas) y peldaños de la hélice ya asentados; devuelve las piezas creadas.'
+    ox,oy,oz=origin;made=[]
+    for lv,beams,boards in frames:
+        f=lv['floor']
+        for b in beams:
+            ob=primitives.block('Madera · viga torreón %s.%s'%(f,b['id']),ox+b['x'][0],ox+b['x'][1],oy+b['y'][0],oy+b['y'][1],oz+lv['beam_z0'],oz+lv['beam_z1'],coll,wood)
+            identifiers.tag(ob,'beam',f,b['id']);ob['wall_id']='torreon';made.append(ob)
+        for t in boards:
+            ob=primitives.block('Madera · tabla torreón %s.%s'%(f,t['id']),ox+t['x'][0],ox+t['x'][1],oy+t['y'][0],oy+t['y'][1],oz+lv['beam_z1'],oz+lv['top'],coll,wood)
+            identifiers.tag(ob,'board',f,t['id']);ob['wall_id']='torreon';made.append(ob)
+    for k,st in enumerate(steps):
+        verts,faces=radial_prism(geo,st['depth'],st['a0'],st['a1'],oz+st['z0'],oz+st['z1'],tower_floors.STEP_EMBED)
+        verts=[(x+ox,y+oy,z) for x,y,z in verts]
+        ob=primitives.mesh_obj('Piedra · peldaño torreón %s'%k,verts,faces,coll,stone)
+        identifiers.tag(ob,'stair',st['flight'],st['index']);ob['wall_id']='torreon';made.append(ob)
+        primitives.bevel(ob,min(.3,(st['z1']-st['z0'])*.1))
+    return made
+
+
 def stone_runs(stones,tolerance=1e-6):
     'IA: Tramos angulares contiguos de piedras vivas; None representa la vuelta completa.'
     if not stones:return []
@@ -68,13 +106,16 @@ def build_round(coll,plan,stone,core,origin=(0.,0.,0.)):
     ox,oy,oz=origin;made=[]
     for course in plan:
         z0=oz+course['z0']+masonry.COURSE_BOTTOM_INSET;z1=oz+course['z1']-masonry.COURSE_TOP_INSET
-        r_in,r_out=course['r_in'],course['r_out'];t=r_out-r_in
+        r_in,r_out=course['r_in'],course['r_out'];t=r_out-r_in;corbels=course.get('corbels',{})
         for index,(a0,a1) in enumerate(course['stones']):
             gap=tower_plan.JOINT_MM/2/r_out
-            verts,faces=sector_mesh(r_in,r_out,a0+gap,a1-gap,z0,z1)
+            # Las ménsulas son perpiaños: la misma piedra atraviesa el muro y vuela hacia dentro.
+            inner=r_in-course.get('corbel_reach',0.) if (a0,a1) in corbels else r_in
+            verts,faces=sector_mesh(inner,r_out,a0+gap,a1-gap,z0,z1)
             verts=[(x+ox,y+oy,z) for x,y,z in verts]
             ob=primitives.mesh_obj('Piedra · torreón %s.%s'%(course['row'],index),verts,faces,coll,stone)
             identifiers.tag(ob,'stone',course['row'],index);ob['wall_id']='torreon';made.append(ob)
+            if inner<r_in:ob['corbel']=True
             primitives.bevel(ob,min(.65,(z1-z0)*.12,r_out*(a1-a0)*.1,t*.1))
         # El núcleo solo existe bajo piedras vivas: un anillo si la hilada está completa, sectores si está en ruina.
         zc0=oz+course['z0']-.85 if course['row'] else oz+course['z0'];zc1=oz+course['z1']-.7
@@ -95,19 +136,24 @@ def build_square(coll,plan,stone,core,origin=(0.,0.,0.)):
             (x0,x1),(y0,y1)=s['x'],s['y']
             ob=primitives.block('Piedra · torreón %s.%s'%(course['row'],index),ox+x0+j,ox+x1-j,oy+y0+j,oy+y1-j,z0,z1,coll,stone)
             identifiers.tag(ob,'stone',course['row'],index);ob['wall_id']='torreon_'+s['wall'];made.append(ob)
-        # Núcleo por muro, solo a lo largo de las piedras vivas de esa hilada y dentro del grosor.
-        zc0=oz+course['z0']-.85 if course['row'] else oz+course['z0'];zc1=oz+course['z1']-.7
-        for k,wall in enumerate(('front','back','left','right')):
-            own=[s for s in course['stones'] if s['wall']==wall]
+            if s.get('corbels'):ob['corbel']=True
+        # Núcleo por muro y por tramo continuo de piedras vivas, dentro del grosor común: no tapa saeteras ni huecos.
+        zc0=oz+course['z0']-.85 if course['row'] else oz+course['z0'];zc1=oz+course['z1']-.7;k=0
+        for wall in ('front','back','left','right'):
+            along='x' if wall in ('front','back') else 'y';across='y' if along=='x' else 'x'
+            own=sorted([s for s in course['stones'] if s['wall']==wall],key=lambda s:s[along][0])
             if not own:continue
-            along=0 if wall in ('front','back') else 1;across=1-along
-            lo=min(s['x' if along==0 else 'y'][0] for s in own);hi=max(s['x' if along==0 else 'y'][1] for s in own)
-            c0=own[0]['y' if along==0 else 'x'][0];c1=own[0]['y' if along==0 else 'x'][1];t=c1-c0
-            c0,c1=c0+CORE_INSET*t,c1-CORE_INSET*t;lo,hi=lo+CORE_INSET*t,hi-CORE_INSET*t
-            if hi-lo<tower_plan.MIN_STONE_MM:continue
-            x0,x1,y0,y1=(lo,hi,c0,c1) if along==0 else (c0,c1,lo,hi)
-            ob=primitives.block('Mortero · torreón %s'%course['row'],ox+x0,ox+x1,oy+y0,oy+y1,zc0,zc1,coll,core)
-            identifiers.tag(ob,'mortar',course['row'],k);ob['wall_id']='torreon';made.append(ob)
+            c0=max(s[across][0] for s in own);c1=min(s[across][1] for s in own);t=c1-c0
+            runs=[[own[0][along][0],own[0][along][1]]]
+            for s in own[1:]:
+                if s[along][0]<=runs[-1][1]+1e-6:runs[-1][1]=max(runs[-1][1],s[along][1])
+                else:runs.append([s[along][0],s[along][1]])
+            for lo,hi in runs:
+                lo,hi=lo+CORE_INSET*t,hi-CORE_INSET*t
+                if hi-lo<tower_plan.MIN_STONE_MM:continue
+                x0,x1,y0,y1=(lo,hi,c0+CORE_INSET*t,c1-CORE_INSET*t) if along=='x' else (c0+CORE_INSET*t,c1-CORE_INSET*t,lo,hi)
+                ob=primitives.block('Mortero · torreón %s'%course['row'],ox+x0,ox+x1,oy+y0,oy+y1,zc0,zc1,coll,core)
+                identifiers.tag(ob,'mortar',course['row'],k);ob['wall_id']='torreon';made.append(ob);k+=1
     return made
 
 
@@ -123,20 +169,26 @@ def generate(scene,p):
     coll=bpy.data.collections.new(COLLECTION);scene.collection.children.link(coll)
     runtime.quality=p.preview_quality
     stone=primitives.material('Piedra · neutro',(.52,.52,.52));core=primitives.material('Núcleo · neutro',(.44,.44,.44))
-    thickness=min(p.thickness,p.tower_size*.3)
+    thickness=min(p.thickness,p.tower_size*.3);geo=tower_floors.geometry(p.tower_shape,p.tower_size,thickness)
+    wood=primitives.material('Madera · neutro',(.42,.32,.22))
     if p.tower_shape=='ROUND':
         intact=tower_plan.round_plan(p.tower_size/2,thickness,p.tower_height,p.stone_size,seed=p.seed,variation=p.stone_variation,slits=p.tower_slits,floors=p.tower_floors)
+        frames,steps=tower_floors.interior(geo,intact,p.tower_floors)
         plan,removed=tower_plan.ruin_round(intact,p.tower_height,seed=p.seed,amount=p.tower_ruin)
         made=build_round(coll,plan,stone,core)
     else:
         intact=tower_plan.square_plan(p.tower_size,thickness,p.tower_height,p.stone_size,seed=p.seed,variation=p.stone_variation,slits=min(1,p.tower_slits),floors=p.tower_floors)
+        frames,steps=tower_floors.interior(geo,intact,p.tower_floors)
         plan,removed=tower_plan.ruin_square(intact,p.tower_height,seed=p.seed,amount=p.tower_ruin)
         made=build_square(coll,plan,stone,core)
+    kept,alive,lost=tower_floors.settle(geo,plan,frames,steps)
+    inside=build_interior(coll,geo,kept,alive,stone,wood)
     if getattr(p,'wear',0)>0:
         from ..geometry import weather
         for i,ob in enumerate(o for o in made if o.name.startswith('Piedra')):weather.weather_stone(ob,p.wear,p.seed*977+i)
     heaps=tower_rubble(coll,p,stone,tower_plan.lost_angles(intact,plan,square=p.tower_shape!='ROUND'),removed)
-    return {'stones':sum(o.name.startswith('Piedra') for o in made),'removed':removed,'pieces':len(made),'heaps':heaps}
+    interior={'beams':sum(len(b) for _,b,_ in kept),'boards':sum(len(t) for _,_,t in kept),'steps':len(alive),'lost':lost}
+    return {'stones':sum(o.name.startswith('Piedra') for o in made),'removed':removed,'pieces':len(made)+len(inside),'heaps':heaps,'interior':interior}
 
 
 def tower_rubble(coll,p,stone,angles,removed):

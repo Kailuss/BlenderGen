@@ -42,10 +42,31 @@ Dos variantes: **circular** y **cuadrada**.
   una pieza por cada ~4 piedras retiradas (máximo 14 por montón).
 - Desgaste de la fábrica (`weather.weather_stone`) en las piedras del torreón según «Desgaste».
 
+## Paso 6 (hecho): forjados sobre ménsulas y escalera de caracol — `structure/tower_floors.py`
+- Un forjado entre cada dos plantas. Las vigas (eje X, sección de `seat.py`) apoyan en **ménsulas**: perpiaños de
+  la hilada inferior que atraviesan el muro y vuelan 4 mm (circular) o 3 mm (cuadrada) hacia dentro. La ménsula es
+  una piedra del aparejo: entra en el plan antes de la ruina y sigue su regla de apoyo.
+- Entrega mínima de 1,2 mm en el borde más desfavorable. En la circular las vigas oblicuas cerca del muro no se
+  ponen: su ménsula pasaría de 9 mm o la cabeza no entregaría. Si la ménsula caería sobre una saetera o la viga roza
+  la escalera, la viga se corre hasta 3 mm.
+- Tablas en Y sobre las vigas, con vuelo máximo de 4,5 mm más allá de la última viga; necesitan dos vigas y el
+  centro entre ellas.
+- Escalera: hélice continua de peldaños de piedra pegados al muro (volada, sin machón), una vuelta por planta; cada
+  peldaño monta un 30 % sobre el anterior. En la cuadrada sigue el paramento y quiebra en las esquinas.
+- El hueco de la escalera sale del choque: las vigas que tocarían un peldaño no se ponen y las tablas se recortan.
+  La llegada se orienta para que el tramo bajo el forjado pase por +Y, lejos de las cabezas de viga.
+- Tras la ruina queda solo lo que se sostiene: viga con sus dos ménsulas vivas, tabla con dos vigas vivas, peldaño
+  con el anterior vivo y al menos un 30 % de su arco con muro detrás. Lo que cae se retira (recuento en `interior.lost`).
+- La cuadrada tenía el núcleo de mortero corrido por todo el muro y tapaba la saetera por dentro. Ahora hay un
+  núcleo por tramo continuo de piedras.
+- Pruebas: `tests/test_tower_floors.py` (puras: continuidad de la hélice, entregas, ménsulas en el plan, hilada que
+  cierra, choque independiente madera/peldaño, cobertura ≥ 40 %, ruina) y `tests/blender_tower_interior.py` (mallas
+  cerradas, choques con BVH, `.blend` en `dist/pruebas`, vista en corte).
+- Límite conocido: no se garantiza altura libre de paso bajo el forjado, solo que no haya choque. La escalera
+  termina en el último forjado.
+
 ## Siguiente
-1. Grietas en los sectores; forjados interiores y escalera de caracol; terraza con `roof_support`.
-2. Interior: forjados de vigas radiales o paralelas con asiento en `seat.py`, escalera de caracol embebida o
-   adosada, terraza con `roof_support` (ya exige apoyo real).
-3. Lúgubre: coronación rota con almenas perdidas, sillares caídos al pie, saeteras ensanchadas por el daño,
-   pátina y verdín por cara expuesta; todo sembrado y paramétrico.
-4. Grafo causal completo (muro → forjado → terraza) para que el derrumbe deje solo lo que se sostiene.
+1. Escalera hasta la terraza (con su acceso) y terraza con `roof_support`.
+2. Grietas en los sectores; saeteras ensanchadas por el daño; pátina y verdín por cara expuesta.
+3. Dejar caer en el laboratorio lo que pierde apoyo, en vez de retirarlo («dejar a la naturaleza hacer»).
+4. Grafo causal completo (muro → ménsula → viga → tabla, muro → peldaño).
