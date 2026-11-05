@@ -75,7 +75,7 @@ def balcony_gate(coll,p,w,h):
 
 
 def canopy(coll,p,w,a,b,top,depth,ceiling=None):
-    'IA: Tejadillo de media caña con perfil compartido, solape del 30%, pares rectos por tramos y rastreles; todo queda sobre el dintel. Sobre mirador (depth>0) no lleva ménsulas: apoya en sus montantes.'
+    'IA: Tejadillo de media caña con perfil compartido, solape del 30%, pares rectos por tramos y rastreles; todo queda sobre el dintel. Sobre mirador (depth>0) la ménsula nace por encima del remate del mirador.'
     side=1 if w['id'] in ('left','back') else -1
     rear=side*(p.thickness/2-.3);front=side*(p.thickness/2+depth+7)
     wood=primitives.material('Madera · tejadillo',(.31,.22,.13));clay=primitives.material('Tejas · arcilla',(.40,.20,.115))
@@ -88,8 +88,9 @@ def canopy(coll,p,w,a,b,top,depth,ceiling=None):
         return (x,front+(rear-front)*t,spatial.roof_height(t,base,rise,p.roof_curve)+longitudinal+extra)
     for x in (a+1,b-1):
         for row in range(rows):beam(coll,wood,w,'Madera · par tejadillo',point(x,row/rows),point(x,(row+1)/rows),1.7,1.8,p.seed+52000+row)
-        # Con mirador, los montantes ya sostienen el tejadillo: la ménsula los atravesaba (casa máxima, 5-11-2026).
-        if not depth:beam(coll,wood,w,'Madera · ménsula tejadillo',(x,rear,top-3),point(x,.08),1.7,1.7,p.seed+52020)
+        # Con mirador, la ménsula arranca por encima de su remate (fondo hasta top+1,4): antes nacía 3 mm por debajo y
+        # atravesaba el montante (casa máxima, 5-11-2026); sin ella el tejadillo quedaba flotando 0,5 mm.
+        beam(coll,wood,w,'Madera · ménsula tejadillo',(x,rear,top+2.4 if depth else top-3),point(x,.08),1.7,1.7,p.seed+52020)
     for row in range(rows+1):beam(coll,wood,w,'Madera · rastrel tejadillo',point(a,row/rows,2.1),point(b,row/rows,2.1),3.4,1.3,p.seed+52100+row)
     verts=[];faces=[];count=0
     for row in range(rows):
