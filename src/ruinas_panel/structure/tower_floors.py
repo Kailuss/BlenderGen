@@ -475,10 +475,12 @@ def lost_pieces(geo,frames,kept,steps,alive):
 
 
 def fallen(geo,frames,kept,steps,alive,seed=0):
-    'IA: Deja caer en vertical lo que perdió apoyo sobre la superficie más alta por debajo (tablas o losas vivas, otro escombro o el suelo), dentro de la zona central, en el sitio más bajo de varios sembrados y sin montones de más de PILE_MAX; las piezas largas se parten. Devuelve piezas caídas y cuántas se dan por retiradas.'
+    'IA: Deja caer en vertical lo que perdió apoyo sobre la superficie más alta por debajo (tablas o losas vivas, otro escombro o el suelo), dentro de la zona central, en el sitio más bajo de varios sembrados y sin montones de más de PILE_MAX; las piezas largas se parten. Devuelve piezas caídas y las que no caben dentro, por material (wood, stone), para echarlas al montón exterior.'
     import random
-    rng=random.Random(seed*6151+29);r=central(geo);tops={};pieces=[];cleared=0
-    if r<3:return [],len(lost_pieces(geo,frames,kept,steps,alive))
+    rng=random.Random(seed*6151+29);r=central(geo);tops={};pieces=[];cleared={'wood':0,'stone':0}
+    if r<3:
+        for p in lost_pieces(geo,frames,kept,steps,alive):cleared['wood' if p['wood'] else 'stone']+=1
+        return [],cleared
     for lv,_,stay,rest in kept:
         for t in stay:
             for c in cells_under(footprint(geo,sum(t['x'])/2,sum(t['y'])/2,0.,t['x'][1]-t['x'][0],t['y'][1]-t['y'][0])):tops.setdefault(c,[]).append(lv['board_top'])
@@ -490,7 +492,7 @@ def fallen(geo,frames,kept,steps,alive,seed=0):
         length,width,height=p['size'];parts=max(1,math.ceil(length/(1.6*r)))
         part=(length-FALL_BREAK*(parts-1))/parts
         for k in range(parts):
-            if len(pieces)>=FALL_LIMIT:cleared+=1;continue
+            if len(pieces)>=FALL_LIMIT:cleared['wood' if p['wood'] else 'stone']+=1;continue
             off=(k-(parts-1)/2)*(part+FALL_BREAK);c,s=math.cos(p['yaw']),math.sin(p['yaw'])
             placed=None
             # Se prueban varios sitios y se queda el más bajo: el escombro se esparce en vez de apilarse en columna.
@@ -512,7 +514,7 @@ def fallen(geo,frames,kept,steps,alive,seed=0):
                 if level<FALL_SUPPORT*len(cells):continue
                 if any(z<ceiling<z+height+.2 for ceiling in ceilings):continue
                 if placed is None or z<placed[3]-1e-6:placed=(cx,cy,yaw,z,cells)
-            if placed is None:cleared+=1;continue
+            if placed is None:cleared['wood' if p['wood'] else 'stone']+=1;continue
             cx,cy,yaw,z,cells=placed
             for cell in cells:tops.setdefault(cell,[]).append(z+height)
             pieces.append({'kind':p['kind'],'wood':p['wood'],'x':cx,'y':cy,'yaw':yaw,'size':(part,width,height),'z0':z,'from':p['z0']})

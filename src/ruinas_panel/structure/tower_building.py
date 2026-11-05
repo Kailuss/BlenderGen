@@ -11,6 +11,7 @@ from ..geometry import primitives
 from . import tower_plan,tower_floors
 
 SEGMENT_MM=1.6      # cuerda máxima de las caras curvas
+BEAM_SECTION=(tower_floors.BEAM_W,tower_floors.BEAM_H)
 CORE_INSET=.18      # fracción del grosor que el núcleo queda dentro de cada paramento
 
 
@@ -206,28 +207,43 @@ def generate(scene,p):
     if getattr(p,'wear',0)>0:
         from ..geometry import weather
         for i,ob in enumerate(o for o in made if o.name.startswith('Piedra')):weather.weather_stone(ob,p.wear,p.seed*977+i)
-    heaps=tower_rubble(coll,p,stone,tower_plan.lost_angles(intact,plan,square=p.tower_shape!='ROUND'),removed)
+    # Lo que no cabe dentro sale por las brechas al montón del pie: no se pierde material, se recoloca.
+    heaps=tower_rubble(coll,p,stone,tower_plan.lost_angles(intact,plan,square=p.tower_shape!='ROUND'),removed,cleared,wood)
     interior={'beams':sum(len(f[1]) for f in kept),'boards':sum(len(f[2]) for f in kept),'slabs':sum(len(f[3]) for f in kept),
-              'terrace':any(f[0]['terrace'] and f[3] for f in kept),'steps':len(alive),'lost':lost,'fallen':len(debris),'cleared':cleared}
+              'terrace':any(f[0]['terrace'] and f[3] for f in kept),'steps':len(alive),'lost':lost,'fallen':len(debris),'outside':cleared}
     return {'stones':sum(o.name.startswith('Piedra') for o in made),'removed':removed,'pieces':len(made)+len(inside),'heaps':heaps,'interior':interior}
 
 
-def tower_rubble(coll,p,stone,angles,removed):
-    'IA: Escombro al pie del torreón donde más coronación se perdió: montículo de tierra, piedras partidas asentadas y grava; una pieza por cada ~4 retiradas (máx. 14 por montón).'
+def tower_rubble(coll,p,stone,angles,removed,interior=None,wood=None):
+    'IA: Escombro al pie del torreón donde más coronación se perdió: montículo de tierra, piedras partidas asentadas y grava; una pieza por cada ~4 retiradas (máx. 14 por montón, 20 con el interior que no cupo dentro) y maderos asentados por cada ~3 piezas de madera interior (máx. 6 por montón).'
     import random
     from ..geometry import terrain,fracture
     if not removed or not angles:return []
     soil=primitives.material('Tierra · arena',(.36,.31,.24));r=p.tower_size/2;h=p.stone_size;audit=[]
-    for k,(theta,count) in enumerate(tower_plan.heap_directions(angles)):
+    directions=tower_plan.heap_directions(angles);interior=interior or {'wood':0,'stone':0}
+    extra_stone=interior['stone']//(3*len(directions));timber=min(6,interior['wood']//(3*len(directions))) if wood else 0
+    for k,(theta,count) in enumerate(directions):
         rr=random.Random(p.seed*7349+k);rx=h*(1.6+.08*min(count,30));ry=rx*.7
         d=r+rx*.55;x,y=d*math.cos(theta),d*math.sin(theta)
         pad,surface=terrain.earth_patch(coll,soil,'Tierra · cúmulo torreón %s'%k,x,y,rx,ry,1.2+h*.5,p.seed+5100+k,getattr(p,'ground_roughness',.3))
-        pieces=min(14,max(1,count//4))
+        pieces=min(20,min(14,max(1,count//4))+extra_stone)
         for j in range(pieces):
             before=set(coll.objects);a=rr.random()*math.tau;rad=.7*math.sqrt((j+.5)/pieces)
             cx=x+rx*rad*math.cos(a);cy=y+ry*rad*math.sin(a);scale=rr.uniform(.6,1.0)
             fracture.broken_stone(coll,stone,cx,cy,rr.uniform(-math.pi,math.pi),h*1.6*scale,h*.8*scale,h*.62*scale,p.seed+6200+k*131+j,getattr(p,'wear',0))
             for ob in set(coll.objects)-before:terrain.settle_rubble(ob,surface);ob['escombro']=True
+        # Maderos del interior en el borde del montón (las piedras ocupan el centro): vigas partidas y tablas.
+        for j in range(timber):
+            a=rr.random()*math.tau;rad=rr.uniform(.72,.92);cx=x+rx*rad*math.cos(a);cy=y+ry*rad*math.sin(a)
+            beam=j%2==0;length=rr.uniform(8,14) if beam else rr.uniform(8,16)
+            width,height=(BEAM_SECTION[0]*.85,BEAM_SECTION[1]*.85) if beam else (3.,1.)
+            yaw=rr.uniform(-math.pi,math.pi);c,sn=math.cos(yaw),math.sin(yaw);corners=[]
+            for u,v in ((-1,-1),(1,-1),(1,1),(-1,1)):corners.append((cx+u*length/2*c-v*width/2*sn,cy+u*length/2*sn+v*width/2*c))
+            z0=surface(cx,cy)+height*.5
+            verts=[(px,py,z0) for px,py in corners]+[(px,py,z0+height) for px,py in corners]
+            ob=primitives.mesh_obj('Madera · %s del torreón %s.%s'%('viga partida' if beam else 'tabla caída',k,j),verts,
+                                   [(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)],coll,wood)
+            terrain.settle_rubble(ob,surface);ob['escombro']=True;ob['tower_heap']=True
         terrain.gravel_batch(coll,stone,'Grava · torreón %s'%k,x,y,rx,ry,surface,10+3*pieces,p.seed+9500+k)
-        audit.append({'angle':theta,'lost':count,'pieces':pieces})
+        audit.append({'angle':theta,'lost':count,'pieces':pieces,'timber':timber})
     return audit
