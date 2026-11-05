@@ -1,4 +1,4 @@
-"""Torreón, pasos 6 y 7: forjados sobre ménsulas, escalera de caracol y terraza de losas desde el generador del panel."""
+"""Torreón, pasos 6 a 8: forjados sobre ménsulas, escalera de caracol, terraza de losas y escombro interior caído desde el generador del panel."""
 import sys,json
 from pathlib import Path
 import bpy,bmesh
@@ -20,7 +20,7 @@ def shrunk_tree(ob,factor=.97):
 
 
 def run():
-    'IA: Genera torre circular y cuadrada con interior (intacta con terraza, ruina leve y fuerte), exige mallas cerradas, volumen positivo, peldaños sin chocar con madera ni ménsulas y algo perdido con ruina fuerte; guarda .blend y vista en corte.'
+    'IA: Genera torre circular y cuadrada con interior (intacta con terraza, ruina leve y fuerte con escombro caído sin choques), exige mallas cerradas, volumen positivo, peldaños sin chocar con madera ni ménsulas y algo perdido con ruina fuerte; guarda .blend y vista en corte.'
     bpy.ops.wm.read_factory_settings(use_empty=True);addon.register();runtime.preview=True
     scene=bpy.context.scene;p=scene.ruin_settings;p.preview_quality='DRAFT';p.seed=11;p.wear_level='CUSTOM';p.wear=0.
     p.tower_floors=3;p.tower_height=120;report={}
@@ -35,24 +35,29 @@ def run():
                 if ob.name.startswith(('Madera','Piedra · peldaño','Piedra · losa')) or ob.get('corbel'):
                     bm=bmesh.new();bm.from_mesh(ob.data);volume=bm.calc_volume(signed=True);bm.free()
                     assert volume>0,(ob.name,volume)
-            steps=[o for o in pieces if o.name.startswith('Piedra · peldaño')]
-            others=[o for o in pieces if o.name.startswith(('Madera','Piedra · losa')) or o.get('corbel')]
-            trees={o.name:shrunk_tree(o) for o in steps+others}
+            fallen=[o for o in pieces if o.get('tower_fallen')]
+            steps=[o for o in pieces if o.name.startswith('Piedra · peldaño') and not o.get('tower_fallen')]
+            others=[o for o in pieces if (o.name.startswith(('Madera','Piedra · losa')) or o.get('corbel')) and not o.get('tower_fallen')]
+            trees={o.name:shrunk_tree(o) for o in steps+others+fallen}
             clashes=[(s.name,o.name) for s in steps for o in others if trees[s.name].overlap(trees[o.name])]
+            # El escombro caído no atraviesa peldaños, madera, losas, ménsulas ni otro escombro.
+            clashes+=[(f.name,o.name) for i,f in enumerate(fallen) for o in steps+others+fallen[:i] if trees[f.name].overlap(trees[o.name])]
             assert not clashes,clashes[:5]
             inside=result['interior']
             if ruin==0:assert inside['terrace'] and inside['slabs']>=15,inside
+            if ruin>.5:assert inside['fallen']>0 and inside['fallen']==len(fallen),inside
             if ruin<.5:assert inside['beams']>=4 and inside['boards']>=10 and inside['steps']>=20,inside
             key='%s_%s'%(shape.lower(),ruin);report[key]=inside
             print('TOWER_INTERIOR',key,inside,flush=True)
-            if ruin in (0.,.35):
-                tag='terraza' if ruin==0 else 'ruina'
-                bpy.ops.wm.save_as_mainfile(filepath=str(out/('torreon_paso7_%s_%s.blend'%(shape.lower(),tag))),copy=True)
+            if ruin in (0.,.35,.85):
+                tag={0.:'terraza',.35:'ruina',.85:'derrumbe'}[ruin]
+                bpy.ops.wm.save_as_mainfile(filepath=str(out/('torreon_paso8_%s_%s.blend'%(shape.lower(),tag))),copy=True)
                 # Vista en corte: se ocultan las piezas de muro de la mitad delantera para ver forjados y escalera.
                 # Se ocultan todos los núcleos (anillos que taparían el corte) y escombro y piedras de la mitad delantera.
                 for ob in pieces:
                     if ob.name.startswith(('Madera','Piedra · peldaño','Piedra · losa')):continue
                     ys=[v.co.y for v in ob.data.vertices]
+                    if ob.get('tower_fallen'):continue
                     ob.hide_render=ob.name.startswith('Mortero') or bool(ob.get('escombro')) or sum(ys)/len(ys)<0
                 render(scene,ROOT/('reports/tower_interior_%s_%s.png'%(shape.lower(),tag)),focus=(0,0,62),location=(60,-300,150),scale=150)
     (ROOT/'reports/tower_interior.json').write_text(json.dumps(report,indent=2),encoding='utf8')

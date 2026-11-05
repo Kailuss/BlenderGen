@@ -79,8 +79,26 @@ Dos variantes: **circular** y **cuadrada**.
 - **Límite:** en la torre circular de 40 mm no caben viga y escalera en todas las plantas, y alguna se queda sin
   tablas.
 
+## Paso 8 (hecho): lo que pierde apoyo cae dentro («dejar a la naturaleza hacer»)
+- **Antes:** vigas, tablas, losas y peldaños sin apoyo tras la ruina se retiraban.
+- **Ahora** (`tower_floors.fallen`, `tower_building.build_fallen`): caen en vertical, de abajo arriba, sobre la
+  superficie viva más alta por debajo: tablas o losas de un piso que aguanta, otro escombro o el suelo.
+- **Dónde caen:** solo en la zona central libre de escalera.
+- **Cómo se posan:**
+  - Se prueban 16 sitios sembrados y se queda el más bajo, para que el escombro se esparza.
+  - Ningún montón pasa de 10 mm sobre su piso, ni toca las vigas de un piso vivo de encima.
+  - Al menos el 40 % de la huella tiene que descansar a su cota.
+- **Piezas largas:** las vigas y tablas que no caben se parten en trozos.
+- **Marcas:** las piezas caídas llevan `escombro` y `tower_fallen`.
+- **Límite:** máximo 40 piezas; lo que no cabe se da por retirado (`interior.cleared`).
+- No es simulación: es una caída geométrica en la generación. El laboratorio de física puede asentarlo después.
+- **Pruebas:**
+  - `test_fallen_pieces_rest_without_clashing`: zona central, se posa en algo y sin cruces.
+  - `blender_tower_interior`: escombro sin choques BVH con peldaños, madera, losas, ménsulas ni entre sí, y vista de
+    derrumbe 0,85.
+
 ## Siguiente
 1. Almenas en el pretil; desagüe de la terraza.
 2. Grietas en los sectores; saeteras ensanchadas por el daño; pátina y verdín por cara expuesta.
-3. Dejar caer en el laboratorio lo que pierde apoyo, en vez de retirarlo («dejar a la naturaleza hacer»).
+3. Llevar la misma caída a la terraza y cubiertas de la casa (`tower_roof.fall` ya hace algo parecido).
 4. Grafo causal completo (muro → ménsula → viga → tabla, muro → peldaño).

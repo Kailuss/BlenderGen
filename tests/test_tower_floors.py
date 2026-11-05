@@ -35,6 +35,16 @@ def box_points(x0,x1,y0,y1,z0,z1,n=6):
                 yield (x0+e+(x1-x0-2*e)*i/(n-1),y0+e+(y1-y0-2*e)*j/(n-1),z0+e+(z1-z0-2*e)*k/2)
 
 
+def overlap(a,b,tolerance=.02):
+    'IA: Ejes separadores de dos rectángulos girados: cierto si se solapan más que tolerance.'
+    for poly in (a,b):
+        for k in range(4):
+            (x0,y0),(x1,y1)=poly[k],poly[(k+1)%4];nx,ny=y1-y0,x0-x1;n=math.hypot(nx,ny);nx,ny=nx/n,ny/n
+            pa=[x*nx+y*ny for x,y in a];pb=[x*nx+y*ny for x,y in b]
+            if max(pa)<=min(pb)+tolerance or max(pb)<=min(pa)+tolerance:return False
+    return True
+
+
 class TowerFloorsTests(unittest.TestCase):
     def test_stair_continuous_turn_per_floor(self):
         'IA: La hélice sube sin saltos, cada peldaño monta sobre el anterior, cada tramo acaba en su piso y los de planta dan una vuelta.'
@@ -145,6 +155,31 @@ class TowerFloorsTests(unittest.TestCase):
             self.assertGreater(cover,.25,(shape,size,cover))
             for s in tiles:self.assertTrue(tf.inside(geo,s['x'][0],s['x'][1],s['y'][0],s['y'][1]))
             self.assertFalse(any(f[0]['terrace'] for f in build(shape,size,t,terrace=False)[2]))
+
+    def test_fallen_pieces_rest_without_clashing(self):
+        'IA: El escombro interior queda en la zona central, se posa en el suelo, en un piso vivo o en otra pieza caída, no se cruza con otras piezas caídas y sale algo con ruina fuerte.'
+        total=0
+        for shape,size,t in CASES:
+            geo,plan,frames,steps=build(shape,size,t)
+            ruin=(tp.ruin_round if shape=='ROUND' else tp.ruin_square)
+            for amount in (.35,.85):
+                kept=ruin(plan,120,seed=7,amount=amount)[0]
+                floors,alive,lost=tf.settle(geo,kept,frames,steps)
+                pieces,cleared=tf.fallen(geo,frames,floors,steps,alive,7)
+                total+=len(pieces)
+                self.assertLessEqual(len(pieces),tf.FALL_LIMIT)
+                surfaces={0.}|{lv['board_top'] for lv,_,b,_ in floors if b}|{lv['top'] for lv,_,_,sl in floors if sl}
+                for i,p in enumerate(pieces):
+                    corners=tf.footprint(geo,p['x'],p['y'],p['yaw'],p['size'][0],p['size'][1])
+                    self.assertTrue(tf.in_central(geo,corners))
+                    self.assertLess(p['z0'],p['from'])
+                    tops=surfaces|{q['z0']+q['size'][2] for q in pieces[:i]}
+                    self.assertTrue(any(abs(p['z0']-z)<1e-6 for z in tops),(shape,size,p))
+                    for q in pieces[:i]:
+                        if p['z0']>=q['z0']+q['size'][2]-1e-6 or q['z0']>=p['z0']+p['size'][2]-1e-6:continue
+                        other=tf.footprint(geo,q['x'],q['y'],q['yaw'],q['size'][0],q['size'][1])
+                        self.assertFalse(overlap(corners,other),(shape,size,p,q))
+        self.assertGreater(total,20)
 
     def test_single_floor_has_no_interior(self):
         'IA: Con una sola planta no hay forjados ni escalera.'
