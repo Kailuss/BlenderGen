@@ -228,13 +228,14 @@ def corbel_in_masonry(geo,plan,lv,span,side):
     return cover>=(x1-x0)*(y1-y0)-1e-6
 
 
-def frame(geo,lv,steps,plan=None):
-    'IA: Vigas, ménsulas y tablas de un forjado sin chocar con la escalera ni volar sobre saeteras; las tablas se recortan contra peldaños y paramento.'
+def frame(geo,lv,steps,plan=None,hatch=None):
+    'IA: Vigas, ménsulas y tablas de un forjado sin chocar con la escalera ni volar sobre saeteras; las tablas se recortan contra peldaños y paramento. Con hatch (escalera de mano) no hay vigas en la franja de la trampilla y las tablas de su ancho acaban en la última viga.'
     beams=[];positions=beam_positions(geo);limit=positions[-1]
     for k,y in enumerate(positions):
         # Si la ménsula cae sobre una saetera o la viga roza la escalera, se corre la viga como haría el carpintero.
         for shift in BEAM_SHIFTS_MM:
             beam=place_beam(geo,lv,steps,plan,k,y+shift,limit)
+            if beam and hatch and beam['y'][1]>hatch['y0']:beam=None
             if beam and (not beams or beam['y'][0]-beams[-1]['y'][1]>=.5):beams.append(beam);break
     boards=[]
     if len(beams)<2:return beams,boards
@@ -247,6 +248,7 @@ def frame(geo,lv,steps,plan=None):
         carriers=[b for b in beams if b['x'][0]<=x0 and b['x'][1]>=x1]
         if len(carriers)<2:continue
         y0=max(-limit,carriers[0]['y'][0]-BOARD_CANTILEVER);y1=min(limit,carriers[-1]['y'][1]+BOARD_CANTILEVER)
+        if hatch and x1>-hatch['half'] and x0<hatch['half']:y1=min(y1,carriers[-1]['y'][1])
         while y1-y0>BOARD_W and box_hits_steps(geo,steps,x0,x1,y1-.5,y1,z0,z1):y1-=.5
         while y1-y0>BOARD_W and box_hits_steps(geo,steps,x0,x1,y0,y0+.5,z0,z1):y0+=.5
         if box_hits_steps(geo,steps,x0,x1,y0,y1,z0,z1):continue
@@ -268,7 +270,7 @@ def bearing(slab,boards):
     return sum(max(0.,min(x1,t['x'][1])-max(x0,t['x'][0]))*max(0.,min(y1,t['y'][1])-max(y0,t['y'][0])) for t in boards)/area
 
 
-def slabs(geo,lv,boards,steps):
+def slabs(geo,lv,boards,steps,hatch=None):
     'IA: Losas de la terraza a soga (medio módulo de contrapeo por fila) dentro del paramento, sin chocar con la escalera y con SLAB_BEARING de su área sobre tablas.'
     if not lv['terrace'] or not boards:return []
     out=[];r=geo['inner'];n=int(2*r//SLAB_MM)+2;k=0
@@ -278,6 +280,7 @@ def slabs(geo,lv,boards,steps):
             x0=-r-phase+i*SLAB_MM+SLAB_JOINT/2;x1=x0+SLAB_MM-SLAB_JOINT
             if not inside(geo,x0,x1,y0,y1):continue
             if box_hits_steps(geo,steps,x0,x1,y0,y1,lv['board_top'],lv['top']):continue
+            if hatch and x1>-hatch['half'] and x0<hatch['half'] and y1>hatch['edge']:continue
             slab={'id':k,'x':(x0,x1),'y':(y0,y1)};k+=1
             if bearing(slab,boards)>=SLAB_BEARING:out.append(slab)
     return out
@@ -401,13 +404,63 @@ def interior(geo,plan,floors,terrace=False):
     'IA: Plan interior completo sobre el aparejo intacto: forjados (y terraza con losas si terrace), ménsulas insertadas en el plan y hélice; modifica plan en su sitio. Cada forjado es (nivel, vigas, tablas, losas).'
     lv=levels(plan,floors,terrace)
     if not lv:return [],[]
-    tops=[0.]+[l['top'] for l in lv];arrival=arrival_angle(geo,lv,tops)
+    tops=[0.]+[l['top'] for l in lv];frames=[]
+    if uses_ladder(geo):
+        # Torre estrecha: escalera de mano y trampilla junto al muro +Y en vez de caracol.
+        steps=[];hatch={'half':HATCH_W/2,'y0':geo['inner']-WALL_CLEAR-HATCH_L}
+        for l in lv:
+            beams,boards=frame(geo,l,steps,plan,hatch)
+            edge=max((b['y'][1] for b in beams),default=hatch['y0'])
+            add_corbels(plan,geo,l,beams);frames.append((l,beams,boards,slabs(geo,l,boards,steps,dict(hatch,edge=edge))))
+        return frames,steps
+    arrival=arrival_angle(geo,lv,tops)
     steps=stair(geo,tops,arrival,flight_turns(lv,tops,arrival))
-    frames=[]
     for l in lv:
         beams,boards=frame(geo,l,steps,plan)
         add_corbels(plan,geo,l,beams);frames.append((l,beams,boards,slabs(geo,l,boards,steps)))
     return frames,steps
+
+
+LADDER_BELOW_MM=16.     # radio o semilado interior por debajo del cual va escalera de mano
+HATCH_W=6.              # ancho de la trampilla (y de la escalera con holgura)
+HATCH_L=7.              # largo de la trampilla junto al muro +Y
+LADDER_HALF=2.          # semiancho entre ejes de largueros
+LADDER_SLOPE=.27        # avance horizontal por milímetro de subida (unos 75° de inclinación)
+RAIL=(.9,1.2)           # sección del larguero (ancho, canto)
+RUNG=.7                 # sección del peldaño de madera
+RUNG_STEP=3.            # separación vertical de peldaños
+
+
+def uses_ladder(geo):
+    'IA: Indica si la torre es tan estrecha que el caracol no deja sitio a los forjados: entonces escalera de mano y trampilla.'
+    return geo['inner']<LADDER_BELOW_MM
+
+
+def ladders(geo,frames):
+    'IA: Una escalera de mano por planta: pie sobre el piso de abajo (o el suelo) y cabeza apoyada bajo el canto de la última viga hacia +Y, subiendo por la trampilla. Largueros y peldaños como ejes con sección.'
+    if not uses_ladder(geo):return []
+    out=[];lo=0.
+    for f,(lv,beams,boards,_) in enumerate(frames):
+        if not beams:lo=lv['top'];continue
+        last=max(beams,key=lambda b:b['y'][1]);top=lv['beam_z1']-.1
+        y_top=last['y'][1]+RAIL[1]/2+.05+BEAM_H*LADDER_SLOPE;y_foot=y_top-(top-lo)*LADDER_SLOPE
+        rails=[((x,y_foot,lo+.2),(x,y_top,top)) for x in (-LADDER_HALF,LADDER_HALF)]
+        rungs=[]
+        z=lo+RUNG_STEP
+        while z<top-1.:
+            y=y_foot+(z-lo)*LADDER_SLOPE;rungs.append(((-LADDER_HALF+RAIL[0]/2,y,z),(LADDER_HALF-RAIL[0]/2,y,z)));z+=RUNG_STEP
+        out.append({'flight':f,'beam':last['id'],'level':f,'foot':(y_foot,lo),'rails':rails,'rungs':rungs})
+        lo=lv['top']
+    return out
+
+
+def ladder_alive(geo,ladder,kept):
+    'IA: Una escalera de mano se sostiene si sigue viva la viga en la que apoya y, salvo en planta baja, hay tabla bajo su pie.'
+    lv,beams,_,_=kept[ladder['level']]
+    if ladder['beam'] not in {b['id'] for b in beams}:return False
+    if ladder['level']==0:return True
+    y,_=ladder['foot'];below=kept[ladder['level']-1][2]
+    return any(t['x'][0]<=LADDER_HALF and t['x'][1]>=-LADDER_HALF and t['y'][0]<=y<=t['y'][1] for t in below)
 
 
 FALL_LIMIT=40           # piezas caídas como máximo; el resto se da por retirado
@@ -450,7 +503,7 @@ def cells_under(corners):
     return out
 
 
-def lost_pieces(geo,frames,kept,steps,alive):
+def lost_pieces(geo,frames,kept,steps,alive,lost_ladders=()):
     'IA: Piezas que perdieron apoyo, con su caja original (centro, giro, medidas, cota de base) y material, de abajo arriba.'
     out=[]
     for (lv,beams,boards,tiles),(_,live,stay,rest) in zip(frames,kept):
@@ -466,6 +519,10 @@ def lost_pieces(geo,frames,kept,steps,alive):
         for t in tiles:
             if t['id'] in ids:continue
             out.append({'kind':'slab','wood':False,'x':sum(t['x'])/2,'y':sum(t['y'])/2,'yaw':0.,'size':(t['x'][1]-t['x'][0],t['y'][1]-t['y'][0],SLAB_T),'z0':lv['board_top']})
+    for ladder in lost_ladders:
+        for (x,ya,za),(_,yb,zb) in ladder['rails']:
+            length=math.dist((ya,za),(yb,zb))
+            out.append({'kind':'rail','wood':True,'x':x,'y':(ya+yb)/2,'yaw':math.pi/2,'size':(length,RAIL[0],RAIL[1]),'z0':min(za,zb)})
     live={(s['flight'],s['index']) for s in alive}
     for s in steps:
         if (s['flight'],s['index']) in live:continue
@@ -474,12 +531,12 @@ def lost_pieces(geo,frames,kept,steps,alive):
     return sorted(out,key=lambda p:p['z0'])
 
 
-def fallen(geo,frames,kept,steps,alive,seed=0):
+def fallen(geo,frames,kept,steps,alive,seed=0,lost_ladders=()):
     'IA: Deja caer en vertical lo que perdió apoyo sobre la superficie más alta por debajo (tablas o losas vivas, otro escombro o el suelo), dentro de la zona central, en el sitio más bajo de varios sembrados y sin montones de más de PILE_MAX; las piezas largas se parten. Devuelve piezas caídas y las que no caben dentro, por material (wood, stone), para echarlas al montón exterior.'
     import random
     rng=random.Random(seed*6151+29);r=central(geo);tops={};pieces=[];cleared={'wood':0,'stone':0}
     if r<3:
-        for p in lost_pieces(geo,frames,kept,steps,alive):cleared['wood' if p['wood'] else 'stone']+=1
+        for p in lost_pieces(geo,frames,kept,steps,alive,lost_ladders):cleared['wood' if p['wood'] else 'stone']+=1
         return [],cleared
     for lv,_,stay,rest in kept:
         for t in stay:
@@ -488,7 +545,7 @@ def fallen(geo,frames,kept,steps,alive,seed=0):
             for c in cells_under(footprint(geo,sum(t['x'])/2,sum(t['y'])/2,0.,t['x'][1]-t['x'][0],t['y'][1]-t['y'][0])):tops.setdefault(c,[]).append(lv['top'])
     floors={k:list(v) for k,v in tops.items()}
     ceilings=sorted(lv['beam_z0'] for lv,live,_,_ in kept if live)
-    for p in lost_pieces(geo,frames,kept,steps,alive):
+    for p in lost_pieces(geo,frames,kept,steps,alive,lost_ladders):
         length,width,height=p['size'];parts=max(1,math.ceil(length/(1.6*r)))
         part=(length-FALL_BREAK*(parts-1))/parts
         for k in range(parts):

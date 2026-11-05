@@ -112,8 +112,20 @@ Dos variantes: **circular** y **cuadrada**.
 - **Montón del pie:** cada madero busca un hueco libre en planta (holgura de 0,3 mm) entre piedras partidas y otros
   maderos. Si no lo encuentra, no se pone. La prueba de Blender lo verifica con BVH.
 
+## Paso 11 (hecho): escalera de mano y trampilla en torres estrechas
+- Decisión del usuario: en torres estrechas (radio o semilado interior < 16 mm, `uses_ladder`) el caracol no deja
+  sitio a los forjados, así que va escalera de mano y trampilla.
+- **Trampilla:** franja junto al muro +Y, de 6 mm de ancho, sin vigas. Las tablas de ese ancho acaban en la última
+  viga y la terraza no lleva losas en ella.
+- **Escalera** (`tower_floors.ladders`): una por planta, con dos largueros y peldaños cada 3 mm, inclinada unos 75°.
+  El pie descansa en el piso de abajo (o el suelo) y la cabeza apoya bajo el canto de la última viga, subiendo por la
+  trampilla sin tocar la viga.
+- **Tras la ruina:** se sostiene si sigue su viga y hay tabla bajo el pie (`ladder_alive`). Si no, sus largueros caen
+  con el resto del escombro.
+- **Pruebas:** `test_narrow_tower_ladders` y la torre circular de 40 mm en `blender_tower_interior`.
+
 ## Siguiente
-1. Desagüe de la terraza; escalera de mano y trampilla en torres estrechas.
+1. Desagüe de la terraza.
 2. Grietas en los sectores; saeteras ensanchadas por el daño; pátina y verdín por cara expuesta.
 3. Llevar la misma caída a la terraza y cubiertas de la casa (`tower_roof.fall` ya hace algo parecido).
 4. Grafo causal completo (muro → ménsula → viga → tabla, muro → peldaño).

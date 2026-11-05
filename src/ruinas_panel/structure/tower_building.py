@@ -89,9 +89,32 @@ def build_interior(coll,geo,frames,steps,stone,wood,origin=(0.,0.,0.)):
     return made
 
 
+def oriented_box(a,b,width,height):
+    'IA: Caja cerrada a lo largo del eje a→b con ancho en X del mundo y canto perpendicular; para largueros y peldaños.'
+    from mathutils import Vector
+    a,b=Vector(a),Vector(b);axis=(b-a).normalized();side=Vector((1,0,0))
+    if abs(axis.dot(side))>.9:side=Vector((0,1,0))
+    side=(side-axis*axis.dot(side)).normalized();up=axis.cross(side).normalized()
+    corners=[side*u*width/2+up*v*height/2 for u,v in ((-1,-1),(1,-1),(1,1),(-1,1))]
+    verts=[tuple(a+c) for c in corners]+[tuple(b+c) for c in corners]
+    return verts,[(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]
+
+
+def build_ladders(coll,climbs,wood,origin=(0.,0.,0.)):
+    'IA: Escaleras de mano en pie: dos largueros y peldaños de madera, marcados con su planta.'
+    ox,oy,oz=origin;made=[]
+    for climb in climbs:
+        for k,(a,b) in enumerate(climb['rails']+climb['rungs']):
+            rail=k<len(climb['rails']);size=tower_floors.RAIL if rail else (tower_floors.RUNG,tower_floors.RUNG)
+            verts,faces=oriented_box((a[0]+ox,a[1]+oy,a[2]+oz),(b[0]+ox,b[1]+oy,b[2]+oz),*size)
+            ob=primitives.mesh_obj('Madera · %s escalera de mano torreón %s.%s'%('larguero' if rail else 'peldaño',climb['flight'],k),verts,faces,coll,wood)
+            identifiers.tag(ob,'ladder',climb['flight'],k);ob['wall_id']='torreon';ob['ladder']=True;made.append(ob)
+    return made
+
+
 def build_fallen(coll,pieces,stone,wood,origin=(0.,0.,0.)):
     'IA: Escombro interior caído desde tower_floors.fallen: cajas cerradas giradas en planta, marcadas escombro y tower_fallen.'
-    ox,oy,oz=origin;made=[];names={'beam':'Madera · viga caída torreón','board':'Madera · tabla caída torreón','slab':'Piedra · losa caída torreón','step':'Piedra · peldaño caído torreón'}
+    ox,oy,oz=origin;made=[];names={'rail':'Madera · larguero caído torreón','beam':'Madera · viga caída torreón','board':'Madera · tabla caída torreón','slab':'Piedra · losa caída torreón','step':'Piedra · peldaño caído torreón'}
     for k,piece in enumerate(pieces):
         length,width,height=piece['size'];corners=tower_floors.footprint(None,piece['x'],piece['y'],piece['yaw'],length,width)
         z0=oz+piece['z0'];z1=z0+height
@@ -203,8 +226,11 @@ def generate(scene,p):
         made=build_square(coll,plan,stone,core)
     kept,alive,lost=tower_floors.settle(geo,plan,frames,steps)
     inside=build_interior(coll,geo,kept,alive,stone,wood)
+    # Torre estrecha: escalera de mano por planta; si pierde la viga o el piso de abajo, cae con el resto.
+    climbs=tower_floors.ladders(geo,frames);standing=[l for l in climbs if tower_floors.ladder_alive(geo,l,kept)]
+    inside+=build_ladders(coll,standing,wood);lost['ladders']=len(climbs)-len(standing)
     # Lo que pierde apoyo no desaparece: cae sobre el piso vivo de abajo o el suelo («dejar a la naturaleza hacer»).
-    debris,cleared=tower_floors.fallen(geo,frames,kept,steps,alive,p.seed)
+    debris,cleared=tower_floors.fallen(geo,frames,kept,steps,alive,p.seed,[l for l in climbs if l not in standing])
     inside+=build_fallen(coll,debris,stone,wood)
     if getattr(p,'wear',0)>0:
         from ..geometry import weather
@@ -212,7 +238,7 @@ def generate(scene,p):
     # Lo que no cabe dentro sale por las brechas al montón del pie: no se pierde material, se recoloca.
     heaps=tower_rubble(coll,p,stone,tower_plan.lost_angles(intact,plan,square=p.tower_shape!='ROUND'),removed,cleared,wood)
     interior={'beams':sum(len(f[1]) for f in kept),'boards':sum(len(f[2]) for f in kept),'slabs':sum(len(f[3]) for f in kept),
-              'terrace':any(f[0]['terrace'] and f[3] for f in kept),'steps':len(alive),'lost':lost,'fallen':len(debris),'outside':cleared}
+              'terrace':any(f[0]['terrace'] and f[3] for f in kept),'steps':len(alive),'ladders':len(standing),'lost':lost,'fallen':len(debris),'outside':cleared}
     return {'stones':sum(o.name.startswith('Piedra') for o in made),'removed':removed,'pieces':len(made)+len(inside),'heaps':heaps,'interior':interior}
 
 

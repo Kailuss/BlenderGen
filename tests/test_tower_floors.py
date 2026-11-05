@@ -50,6 +50,7 @@ class TowerFloorsTests(unittest.TestCase):
         'IA: La hélice sube sin saltos, cada peldaño monta sobre el anterior, cada tramo acaba en su piso y los de planta dan una vuelta.'
         for shape,size,t in CASES:
             geo,plan,frames,steps=build(shape,size,t)
+            if tf.uses_ladder(geo):continue
             tops=[f[0]['top'] for f in frames]
             for a,b in zip(steps,steps[1:]):
                 self.assertAlmostEqual(a['z1'],b['z0'],places=9)
@@ -149,7 +150,7 @@ class TowerFloorsTests(unittest.TestCase):
             lv,beams,boards,tiles=frames[-1]
             self.assertTrue(lv['terrace'])
             self.assertEqual(len(plan)-lv['corbel_row']-1,tf.PARAPET_COURSES)
-            self.assertAlmostEqual(steps[-1]['z1'],lv['top'],places=9)
+            if steps:self.assertAlmostEqual(steps[-1]['z1'],lv['top'],places=9)
             area=math.pi*geo['inner']**2 if shape=='ROUND' else (2*geo['inner'])**2
             cover=sum((s['x'][1]-s['x'][0])*(s['y'][1]-s['y'][0]) for s in tiles)/area
             self.assertGreater(cover,.25,(shape,size,cover))
@@ -180,6 +181,30 @@ class TowerFloorsTests(unittest.TestCase):
                         other=tf.footprint(geo,q['x'],q['y'],q['yaw'],q['size'][0],q['size'][1])
                         self.assertFalse(overlap(corners,other),(shape,size,p,q))
         self.assertGreater(total,20)
+
+    def test_narrow_tower_ladders(self):
+        'IA: Torres estrechas: sin caracol; una escalera de mano por planta con pie en el piso de abajo (o el suelo) sobre una tabla, que no toca la viga en la que apoya y sube por la trampilla (sin tablas ni losas en ella).'
+        for shape in ('ROUND','SQUARE'):
+            geo,plan,frames,steps=build(shape,40,6)
+            self.assertTrue(tf.uses_ladder(geo));self.assertEqual(steps,[])
+            climbs=tf.ladders(geo,frames);self.assertEqual(len(climbs),sum(1 for f in frames if f[1]))
+            lo=0.
+            for f,(lv,beams,boards,tiles) in enumerate(frames):
+                climb=[c for c in climbs if c['flight']==f][0];y_foot,z_foot=climb['foot']
+                self.assertAlmostEqual(z_foot,lo,places=9)
+                if f:self.assertTrue(any(t['x'][0]<=tf.LADDER_HALF and t['x'][1]>=-tf.LADDER_HALF and t['y'][0]<=y_foot<=t['y'][1] for t in frames[f-1][2]))
+                last=max(b['y'][1] for b in beams)
+                for (x,ya,za),(_,yb,zb) in climb['rails']:
+                    for k in range(21):
+                        u=k/20;y=ya+(yb-ya)*u;z=za+(zb-za)*u
+                        self.assertTrue(tf.inside(geo,x-.5,x+.5,y-.6,y+.6))
+                        if lv['beam_z0']-.6<=z<=lv['beam_z1']:self.assertGreater(y-.6,last)
+                    self.assertLess(zb,lv['beam_z1'])
+                for t in boards:
+                    if t['x'][1]>-tf.HATCH_W/2 and t['x'][0]<tf.HATCH_W/2:self.assertLessEqual(t['y'][1],last+1e-9)
+                for t in tiles:
+                    self.assertFalse(t['x'][1]>-tf.HATCH_W/2 and t['x'][0]<tf.HATCH_W/2 and t['y'][1]>last)
+                lo=lv['top']
 
     def test_single_floor_has_no_interior(self):
         'IA: Con una sola planta no hay forjados ni escalera.'
