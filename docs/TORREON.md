@@ -30,8 +30,14 @@ Dos variantes: **circular** y **cuadrada**.
 - Cuadrada: rejilla de juntas común por muro con medio módulo de contrapeo por hilada (antes dos hiladas
   seguidas podían repetir juntas). Sectores circulares biselados.
 
+## Paso 4 (hecho): en el panel
+- Subpanel «Torreón (prueba)»: planta (circular/cuadrada), diámetro o lado, altura, plantas, saeteras y ruina de
+  coronación; botón «Generar torreón». Crea la colección `Ruinas · Torreón` (sustituye la anterior) sin tocar la
+  casa; grosor y altura de hilada salen del tipo de construcción, la semilla es la de la casa.
+- Prueba `tests/blender_tower_operator.py`.
+
 ## Siguiente
-1. Integrarlo como tipo de edificio en el panel; desgaste y grietas de la fábrica actual en los sectores.
+1. Desgaste y grietas de la fábrica actual en los sectores; escombro caído al pie desde las piedras retiradas.
 2. Interior: forjados de vigas radiales o paralelas con asiento en `seat.py`, escalera de caracol embebida o
    adosada, terraza con `roof_support` (ya exige apoyo real).
 3. Lúgubre: coronación rota con almenas perdidas, sillares caídos al pie, saeteras ensanchadas por el daño,

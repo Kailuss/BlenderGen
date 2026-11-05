@@ -4,6 +4,7 @@ Cada piedra es una pieza cerrada; un núcleo de mortero por hilada, embebido com
 juntas por dentro para que la pieza impresa quede unida. Medidas en mm y marcas de aparejo (C5-5) desde el inicio.
 """
 import math
+import bpy
 from .. import config_masonry as masonry
 from ..construction_core import identifiers
 from ..geometry import primitives
@@ -108,3 +109,27 @@ def build_square(coll,plan,stone,core,origin=(0.,0.,0.)):
             ob=primitives.block('Mortero · torreón %s'%course['row'],ox+x0,ox+x1,oy+y0,oy+y1,zc0,zc1,coll,core)
             identifiers.tag(ob,'mortar',course['row'],k);ob['wall_id']='torreon';made.append(ob)
     return made
+
+
+COLLECTION='Ruinas · Torreón'
+
+
+def generate(scene,p):
+    'IA: Torreón suelto desde los ajustes: grosor y hilada del tipo de construcción, semilla de la casa; sustituye el torreón anterior sin tocar la casa.'
+    from .. import runtime
+    old=bpy.data.collections.get(COLLECTION)
+    if old:
+        primitives.remove_objects(list(old.objects));bpy.data.collections.remove(old)
+    coll=bpy.data.collections.new(COLLECTION);scene.collection.children.link(coll)
+    runtime.quality=p.preview_quality
+    stone=primitives.material('Piedra · neutro',(.52,.52,.52));core=primitives.material('Núcleo · neutro',(.44,.44,.44))
+    thickness=min(p.thickness,p.tower_size*.3)
+    if p.tower_shape=='ROUND':
+        plan=tower_plan.round_plan(p.tower_size/2,thickness,p.tower_height,p.stone_size,seed=p.seed,variation=p.stone_variation,slits=p.tower_slits,floors=p.tower_floors)
+        plan,removed=tower_plan.ruin_round(plan,p.tower_height,seed=p.seed,amount=p.tower_ruin)
+        made=build_round(coll,plan,stone,core)
+    else:
+        plan=tower_plan.square_plan(p.tower_size,thickness,p.tower_height,p.stone_size,seed=p.seed,variation=p.stone_variation,slits=min(1,p.tower_slits),floors=p.tower_floors)
+        plan,removed=tower_plan.ruin_square(plan,p.tower_height,seed=p.seed,amount=p.tower_ruin)
+        made=build_square(coll,plan,stone,core)
+    return {'stones':sum(o.name.startswith('Piedra') for o in made),'removed':removed,'pieces':len(made)}

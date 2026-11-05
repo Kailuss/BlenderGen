@@ -195,6 +195,9 @@ def section_panel(index, section):
             scale=config.GAME_SCALES[p.game_scale][0]
             storey=p.low_wall_height if p.height_type=='RUIN' else p.ground_storey_height
             col.label(text='A 1:%d · planta %.1f m · puerta %.1f m' % (scale, storey*scale/1000, p.door_height*scale/1000))
+        if section['id']=='tower':
+            col.operator('ruin.tower_generate',icon='MOD_BUILD')
+            col.label(text='Grosor y hilada del tipo de construcción')
         if section['id']=='physics':
             col.operator('ruin.physics_lab',icon='PHYSICS')
             col.label(text='Límite y construcción: solo el ejemplo aislado')
