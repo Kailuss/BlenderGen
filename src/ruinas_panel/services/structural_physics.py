@@ -166,6 +166,21 @@ def centered_difference(target,cutter):
         target.data.transform(Matrix.Translation(center));cutter.data=original;bpy.data.meshes.remove(temporary)
 
 
+def box_difference(target,cutter):
+    'IA: Último recurso de encaje: resta la caja envolvente del cortador (Manifold, centrado), robusta ante cortadores curvos o astillados; quita algo más de material que el corte exacto.'
+    lo,hi=bounds(cutter);center=(lo+hi)/2
+    corners=[(x,y,z) for z in (lo.z,hi.z) for y in (lo.y,hi.y) for x in (lo.x,hi.x)]
+    mesh=bpy.data.meshes.new('Encaje caja')
+    mesh.from_pydata([tuple(Vector(c)-center) for c in corners],[],[(0,2,3,1),(4,5,7,6),(0,1,5,4),(2,6,7,3),(0,4,6,2),(1,3,7,5)])
+    box=bpy.data.objects.new('Encaje caja',mesh)
+    target.data.transform(Matrix.Translation(-center))
+    try:
+        mod=target.modifiers.new('Encaje por caja','BOOLEAN');mod.operation='DIFFERENCE';mod.solver='MANIFOLD';mod.object=box
+        primitives.apply_modifier(target,mod,box)
+    finally:
+        target.data.transform(Matrix.Translation(center));bpy.data.objects.remove(box);bpy.data.meshes.remove(mesh)
+
+
 def resolve(objects,report):
     'IA: Recorta copias solapadas con BVH reutilizados hasta cambiar la pieza; reintenta en coordenadas locales antes de tolerancias y exige cierre, volumen y fuente intacta.'
     priority={'wood':0,'metal':1,'tile':2,'stone':3,'ground':4}
@@ -223,6 +238,15 @@ def resolve(objects,report):
                 finally:cutter.data=original_cutter;bpy.data.meshes.remove(shifted)
                 if after and after<=before+max(.001,before*.0001):
                     report.setdefault('tolerant_joints',[]).append({'target':target['source_piece'],'cutter':cutter['source_piece'],'offset_mm':offset});break
+        if not after or after>before+max(.001,before*.0001):
+            # Último recurso antes de abortar el laboratorio: restar la caja del cortador (p. ej. ménsula de tejadillo
+            # atravesada por el montante del mirador en la casa máxima, 5-11-2026).
+            failed=target.data;target.data=backup.copy();bpy.data.meshes.remove(failed)
+            box_difference(target,cutter);after=valid(target.data)
+            if not target.data.polygons:
+                removed.add(target);report['covered_pieces_removed']+=1;bpy.data.meshes.remove(backup);continue
+            if after and after<=before+max(.001,before*.0001):
+                report.setdefault('box_joints',[]).append({'target':target['source_piece'],'cutter':cutter['source_piece'],'removed_mm3':round(before-after,4)})
         if not after or after>before+max(.001,before*.0001):
             print('INVALID_JOINT' ,target.name,cutter.name,before,after,flush=True)
             import tempfile
