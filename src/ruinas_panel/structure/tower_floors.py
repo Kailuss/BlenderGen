@@ -26,7 +26,13 @@ CORBEL_MARGIN=.4        # ménsula más ancha que la cabeza de viga a cada lado
 MIN_SEAT_MM=1.2         # entrega mínima de viga sobre ménsula, medida en el borde más desfavorable
 BEAM_SHIFTS_MM=(0.,.75,-.75,1.5,-1.5,2.25,-2.25,3.,-3.)
 MAX_CORBEL_MM=9.        # ménsula más larga (en el paramento) que esto: la viga es demasiado oblicua
+PARAPET_COURSES=3       # hiladas de pretil sobre la terraza
+SLAB_MM=5.              # losa cuadrada de la terraza
+SLAB_T=1.2
+SLAB_JOINT=.15
+SLAB_BEARING=.6         # fracción mínima del área de losa sobre tablas
 STEP_RISE_MM=2.8
+CLASH_MARGIN=.15        # holgura entre madera y peldaño al buscar choques (cubre el muestreo)
 STEP_OVERLAP=.3         # fracción del paso angular con que cada peldaño monta sobre el anterior
 STEP_EMBED=.1           # el peldaño entra 0,1 mm en el paramento para fundirse al exportar
 WALL_BEHIND=.3          # fracción mínima del arco del peldaño con muro detrás
@@ -50,44 +56,67 @@ def stair_depth(geo):
     return min(10.,max(5.,.4*geo['inner']))
 
 
-def levels(plan,floors):
-    'IA: Forjados entre plantas: hilada de ménsulas, cota de base de viga y cota de piso acabado de cada uno.'
-    rows=len(plan);out=[]
+def level(plan,floor,row,terrace=False):
+    'IA: Un forjado con ménsulas en la hilada row-1: cotas de viga, de tablas (board_top) y de piso acabado (top, con losas si es terraza).'
+    corbel=plan[row-1];base=corbel['z1']-masonry.COURSE_TOP_INSET;boards=base+BEAM_H+BOARD_T
+    return {'floor':floor,'corbel_row':row-1,'corbel_z0':corbel['z0']+masonry.COURSE_BOTTOM_INSET,'beam_z0':base,
+            'beam_z1':base+BEAM_H,'board_top':boards,'top':boards+(SLAB_T if terrace else 0.),'terrace':terrace}
+
+
+def levels(plan,floors,terrace=False):
+    'IA: Forjados que reparten en plantas iguales las hiladas bajo el pretil (PARAPET_COURSES si terrace) y, si terrace, la terraza bajo el pretil cuando la última planta tiene al menos tres hiladas.'
+    rows=len(plan);usable=rows-(PARAPET_COURSES if terrace else 0);out=[]
     for f in range(1,max(1,floors)):
-        row=min(rows-2,max(2,round(f*rows/floors)))
-        corbel=plan[row-1]
-        base=corbel['z1']-masonry.COURSE_TOP_INSET
-        out.append({'floor':f,'corbel_row':row-1,'corbel_z0':corbel['z0']+masonry.COURSE_BOTTOM_INSET,
-                    'beam_z0':base,'beam_z1':base+BEAM_H,'top':base+BEAM_H+BOARD_T})
+        out.append(level(plan,f,min(rows-2,max(2,round(f*usable/floors)))))
+    last=out[-1]['corbel_row']+1 if out else 0
+    if terrace and usable-last>=3 and usable>=2:out.append(level(plan,max(1,floors),usable,True))
     return out
 
 
-def stair(geo,tops,arrival):
-    'IA: Hélice de peldaños de suelo a último piso: una vuelta por planta que acaba en el ángulo arrival; cada peldaño monta STEP_OVERLAP sobre el anterior.'
-    steps=[];depth=stair_depth(geo)
+def stair(geo,tops,arrival,turns=None):
+    'IA: Hélice continua de peldaños de suelo a último piso; el tramo f gira turns[f] radianes (por defecto una vuelta, que llega de nuevo a arrival); cada peldaño monta STEP_OVERLAP sobre el anterior.'
+    steps=[];depth=stair_depth(geo);start=arrival
     for flight,(z_lo,z_hi) in enumerate(zip(tops,tops[1:])):
-        n=max(8,round((z_hi-z_lo)/STEP_RISE_MM));rise=(z_hi-z_lo)/n;pitch=2*math.pi/n
+        turn=turns[flight] if turns else 2*math.pi
+        n=max(4 if turn<2*math.pi-1e-9 else 8,round((z_hi-z_lo)/STEP_RISE_MM));rise=(z_hi-z_lo)/n;pitch=turn/n
         for i in range(n):
-            a0=arrival+i*pitch
+            a0=start+i*pitch
             steps.append({'flight':flight,'index':i,'a0':a0,'a1':a0+pitch*(1+STEP_OVERLAP),
                           'z0':z_lo+i*rise,'z1':z_lo+(i+1)*rise,'depth':depth})
+        start+=turn
     return steps
+
+
+def flight_turns(lv,tops,arrival):
+    'IA: Giro de cada tramo: vuelta completa en los pisos; en la terraza, el giro cercano al paso angular del tramo anterior que deja centrado en ±Y el arco de hélice que pasa bajo su forjado (lejos de las cabezas de viga).'
+    turns=[2*math.pi]*len(lv)
+    if not lv or not lv[-1]['terrace'] or len(lv)<2:return turns
+    l=lv[-1];z_lo,z_hi=tops[-2],tops[-1];below=(z_hi-l['corbel_z0'])/(z_hi-z_lo)
+    previous=max(8,round((tops[-2]-tops[-3])/STEP_RISE_MM));pitch=2*math.pi/previous
+    wanted=max(4,round((z_hi-z_lo)/STEP_RISE_MM))*pitch;best=None
+    for target in (math.pi/2,3*math.pi/2):
+        for k in range(-1,3):
+            angle=(target-arrival+2*math.pi*k)/(1-below/2)
+            if math.pi/2<=angle<=2*math.pi and (best is None or abs(angle-wanted)<abs(best-wanted)):best=angle
+    turns[-1]=best if best is not None else 2*math.pi
+    return turns
 
 
 def arrival_angle(geo,lv,tops):
     'IA: Ángulo de llegada a cada piso: centra en +Y (lejos de las cabezas de viga) el tramo de hélice que pasa bajo el forjado.'
     if not lv:return math.pi/2
-    span=max((t-l['corbel_z0'])/(t-b) for l,t,b in zip(lv,tops[1:],tops))
+    pairs=[(l,t,b) for l,t,b in zip(lv,tops[1:],tops) if not l['terrace']] or list(zip(lv,tops[1:],tops))
+    span=max((t-l['corbel_z0'])/(t-b) for l,t,b in pairs)
     return math.pi/2+math.pi*min(1.,span)
 
 
-def in_step(geo,step,x,y):
-    'IA: Indica si el punto XY cae en la huella del peldaño (banda junto al paramento y arco del peldaño).'
+def in_step(geo,step,x,y,margin=0.):
+    'IA: Indica si el punto XY cae en la huella del peldaño (banda junto al paramento y arco del peldaño), ampliada margin mm hacia dentro y por los lados.'
     r=math.hypot(x,y)
     if r<1e-9:return False
-    theta=math.atan2(y,x)
-    if (theta-step['a0'])%(2*math.pi)>step['a1']-step['a0']:return False
-    return boundary(geo,theta,step['depth'])<=r<=boundary(geo,theta)+STEP_EMBED
+    theta=math.atan2(y,x);pad=margin/max(r,1e-9)
+    if (theta-step['a0']+pad)%(2*math.pi)>step['a1']-step['a0']+2*pad:return False
+    return boundary(geo,theta,step['depth'])-margin<=r<=boundary(geo,theta)+STEP_EMBED
 
 
 def step_outline(geo,step,spacing=.3):
@@ -112,7 +141,7 @@ def box_hits_steps(geo,steps,x0,x1,y0,y1,z0,z1,spacing=.6):
         x=x0+(x1-x0)*i/(nx-1)
         for j in range(ny):
             y=y0+(y1-y0)*j/(ny-1)
-            if any(in_step(geo,s,x,y) for s in near):return True
+            if any(in_step(geo,s,x,y,CLASH_MARGIN) for s in near):return True
     for s in near:
         if any(x0<x<x1 and y0<y<y1 for x,y in step_outline(geo,s)):return True
     return False
@@ -184,8 +213,19 @@ def place_beam(geo,lv,steps,plan,k,y,limit):
     boxes=[(-end,end,y0,y1,lv['beam_z0'],lv['beam_z1'])]
     boxes+=[(s*end-(reach if s>0 else 0),s*end+(0 if s>0 else reach),y0-CORBEL_MARGIN,y1+CORBEL_MARGIN,lv['corbel_z0'],lv['beam_z0']) for s in (1,-1)]
     if any(box_hits_steps(geo,steps,*b) for b in boxes):return None
-    if plan is not None and not all(corbel_supported(geo,plan,lv,c,s) for c,s in zip(corbels,(1,-1))):return None
+    if plan is not None and not all(corbel_supported(geo,plan,lv,c,s) and corbel_in_masonry(geo,plan,lv,c,s) for c,s in zip(corbels,(1,-1))):return None
     return {'id':k,'y':(y0,y1),'x':(-end,end),'corbels':corbels}
+
+
+def corbel_in_masonry(geo,plan,lv,span,side):
+    'IA: Indica si la ménsula sustituye solo piedra de su hilada (no ocupa una saetera ni un hueco del aparejo).'
+    course=plan[lv['corbel_row']]['stones']
+    if geo['shape']=='ROUND':
+        a,b=span
+        return tower_plan._angular_support(a,b,course)>=(b-a)-1e-6
+    x0,x1=(geo['inner'],geo['outer']) if side>0 else (-geo['outer'],-geo['inner']);y0,y1=span
+    cover=sum(max(0.,min(x1,t['x'][1])-max(x0,t['x'][0]))*max(0.,min(y1,t['y'][1])-max(y0,t['y'][0])) for t in course)
+    return cover>=(x1-x0)*(y1-y0)-1e-6
 
 
 def frame(geo,lv,steps,plan=None):
@@ -198,7 +238,7 @@ def frame(geo,lv,steps,plan=None):
             if beam and (not beams or beam['y'][0]-beams[-1]['y'][1]>=.5):beams.append(beam);break
     boards=[]
     if len(beams)<2:return beams,boards
-    z0,z1=lv['beam_z1'],lv['top'];lo=beams[0]['y'][0];hi=beams[-1]['y'][1]
+    z0,z1=lv['beam_z1'],lv['board_top']
     pitch=BOARD_W+BOARD_GAP;count=int((2*(geo['inner']-WALL_CLEAR)+BOARD_GAP)//pitch)
     start=-(count*pitch-BOARD_GAP)/2
     for i in range(count):
@@ -213,6 +253,34 @@ def frame(geo,lv,steps,plan=None):
         board={'id':i,'x':(x0,x1),'y':(y0,y1)}
         if supports(board,beams):boards.append(board)
     return beams,boards
+
+
+def inside(geo,x0,x1,y0,y1):
+    'IA: Indica si un rectángulo cabe dentro del paramento interior con la holgura de la madera.'
+    r=geo['inner']-WALL_CLEAR
+    if geo['shape']=='SQUARE':return -r<=x0 and x1<=r and -r<=y0 and y1<=r
+    return all(math.hypot(x,y)<=r for x in (x0,x1) for y in (y0,y1))
+
+
+def bearing(slab,boards):
+    'IA: Fracción del área de una losa que descansa sobre tablas (las tablas no se solapan entre sí).'
+    (x0,x1),(y0,y1)=slab['x'],slab['y'];area=(x1-x0)*(y1-y0)
+    return sum(max(0.,min(x1,t['x'][1])-max(x0,t['x'][0]))*max(0.,min(y1,t['y'][1])-max(y0,t['y'][0])) for t in boards)/area
+
+
+def slabs(geo,lv,boards,steps):
+    'IA: Losas de la terraza a soga (medio módulo de contrapeo por fila) dentro del paramento, sin chocar con la escalera y con SLAB_BEARING de su área sobre tablas.'
+    if not lv['terrace'] or not boards:return []
+    out=[];r=geo['inner'];n=int(2*r//SLAB_MM)+2;k=0
+    for j in range(n):
+        y0=-r+j*SLAB_MM+SLAB_JOINT/2;y1=y0+SLAB_MM-SLAB_JOINT;phase=SLAB_MM/2 if j%2 else 0.
+        for i in range(n+1):
+            x0=-r-phase+i*SLAB_MM+SLAB_JOINT/2;x1=x0+SLAB_MM-SLAB_JOINT
+            if not inside(geo,x0,x1,y0,y1):continue
+            if box_hits_steps(geo,steps,x0,x1,y0,y1,lv['board_top'],lv['top']):continue
+            slab={'id':k,'x':(x0,x1),'y':(y0,y1)};k+=1
+            if bearing(slab,boards)>=SLAB_BEARING:out.append(slab)
+    return out
 
 
 def supports(board,beams):
@@ -313,13 +381,14 @@ def corbel_alive(geo,course,beam_id):
 
 def settle(geo,plan,lv_frames,steps):
     'IA: Tras la ruina: vigas con sus dos ménsulas, tablas con dos vigas y el centro entre ellas, peldaños con el anterior y muro detrás. Devuelve lo que queda y recuentos de lo perdido.'
-    kept=[];lost={'beams':0,'boards':0,'steps':0}
-    for lv,beams,boards in lv_frames:
+    kept=[];lost={'beams':0,'boards':0,'slabs':0,'steps':0}
+    for lv,beams,boards,tiles in lv_frames:
         course=plan[lv['corbel_row']]
         live=[b for b in beams if corbel_alive(geo,course,b['id'])]
         stay=[t for t in boards if supports(t,live)]
-        lost['beams']+=len(beams)-len(live);lost['boards']+=len(boards)-len(stay)
-        kept.append((lv,live,stay))
+        rest=[t for t in tiles if bearing(t,stay)>=SLAB_BEARING]
+        lost['beams']+=len(beams)-len(live);lost['boards']+=len(boards)-len(stay);lost['slabs']+=len(tiles)-len(rest)
+        kept.append((lv,live,stay,rest))
     alive=[];previous=True
     for s in steps:
         previous=previous and wall_behind(geo,plan,s)>=WALL_BEHIND
@@ -328,14 +397,14 @@ def settle(geo,plan,lv_frames,steps):
     return kept,alive,lost
 
 
-def interior(geo,plan,floors):
-    'IA: Plan interior completo sobre el aparejo intacto: forjados, ménsulas insertadas en el plan y hélice; modifica plan en su sitio.'
-    lv=levels(plan,floors)
+def interior(geo,plan,floors,terrace=False):
+    'IA: Plan interior completo sobre el aparejo intacto: forjados (y terraza con losas si terrace), ménsulas insertadas en el plan y hélice; modifica plan en su sitio. Cada forjado es (nivel, vigas, tablas, losas).'
+    lv=levels(plan,floors,terrace)
     if not lv:return [],[]
-    tops=[0.]+[l['top'] for l in lv]
-    steps=stair(geo,tops,arrival_angle(geo,lv,tops))
+    tops=[0.]+[l['top'] for l in lv];arrival=arrival_angle(geo,lv,tops)
+    steps=stair(geo,tops,arrival,flight_turns(lv,tops,arrival))
     frames=[]
     for l in lv:
         beams,boards=frame(geo,l,steps,plan)
-        add_corbels(plan,geo,l,beams);frames.append((l,beams,boards))
+        add_corbels(plan,geo,l,beams);frames.append((l,beams,boards,slabs(geo,l,boards,steps)))
     return frames,steps

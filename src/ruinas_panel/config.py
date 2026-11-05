@@ -166,7 +166,7 @@ SECTIONS=(
  {'id':'windows','title':'Ventanas','toggle':'windows_enabled','fields':('window_facing','windows_per_wall','window_width','window_height','window_leaves','window_open_angle','window_canopies','window_projection','window_bay_join','window_bay_gap'),'closed':True},
  {'id':'balconies','title':'Balcones','toggle':'balconies','fields':('balconies_per_wall','balcony_width','balcony_height','balcony_depth','balcony_gate','balcony_open_angle','balcony_canopy'),'closed':True},
  {'id':'roof','title':'Cubierta','toggle':'roof_frame','fields':('roof_type','roof_curve','roof_sweep','roof_sweep_bias','roof_asymmetry','roof_tiles','roof_gables','chimneys','brass_pipes'),'closed':True},
- {'id':'tower','title':'Torreón (prueba)','fields':('tower_shape','tower_size','tower_height','tower_floors','tower_slits','tower_ruin'),'closed':True},
+ {'id':'tower','title':'Torreón (prueba)','fields':('tower_shape','tower_size','tower_height','tower_floors','tower_slits','tower_terrace','tower_ruin'),'closed':True},
  {'id':'foundation','title':'Cimientos y patio','fields':('foundation_enabled','foundation_height','entrance_tread','patio_enabled','patio_margin','patio_fence','fence_height'),'closed':True},
  {'id':'damage','title':'Daño','toggle':'damage_enabled','fields':('collapse','break_position','hole_count','hole_size','hole_seed','hole_damage','wear_level','wear','cracks','rubble_amount','ground_roughness','wood_damage','floor_damage','roof_damage','roof_damage_seed','facade_damage','iron_mode','iron_damage'),'closed':False},
  {'id':'cracks','title':'Grietas','fields':('cracks_per_stone','crack_length_var','crack_width_var','crack_angle_var','crack_path_var'),'closed':True},

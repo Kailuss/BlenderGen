@@ -65,8 +65,22 @@ Dos variantes: **circular** y **cuadrada**.
 - Límite conocido: no se garantiza altura libre de paso bajo el forjado, solo que no haya choque. La escalera
   termina en el último forjado.
 
+## Paso 7 (hecho): terraza bajo el pretil y escalera hasta arriba
+- Opción «Terraza» del subpanel (activa por defecto). Las plantas se reparten bajo un pretil de 3 hiladas, y las
+  saeteras se centran en esas plantas (parámetro `parapet` de `round_plan` y `square_plan`).
+- La terraza es un forjado más: vigas sobre ménsulas y tablas, y encima losas de piedra de 5 mm a soga, con medio
+  módulo de contrapeo por fila.
+- **Losas:** dentro del paramento, sin chocar con la escalera y con al menos el 60 % de su área sobre tablas. Tras la
+  ruina, la misma regla con las tablas que quedan.
+- **Último tramo:** no da la vuelta completa. Gira lo justo, cerca del paso angular del tramo anterior, para que el
+  arco que pasa bajo la terraza quede centrado en ±Y, lejos de las cabezas de viga. Termina en el piso de losas.
+- **Ménsulas:** se rechazan si ocuparían una saetera o un hueco de su propia hilada (`corbel_in_masonry`).
+- **Choques:** la búsqueda deja 0,15 mm de holgura (`CLASH_MARGIN`) para cubrir el muestreo.
+- **Límite:** en la torre circular de 40 mm no caben viga y escalera en todas las plantas, y alguna se queda sin
+  tablas.
+
 ## Siguiente
-1. Escalera hasta la terraza (con su acceso) y terraza con `roof_support`.
+1. Almenas en el pretil; desagüe de la terraza.
 2. Grietas en los sectores; saeteras ensanchadas por el daño; pátina y verdín por cara expuesta.
 3. Dejar caer en el laboratorio lo que pierde apoyo, en vez de retirarlo («dejar a la naturaleza hacer»).
 4. Grafo causal completo (muro → ménsula → viga → tabla, muro → peldaño).
