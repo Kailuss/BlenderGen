@@ -75,7 +75,8 @@ def settle(coll,p,parts,x0,x1,hole):
         else:fallen.append(ob);blocks+=1
     standing=[boxes[o] for o in parts if o not in fallen]
     # Escombros: parte proporcional a Escombros; el resto se da por pulverizado o disperso fuera.
-    lost=[o for o in fallen if random.Random(p.seed+zlib.crc32(primitives.piece_key(o).encode())).random()>=p.rubble_amount]
+    # Sorteo por nombre de objeto: la clave de pieza es la misma para todas las losas y lo volvía todo o nada.
+    lost=[o for o in fallen if random.Random(p.seed+zlib.crc32(o.name.encode())).random()>=p.rubble_amount]
     fall([o for o in fallen if o not in lost],boxes,surfaces+standing,grounded+[False]*len(standing),p)
     primitives.remove_objects(lost)
     return {'beams_without_bearing':missing,'slabs_unseated':slabs,'blocks_unseated':blocks,'fallen':len(fallen)-len(lost),'lost':len(lost)}
