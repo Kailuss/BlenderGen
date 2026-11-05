@@ -286,6 +286,21 @@ class RUIN_OT_seed(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class RUIN_OT_tower(bpy.types.Operator):
+    bl_idname='ruin.tower_generate'
+    bl_label='Generar torreón'
+    bl_description='Construye un torreón suelto (circular o cuadrado) con aparejo trabado, saeteras y coronación en ruina con apoyo verificado; no toca la casa'
+    bl_options={'REGISTER','UNDO'}
+    poll=classmethod(ready)
+    def execute(self,context):
+        'IA: Genera el torreón en su propia colección y informa de piedras y retiradas.'
+        from ..structure import tower_building
+        try:result=tower_building.generate(context.scene,context.scene.ruin_settings)
+        except Exception as exc:return fail(self,context,exc)
+        self.report({'INFO'},'Torreón: %d piedras; %d retiradas por la ruina'%(result['stones'],result['removed']))
+        return {'FINISHED'}
+
+
 class RUIN_OT_holes(bpy.types.Operator):
     bl_idname='ruin.next_holes'
     bl_label='Redistribuir agujeros'
