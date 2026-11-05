@@ -15,9 +15,15 @@ Dos variantes: **circular** y **cuadrada**.
 - Pruebas puras: `tests/test_tower_plan.py` (cierre de la vuelta, contrapeo, sin solapes, esquinas trabadas,
   área exacta restada por saetera).
 
+## Paso 2 (hecho): mallas — `structure/tower_building.py`
+- Circular: cada piedra es un sector anular cerrado (cuerda ≤ 1,6 mm); un anillo de mortero por hilada,
+  embebido como en los muros, rellena las juntas por dentro.
+- Cuadrada: bloques con `primitives.block` (bisel incluido) y núcleo por muro y hilada.
+- Juntas de 0,12 mm entre piedras y los mismos retranqueos de hilada que la fábrica; marcas de aparejo C5-5.
+- Prueba `tests/blender_tower_building.py`: mallas cerradas con volumen positivo y vista Workbench.
+
 ## Siguiente
-1. Constructor de mallas: sectores anulares cerrados (circular) y bloques (cuadrada) desde el plan, con el
-   mismo bisel, desgaste y grietas que la fábrica actual; IDs de aparejo (`identifiers.tag`) desde el inicio.
+1. Integrarlo como tipo de edificio en el panel; bisel, desgaste y grietas de la fábrica actual en los sectores.
 2. Interior: forjados de vigas radiales o paralelas con asiento en `seat.py`, escalera de caracol embebida o
    adosada, terraza con `roof_support` (ya exige apoyo real).
 3. Lúgubre: coronación rota con almenas perdidas, sillares caídos al pie, saeteras ensanchadas por el daño,
