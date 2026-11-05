@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.31 — 2026-11-05
+
+La terraza del torreón se sostiene con la geometría real que queda tras el derrumbe (vigas con asiento en las dos cabezas, losas sin vuelco, parapetos con área mínima), hasta punto fijo. Corrige `imposible.blend`. Detalle en `V03231.md`.
+
 ## v0.32.30 — 2026-11-05
 
 Soltar uniones acumulable; colisión desactivada entre piezas que empiezan solapadas y descarte de astillas sub-píxel en el laboratorio (fin de los hierros bailarines en Equilibrada); aviso de duración menor de 8 s. Detalle en `V03230.md`.

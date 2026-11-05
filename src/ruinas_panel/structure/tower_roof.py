@@ -19,6 +19,38 @@ def loss_at(p,x,y):
     return max(p.height-spatial.collapse_height(p,x,y),30*p.roof_damage**1.6*strength)
 
 
+def roof_pieces(coll,before):
+    'IA: Piezas nuevas de la terraza como cajas para roof_support: vigas y brochales con su eje largo, losas y bloques de parapeto.'
+    pieces={};objects={}
+    for ob in set(coll.objects)-before:
+        part=ob.get('tower_part');kind='beam' if ob.get('roof_timber') else 'slab' if part=='deck' else 'block' if part in ('parapet','merlon') else None
+        if kind is None:continue
+        co=primitives.coords(ob)
+        if not len(co):continue
+        lo=tuple(map(float,co.min(axis=0)));hi=tuple(map(float,co.max(axis=0)))
+        pieces[ob.name]=(kind,lo,hi,0 if hi[0]-lo[0]>=hi[1]-lo[1] else 1);objects[ob.name]=ob
+    return pieces,objects
+
+
+def masonry_boxes(coll,before):
+    'IA: Sillares y piedras de muro que sobreviven al derrumbe y a los huecos; el mortero no cuenta como asiento.'
+    boxes=[]
+    for ob in coll.objects:
+        if ob not in before or ob.get('escombro'):continue
+        name=primitives.piece_key(ob)
+        if not (name.startswith('Piedra') or (name.startswith('Pilar') and 'sillar' in name)):continue
+        co=primitives.coords(ob)
+        if len(co):boxes.append((tuple(map(float,co.min(axis=0))),tuple(map(float,co.max(axis=0)))))
+    return boxes
+
+
+def support_closure(coll,p,before):
+    'IA: Objetos de la terraza sin apoyo real según construction_core.roof_support, con asiento mínimo de medio grosor de muro.'
+    from ..construction_core import roof_support
+    pieces,objects=roof_pieces(coll,before)
+    return [objects[k] for k in roof_support.unsupported(pieces,masonry_boxes(coll,before),p.thickness/2)]
+
+
 def build(coll,p,scene,walls):
     'IA: Terraza modular con acceso y parapeto; el derrumbe compartido recorta coronación y retira módulos con pérdida local superior a 6 mm, sin booleanas globales.'
     before=set(coll.objects)
@@ -80,21 +112,12 @@ def build(coll,p,scene,walls):
             if co[:,2].min()>=limit:removed.append(ob)
             elif co[:,2].max()>limit:primitives.clip_closed(ob,(0,0,limit),(0,0,1))
     primitives.remove_objects(removed)
+    meta.put(scene,'cubierta_sin_apoyo',[])
     if max(p.collapse,p.roof_damage)>0:
-        supports=[(primitives.coords(o).min(axis=0),primitives.coords(o).max(axis=0)) for o in set(coll.objects)-before if o.get('roof_timber')]
-        unsupported=[]
-        for ob in set(coll.objects)-before:
-            if ob.get('tower_part')!='deck':continue
-            co=primitives.coords(ob);lo=co.min(axis=0);hi=co.max(axis=0)
-            if not any(all(min(hi[k],b[k])>=max(lo[k],a[k]) for k in (0,1)) for a,b in supports):unsupported.append(ob)
-        primitives.remove_objects(unsupported)
-        seats=[(primitives.coords(o).min(axis=0),primitives.coords(o).max(axis=0)) for o in set(coll.objects)-before if o.get('tower_part')=='deck']
-        parapets=sorted((o for o in set(coll.objects)-before if o.get('tower_part') in ('parapet','merlon')),key=lambda o:float(primitives.coords(o)[:,2].min()))
-        unsupported=[]
-        for ob in parapets:
-            co=primitives.coords(ob);lo=co.min(axis=0);hi=co.max(axis=0)
-            if any(abs(lo[2]-b[2])<.3 and all(min(hi[k],b[k])-max(lo[k],a[k])>.01 for k in (0,1)) for a,b in seats):seats.append((lo,hi))
-            else:unsupported.append(ob)
+        # Apoyo real tras derrumbe y huecos: cabezas de viga sobre piedra superviviente, losas entre dos vigas
+        # y bloques sin vuelco, hasta punto fijo (caso imposible.blend: viga a 8–16 mm de la piedra).
+        unsupported=support_closure(coll,p,before)
+        meta.put(scene,'cubierta_sin_apoyo',sorted(o.name for o in unsupported))
         primitives.remove_objects(unsupported)
     deck=sum(o.get('tower_part')=='deck' for o in coll.objects)
     count=sum(o.get('tower_part') in ('merlon','parapet') for o in coll.objects)
