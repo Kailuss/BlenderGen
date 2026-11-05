@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.40 — 2026-11-05
+
+Laboratorio: último recurso de encaje por caja envolvente antes de abortar. La ménsula del tejadillo sobre mirador nace por encima de su remate (atravesaba el montante). Hallado en la prueba de estrés. Cambian los digests de door_windows_work, room_beams_draft y window_detail (revisados con render). Detalle en `V03240.md`.
+
 ## v0.32.39 — 2026-11-05
 
 Torreón estrecho (interior < 16 mm): escalera de mano y trampilla por planta en vez de caracol; la escalera cae si pierde su viga o el piso de abajo. El muro de torres pequeñas adelgaza hasta dejar 12 mm de radio interior. Corregido el escombro interior que podía cruzarse cuando el montón superaba el origen de la pieza. Detalle en `V03239.md` y `TORREON.md`.
