@@ -105,8 +105,15 @@ Dos variantes: **circular** y **cuadrada**.
     `escombro` y `tower_heap`.
 - Así no se pierde material: se recoloca donde cae por las brechas. Recuento en `interior.outside`.
 
+## Paso 10 (hecho): almenas y montón sin cruces
+- **Almenas:** con terraza, las 2 hiladas superiores del pretil se abren en almenas. Huecos de 5,5 mm y merlones de
+  8 mm (`tower_plan.crenellate`), alineados en las dos hiladas. En la cuadrada van centradas en cada cara, con un
+  merlón entero en las esquinas. Se abren antes de la ruina, así que los merlones siguen la regla de apoyo.
+- **Montón del pie:** cada madero busca un hueco libre en planta (holgura de 0,3 mm) entre piedras partidas y otros
+  maderos. Si no lo encuentra, no se pone. La prueba de Blender lo verifica con BVH.
+
 ## Siguiente
-1. Almenas en el pretil; desagüe de la terraza.
+1. Desagüe de la terraza; escalera de mano y trampilla en torres estrechas.
 2. Grietas en los sectores; saeteras ensanchadas por el daño; pátina y verdín por cara expuesta.
 3. Llevar la misma caída a la terraza y cubiertas de la casa (`tower_roof.fall` ya hace algo parecido).
 4. Grafo causal completo (muro → ménsula → viga → tabla, muro → peldaño).

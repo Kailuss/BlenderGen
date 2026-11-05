@@ -210,3 +210,35 @@ def heap_directions(angles,count=2,spread=.6):
         group=[u for u in pool if abs((u-best+math.pi)%(2*math.pi)-math.pi)<spread]
         picked.append((best,len(group)));pool=[u for u in pool if u not in group]
     return picked
+
+
+CRENEL_MM=5.5           # hueco de almena (tronera entre merlones)
+MERLON_MM=8.            # merlón
+CRENEL_COURSES=2        # hiladas superiores que se abren en las almenas
+
+
+def crenellate(plan,square=False,courses=CRENEL_COURSES):
+    'IA: Abre almenas en las courses hiladas superiores: huecos de CRENEL_MM cada CRENEL_MM+MERLON_MM, alineados en todas esas hiladas; en la cuadrada, merlones enteros en las esquinas. Modifica plan en su sitio y devuelve los huecos de la hilada más alta.'
+    if len(plan)<courses+2:return []
+    pitch=CRENEL_MM+MERLON_MM;holes=[]
+    if not square:
+        course=plan[-1];r=(course['r_in']+course['r_out'])/2;n=max(4,round(2*math.pi*r/pitch));half=CRENEL_MM/2/r
+        holes=[(k*2*math.pi/n+math.pi/n-half,k*2*math.pi/n+math.pi/n+half) for k in range(n)]
+        for course in plan[-courses:]:
+            stones=cut_holes(course['stones'],holes,MIN_STONE_MM/r,2*math.pi)
+            course['stones']=[(a%(2*math.pi),a%(2*math.pi)+(b-a)) for a,b in stones];course['crenels']=holes
+        return holes
+    stones=plan[-1]['stones'];outer=max(max(abs(s['x'][1]),abs(s['y'][1])) for s in stones)
+    n=max(1,int((2*outer-MERLON_MM)//pitch))
+    while n>1 and (n-1)/2*pitch+CRENEL_MM/2>outer-MERLON_MM:n-=1
+    holes=[((k-(n-1)/2)*pitch-CRENEL_MM/2,(k-(n-1)/2)*pitch+CRENEL_MM/2) for k in range(n)]
+    for course in plan[-courses:]:
+        out=[]
+        for wall in ('front','back','left','right'):
+            axis='x' if wall in ('front','back') else 'y';own=sorted([s for s in course['stones'] if s['wall']==wall],key=lambda s:s[axis][0])
+            if not own:continue
+            pieces=merge_short(cut_holes([s[axis] for s in own],holes,MIN_STONE_MM),MIN_STONE_MM)
+            other='y' if axis=='x' else 'x'
+            out+=[{'wall':wall,axis:p,other:own[0][other]} for p in pieces]
+        course['stones']=out;course['crenels']=holes
+    return holes

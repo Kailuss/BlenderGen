@@ -53,6 +53,11 @@ def run():
                 bm=bmesh.new();bm.from_mesh(ob.data);volume=bm.calc_volume(signed=True);bm.free()
                 assert volume>0 and min(v.co.z for v in ob.data.vertices)>=.04-1e-6,(ob.name,volume)
             inside['heap_timber']=len(heap)
+            # Los maderos del montón no se cruzan con las piedras partidas ni entre sí (encogidos: los contactos no cuentan).
+            heap_stones=[o for o in pieces if o.get('escombro') and o.name.startswith('Piedra') and not o.get('tower_fallen')]
+            heap_trees={o.name:shrunk_tree(o) for o in heap+heap_stones}
+            crossing=[(a.name,b.name) for i,a in enumerate(heap) for b in heap_stones+heap[:i] if heap_trees[a.name].overlap(heap_trees[b.name])]
+            assert not crossing,crossing[:5]
             if ruin<.5:assert inside['beams']>=4 and inside['boards']>=10 and inside['steps']>=20,inside
             key='%s_%s'%(shape.lower(),ruin);report[key]=inside
             print('TOWER_INTERIOR',key,inside,flush=True)

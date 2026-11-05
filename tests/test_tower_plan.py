@@ -94,6 +94,29 @@ class TowerPlanTests(unittest.TestCase):
         with self.assertRaises(ValueError):tp.round_plan(10,12,50,6)
         with self.assertRaises(ValueError):tp.square_plan(20,12,50,6)
 
+    def test_crenels_round_aligned_and_open(self):
+        'IA: Las almenas circulares abren el mismo hueco en las dos hiladas superiores y ninguna piedra lo ocupa; el resto de la vuelta sigue cubierto.'
+        plan=tp.round_plan(30,10,120,6.5,seed=7,slits=3,floors=3,parapet=3);holes=tp.crenellate(plan)
+        self.assertGreaterEqual(len(holes),8)
+        for course in plan[-tp.CRENEL_COURSES:]:
+            self.assertEqual(course['crenels'],holes)
+            covered=sum(b-a for a,b in course['stones'])+sum(b-a for a,b in holes)
+            self.assertAlmostEqual(covered,2*math.pi,places=6)
+            for h0,h1 in holes:
+                self.assertLess(tp._angular_support(h0,h1,course['stones']),1e-9)
+        self.assertNotIn('crenels',plan[-tp.CRENEL_COURSES-1])
+
+    def test_crenels_square_corner_merlons(self):
+        'IA: En la cuadrada los huecos quedan centrados, dejan merlón en las esquinas y ninguna piedra de las hiladas altas los ocupa.'
+        for side in (40,56,80):
+            plan=tp.square_plan(side,min(12,side*.3),120,6.5,seed=7,slits=1,floors=3,parapet=3);holes=tp.crenellate(plan,square=True)
+            self.assertAlmostEqual(sum(a+b for a,b in holes),0.,places=9)
+            self.assertTrue(all(abs(b)<=side/2-tp.MERLON_MM+1e-9 and abs(a)<=side/2-tp.MERLON_MM+1e-9 for a,b in holes))
+            for course in plan[-tp.CRENEL_COURSES:]:
+                for s in course['stones']:
+                    axis='x' if s['wall'] in ('front','back') else 'y'
+                    for h0,h1 in holes:self.assertLessEqual(min(s[axis][1],h1)-max(s[axis][0],h0),1e-9,(side,s,h0,h1))
+
 
 if __name__=='__main__':
     unittest.main()
