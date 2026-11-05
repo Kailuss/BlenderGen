@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.37 — 2026-11-05
+
+Torreón: almenas en el pretil (2 hiladas, merlón entero en las esquinas de la cuadrada, sujetas a la regla de apoyo) y maderos del montón del pie sin cruzarse con piedras ni entre sí. Detalle en `V03237.md` y `TORREON.md`.
+
 ## v0.32.36 — 2026-11-05
 
 Torreón: el escombro interior que no cabe dentro sale al montón del pie (piedras partidas y maderos asentados en la tierra) en vez de retirarse. Detalle en `V03236.md` y `TORREON.md`.
