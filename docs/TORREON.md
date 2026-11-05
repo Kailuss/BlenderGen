@@ -97,6 +97,14 @@ Dos variantes: **circular** y **cuadrada**.
   - `blender_tower_interior`: escombro sin choques BVH con peldaños, madera, losas, ménsulas ni entre sí, y vista de
     derrumbe 0,85.
 
+## Paso 9 (hecho): lo que no cabe dentro sale al montón del pie
+- `tower_floors.fallen` devuelve, por material, lo que no cupo dentro (madera y piedra).
+- `tower_rubble` lo añade a los montones exteriores:
+  - Piedra: hasta 20 piedras partidas por montón (antes 14).
+  - Madera: vigas partidas y tablas en el borde del montón (hasta 6 por montón), asentadas en la tierra y marcadas
+    `escombro` y `tower_heap`.
+- Así no se pierde material: se recoloca donde cae por las brechas. Recuento en `interior.outside`.
+
 ## Siguiente
 1. Almenas en el pretil; desagüe de la terraza.
 2. Grietas en los sectores; saeteras ensanchadas por el daño; pátina y verdín por cara expuesta.

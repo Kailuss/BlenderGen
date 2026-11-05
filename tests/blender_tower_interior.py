@@ -46,6 +46,13 @@ def run():
             inside=result['interior']
             if ruin==0:assert inside['terrace'] and inside['slabs']>=15,inside
             if ruin>.5:assert inside['fallen']>0 and inside['fallen']==len(fallen),inside
+            # Lo que no cupo dentro está en el montón del pie: maderos cerrados con volumen, posados en la tierra.
+            heap=[o for o in pieces if o.get('tower_heap')]
+            if ruin>.5:assert inside['outside']['wood']<3 or heap,(inside,len(heap))
+            for ob in heap:
+                bm=bmesh.new();bm.from_mesh(ob.data);volume=bm.calc_volume(signed=True);bm.free()
+                assert volume>0 and min(v.co.z for v in ob.data.vertices)>=.04-1e-6,(ob.name,volume)
+            inside['heap_timber']=len(heap)
             if ruin<.5:assert inside['beams']>=4 and inside['boards']>=10 and inside['steps']>=20,inside
             key='%s_%s'%(shape.lower(),ruin);report[key]=inside
             print('TOWER_INTERIOR',key,inside,flush=True)
