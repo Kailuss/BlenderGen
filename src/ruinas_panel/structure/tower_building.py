@@ -46,6 +46,22 @@ def ring_mesh(r_in,r_out,z0,z1):
     return verts,faces
 
 
+def stone_runs(stones,tolerance=1e-6):
+    'IA: Tramos angulares contiguos de piedras vivas; None representa la vuelta completa.'
+    if not stones:return []
+    spans=sorted(stones);runs=[list(spans[0])]
+    for a,b in spans[1:]:
+        if a<=runs[-1][1]+tolerance:runs[-1][1]=max(runs[-1][1],b)
+        else:runs.append([a,b])
+    total=sum(b-a for a,b in runs)
+    if len(runs)==1 and total>=2*math.pi-1e-6:return [None]
+    # Une el último tramo con el primero si cierran la vuelta por 2π.
+    if len(runs)>1 and abs(runs[-1][1]-2*math.pi-runs[0][0])<tolerance*10:
+        runs[0]=[runs[-1][0],runs[0][1]+2*math.pi];runs.pop()
+        if runs[0][1]-runs[0][0]>=2*math.pi-1e-6:return [None]
+    return [tuple(r) for r in runs]
+
+
 def build_round(coll,plan,stone,core,origin=(0.,0.,0.)):
     'IA: Construye la torre circular del plan; devuelve piedras y núcleos. Juntas de JOINT_MM entre piedras y hiladas.'
     ox,oy,oz=origin;made=[]
@@ -58,10 +74,14 @@ def build_round(coll,plan,stone,core,origin=(0.,0.,0.)):
             verts=[(x+ox,y+oy,z) for x,y,z in verts]
             ob=primitives.mesh_obj('Piedra · torreón %s.%s'%(course['row'],index),verts,faces,coll,stone)
             identifiers.tag(ob,'stone',course['row'],index);ob['wall_id']='torreon';made.append(ob)
-        verts,faces=ring_mesh(r_in+CORE_INSET*t,r_out-CORE_INSET*t,oz+course['z0']-.85 if course['row'] else oz+course['z0'],oz+course['z1']-.7)
-        verts=[(x+ox,y+oy,z) for x,y,z in verts]
-        ob=primitives.mesh_obj('Mortero · torreón %s'%course['row'],verts,faces,coll,core)
-        identifiers.tag(ob,'mortar',course['row'],0);ob['wall_id']='torreon';made.append(ob)
+            primitives.bevel(ob,min(.65,(z1-z0)*.12,r_out*(a1-a0)*.1,t*.1))
+        # El núcleo solo existe bajo piedras vivas: un anillo si la hilada está completa, sectores si está en ruina.
+        zc0=oz+course['z0']-.85 if course['row'] else oz+course['z0'];zc1=oz+course['z1']-.7
+        for k,run in enumerate(stone_runs(course['stones'])):
+            verts,faces=ring_mesh(r_in+CORE_INSET*t,r_out-CORE_INSET*t,zc0,zc1) if run is None else sector_mesh(r_in+CORE_INSET*t,r_out-CORE_INSET*t,run[0],run[1],zc0,zc1)
+            verts=[(x+ox,y+oy,z) for x,y,z in verts]
+            ob=primitives.mesh_obj('Mortero · torreón %s'%course['row'],verts,faces,coll,core)
+            identifiers.tag(ob,'mortar',course['row'],k);ob['wall_id']='torreon';made.append(ob)
     return made
 
 
@@ -74,11 +94,17 @@ def build_square(coll,plan,stone,core,origin=(0.,0.,0.)):
             (x0,x1),(y0,y1)=s['x'],s['y']
             ob=primitives.block('Piedra · torreón %s.%s'%(course['row'],index),ox+x0+j,ox+x1-j,oy+y0+j,oy+y1-j,z0,z1,coll,stone)
             identifiers.tag(ob,'stone',course['row'],index);ob['wall_id']='torreon_'+s['wall'];made.append(ob)
-        xs=[v for s in course['stones'] for v in s['x']];ys=[v for s in course['stones'] for v in s['y']]
-        half=max(max(xs),-min(xs));inner=min(abs(v) for s in course['stones'] if s['wall'] in ('left','right') for v in s['x'])
-        t=half-inner;a,b=half-CORE_INSET*t,inner+CORE_INSET*t
+        # Núcleo por muro, solo a lo largo de las piedras vivas de esa hilada y dentro del grosor.
         zc0=oz+course['z0']-.85 if course['row'] else oz+course['z0'];zc1=oz+course['z1']-.7
-        for k,(x0,x1,y0,y1) in enumerate(((-a,a,-a,-b),(-a,a,b,a),(-a,-b,-b,b),(b,a,-b,b))):
+        for k,wall in enumerate(('front','back','left','right')):
+            own=[s for s in course['stones'] if s['wall']==wall]
+            if not own:continue
+            along=0 if wall in ('front','back') else 1;across=1-along
+            lo=min(s['x' if along==0 else 'y'][0] for s in own);hi=max(s['x' if along==0 else 'y'][1] for s in own)
+            c0=own[0]['y' if along==0 else 'x'][0];c1=own[0]['y' if along==0 else 'x'][1];t=c1-c0
+            c0,c1=c0+CORE_INSET*t,c1-CORE_INSET*t;lo,hi=lo+CORE_INSET*t,hi-CORE_INSET*t
+            if hi-lo<tower_plan.MIN_STONE_MM:continue
+            x0,x1,y0,y1=(lo,hi,c0,c1) if along==0 else (c0,c1,lo,hi)
             ob=primitives.block('Mortero · torreón %s'%course['row'],ox+x0,ox+x1,oy+y0,oy+y1,zc0,zc1,coll,core)
             identifiers.tag(ob,'mortar',course['row'],k);ob['wall_id']='torreon';made.append(ob)
     return made

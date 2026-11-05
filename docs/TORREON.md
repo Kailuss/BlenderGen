@@ -22,8 +22,16 @@ Dos variantes: **circular** y **cuadrada**.
 - Juntas de 0,12 mm entre piedras y los mismos retranqueos de hilada que la fábrica; marcas de aparejo C5-5.
 - Prueba `tests/blender_tower_building.py`: mallas cerradas con volumen positivo y vista Workbench.
 
+## Paso 3 (hecho): coronación en ruina con apoyo verificado
+- `crown_field`: perfil de pérdida sembrado alrededor de la torre (pocos cosenos, sin texturas globales).
+- `ruin_round` / `ruin_square`: quitan las piedras por encima del perfil y luego, de abajo arriba, toda piedra con
+  menos de la mitad de su arco o área apoyada en piedras vivas de la hilada inferior (nada queda flotando).
+- El núcleo de mortero solo se construye bajo piedras vivas (sectores en hiladas rotas).
+- Cuadrada: rejilla de juntas común por muro con medio módulo de contrapeo por hilada (antes dos hiladas
+  seguidas podían repetir juntas). Sectores circulares biselados.
+
 ## Siguiente
-1. Integrarlo como tipo de edificio en el panel; bisel, desgaste y grietas de la fábrica actual en los sectores.
+1. Integrarlo como tipo de edificio en el panel; desgaste y grietas de la fábrica actual en los sectores.
 2. Interior: forjados de vigas radiales o paralelas con asiento en `seat.py`, escalera de caracol embebida o
    adosada, terraza con `roof_support` (ya exige apoyo real).
 3. Lúgubre: coronación rota con almenas perdidas, sillares caídos al pie, saeteras ensanchadas por el daño,

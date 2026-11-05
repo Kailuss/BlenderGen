@@ -99,11 +99,12 @@ def square_plan(side,thickness,height,course_mm,seed=0,variation=.2,slits=0,floo
             along_x=wall in ('front','back')
             full=along_x==own_x
             a,b=(-half,half) if full else (-inner,inner)
-            n=max(1,round((b-a)/(ARC_PER_COURSE*h)))
-            cuts=[a+(b-a)*i/n for i in range(n+1)]
-            shift=(b-a)/n/2 if (row//2)%2 else 0
-            if shift:cuts=[a]+[c+shift for c in cuts[1:-1]]+[b]
-            cuts=[cuts[0]]+[c+rng.uniform(-1,1)*(b-a)/n*.15*variation for c in cuts[1:-1]]+[cuts[-1]]
+            # Rejilla común a todo el muro con medio módulo de contrapeo por hilada: dos hiladas seguidas nunca
+            # comparten juntas aunque una llegue a la esquina y la otra no.
+            n=max(1,round(side/(ARC_PER_COURSE*h)));pitch=side/n;phase=pitch/2 if row%2 else 0.
+            inner_cuts=[-half+phase+k*pitch for k in range(-1,n+2)]
+            cuts=[a]+[c for c in inner_cuts if a+MIN_STONE_MM<=c<=b-MIN_STONE_MM]+[b]
+            cuts=[cuts[0]]+[c+rng.uniform(-1,1)*pitch*.15*variation for c in cuts[1:-1]]+[cuts[-1]]
             pieces=[(cuts[i],cuts[i+1]) for i in range(len(cuts)-1)]
             if row in slit_rows and slits and wall==('front','right','back','left')[floors_index(row,slit_rows,rows,floors)%4]:
                 pieces=cut_holes(pieces,[(-SLIT_WIDTH_MM/2,SLIT_WIDTH_MM/2)],MIN_STONE_MM)
@@ -136,3 +137,54 @@ def merge_short(pieces,minimum):
             if abs(pieces[min(i,j)][1]-pieces[max(i,j)][0])>1e-9:continue
             lo,hi=min(i,j),max(i,j);pieces[lo:hi+1]=[(pieces[lo][0],pieces[hi][1])];changed=True;break
     return pieces
+
+
+def crown_field(seed,amount,lobes=3):
+    'IA: Altura relativa de ruina en [0,1] alrededor de la torre (θ en radianes): suma sembrada de pocos cosenos; amount=0 no rompe nada.'
+    rng=random.Random(seed*31337+17)
+    terms=[(rng.uniform(.5,1),k,rng.uniform(0,2*math.pi)) for k in range(1,lobes+1)]
+    total=sum(w for w,_,_ in terms)
+    def field(theta):
+        'IA: Fracción de altura perdida en θ.'
+        v=sum(w*(1+math.cos(k*theta+ph))/2 for w,k,ph in terms)/total
+        return amount*v**1.5
+    return field
+
+
+def ruin_round(plan,height,seed=0,amount=.3,support=.5):
+    'IA: Coronación arruinada de torre circular: quita piedras sobre el perfil de ruina y luego, de abajo arriba, toda piedra cuyo arco no apoye al menos support en piedras vivas de la hilada inferior. Devuelve plan nuevo y retiradas.'
+    field=crown_field(seed,amount);kept=[];removed=0;below=None
+    for course in plan:
+        stones=[]
+        for a,b in course['stones']:
+            mid=(a+b)/2
+            if course['z1']>height*(1-field(mid)):removed+=1;continue
+            if below is not None and _angular_support(a,b,below)<support*(b-a):removed+=1;continue
+            stones.append((a,b))
+        kept.append(dict(course,stones=stones));below=stones
+    return kept,removed
+
+
+def _angular_support(a,b,below):
+    'IA: Longitud angular de [a,b] cubierta por piedras de la hilada inferior, con vuelta completa.'
+    total=0.
+    for c,d in below:
+        for sh in (0,2*math.pi,-2*math.pi):
+            total+=max(0.,min(b,d+sh)-max(a,c+sh))
+    return total
+
+
+def ruin_square(plan,height,seed=0,amount=.3,support=.5):
+    'IA: Coronación arruinada de torre cuadrada con el mismo perfil (θ desde el centro) y la regla de apoyo por área sobre la hilada inferior.'
+    field=crown_field(seed,amount);kept=[];removed=0;below=None
+    for course in plan:
+        stones=[]
+        for s in course['stones']:
+            cx=(s['x'][0]+s['x'][1])/2;cy=(s['y'][0]+s['y'][1])/2
+            if course['z1']>height*(1-field(math.atan2(cy,cx))):removed+=1;continue
+            area=(s['x'][1]-s['x'][0])*(s['y'][1]-s['y'][0])
+            if below is not None and sum(max(0.,min(s['x'][1],t['x'][1])-max(s['x'][0],t['x'][0]))*max(0.,min(s['y'][1],t['y'][1])-max(s['y'][0],t['y'][0])) for t in below)<support*area:
+                removed+=1;continue
+            stones.append(s)
+        kept.append(dict(course,stones=stones));below=stones
+    return kept,removed

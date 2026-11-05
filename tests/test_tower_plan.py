@@ -57,6 +57,27 @@ class TowerPlanTests(unittest.TestCase):
         self.assertTrue(any(abs(d-tp.SLIT_WIDTH_MM*t)<1e-6 for d in diffs))
         self.assertTrue(all(abs(d)<1e-6 or abs(d-tp.SLIT_WIDTH_MM*t)<1e-6 for d in diffs))
 
+    def test_square_rows_never_share_joints(self):
+        'IA: Dos hiladas seguidas de un mismo muro nunca repiten una junta interior (salvo cerca de las esquinas trabadas).'
+        plan=tp.square_plan(56,12,120,6.5,seed=7,variation=0)
+        for low,high in zip(plan,plan[1:]):
+            joints=lambda c:{round(s['x'][0],3) for s in c['stones'] if s['wall']=='front' and abs(s['x'][0])<16}
+            self.assertFalse(joints(low)&joints(high))
+
+    def test_ruin_keeps_support(self):
+        'IA: La ruina quita coronación sin dejar piedras sin al menos la mitad apoyada; amount=0 no quita nada.'
+        plan=tp.round_plan(30,10,120,6.5,seed=7)
+        same,removed=tp.ruin_round(plan,120,seed=7,amount=0)
+        self.assertEqual(removed,0)
+        ruined,removed=tp.ruin_round(plan,120,seed=7,amount=.4)
+        self.assertGreater(removed,0)
+        for low,high in zip(ruined,ruined[1:]):
+            for a,b in high['stones']:
+                self.assertGreaterEqual(tp._angular_support(a,b,low['stones']),.5*(b-a)-1e-9)
+        self.assertEqual(len(ruined[0]['stones']),len(plan[0]['stones']))
+        sq,removed=tp.ruin_square(tp.square_plan(56,12,120,6.5,seed=7),120,seed=7,amount=.4)
+        self.assertGreater(removed,0)
+
     def test_invalid(self):
         'IA: Rechaza grosores imposibles.'
         with self.assertRaises(ValueError):tp.round_plan(10,12,50,6)
