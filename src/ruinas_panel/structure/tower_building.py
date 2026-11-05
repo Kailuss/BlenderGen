@@ -66,16 +66,19 @@ def radial_prism(geo,depth,a0,a1,z0,z1,embed=0.):
 
 
 def build_interior(coll,geo,frames,steps,stone,wood,origin=(0.,0.,0.)):
-    'IA: Forjados (vigas sobre ménsulas y tablas) y peldaños de la hélice ya asentados; devuelve las piezas creadas.'
+    'IA: Forjados (vigas sobre ménsulas, tablas y losas de terraza) y peldaños de la hélice ya asentados; devuelve las piezas creadas.'
     ox,oy,oz=origin;made=[]
-    for lv,beams,boards in frames:
+    for lv,beams,boards,tiles in frames:
         f=lv['floor']
         for b in beams:
             ob=primitives.block('Madera · viga torreón %s.%s'%(f,b['id']),ox+b['x'][0],ox+b['x'][1],oy+b['y'][0],oy+b['y'][1],oz+lv['beam_z0'],oz+lv['beam_z1'],coll,wood)
             identifiers.tag(ob,'beam',f,b['id']);ob['wall_id']='torreon';made.append(ob)
         for t in boards:
-            ob=primitives.block('Madera · tabla torreón %s.%s'%(f,t['id']),ox+t['x'][0],ox+t['x'][1],oy+t['y'][0],oy+t['y'][1],oz+lv['beam_z1'],oz+lv['top'],coll,wood)
+            ob=primitives.block('Madera · tabla torreón %s.%s'%(f,t['id']),ox+t['x'][0],ox+t['x'][1],oy+t['y'][0],oy+t['y'][1],oz+lv['beam_z1'],oz+lv['board_top'],coll,wood)
             identifiers.tag(ob,'board',f,t['id']);ob['wall_id']='torreon';made.append(ob)
+        for t in tiles:
+            ob=primitives.block('Piedra · losa terraza torreón %s'%t['id'],ox+t['x'][0],ox+t['x'][1],oy+t['y'][0],oy+t['y'][1],oz+lv['board_top'],oz+lv['top'],coll,stone)
+            identifiers.tag(ob,'slab',f,t['id']);ob['wall_id']='torreon';made.append(ob)
     for k,st in enumerate(steps):
         verts,faces=radial_prism(geo,st['depth'],st['a0'],st['a1'],oz+st['z0'],oz+st['z1'],tower_floors.STEP_EMBED)
         verts=[(x+ox,y+oy,z) for x,y,z in verts]
@@ -170,15 +173,15 @@ def generate(scene,p):
     runtime.quality=p.preview_quality
     stone=primitives.material('Piedra · neutro',(.52,.52,.52));core=primitives.material('Núcleo · neutro',(.44,.44,.44))
     thickness=min(p.thickness,p.tower_size*.3);geo=tower_floors.geometry(p.tower_shape,p.tower_size,thickness)
-    wood=primitives.material('Madera · neutro',(.42,.32,.22))
+    wood=primitives.material('Madera · neutro',(.42,.32,.22));parapet=tower_floors.PARAPET_COURSES if p.tower_terrace else 0
     if p.tower_shape=='ROUND':
-        intact=tower_plan.round_plan(p.tower_size/2,thickness,p.tower_height,p.stone_size,seed=p.seed,variation=p.stone_variation,slits=p.tower_slits,floors=p.tower_floors)
-        frames,steps=tower_floors.interior(geo,intact,p.tower_floors)
+        intact=tower_plan.round_plan(p.tower_size/2,thickness,p.tower_height,p.stone_size,seed=p.seed,variation=p.stone_variation,slits=p.tower_slits,floors=p.tower_floors,parapet=parapet)
+        frames,steps=tower_floors.interior(geo,intact,p.tower_floors,p.tower_terrace)
         plan,removed=tower_plan.ruin_round(intact,p.tower_height,seed=p.seed,amount=p.tower_ruin)
         made=build_round(coll,plan,stone,core)
     else:
-        intact=tower_plan.square_plan(p.tower_size,thickness,p.tower_height,p.stone_size,seed=p.seed,variation=p.stone_variation,slits=min(1,p.tower_slits),floors=p.tower_floors)
-        frames,steps=tower_floors.interior(geo,intact,p.tower_floors)
+        intact=tower_plan.square_plan(p.tower_size,thickness,p.tower_height,p.stone_size,seed=p.seed,variation=p.stone_variation,slits=min(1,p.tower_slits),floors=p.tower_floors,parapet=parapet)
+        frames,steps=tower_floors.interior(geo,intact,p.tower_floors,p.tower_terrace)
         plan,removed=tower_plan.ruin_square(intact,p.tower_height,seed=p.seed,amount=p.tower_ruin)
         made=build_square(coll,plan,stone,core)
     kept,alive,lost=tower_floors.settle(geo,plan,frames,steps)
@@ -187,7 +190,8 @@ def generate(scene,p):
         from ..geometry import weather
         for i,ob in enumerate(o for o in made if o.name.startswith('Piedra')):weather.weather_stone(ob,p.wear,p.seed*977+i)
     heaps=tower_rubble(coll,p,stone,tower_plan.lost_angles(intact,plan,square=p.tower_shape!='ROUND'),removed)
-    interior={'beams':sum(len(b) for _,b,_ in kept),'boards':sum(len(t) for _,_,t in kept),'steps':len(alive),'lost':lost}
+    interior={'beams':sum(len(f[1]) for f in kept),'boards':sum(len(f[2]) for f in kept),'slabs':sum(len(f[3]) for f in kept),
+              'terrace':any(f[0]['terrace'] and f[3] for f in kept),'steps':len(alive),'lost':lost}
     return {'stones':sum(o.name.startswith('Piedra') for o in made),'removed':removed,'pieces':len(made)+len(inside),'heaps':heaps,'interior':interior}
 
 

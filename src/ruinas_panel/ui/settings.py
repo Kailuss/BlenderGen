@@ -65,6 +65,7 @@ class RuinSettings(bpy.types.PropertyGroup):
     tower_height: FloatProperty(name='Altura (mm)',default=120,min=20,max=400)
     tower_floors: IntProperty(name='Plantas',description='Reparte las saeteras por planta',default=3,min=1,max=8)
     tower_slits: IntProperty(name='Saeteras por planta',default=3,min=0,max=8)
+    tower_terrace: BoolProperty(name='Terraza',description='Terraza de losas bajo un pretil de tres hiladas, con la escalera subiendo hasta ella',default=True)
     tower_ruin: FloatProperty(name='Ruina de coronación',description='Pérdida de la coronación con perfil sembrado; nunca deja piedras sin la mitad apoyada',default=.35,min=0,max=.9)
     roof_damage_seed: IntProperty(name='Semilla del daño de cubierta',description='Cambia focos y contornos sin cambiar el aparejo ni la distribución de la casa',default=0,min=0,max=999999)
     chimneys: BoolProperty(name='Chimenea',description='Hogar abierto desde planta baja, conducto hueco y paso resuelto por forjado y tejas; necesita un tramo libre de vanos y escalera',default=False)

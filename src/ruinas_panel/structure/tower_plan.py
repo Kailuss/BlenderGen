@@ -30,13 +30,13 @@ def ring_count(radius_mid,course_h):
     return n+n%2
 
 
-def round_plan(radius,thickness,height,course_mm,seed=0,variation=.2,slits=0,floors=1):
+def round_plan(radius,thickness,height,course_mm,seed=0,variation=.2,slits=0,floors=1,parapet=0):
     'IA: Torre circular: por hilada, piedras como intervalos angulares [a0,a1) contrapeados medio módulo, con variación sembrada y saeteras huecas.'
     if not 0<thickness<radius:raise ValueError('Grosor fuera del radio')
     rows=courses(height,course_mm);r_mid=radius-thickness/2;h=height/len(rows)
     n=ring_count(r_mid,h);pitch=2*math.pi/n;rng=random.Random(seed*7919+11)
     min_angle=MIN_STONE_MM/r_mid
-    slit_rows=slit_courses(rows,floors) if slits else {}
+    slit_rows=slit_courses(rows,floors,parapet) if slits else {}
     plan=[]
     for row,(z0,z1) in enumerate(rows):
         offset=pitch/2 if row%2 else 0.
@@ -52,9 +52,9 @@ def round_plan(radius,thickness,height,course_mm,seed=0,variation=.2,slits=0,flo
     return plan
 
 
-def slit_courses(rows,floors):
-    'IA: Hiladas con saetera: un tramo de SLIT_HEIGHT_COURSES hiladas centrado en cada planta, girado por planta para no apilar huecos.'
-    per=max(1,len(rows)//max(1,floors));result={}
+def slit_courses(rows,floors,parapet=0):
+    'IA: Hiladas con saetera: un tramo de SLIT_HEIGHT_COURSES hiladas centrado en cada planta (bajo las parapet hiladas de pretil), girado por planta para no apilar huecos.'
+    per=max(1,(len(rows)-parapet)//max(1,floors));result={}
     for f in range(floors):
         mid=f*per+per//2;turn=f*math.pi/max(2,floors)
         for r in range(mid-SLIT_HEIGHT_COURSES//2,mid-SLIT_HEIGHT_COURSES//2+SLIT_HEIGHT_COURSES):
@@ -86,15 +86,15 @@ def cut_holes(stones,holes,minimum,period=None):
     return merged
 
 
-def square_plan(side,thickness,height,course_mm,seed=0,variation=.2,slits=0,floors=1):
+def square_plan(side,thickness,height,course_mm,seed=0,variation=.2,slits=0,floors=1,parapet=0):
     'IA: Torre cuadrada de lado exterior side: cuatro muros con esquinas trabadas que alternan dueño por hilada; piedras como rectángulos XY.'
     if not 0<2*thickness<side:raise ValueError('Grosor imposible para el lado')
     rows=courses(height,course_mm);h=height/len(rows);rng=random.Random(seed*104729+5)
     half=side/2;inner=half-thickness;plan=[]
-    slit_rows=slit_courses(rows,floors) if slits else {}
+    slit_rows=slit_courses(rows,floors,parapet) if slits else {}
     for row,(z0,z1) in enumerate(rows):
         own_x=row%2==0  # hiladas pares: frente y trasera llegan a las esquinas; impares: los laterales
-        stones=[]
+        stones=[];holes=[]
         for wall in ('front','back','left','right'):
             along_x=wall in ('front','back')
             full=along_x==own_x
@@ -106,8 +106,8 @@ def square_plan(side,thickness,height,course_mm,seed=0,variation=.2,slits=0,floo
             cuts=[a]+[c for c in inner_cuts if a+MIN_STONE_MM<=c<=b-MIN_STONE_MM]+[b]
             cuts=[cuts[0]]+[c+rng.uniform(-1,1)*pitch*.15*variation for c in cuts[1:-1]]+[cuts[-1]]
             pieces=[(cuts[i],cuts[i+1]) for i in range(len(cuts)-1)]
-            if row in slit_rows and slits and wall==('front','right','back','left')[floors_index(row,slit_rows,rows,floors)%4]:
-                pieces=cut_holes(pieces,[(-SLIT_WIDTH_MM/2,SLIT_WIDTH_MM/2)],MIN_STONE_MM)
+            if row in slit_rows and slits and wall==('front','right','back','left')[floors_index(row,slit_rows,rows,floors,parapet)%4]:
+                pieces=cut_holes(pieces,[(-SLIT_WIDTH_MM/2,SLIT_WIDTH_MM/2)],MIN_STONE_MM);holes.append(wall)
             pieces=merge_short(pieces,MIN_STONE_MM)
             for p0,p1 in pieces:
                 if along_x:
@@ -116,13 +116,13 @@ def square_plan(side,thickness,height,course_mm,seed=0,variation=.2,slits=0,floo
                 else:
                     x0,x1=(-half,-inner) if wall=='left' else (inner,half)
                     stones.append({'wall':wall,'x':(x0,x1),'y':(p0,p1)})
-        plan.append({'row':row,'z0':z0,'z1':z1,'stones':stones,'corner_owner':'front_back' if own_x else 'sides'})
+        plan.append({'row':row,'z0':z0,'z1':z1,'stones':stones,'corner_owner':'front_back' if own_x else 'sides','slits':holes})
     return plan
 
 
-def floors_index(row,slit_rows,rows,floors):
+def floors_index(row,slit_rows,rows,floors,parapet=0):
     'IA: Planta a la que pertenece una hilada con saetera; reparte las saeteras entre las cuatro caras.'
-    per=max(1,len(rows)//max(1,floors))
+    per=max(1,(len(rows)-parapet)//max(1,floors))
     return min(floors-1,row//per)
 
 
