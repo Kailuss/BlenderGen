@@ -54,7 +54,7 @@ def run():
                     if ob.name.startswith(('Madera','Piedra · peldaño','Piedra · losa')):continue
                     ys=[v.co.y for v in ob.data.vertices]
                     ob.hide_render=ob.name.startswith('Mortero') or bool(ob.get('escombro')) or sum(ys)/len(ys)<0
-                render(scene,ROOT/('reports/tower_interior_%s_%s.png'%(shape.lower(),tag)),focus=(0,0,60),location=(60,-300,150),scale=140)
+                render(scene,ROOT/('reports/tower_interior_%s_%s.png'%(shape.lower(),tag)),focus=(0,0,62),location=(60,-300,150),scale=150)
     (ROOT/'reports/tower_interior.json').write_text(json.dumps(report,indent=2),encoding='utf8')
     print('TOWER_INTERIOR_PASSED',flush=True)
 

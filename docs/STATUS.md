@@ -1,5 +1,9 @@
 # Estado del proyecto
 
+## v0.32.34 — 2026-11-05
+
+Torreón con terraza: losas sobre tablas y vigas bajo un pretil de tres hiladas, escalera de caracol hasta arriba, plantas y saeteras repartidas bajo el pretil (opción «Terraza» del subpanel). Detalle en `V03234.md` y `TORREON.md`.
+
 ## v0.32.33 — 2026-11-05
 
 Torreón con interior: forjados de vigas sobre ménsulas del aparejo, tablas y escalera de caracol volada de una vuelta por planta; el hueco de la escalera sale del choque y tras la ruina solo queda lo que se sostiene. La cuadrada ya no tapa las saeteras con el núcleo. Detalle en `V03233.md` y `TORREON.md`.
